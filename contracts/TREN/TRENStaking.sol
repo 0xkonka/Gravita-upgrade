@@ -32,10 +32,10 @@ contract TRENStaking is
     address constant ETH_REF_ADDRESS = address(0);
 
     mapping(address => uint256) public stakes;
-    uint256 public totalGRVTStaked;
+    uint256 public totalTRENStaked;
 
-    mapping(address => uint256) public F_ASSETS; // Running sum of asset fees per-GRVT-staked
-    uint256 public F_DEBT_TOKENS; // Running sum of debt token fees per-GRVT-staked
+    mapping(address => uint256) public F_ASSETS; // Running sum of asset fees per-TREN-staked
+    uint256 public F_DEBT_TOKENS; // Running sum of debt token fees per-TREN-staked
 
     // User snapshots of F_ASSETS and F_DEBT_TOKENS, taken at the point at which their latest
     // deposit was made
@@ -50,12 +50,12 @@ contract TRENStaking is
     mapping(address => bool) isAssetTracked;
     mapping(address => uint256) public sentToTreasuryTracker;
 
-    IERC20 public override grvtToken;
+    IERC20 public override trenToken;
 
     address public debtTokenAddress;
     address public feeCollectorAddress;
     address public treasuryAddress;
-    address public vesselManagerAddress;
+    address public trenBoxManagerAddress;
 
     bool public isSetupInitialized;
 
@@ -74,9 +74,9 @@ contract TRENStaking is
     function setAddresses(
         address _debtTokenAddress,
         address _feeCollectorAddress,
-        address _grvtTokenAddress,
+        address _trenTokenAddress,
         address _treasuryAddress,
-        address _vesselManagerAddress
+        address _trenBoxManagerAddress
     )
         external
         onlyOwner
@@ -85,9 +85,9 @@ contract TRENStaking is
 
         debtTokenAddress = _debtTokenAddress;
         feeCollectorAddress = _feeCollectorAddress;
-        grvtToken = IERC20(_grvtTokenAddress);
+        trenToken = IERC20(_trenTokenAddress);
         treasuryAddress = _treasuryAddress;
-        vesselManagerAddress = _vesselManagerAddress;
+        trenBoxManagerAddress = _trenBoxManagerAddress;
 
         isAssetTracked[ETH_REF_ADDRESS] = true;
         ASSET_TYPE.push(ETH_REF_ADDRESS);
@@ -95,8 +95,8 @@ contract TRENStaking is
     }
 
     // If caller has a pre-existing stake, send any accumulated asset and debtToken gains to them.
-    function stake(uint256 _GRVTamount) external override nonReentrant whenNotPaused {
-        require(_GRVTamount > 0);
+    function stake(uint256 _TRENamount) external override nonReentrant whenNotPaused {
+        require(_TRENamount > 0);
 
         uint256 currentStake = stakes[msg.sender];
 
@@ -123,22 +123,22 @@ contract TRENStaking is
             _updateUserSnapshots(asset, msg.sender);
         }
 
-        uint256 newStake = currentStake + _GRVTamount;
+        uint256 newStake = currentStake + _TRENamount;
 
-        // Increase user’s stake and total GRVT staked
+        // Increase user’s stake and total TREN staked
         stakes[msg.sender] = newStake;
-        totalGRVTStaked = totalGRVTStaked + _GRVTamount;
-        emit TotalGRVTStakedUpdated(totalGRVTStaked);
+        totalTRENStaked = totalTRENStaked + _TRENamount;
+        emit TotalTRENStakedUpdated(totalTRENStaked);
 
-        // Transfer GRVT from caller to this contract
-        grvtToken.transferFrom(msg.sender, address(this), _GRVTamount);
+        // Transfer TREN from caller to this contract
+        trenToken.transferFrom(msg.sender, address(this), _TRENamount);
 
         emit StakeChanged(msg.sender, newStake);
     }
 
-    // Unstake the GRVT and send the it back to the caller, along with their accumulated gains.
+    // Unstake the TREN and send the it back to the caller, along with their accumulated gains.
     // If requested amount > stake, send their entire stake.
-    function unstake(uint256 _GRVTamount) external override nonReentrant {
+    function unstake(uint256 _TRENamount) external override nonReentrant {
         uint256 currentStake = stakes[msg.sender];
         _requireUserHasStake(currentStake);
 
@@ -163,17 +163,17 @@ contract TRENStaking is
             _sendAssetGainToUser(asset, assetGain);
         }
 
-        if (_GRVTamount > 0) {
-            uint256 GRVTToWithdraw = TrenMath._min(_GRVTamount, currentStake);
-            uint256 newStake = currentStake - GRVTToWithdraw;
+        if (_TRENamount > 0) {
+            uint256 TRENToWithdraw = TrenMath._min(_TRENamount, currentStake);
+            uint256 newStake = currentStake - TRENToWithdraw;
 
-            // Decrease user's stake and total GRVT staked
+            // Decrease user's stake and total TREN staked
             stakes[msg.sender] = newStake;
-            totalGRVTStaked = totalGRVTStaked - GRVTToWithdraw;
-            emit TotalGRVTStakedUpdated(totalGRVTStaked);
+            totalTRENStaked = totalTRENStaked - TRENToWithdraw;
+            emit TotalTRENStakedUpdated(totalTRENStaked);
 
-            // Transfer unstaked GRVT to user
-            IERC20(address(grvtToken)).safeTransfer(msg.sender, GRVTToWithdraw);
+            // Transfer unstaked TREN to user
+            IERC20(address(trenToken)).safeTransfer(msg.sender, TRENToWithdraw);
             emit StakeChanged(msg.sender, newStake);
         }
     }
@@ -194,7 +194,7 @@ contract TRENStaking is
     )
         external
         override
-        callerIsVesselManager
+        callerIsTrenBoxManager
     {
         if (paused()) {
             sendToTreasury(_asset, _assetFee);
@@ -206,13 +206,13 @@ contract TRENStaking is
             ASSET_TYPE.push(_asset);
         }
 
-        uint256 assetFeePerGRVTStaked;
+        uint256 assetFeePerTRENStaked;
 
-        if (totalGRVTStaked > 0) {
-            assetFeePerGRVTStaked = (_assetFee * DECIMAL_PRECISION) / totalGRVTStaked;
+        if (totalTRENStaked > 0) {
+            assetFeePerTRENStaked = (_assetFee * DECIMAL_PRECISION) / totalTRENStaked;
         }
 
-        F_ASSETS[_asset] = F_ASSETS[_asset] + assetFeePerGRVTStaked;
+        F_ASSETS[_asset] = F_ASSETS[_asset] + assetFeePerTRENStaked;
         emit Fee_AssetUpdated(_asset, F_ASSETS[_asset]);
     }
 
@@ -222,12 +222,12 @@ contract TRENStaking is
             return;
         }
 
-        uint256 feePerGRVTStaked;
-        if (totalGRVTStaked > 0) {
-            feePerGRVTStaked = (_debtTokenFee * DECIMAL_PRECISION) / totalGRVTStaked;
+        uint256 feePerTRENStaked;
+        if (totalTRENStaked > 0) {
+            feePerTRENStaked = (_debtTokenFee * DECIMAL_PRECISION) / totalTRENStaked;
         }
 
-        F_DEBT_TOKENS = F_DEBT_TOKENS + feePerGRVTStaked;
+        F_DEBT_TOKENS = F_DEBT_TOKENS + feePerTRENStaked;
         emit Fee_DebtTokenUpdated(F_DEBT_TOKENS);
     }
 
@@ -287,17 +287,17 @@ contract TRENStaking is
 
     // --- 'require' functions ---
 
-    modifier callerIsVesselManager() {
-        require(msg.sender == vesselManagerAddress, "GRVTStaking: caller is not VesselManager");
+    modifier callerIsTrenBoxManager() {
+        require(msg.sender == trenBoxManagerAddress, "TRENStaking: caller is not TrenBoxManager");
         _;
     }
 
     modifier callerIsFeeCollector() {
-        require(msg.sender == feeCollectorAddress, "GRVTStaking: caller is not FeeCollector");
+        require(msg.sender == feeCollectorAddress, "TRENStaking: caller is not FeeCollector");
         _;
     }
 
     function _requireUserHasStake(uint256 currentStake) internal pure {
-        require(currentStake > 0, "GRVTStaking: User must have a non-zero stake");
+        require(currentStake > 0, "TRENStaking: User must have a non-zero stake");
     }
 }

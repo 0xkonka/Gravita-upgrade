@@ -17,10 +17,10 @@ import { Addresses } from "./Addresses.sol";
 /*
 * The Default Pool holds the collateral and debt token amounts from liquidations that have been
 redistributed
-* to active vessels but not yet "applied", i.e. not yet recorded on a recipient active vessel's
+* to active trenBoxes but not yet "applied", i.e. not yet recorded on a recipient active trenBox's
 struct.
  *
- * When a vessel makes an operation that applies to its pending collateral and debt, they are moved
+ * When a trenBox makes an operation that applies to its pending collateral and debt, they are moved
  * from the Default Pool to the Active Pool.
  */
 contract DefaultPool is OwnableUpgradeable, UUPSUpgradeable, IDefaultPool, Addresses {
@@ -56,7 +56,7 @@ contract DefaultPool is OwnableUpgradeable, UUPSUpgradeable, IDefaultPool, Addre
     )
         external
         override
-        callerIsVesselManager
+        callerIsTrenBoxManager
     {
         uint256 newDebt = debtTokenBalances[_asset] + _amount;
         debtTokenBalances[_asset] = newDebt;
@@ -69,7 +69,7 @@ contract DefaultPool is OwnableUpgradeable, UUPSUpgradeable, IDefaultPool, Addre
     )
         external
         override
-        callerIsVesselManager
+        callerIsTrenBoxManager
     {
         uint256 newDebt = debtTokenBalances[_asset] - _amount;
         debtTokenBalances[_asset] = newDebt;
@@ -84,7 +84,7 @@ contract DefaultPool is OwnableUpgradeable, UUPSUpgradeable, IDefaultPool, Addre
     )
         external
         override
-        callerIsVesselManager
+        callerIsTrenBoxManager
     {
         uint256 safetyTransferAmount = SafetyTransfer.decimalsCorrection(_asset, _amount);
         if (safetyTransferAmount == 0) {
@@ -108,8 +108,8 @@ contract DefaultPool is OwnableUpgradeable, UUPSUpgradeable, IDefaultPool, Addre
         _;
     }
 
-    modifier callerIsVesselManager() {
-        require(msg.sender == vesselManager, "DefaultPool: Caller is not the VesselManager");
+    modifier callerIsTrenBoxManager() {
+        require(msg.sender == trenBoxManager, "DefaultPool: Caller is not the TrenBoxManager");
         _;
     }
 

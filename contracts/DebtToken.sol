@@ -17,7 +17,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
     // address public constant borrowerOperationsAddress =
     // 0x2bCA0300c2aa65de6F19c2d241B54a445C9990E2;
     // address public constant stabilityPoolAddress = 0x4F39F12064D83F6Dd7A2BDb0D53aF8be560356A6;
-    // address public constant vesselManagerAddress = 0xdB5DAcB1DFbe16326C3656a88017f0cB4ece0977;
+    // address public constant trenBoxManagerAddress = 0xdB5DAcB1DFbe16326C3656a88017f0cB4ece0977;
 
     // MAINNET-ONLY SECTION END
     // ---------------------------------------------------------------------------------------
@@ -27,26 +27,26 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
 
     address public borrowerOperationsAddress;
     address public stabilityPoolAddress;
-    address public vesselManagerAddress;
+    address public trenBoxManagerAddress;
 
     constructor(address initialOwner) ERC20("Gravita Debt Token", "GRAI") Ownable(initialOwner) { }
 
     function setAddresses(
         address _borrowerOperationsAddress,
         address _stabilityPoolAddress,
-        address _vesselManagerAddress
+        address _trenBoxManagerAddress
     )
         public
         onlyOwner
     {
         require(
             _borrowerOperationsAddress != address(0) && _stabilityPoolAddress != address(0)
-                && _vesselManagerAddress != address(0),
+                && _trenBoxManagerAddress != address(0),
             "Invalid address"
         );
         borrowerOperationsAddress = _borrowerOperationsAddress;
         stabilityPoolAddress = _stabilityPoolAddress;
-        vesselManagerAddress = _vesselManagerAddress;
+        trenBoxManagerAddress = _trenBoxManagerAddress;
     }
 
     // TESTNET-ONLY SECTION END
@@ -80,7 +80,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
     }
 
     function burn(address _account, uint256 _amount) external override {
-        _requireCallerIsBOorVesselMorSP();
+        _requireCallerIsBOorTrenBoxMorSP();
         _burn(_account, _amount);
     }
 
@@ -109,7 +109,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         external
         override
     {
-        _requireCallerIsVesselMorSP();
+        _requireCallerIsTrenBoxMorSP();
         _transfer(_poolAddress, _receiver, _amount);
     }
 
@@ -159,11 +159,11 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         );
     }
 
-    function _requireCallerIsBOorVesselMorSP() internal view {
+    function _requireCallerIsBOorTrenBoxMorSP() internal view {
         require(
-            msg.sender == borrowerOperationsAddress || msg.sender == vesselManagerAddress
+            msg.sender == borrowerOperationsAddress || msg.sender == trenBoxManagerAddress
                 || msg.sender == stabilityPoolAddress,
-            "DebtToken: Caller is neither BorrowerOperations nor VesselManager nor StabilityPool"
+            "DebtToken: Caller is neither BorrowerOperations nor TrenBoxManager nor StabilityPool"
         );
     }
 
@@ -171,10 +171,10 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         require(msg.sender == stabilityPoolAddress, "DebtToken: Caller is not the StabilityPool");
     }
 
-    function _requireCallerIsVesselMorSP() internal view {
+    function _requireCallerIsTrenBoxMorSP() internal view {
         require(
-            msg.sender == vesselManagerAddress || msg.sender == stabilityPoolAddress,
-            "DebtToken: Caller is neither VesselManager nor StabilityPool"
+            msg.sender == trenBoxManagerAddress || msg.sender == stabilityPoolAddress,
+            "DebtToken: Caller is neither TrenBoxManager nor StabilityPool"
         );
     }
 }

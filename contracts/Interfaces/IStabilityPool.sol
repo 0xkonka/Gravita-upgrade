@@ -28,7 +28,7 @@ interface IStabilityPool is IDeposit {
         uint256[] _amounts,
         uint256 _debtTokenLoss
     );
-    event GRVTPaidToDepositor(address indexed _depositor, uint256 _GRVT);
+    event TRENPaidToDepositor(address indexed _depositor, uint256 _TREN);
     event StabilityPoolAssetBalanceUpdated(address _asset, uint256 _newBalance);
     event StabilityPoolDebtTokenBalanceUpdated(uint256 _newBalance);
     event StakeChanged(uint256 _newSystemStake, address _depositor);
@@ -44,7 +44,7 @@ interface IStabilityPool is IDeposit {
 
     error StabilityPool__ActivePoolOnly(address sender, address expected);
     error StabilityPool__AdminContractOnly(address sender, address expected);
-    error StabilityPool__VesselManagerOnly(address sender, address expected);
+    error StabilityPool__TrenBoxManagerOnly(address sender, address expected);
     error StabilityPool__ArrayNotInAscendingOrder();
 
     // --- Functions ---
@@ -55,20 +55,20 @@ interface IStabilityPool is IDeposit {
      * Initial checks:
      * - _amount is not zero
      * ---
-    * - Triggers a GRVT issuance, based on time passed since the last issuance. The GRVT issuance is
+    * - Triggers a TREN issuance, based on time passed since the last issuance. The TREN issuance is
     shared between *all* depositors.
-     * - Sends depositor's accumulated gains (GRVT, assets) to depositor
+     * - Sends depositor's accumulated gains (TREN, assets) to depositor
      */
     function provideToSP(uint256 _amount, address[] calldata _assets) external;
 
     /*
      * Initial checks:
-     * - _amount is zero or there are no under collateralized vessels left in the system
+     * - _amount is zero or there are no under collateralized trenBoxes left in the system
      * - User has a non zero deposit
      * ---
-    * - Triggers a GRVT issuance, based on time passed since the last issuance. The GRVT issuance is
+    * - Triggers a TREN issuance, based on time passed since the last issuance. The TREN issuance is
     shared between *all* depositors.
-     * - Sends all depositor's accumulated gains (GRVT, assets) to depositor
+     * - Sends all depositor's accumulated gains (TREN, assets) to depositor
      * - Decreases deposit's stake, and takes new snapshots.
      *
      * If _amount > userDeposit, the user withdraws all of their compounded deposit.
@@ -77,17 +77,17 @@ interface IStabilityPool is IDeposit {
 
     /*
     Initial checks:
-    * - Caller is VesselManager
+    * - Caller is TrenBoxManager
     * ---
     * Cancels out the specified debt against the debt token contained in the Stability Pool (as far
     as possible)
-    * and transfers the Vessel's collateral from ActivePool to StabilityPool.
-    * Only called by liquidation functions in the VesselManager.
+    * and transfers the TrenBox's collateral from ActivePool to StabilityPool.
+    * Only called by liquidation functions in the TrenBoxManager.
     */
     function offset(uint256 _debt, address _asset, uint256 _coll) external;
 
     /*
-    * Returns debt tokens held in the pool. Changes when users deposit/withdraw, and when Vessel
+    * Returns debt tokens held in the pool. Changes when users deposit/withdraw, and when TrenBox
     debt is offset.
      */
     function getTotalDebtTokenDeposits() external view returns (uint256);
@@ -104,9 +104,9 @@ interface IStabilityPool is IDeposit {
         returns (address[] memory, uint256[] memory);
 
     /*
-     * Calculate the GRVT gain earned by a deposit since its last snapshots were taken.
+     * Calculate the TREN gain earned by a deposit since its last snapshots were taken.
      */
-    function getDepositorGRVTGain(address _depositor) external view returns (uint256);
+    function getDepositorTRENGain(address _depositor) external view returns (uint256);
 
     /*
      * Return the user's compounded deposits.

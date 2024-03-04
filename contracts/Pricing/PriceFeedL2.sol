@@ -20,8 +20,9 @@ contract PriceFeedL2 is PriceFeed {
     // Constants
     // --------------------------------------------------------------------------------------------------------
 
-    /// @dev after sequencer comes back up, wait for up to X seconds for openVessel, adjustVessel &
-    /// closeVessel
+    /// @dev after sequencer comes back up, wait for up to X seconds for openTrenBox, adjustTrenBox
+    /// &
+    /// closeTrenBox
     uint256 public constant SEQUENCER_BORROWING_DELAY_SECONDS = 3600;
 
     /// @dev after sequencer comes back up, wait for up to X seconds for redemptions & liquidations
@@ -55,12 +56,12 @@ contract PriceFeedL2 is PriceFeed {
 
     /**
      * @dev Callers:
-     *     - BorrowerOperations.openVessel()
-     *     - BorrowerOperations.adjustVessel()
-     *     - BorrowerOperations.closeVessel()
-     *     - VesselManagerOperations.liquidateVessels()
-     *     - VesselManagerOperations.batchLiquidateVessels()
-     *     - VesselManagerOperations.redeemCollateral()
+     *     - BorrowerOperations.openTrenBox()
+     *     - BorrowerOperations.adjustTrenBox()
+     *     - BorrowerOperations.closeTrenBox()
+     *     - TrenBoxManagerOperations.liquidateTrenBoxes()
+     *     - TrenBoxManagerOperations.batchLiquidateTrenBoxes()
+     *     - TrenBoxManagerOperations.redeemCollateral()
      */
     function fetchPrice(address _token) public view override returns (uint256) {
         _checkSequencerUptimeFeed();
@@ -91,8 +92,8 @@ contract PriceFeedL2 is PriceFeed {
             }
 
             uint256 delay;
-            if (msg.sender == vesselManagerOperations) {
-                // VesselManagerOperations triggers liquidations and redemptions
+            if (msg.sender == trenBoxManagerOperations) {
+                // TrenBoxManagerOperations triggers liquidations and redemptions
                 delay = SEQUENCER_LIQUIDATION_DELAY_SECONDS;
             } else {
                 delay = SEQUENCER_BORROWING_DELAY_SECONDS;

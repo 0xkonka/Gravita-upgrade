@@ -19,9 +19,10 @@ import { IActivePool } from "./Interfaces/IActivePool.sol";
 import { IDeposit } from "./Interfaces/IDeposit.sol";
 
 /*
- * The Active Pool holds the collaterals and debt amounts for all active vessels.
+ * The Active Pool holds the collaterals and debt amounts for all active trenBoxes.
  *
-* When a vessel is liquidated, it's collateral and debt tokens are transferred from the Active Pool,
+* When a trenBox is liquidated, it's collateral and debt tokens are transferred from the Active
+Pool,
 to either the
  * Stability Pool, the Default Pool, or both, depending on the liquidation conditions.
  *
@@ -50,27 +51,27 @@ contract ActivePool is
         _;
     }
 
-    modifier callerIsBorrowerOpsOrVesselMgr() {
+    modifier callerIsBorrowerOpsOrTrenBoxMgr() {
         require(
-            msg.sender == borrowerOperations || msg.sender == vesselManager,
+            msg.sender == borrowerOperations || msg.sender == trenBoxManager,
             "ActivePool: Caller is not an authorized Gravita contract"
         );
         _;
     }
 
-    modifier callerIsBorrowerOpsOrStabilityPoolOrVesselMgr() {
+    modifier callerIsBorrowerOpsOrStabilityPoolOrTrenBoxMgr() {
         require(
             msg.sender == borrowerOperations || msg.sender == stabilityPool
-                || msg.sender == vesselManager,
+                || msg.sender == trenBoxManager,
             "ActivePool: Caller is not an authorized Gravita contract"
         );
         _;
     }
 
-    modifier callerIsBorrowerOpsOrStabilityPoolOrVesselMgrOrVesselMgrOps() {
+    modifier callerIsBorrowerOpsOrStabilityPoolOrTrenBoxMgrOrTrenBoxMgrOps() {
         require(
             msg.sender == borrowerOperations || msg.sender == stabilityPool
-                || msg.sender == vesselManager || msg.sender == vesselManagerOperations,
+                || msg.sender == trenBoxManager || msg.sender == trenBoxManagerOperations,
             "ActivePool: Caller is not an authorized Gravita contract"
         );
         _;
@@ -102,7 +103,7 @@ contract ActivePool is
     )
         external
         override
-        callerIsBorrowerOpsOrVesselMgr
+        callerIsBorrowerOpsOrTrenBoxMgr
     {
         uint256 newDebt = debtTokenBalances[_collateral] + _amount;
         debtTokenBalances[_collateral] = newDebt;
@@ -115,7 +116,7 @@ contract ActivePool is
     )
         external
         override
-        callerIsBorrowerOpsOrStabilityPoolOrVesselMgr
+        callerIsBorrowerOpsOrStabilityPoolOrTrenBoxMgr
     {
         uint256 newDebt = debtTokenBalances[_asset] - _amount;
         debtTokenBalances[_asset] = newDebt;
@@ -132,7 +133,7 @@ contract ActivePool is
         external
         override
         nonReentrant
-        callerIsBorrowerOpsOrStabilityPoolOrVesselMgrOrVesselMgrOps
+        callerIsBorrowerOpsOrStabilityPoolOrTrenBoxMgrOrTrenBoxMgrOps
     {
         uint256 safetyTransferAmount = SafetyTransfer.decimalsCorrection(_asset, _amount);
         if (safetyTransferAmount == 0) return;

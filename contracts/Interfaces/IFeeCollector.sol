@@ -27,11 +27,11 @@ interface IFeeCollector {
 
     error FeeCollector__ArrayMismatch();
     error FeeCollector__BorrowerOperationsOnly(address sender, address expected);
-    error FeeCollector__BorrowerOperationsOrVesselManagerOnly(
+    error FeeCollector__BorrowerOperationsOrTrenBoxManagerOnly(
         address sender, address expected1, address expected2
     );
-    error FeeCollector__InvalidGRVTStakingAddress();
-    error FeeCollector__VesselManagerOnly(address sender, address expected);
+    error FeeCollector__InvalidTRENStakingAddress();
+    error FeeCollector__TrenBoxManagerOnly(address sender, address expected);
 
     // Functions
     // --------------------------------------------------------------------------------------------------------

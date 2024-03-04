@@ -99,12 +99,12 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
     /**
      * @notice Fetches the price for an asset from a previosly configured oracle.
      * @dev Callers:
-     *     - BorrowerOperations.openVessel()
-     *     - BorrowerOperations.adjustVessel()
-     *     - BorrowerOperations.closeVessel()
-     *     - VesselManagerOperations.liquidateVessels()
-     *     - VesselManagerOperations.batchLiquidateVessels()
-     *     - VesselManagerOperations.redeemCollateral()
+     *     - BorrowerOperations.openTrenBox()
+     *     - BorrowerOperations.adjustTrenBox()
+     *     - BorrowerOperations.closeTrenBox()
+     *     - TrenBoxManagerOperations.liquidateTrenBoxes()
+     *     - TrenBoxManagerOperations.batchLiquidateTrenBoxes()
+     *     - TrenBoxManagerOperations.redeemCollateral()
      */
     function fetchPrice(address _token) public view virtual returns (uint256) {
         // Tries fetching the price from the oracle

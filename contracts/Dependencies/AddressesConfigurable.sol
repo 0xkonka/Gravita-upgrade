@@ -15,14 +15,14 @@ abstract contract AddressesConfigurable is OwnableUpgradeable {
     address public defaultPool;
     address public feeCollector;
     address public gasPoolAddress;
-    address public grvtStaking;
+    address public trenStaking;
     address public priceFeed;
-    address public sortedVessels;
+    address public sortedTrenBoxes;
     address public stabilityPool;
     address public timelockAddress;
     address public treasuryAddress;
-    address public vesselManager;
-    address public vesselManagerOperations;
+    address public trenBoxManager;
+    address public trenBoxManagerOperations;
 
     bool public isAddressSetupInitialized;
 
@@ -51,12 +51,12 @@ abstract contract AddressesConfigurable is OwnableUpgradeable {
         feeCollector = _addresses[6];
         gasPoolAddress = _addresses[7];
         priceFeed = _addresses[8];
-        sortedVessels = _addresses[9];
+        sortedTrenBoxes = _addresses[9];
         stabilityPool = _addresses[10];
         timelockAddress = _addresses[11];
         treasuryAddress = _addresses[12];
-        vesselManager = _addresses[13];
-        vesselManagerOperations = _addresses[14];
+        trenBoxManager = _addresses[13];
+        trenBoxManagerOperations = _addresses[14];
 
         isAddressSetupInitialized = true;
     }
@@ -65,7 +65,7 @@ abstract contract AddressesConfigurable is OwnableUpgradeable {
         communityIssuance = _communityIssuance;
     }
 
-    function setGRVTStaking(address _grvtStaking) public onlyOwner {
-        grvtStaking = _grvtStaking;
+    function setTRENStaking(address _trenStaking) public onlyOwner {
+        trenStaking = _trenStaking;
     }
 }

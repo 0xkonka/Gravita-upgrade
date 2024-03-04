@@ -16,10 +16,10 @@ import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
 
 import { IDefaultPool } from "./Interfaces/IDefaultPool.sol";
 import { IPriceFeed } from "./Interfaces/IPriceFeed.sol";
-import { ISortedVessels } from "./Interfaces/ISortedVessels.sol";
+import { ISortedTrenBoxes } from "./Interfaces/ISortedTrenBoxes.sol";
 import { IActivePool } from "./Interfaces/IActivePool.sol";
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
-import { IVesselManager } from "./Interfaces/IVesselManager.sol";
+import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 import { IBorrowerOperations } from "./Interfaces/IBorrowerOperations.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
@@ -44,7 +44,7 @@ contract BorrowerOperations is
     Used to hold, return and assign variables inside a function, in order to avoid the error:
     "CompilerError: Stack too deep". */
 
-    struct LocalVariables_adjustVessel {
+    struct LocalVariables_adjustTrenBox {
         address asset;
         bool isCollIncrease;
         uint256 price;
@@ -61,7 +61,7 @@ contract BorrowerOperations is
         uint256 stake;
     }
 
-    struct LocalVariables_openVessel {
+    struct LocalVariables_openTrenBox {
         address asset;
         uint256 price;
         uint256 debtTokenFee;
@@ -82,9 +82,9 @@ contract BorrowerOperations is
         __UUPSUpgradeable_init();
     }
 
-    // --- Borrower Vessel Operations ---
+    // --- Borrower TrenBox Operations ---
 
-    function openVessel(
+    function openTrenBox(
         address _asset,
         uint256 _assetAmount,
         uint256 _debtTokenAmount,
@@ -97,13 +97,13 @@ contract BorrowerOperations is
         require(
             IAdminContract(adminContract).getIsActive(_asset), "BorrowerOps: Asset is not active"
         );
-        LocalVariables_openVessel memory vars;
+        LocalVariables_openTrenBox memory vars;
         vars.asset = _asset;
 
         vars.price = IPriceFeed(priceFeed).fetchPrice(vars.asset);
         bool isRecoveryMode = _checkRecoveryMode(vars.asset, vars.price);
 
-        _requireVesselIsNotActive(vars.asset, msg.sender);
+        _requireTrenBoxIsNotActive(vars.asset, msg.sender);
 
         vars.netDebt = _debtTokenAmount;
 
@@ -127,27 +127,32 @@ contract BorrowerOperations is
             _requireICRisAboveCCR(vars.asset, vars.ICR);
         } else {
             _requireICRisAboveMCR(vars.asset, vars.ICR);
-            uint256 newTCR = _getNewTCRFromVesselChange(
+            uint256 newTCR = _getNewTCRFromTrenBoxChange(
                 vars.asset, _assetAmount, true, vars.compositeDebt, true, vars.price
             ); // bools: coll increase, debt increase
             _requireNewTCRisAboveCCR(vars.asset, newTCR);
         }
 
-        // Set the vessel struct's properties
-        IVesselManager(vesselManager).setVesselStatus(vars.asset, msg.sender, 1); // Vessel Status 1
+        // Set the trenBox struct's properties
+        ITrenBoxManager(trenBoxManager).setTrenBoxStatus(vars.asset, msg.sender, 1); // TrenBox
+            // Status
+            // 1
             // = Active
-        IVesselManager(vesselManager).increaseVesselColl(vars.asset, msg.sender, _assetAmount);
-        IVesselManager(vesselManager).increaseVesselDebt(vars.asset, msg.sender, vars.compositeDebt);
+        ITrenBoxManager(trenBoxManager).increaseTrenBoxColl(vars.asset, msg.sender, _assetAmount);
+        ITrenBoxManager(trenBoxManager).increaseTrenBoxDebt(
+            vars.asset, msg.sender, vars.compositeDebt
+        );
 
-        IVesselManager(vesselManager).updateVesselRewardSnapshots(vars.asset, msg.sender);
-        vars.stake = IVesselManager(vesselManager).updateStakeAndTotalStakes(vars.asset, msg.sender);
+        ITrenBoxManager(trenBoxManager).updateTrenBoxRewardSnapshots(vars.asset, msg.sender);
+        vars.stake =
+            ITrenBoxManager(trenBoxManager).updateStakeAndTotalStakes(vars.asset, msg.sender);
 
-        ISortedVessels(sortedVessels).insert(
+        ISortedTrenBoxes(sortedTrenBoxes).insert(
             vars.asset, msg.sender, vars.NICR, _upperHint, _lowerHint
         );
         vars.arrayIndex =
-            IVesselManager(vesselManager).addVesselOwnerToArray(vars.asset, msg.sender);
-        emit VesselCreated(vars.asset, msg.sender, vars.arrayIndex);
+            ITrenBoxManager(trenBoxManager).addTrenBoxOwnerToArray(vars.asset, msg.sender);
+        emit TrenBoxCreated(vars.asset, msg.sender, vars.arrayIndex);
 
         // Move the asset to the Active Pool, and mint the debtToken amount to the borrower
         _activePoolAddColl(vars.asset, _assetAmount);
@@ -157,18 +162,18 @@ contract BorrowerOperations is
             _withdrawDebtTokens(vars.asset, gasPoolAddress, gasCompensation, gasCompensation);
         }
 
-        emit VesselUpdated(
+        emit TrenBoxUpdated(
             vars.asset,
             msg.sender,
             vars.compositeDebt,
             _assetAmount,
             vars.stake,
-            BorrowerOperation.openVessel
+            BorrowerOperation.openTrenBox
         );
         emit BorrowingFeePaid(vars.asset, msg.sender, vars.debtTokenFee);
     }
 
-    // Send collateral to a vessel
+    // Send collateral to a trenBox
     function addColl(
         address _asset,
         uint256 _assetSent,
@@ -179,10 +184,10 @@ contract BorrowerOperations is
         override
         nonReentrant
     {
-        _adjustVessel(_asset, _assetSent, msg.sender, 0, 0, false, _upperHint, _lowerHint);
+        _adjustTrenBox(_asset, _assetSent, msg.sender, 0, 0, false, _upperHint, _lowerHint);
     }
 
-    // Withdraw collateral from a vessel
+    // Withdraw collateral from a trenBox
     function withdrawColl(
         address _asset,
         uint256 _collWithdrawal,
@@ -193,11 +198,11 @@ contract BorrowerOperations is
         override
         nonReentrant
     {
-        _adjustVessel(_asset, 0, msg.sender, _collWithdrawal, 0, false, _upperHint, _lowerHint);
+        _adjustTrenBox(_asset, 0, msg.sender, _collWithdrawal, 0, false, _upperHint, _lowerHint);
     }
 
-    // Withdraw debt tokens from a vessel: mint new debt tokens to the owner, and increase the
-    // vessel's debt accordingly
+    // Withdraw debt tokens from a trenBox: mint new debt tokens to the owner, and increase the
+    // trenBox's debt accordingly
     function withdrawDebtTokens(
         address _asset,
         uint256 _debtTokenAmount,
@@ -208,10 +213,10 @@ contract BorrowerOperations is
         override
         nonReentrant
     {
-        _adjustVessel(_asset, 0, msg.sender, 0, _debtTokenAmount, true, _upperHint, _lowerHint);
+        _adjustTrenBox(_asset, 0, msg.sender, 0, _debtTokenAmount, true, _upperHint, _lowerHint);
     }
 
-    // Repay debt tokens to a Vessel: Burn the repaid debt tokens, and reduce the vessel's debt
+    // Repay debt tokens to a TrenBox: Burn the repaid debt tokens, and reduce the trenBox's debt
     // accordingly
     function repayDebtTokens(
         address _asset,
@@ -223,10 +228,10 @@ contract BorrowerOperations is
         override
         nonReentrant
     {
-        _adjustVessel(_asset, 0, msg.sender, 0, _debtTokenAmount, false, _upperHint, _lowerHint);
+        _adjustTrenBox(_asset, 0, msg.sender, 0, _debtTokenAmount, false, _upperHint, _lowerHint);
     }
 
-    function adjustVessel(
+    function adjustTrenBox(
         address _asset,
         uint256 _assetSent,
         uint256 _collWithdrawal,
@@ -239,7 +244,7 @@ contract BorrowerOperations is
         override
         nonReentrant
     {
-        _adjustVessel(
+        _adjustTrenBox(
             _asset,
             _assetSent,
             msg.sender,
@@ -252,10 +257,11 @@ contract BorrowerOperations is
     }
 
     /*
-    * _adjustVessel(): Alongside a debt change, this function can perform either a collateral top-up
+    * _adjustTrenBox(): Alongside a debt change, this function can perform either a collateral
+    top-up
     or a collateral withdrawal.
      */
-    function _adjustVessel(
+    function _adjustTrenBox(
         address _asset,
         uint256 _assetSent,
         address _borrower,
@@ -267,7 +273,7 @@ contract BorrowerOperations is
     )
         internal
     {
-        LocalVariables_adjustVessel memory vars;
+        LocalVariables_adjustTrenBox memory vars;
         vars.asset = _asset;
         vars.price = IPriceFeed(priceFeed).fetchPrice(vars.asset);
         bool isRecoveryMode = _checkRecoveryMode(vars.asset, vars.price);
@@ -277,16 +283,16 @@ contract BorrowerOperations is
         }
         _requireSingularCollChange(_collWithdrawal, _assetSent);
         _requireNonZeroAdjustment(_collWithdrawal, _debtTokenChange, _assetSent);
-        _requireVesselIsActive(vars.asset, _borrower);
+        _requireTrenBoxIsActive(vars.asset, _borrower);
 
-        // Confirm the operation is either a borrower adjusting their own vessel, or a pure asset
-        // transfer from the Stability Pool to a vessel
+        // Confirm the operation is either a borrower adjusting their own trenBox, or a pure asset
+        // transfer from the Stability Pool to a trenBox
         assert(
             msg.sender == _borrower
                 || (stabilityPool == msg.sender && _assetSent != 0 && _debtTokenChange == 0)
         );
 
-        IVesselManager(vesselManager).applyPendingRewards(vars.asset, _borrower);
+        ITrenBoxManager(trenBoxManager).applyPendingRewards(vars.asset, _borrower);
 
         // Get the collChange based on whether or not asset was sent in the transaction
         (vars.collChange, vars.isCollIncrease) = _getCollChange(_assetSent, _collWithdrawal);
@@ -301,13 +307,13 @@ contract BorrowerOperations is
                 // includes the fee
         }
 
-        vars.debt = IVesselManager(vesselManager).getVesselDebt(vars.asset, _borrower);
-        vars.coll = IVesselManager(vesselManager).getVesselColl(vars.asset, _borrower);
+        vars.debt = ITrenBoxManager(trenBoxManager).getTrenBoxDebt(vars.asset, _borrower);
+        vars.coll = ITrenBoxManager(trenBoxManager).getTrenBoxColl(vars.asset, _borrower);
 
-        // Get the vessel's old ICR before the adjustment, and what its new ICR will be after the
+        // Get the trenBox's old ICR before the adjustment, and what its new ICR will be after the
         // adjustment
         vars.oldICR = TrenMath._computeCR(vars.coll, vars.debt, vars.price);
-        vars.newICR = _getNewICRFromVesselChange(
+        vars.newICR = _getNewICRFromTrenBoxChange(
             vars.coll,
             vars.debt,
             vars.collChange,
@@ -333,7 +339,7 @@ contract BorrowerOperations is
             _requireSufficientDebtTokenBalance(_borrower, vars.netDebtChange);
         }
 
-        (vars.newColl, vars.newDebt) = _updateVesselFromAdjustment(
+        (vars.newColl, vars.newDebt) = _updateTrenBoxFromAdjustment(
             vars.asset,
             _borrower,
             vars.collChange,
@@ -341,10 +347,11 @@ contract BorrowerOperations is
             vars.netDebtChange,
             _isDebtIncrease
         );
-        vars.stake = IVesselManager(vesselManager).updateStakeAndTotalStakes(vars.asset, _borrower);
+        vars.stake =
+            ITrenBoxManager(trenBoxManager).updateStakeAndTotalStakes(vars.asset, _borrower);
 
-        // Re-insert vessel in to the sorted list
-        uint256 newNICR = _getNewNominalICRFromVesselChange(
+        // Re-insert trenBox in to the sorted list
+        uint256 newNICR = _getNewNominalICRFromTrenBoxChange(
             vars.coll,
             vars.debt,
             vars.collChange,
@@ -352,17 +359,17 @@ contract BorrowerOperations is
             vars.netDebtChange,
             _isDebtIncrease
         );
-        ISortedVessels(sortedVessels).reInsert(
+        ISortedTrenBoxes(sortedTrenBoxes).reInsert(
             vars.asset, _borrower, newNICR, _upperHint, _lowerHint
         );
 
-        emit VesselUpdated(
+        emit TrenBoxUpdated(
             vars.asset,
             _borrower,
             vars.newDebt,
             vars.newColl,
             vars.stake,
-            BorrowerOperation.adjustVessel
+            BorrowerOperation.adjustTrenBox
         );
         emit BorrowingFeePaid(vars.asset, msg.sender, vars.debtTokenFee);
 
@@ -378,15 +385,15 @@ contract BorrowerOperations is
         );
     }
 
-    function closeVessel(address _asset) external override {
-        _requireVesselIsActive(_asset, msg.sender);
+    function closeTrenBox(address _asset) external override {
+        _requireTrenBoxIsActive(_asset, msg.sender);
         uint256 price = IPriceFeed(priceFeed).fetchPrice(_asset);
         _requireNotInRecoveryMode(_asset, price);
 
-        IVesselManager(vesselManager).applyPendingRewards(_asset, msg.sender);
+        ITrenBoxManager(trenBoxManager).applyPendingRewards(_asset, msg.sender);
 
-        uint256 coll = IVesselManager(vesselManager).getVesselColl(_asset, msg.sender);
-        uint256 debt = IVesselManager(vesselManager).getVesselDebt(_asset, msg.sender);
+        uint256 coll = ITrenBoxManager(trenBoxManager).getTrenBoxColl(_asset, msg.sender);
+        uint256 debt = ITrenBoxManager(trenBoxManager).getTrenBoxDebt(_asset, msg.sender);
 
         uint256 gasCompensation = IAdminContract(adminContract).getDebtTokenGasCompensation(_asset);
         uint256 refund = IFeeCollector(feeCollector).simulateRefund(msg.sender, _asset, 1 ether);
@@ -394,13 +401,13 @@ contract BorrowerOperations is
 
         _requireSufficientDebtTokenBalance(msg.sender, netDebt);
 
-        uint256 newTCR = _getNewTCRFromVesselChange(_asset, coll, false, debt, false, price);
+        uint256 newTCR = _getNewTCRFromTrenBoxChange(_asset, coll, false, debt, false, price);
         _requireNewTCRisAboveCCR(_asset, newTCR);
 
-        IVesselManager(vesselManager).removeStake(_asset, msg.sender);
-        IVesselManager(vesselManager).closeVessel(_asset, msg.sender);
+        ITrenBoxManager(trenBoxManager).removeStake(_asset, msg.sender);
+        ITrenBoxManager(trenBoxManager).closeTrenBox(_asset, msg.sender);
 
-        emit VesselUpdated(_asset, msg.sender, 0, 0, 0, BorrowerOperation.closeVessel);
+        emit TrenBoxUpdated(_asset, msg.sender, 0, 0, 0, BorrowerOperation.closeTrenBox);
 
         // Burn the repaid debt tokens from the user's balance and the gas compensation from the Gas
         // Pool
@@ -433,7 +440,7 @@ contract BorrowerOperations is
         returns (uint256)
     {
         uint256 debtTokenFee =
-            IVesselManager(vesselManager).getBorrowingFee(_asset, _debtTokenAmount);
+            ITrenBoxManager(trenBoxManager).getBorrowingFee(_asset, _debtTokenAmount);
         IDebtToken(debtToken).mint(_asset, feeCollector, debtTokenFee);
         IFeeCollector(feeCollector).increaseDebt(msg.sender, _asset, debtTokenFee);
         return debtTokenFee;
@@ -459,8 +466,8 @@ contract BorrowerOperations is
         }
     }
 
-    // Update vessel's coll and debt based on whether they increase or decrease
-    function _updateVesselFromAdjustment(
+    // Update trenBox's coll and debt based on whether they increase or decrease
+    function _updateTrenBoxFromAdjustment(
         address _asset,
         address _borrower,
         uint256 _collChange,
@@ -472,11 +479,11 @@ contract BorrowerOperations is
         returns (uint256, uint256)
     {
         uint256 newColl = (_isCollIncrease)
-            ? IVesselManager(vesselManager).increaseVesselColl(_asset, _borrower, _collChange)
-            : IVesselManager(vesselManager).decreaseVesselColl(_asset, _borrower, _collChange);
+            ? ITrenBoxManager(trenBoxManager).increaseTrenBoxColl(_asset, _borrower, _collChange)
+            : ITrenBoxManager(trenBoxManager).decreaseTrenBoxColl(_asset, _borrower, _collChange);
         uint256 newDebt = (_isDebtIncrease)
-            ? IVesselManager(vesselManager).increaseVesselDebt(_asset, _borrower, _debtChange)
-            : IVesselManager(vesselManager).decreaseVesselDebt(_asset, _borrower, _debtChange);
+            ? ITrenBoxManager(trenBoxManager).increaseTrenBoxDebt(_asset, _borrower, _debtChange)
+            : ITrenBoxManager(trenBoxManager).decreaseTrenBoxDebt(_asset, _borrower, _debtChange);
 
         return (newColl, newDebt);
     }
@@ -542,7 +549,7 @@ contract BorrowerOperations is
         internal
     {
         /// @dev the borrowing fee partial refund is accounted for when decreasing the debt, as it
-        /// was included when vessel was opened
+        /// was included when trenBox was opened
         IActivePool(activePool).decreaseDebt(_asset, _debtTokenAmount + _refund);
         /// @dev the borrowing fee partial refund is not burned here, as it has already been burned
         /// by the FeeCollector
@@ -578,14 +585,14 @@ contract BorrowerOperations is
         );
     }
 
-    function _requireVesselIsActive(address _asset, address _borrower) internal view {
-        uint256 status = IVesselManager(vesselManager).getVesselStatus(_asset, _borrower);
-        require(status == 1, "BorrowerOps: Vessel does not exist or is closed");
+    function _requireTrenBoxIsActive(address _asset, address _borrower) internal view {
+        uint256 status = ITrenBoxManager(trenBoxManager).getTrenBoxStatus(_asset, _borrower);
+        require(status == 1, "BorrowerOps: TrenBox does not exist or is closed");
     }
 
-    function _requireVesselIsNotActive(address _asset, address _borrower) internal view {
-        uint256 status = IVesselManager(vesselManager).getVesselStatus(_asset, _borrower);
-        require(status != 1, "BorrowerOps: Vessel is active");
+    function _requireTrenBoxIsNotActive(address _asset, address _borrower) internal view {
+        uint256 status = ITrenBoxManager(trenBoxManager).getTrenBoxStatus(_asset, _borrower);
+        require(status != 1, "BorrowerOps: TrenBox is active");
     }
 
     function _requireNonZeroDebtChange(uint256 _debtTokenChange) internal pure {
@@ -610,7 +617,7 @@ contract BorrowerOperations is
         bool _isRecoveryMode,
         uint256 _collWithdrawal,
         bool _isDebtIncrease,
-        LocalVariables_adjustVessel memory _vars
+        LocalVariables_adjustTrenBox memory _vars
     )
         internal
         view
@@ -638,7 +645,7 @@ contract BorrowerOperations is
         } else {
             // if Normal Mode
             _requireICRisAboveMCR(_asset, _vars.newICR);
-            _vars.newTCR = _getNewTCRFromVesselChange(
+            _vars.newTCR = _getNewTCRFromTrenBoxChange(
                 _asset,
                 _vars.collChange,
                 _vars.isCollIncrease,
@@ -660,13 +667,13 @@ contract BorrowerOperations is
     function _requireICRisAboveCCR(address _asset, uint256 _newICR) internal view {
         require(
             _newICR >= IAdminContract(adminContract).getCcr(_asset),
-            "BorrowerOps: Operation must leave vessel with ICR >= CCR"
+            "BorrowerOps: Operation must leave trenBox with ICR >= CCR"
         );
     }
 
     function _requireNewICRisAboveOldICR(uint256 _newICR, uint256 _oldICR) internal pure {
         require(
-            _newICR >= _oldICR, "BorrowerOps: Cannot decrease your Vessel's ICR in Recovery Mode"
+            _newICR >= _oldICR, "BorrowerOps: Cannot decrease your TrenBox's ICR in Recovery Mode"
         );
     }
 
@@ -680,7 +687,7 @@ contract BorrowerOperations is
     function _requireAtLeastMinNetDebt(address _asset, uint256 _netDebt) internal view {
         require(
             _netDebt >= IAdminContract(adminContract).getMinNetDebt(_asset),
-            "BorrowerOps: Vessel's net debt must be greater than minimum"
+            "BorrowerOps: TrenBox's net debt must be greater than minimum"
         );
     }
 
@@ -695,7 +702,7 @@ contract BorrowerOperations is
         require(
             _debtRepayment
                 <= _currentDebt - IAdminContract(adminContract).getDebtTokenGasCompensation(_asset),
-            "BorrowerOps: Amount repaid must not be larger than the Vessel's debt"
+            "BorrowerOps: Amount repaid must not be larger than the TrenBox's debt"
         );
     }
 
@@ -716,7 +723,7 @@ contract BorrowerOperations is
 
     // Compute the new collateral ratio, considering the change in coll and debt. Assumes 0 pending
     // rewards.
-    function _getNewNominalICRFromVesselChange(
+    function _getNewNominalICRFromTrenBoxChange(
         uint256 _coll,
         uint256 _debt,
         uint256 _collChange,
@@ -728,7 +735,7 @@ contract BorrowerOperations is
         pure
         returns (uint256)
     {
-        (uint256 newColl, uint256 newDebt) = _getNewVesselAmounts(
+        (uint256 newColl, uint256 newDebt) = _getNewTrenBoxAmounts(
             _coll, _debt, _collChange, _isCollIncrease, _debtChange, _isDebtIncrease
         );
 
@@ -738,7 +745,7 @@ contract BorrowerOperations is
 
     // Compute the new collateral ratio, considering the change in coll and debt. Assumes 0 pending
     // rewards.
-    function _getNewICRFromVesselChange(
+    function _getNewICRFromTrenBoxChange(
         uint256 _coll,
         uint256 _debt,
         uint256 _collChange,
@@ -751,7 +758,7 @@ contract BorrowerOperations is
         pure
         returns (uint256)
     {
-        (uint256 newColl, uint256 newDebt) = _getNewVesselAmounts(
+        (uint256 newColl, uint256 newDebt) = _getNewTrenBoxAmounts(
             _coll, _debt, _collChange, _isCollIncrease, _debtChange, _isDebtIncrease
         );
 
@@ -759,7 +766,7 @@ contract BorrowerOperations is
         return newICR;
     }
 
-    function _getNewVesselAmounts(
+    function _getNewTrenBoxAmounts(
         uint256 _coll,
         uint256 _debt,
         uint256 _collChange,
@@ -780,7 +787,7 @@ contract BorrowerOperations is
         return (newColl, newDebt);
     }
 
-    function _getNewTCRFromVesselChange(
+    function _getNewTCRFromTrenBoxChange(
         address _asset,
         uint256 _collChange,
         bool _isCollIncrease,

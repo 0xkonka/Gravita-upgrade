@@ -5,16 +5,16 @@ pragma solidity ^0.8.23;
 interface IBorrowerOperations {
     // --- Enums ---
     enum BorrowerOperation {
-        openVessel,
-        closeVessel,
-        adjustVessel
+        openTrenBox,
+        closeTrenBox,
+        adjustTrenBox
     }
 
     // --- Events ---
 
     event BorrowingFeePaid(address indexed _asset, address indexed _borrower, uint256 _feeAmount);
-    event VesselCreated(address indexed _asset, address indexed _borrower, uint256 arrayIndex);
-    event VesselUpdated(
+    event TrenBoxCreated(address indexed _asset, address indexed _borrower, uint256 arrayIndex);
+    event TrenBoxUpdated(
         address indexed _asset,
         address indexed _borrower,
         uint256 _debt,
@@ -25,7 +25,7 @@ interface IBorrowerOperations {
 
     // --- Functions ---
 
-    function openVessel(
+    function openTrenBox(
         address _asset,
         uint256 _assetAmount,
         uint256 _debtTokenAmount,
@@ -66,9 +66,9 @@ interface IBorrowerOperations {
     )
         external;
 
-    function closeVessel(address _asset) external;
+    function closeTrenBox(address _asset) external;
 
-    function adjustVessel(
+    function adjustTrenBox(
         address _asset,
         uint256 _assetSent,
         uint256 _collWithdrawal,

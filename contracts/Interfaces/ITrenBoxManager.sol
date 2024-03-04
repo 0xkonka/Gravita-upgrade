@@ -7,10 +7,10 @@ import { ICollSurplusPool } from "./ICollSurplusPool.sol";
 import { IDebtToken } from "./IDebtToken.sol";
 import { IDefaultPool } from "./IDefaultPool.sol";
 import { ITrenBase } from "./ITrenBase.sol";
-import { ISortedVessels } from "./ISortedVessels.sol";
+import { ISortedTrenBoxes } from "./ISortedTrenBoxes.sol";
 import { IStabilityPool } from "./IStabilityPool.sol";
 
-interface IVesselManager is ITrenBase {
+interface ITrenBoxManager is ITrenBase {
     // Enums
     // ------------------------------------------------------------------------------------------------------------
 
@@ -22,7 +22,7 @@ interface IVesselManager is ITrenBase {
         closedByRedemption
     }
 
-    enum VesselManagerOperation {
+    enum TrenBoxManagerOperation {
         applyPendingRewards,
         liquidateInNormalMode,
         liquidateInRecoveryMode,
@@ -39,32 +39,32 @@ interface IVesselManager is ITrenBase {
         address indexed _asset, uint256 _totalStakesSnapshot, uint256 _totalCollateralSnapshot
     );
     event LTermsUpdated(address indexed _asset, uint256 _L_Coll, uint256 _L_Debt);
-    event VesselSnapshotsUpdated(address indexed _asset, uint256 _L_Coll, uint256 _L_Debt);
-    event VesselIndexUpdated(address indexed _asset, address _borrower, uint256 _newIndex);
+    event TrenBoxSnapshotsUpdated(address indexed _asset, uint256 _L_Coll, uint256 _L_Debt);
+    event TrenBoxIndexUpdated(address indexed _asset, address _borrower, uint256 _newIndex);
 
-    event VesselUpdated(
+    event TrenBoxUpdated(
         address indexed _asset,
         address indexed _borrower,
         uint256 _debt,
         uint256 _coll,
         uint256 _stake,
-        VesselManagerOperation _operation
+        TrenBoxManagerOperation _operation
     );
 
     // Custom Errors
     // ----------------------------------------------------------------------------------------------------
 
-    error VesselManager__FeeBiggerThanAssetDraw();
-    error VesselManager__OnlyOneVessel();
+    error TrenBoxManager__FeeBiggerThanAssetDraw();
+    error TrenBoxManager__OnlyOneTrenBox();
 
-    error VesselManager__OnlyVesselManagerOperations();
-    error VesselManager__OnlyBorrowerOperations();
-    error VesselManager__OnlyVesselManagerOperationsOrBorrowerOperations();
+    error TrenBoxManager__OnlyTrenBoxManagerOperations();
+    error TrenBoxManager__OnlyBorrowerOperations();
+    error TrenBoxManager__OnlyTrenBoxManagerOperationsOrBorrowerOperations();
 
     // Structs
     // ----------------------------------------------------------------------------------------------------------
 
-    struct Vessel {
+    struct TrenBox {
         uint256 debt;
         uint256 coll;
         uint256 stake;
@@ -88,9 +88,9 @@ interface IVesselManager is ITrenBase {
     )
         external;
 
-    function getVesselOwnersCount(address _asset) external view returns (uint256);
+    function getTrenBoxOwnersCount(address _asset) external view returns (uint256);
 
-    function getVesselFromVesselOwnersArray(
+    function getTrenBoxFromTrenBoxOwnersArray(
         address _asset,
         uint256 _index
     )
@@ -116,9 +116,9 @@ interface IVesselManager is ITrenBase {
         external
         returns (uint256);
 
-    function updateVesselRewardSnapshots(address _asset, address _borrower) external;
+    function updateTrenBoxRewardSnapshots(address _asset, address _borrower) external;
 
-    function addVesselOwnerToArray(
+    function addTrenBoxOwnerToArray(
         address _asset,
         address _borrower
     )
@@ -158,9 +158,9 @@ interface IVesselManager is ITrenBase {
             uint256 pendingAssetReward
         );
 
-    function closeVessel(address _asset, address _borrower) external;
+    function closeTrenBox(address _asset, address _borrower) external;
 
-    function closeVesselLiquidation(address _asset, address _borrower) external;
+    function closeTrenBoxLiquidation(address _asset, address _borrower) external;
 
     function removeStake(address _asset, address _borrower) external;
 
@@ -186,17 +186,17 @@ interface IVesselManager is ITrenBase {
         view
         returns (uint256);
 
-    function getVesselStatus(address _asset, address _borrower) external view returns (uint256);
+    function getTrenBoxStatus(address _asset, address _borrower) external view returns (uint256);
 
-    function getVesselStake(address _asset, address _borrower) external view returns (uint256);
+    function getTrenBoxStake(address _asset, address _borrower) external view returns (uint256);
 
-    function getVesselDebt(address _asset, address _borrower) external view returns (uint256);
+    function getTrenBoxDebt(address _asset, address _borrower) external view returns (uint256);
 
-    function getVesselColl(address _asset, address _borrower) external view returns (uint256);
+    function getTrenBoxColl(address _asset, address _borrower) external view returns (uint256);
 
-    function setVesselStatus(address _asset, address _borrower, uint256 num) external;
+    function setTrenBoxStatus(address _asset, address _borrower, uint256 num) external;
 
-    function increaseVesselColl(
+    function increaseTrenBoxColl(
         address _asset,
         address _borrower,
         uint256 _collIncrease
@@ -204,7 +204,7 @@ interface IVesselManager is ITrenBase {
         external
         returns (uint256);
 
-    function decreaseVesselColl(
+    function decreaseTrenBoxColl(
         address _asset,
         address _borrower,
         uint256 _collDecrease
@@ -212,7 +212,7 @@ interface IVesselManager is ITrenBase {
         external
         returns (uint256);
 
-    function increaseVesselDebt(
+    function increaseTrenBoxDebt(
         address _asset,
         address _borrower,
         uint256 _debtIncrease
@@ -220,7 +220,7 @@ interface IVesselManager is ITrenBase {
         external
         returns (uint256);
 
-    function decreaseVesselDebt(
+    function decreaseTrenBoxDebt(
         address _asset,
         address _borrower,
         uint256 _collDecrease
@@ -275,14 +275,14 @@ interface IVesselManager is ITrenBase {
     )
         external;
 
-    function movePendingVesselRewardsToActivePool(
+    function movePendingTrenBoxRewardsToActivePool(
         address _asset,
         uint256 _debtTokenAmount,
         uint256 _assetAmount
     )
         external;
 
-    function isVesselActive(address _asset, address _borrower) external view returns (bool);
+    function isTrenBoxActive(address _asset, address _borrower) external view returns (bool);
 
     function sendGasCompensation(
         address _asset,

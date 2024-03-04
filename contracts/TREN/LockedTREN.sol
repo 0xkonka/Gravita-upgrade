@@ -9,7 +9,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 /*
 This contract is reserved for Linear Vesting to the Team members and the Advisors team.
 */
-contract LockedGRVT is Ownable, Initializable {
+contract LockedTREN is Ownable, Initializable {
     using SafeERC20 for IERC20;
 
     struct Rule {
@@ -20,12 +20,12 @@ contract LockedGRVT is Ownable, Initializable {
         uint256 claimed;
     }
 
-    string public constant NAME = "LockedGRVT";
+    string public constant NAME = "LockedTREN";
     uint256 public constant SIX_MONTHS = 26 weeks;
     uint256 public constant TWO_YEARS = 730 days;
 
-    IERC20 private grvtToken;
-    uint256 private assignedGRVTTokens;
+    IERC20 private trenToken;
+    uint256 private assignedTRENTokens;
 
     mapping(address => Rule) public entitiesVesting;
 
@@ -36,8 +36,8 @@ contract LockedGRVT is Ownable, Initializable {
 
     constructor(address initialOwner) Ownable(initialOwner) { }
 
-    function setAddresses(address _grvtAddress) public initializer onlyOwner {
-        grvtToken = IERC20(_grvtAddress);
+    function setAddresses(address _trenAddress) public initializer onlyOwner {
+        trenToken = IERC20(_trenAddress);
     }
 
     function addEntityVesting(address _entity, uint256 _totalSupply) public onlyOwner {
@@ -45,7 +45,7 @@ contract LockedGRVT is Ownable, Initializable {
 
         require(entitiesVesting[_entity].createdDate == 0, "Entity already has a Vesting Rule");
 
-        assignedGRVTTokens += _totalSupply;
+        assignedTRENTokens += _totalSupply;
 
         entitiesVesting[_entity] = Rule(
             block.timestamp,
@@ -55,7 +55,7 @@ contract LockedGRVT is Ownable, Initializable {
             0
         );
 
-        grvtToken.safeTransferFrom(msg.sender, address(this), _totalSupply);
+        trenToken.safeTransferFrom(msg.sender, address(this), _totalSupply);
     }
 
     function lowerEntityVesting(
@@ -66,7 +66,7 @@ contract LockedGRVT is Ownable, Initializable {
         onlyOwner
         entityRuleExists(_entity)
     {
-        sendGRVTTokenToEntity(_entity);
+        sendTRENTokenToEntity(_entity);
         Rule storage vestingRule = entitiesVesting[_entity];
 
         require(
@@ -78,38 +78,38 @@ contract LockedGRVT is Ownable, Initializable {
     }
 
     function removeEntityVesting(address _entity) public onlyOwner entityRuleExists(_entity) {
-        sendGRVTTokenToEntity(_entity);
+        sendTRENTokenToEntity(_entity);
         Rule memory vestingRule = entitiesVesting[_entity];
 
-        assignedGRVTTokens = assignedGRVTTokens - (vestingRule.totalSupply - vestingRule.claimed);
+        assignedTRENTokens = assignedTRENTokens - (vestingRule.totalSupply - vestingRule.claimed);
 
         delete entitiesVesting[_entity];
     }
 
-    function claimGRVTToken() public entityRuleExists(msg.sender) {
-        sendGRVTTokenToEntity(msg.sender);
+    function claimTRENToken() public entityRuleExists(msg.sender) {
+        sendTRENTokenToEntity(msg.sender);
     }
 
-    function sendGRVTTokenToEntity(address _entity) private {
-        uint256 unclaimedAmount = getClaimableGRVT(_entity);
+    function sendTRENTokenToEntity(address _entity) private {
+        uint256 unclaimedAmount = getClaimableTREN(_entity);
         if (unclaimedAmount == 0) return;
 
         Rule storage entityRule = entitiesVesting[_entity];
         entityRule.claimed += unclaimedAmount;
 
-        assignedGRVTTokens = assignedGRVTTokens - unclaimedAmount;
-        grvtToken.safeTransfer(_entity, unclaimedAmount);
+        assignedTRENTokens = assignedTRENTokens - unclaimedAmount;
+        trenToken.safeTransfer(_entity, unclaimedAmount);
     }
 
-    function transferUnassignedGRVT() external onlyOwner {
-        uint256 unassignedTokens = getUnassignGRVTTokensAmount();
+    function transferUnassignedTREN() external onlyOwner {
+        uint256 unassignedTokens = getUnassignTRENTokensAmount();
 
         if (unassignedTokens == 0) return;
 
-        grvtToken.safeTransfer(msg.sender, unassignedTokens);
+        trenToken.safeTransfer(msg.sender, unassignedTokens);
     }
 
-    function getClaimableGRVT(address _entity) public view returns (uint256 claimable) {
+    function getClaimableTREN(address _entity) public view returns (uint256 claimable) {
         Rule memory entityRule = entitiesVesting[_entity];
         claimable = 0;
 
@@ -126,8 +126,8 @@ contract LockedGRVT is Ownable, Initializable {
         return claimable;
     }
 
-    function getUnassignGRVTTokensAmount() public view returns (uint256) {
-        return grvtToken.balanceOf(address(this)) - assignedGRVTTokens;
+    function getUnassignTRENTokensAmount() public view returns (uint256) {
+        return trenToken.balanceOf(address(this)) - assignedTRENTokens;
     }
 
     function isEntityExits(address _entity) public view returns (bool) {

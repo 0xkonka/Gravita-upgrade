@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-interface ISortedVessels {
+interface ISortedTrenBoxes {
     // --- Events ---
 
     event NodeAdded(address indexed _asset, address _id, uint256 _NICR);

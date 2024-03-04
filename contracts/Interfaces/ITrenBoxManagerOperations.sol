@@ -3,9 +3,9 @@
 pragma solidity ^0.8.23;
 
 import { ITrenBase } from "./ITrenBase.sol";
-import { IVesselManager } from "./IVesselManager.sol";
+import { ITrenBoxManager } from "./ITrenBoxManager.sol";
 
-interface IVesselManagerOperations is ITrenBase {
+interface ITrenBoxManagerOperations is ITrenBase {
     // Events
     // -----------------------------------------------------------------------------------------------------------
 
@@ -25,12 +25,12 @@ interface IVesselManagerOperations is ITrenBase {
         uint256 _debtTokenGasCompensation
     );
 
-    event VesselLiquidated(
+    event TrenBoxLiquidated(
         address indexed _asset,
         address indexed _borrower,
         uint256 _debt,
         uint256 _coll,
-        IVesselManager.VesselManagerOperation _operation
+        ITrenBoxManager.TrenBoxManagerOperation _operation
     );
 
     event RedemptionSoftenParamChanged(uint256 _redemptionSofteningParam);
@@ -38,20 +38,20 @@ interface IVesselManagerOperations is ITrenBase {
     // Custom Errors
     // ----------------------------------------------------------------------------------------------------
 
-    error VesselManagerOperations__InvalidArraySize();
-    error VesselManagerOperations__EmptyAmount();
-    error VesselManagerOperations__FeePercentOutOfBounds(
+    error TrenBoxManagerOperations__InvalidArraySize();
+    error TrenBoxManagerOperations__EmptyAmount();
+    error TrenBoxManagerOperations__FeePercentOutOfBounds(
         uint256 lowerBoundary, uint256 upperBoundary
     );
-    error VesselManagerOperations__InsufficientDebtTokenBalance(uint256 availableBalance);
-    error VesselManagerOperations__NothingToLiquidate();
-    error VesselManagerOperations__OnlyVesselManager();
-    error VesselManagerOperations__RedemptionIsBlocked();
-    error VesselManagerOperations__TCRMustBeAboveMCR(uint256 tcr, uint256 mcr);
-    error VesselManagerOperations__UnableToRedeemAnyAmount();
-    error VesselManagerOperations__VesselNotActive();
-    error VesselManagerOperations__InvalidParam();
-    error VesselManagerOperations__NotTimelock();
+    error TrenBoxManagerOperations__InsufficientDebtTokenBalance(uint256 availableBalance);
+    error TrenBoxManagerOperations__NothingToLiquidate();
+    error TrenBoxManagerOperations__OnlyTrenBoxManager();
+    error TrenBoxManagerOperations__RedemptionIsBlocked();
+    error TrenBoxManagerOperations__TCRMustBeAboveMCR(uint256 tcr, uint256 mcr);
+    error TrenBoxManagerOperations__UnableToRedeemAnyAmount();
+    error TrenBoxManagerOperations__TrenBoxNotActive();
+    error TrenBoxManagerOperations__InvalidParam();
+    error TrenBoxManagerOperations__NotTimelock();
 
     // Structs
     // ----------------------------------------------------------------------------------------------------------
@@ -86,8 +86,8 @@ interface IVesselManagerOperations is ITrenBase {
     }
 
     struct LiquidationValues {
-        uint256 entireVesselDebt;
-        uint256 entireVesselColl;
+        uint256 entireTrenBoxDebt;
+        uint256 entireTrenBoxColl;
         uint256 collGasCompensation;
         uint256 debtTokenGasCompensation;
         uint256 debtToOffset;
@@ -125,9 +125,9 @@ interface IVesselManagerOperations is ITrenBase {
 
     function liquidate(address _asset, address _borrower) external;
 
-    function liquidateVessels(address _asset, uint256 _n) external;
+    function liquidateTrenBoxes(address _asset, uint256 _n) external;
 
-    function batchLiquidateVessels(address _asset, address[] memory _vesselArray) external;
+    function batchLiquidateTrenBoxes(address _asset, address[] memory _trenBoxArray) external;
 
     function redeemCollateral(
         address _asset,

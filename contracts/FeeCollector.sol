@@ -35,7 +35,7 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
     mapping(address => mapping(address => FeeRecord)) public feeRecords; // borrower -> asset ->
         // fees
 
-    bool public constant routeToGRVTStaking = false; // if true, collected fees go to stakers; if
+    bool public constant routeToTRENStaking = false; // if true, collected fees go to stakers; if
         // false, to the treasury
 
     // Initializer
@@ -52,7 +52,8 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
     // ------------------------------------------------------------------------------------------
 
     /**
-     * Triggered when a vessel is created and again whenever the borrower acquires additional loans.
+     * Triggered when a trenBox is created and again whenever the borrower acquires additional
+     * loans.
      * Collects the minimum fee to the platform, for which there is no refund; holds on to the
      * remaining fees until
      * debt is paid, liquidated, or expired.
@@ -76,7 +77,7 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
     }
 
     /**
-     * Triggered when a vessel is adjusted or closed (and the borrower has paid back/decreased his
+     * Triggered when a trenBox is adjusted or closed (and the borrower has paid back/decreased his
      * loan).
      */
     function decreaseDebt(
@@ -86,7 +87,7 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
     )
         external
         override
-        onlyBorrowerOperationsOrVesselManager
+        onlyBorrowerOperationsOrTrenBoxManager
     {
         _decreaseDebt(_borrower, _asset, _paybackFraction);
     }
@@ -100,13 +101,13 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
     )
         external
         override
-        onlyBorrowerOperationsOrVesselManager
+        onlyBorrowerOperationsOrTrenBoxManager
     {
         _decreaseDebt(_borrower, _asset, 1 ether);
     }
 
     /**
-     * Simulates the refund due -if- vessel would be closed at this moment (helper function used by
+     * Simulates the refund due -if- trenBox would be closed at this moment (helper function used by
      * the UI).
      */
     function simulateRefund(
@@ -136,11 +137,18 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
     }
 
     /**
-     * Triggered when a vessel is liquidated; in that case, all remaining fees are collected by the
+     * Triggered when a trenBox is liquidated; in that case, all remaining fees are collected by the
      * platform,
      * and no refunds are generated.
      */
-    function liquidateDebt(address _borrower, address _asset) external override onlyVesselManager {
+    function liquidateDebt(
+        address _borrower,
+        address _asset
+    )
+        external
+        override
+        onlyTrenBoxManager
+    {
         FeeRecord memory mRecord = feeRecords[_borrower][_asset];
         if (mRecord.amount != 0) {
             _closeExpiredOrLiquidatedFeeRecord(_borrower, _asset, mRecord.amount);
@@ -181,19 +189,19 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
     }
 
     /**
-     * Triggered by VesselManager.finalizeRedemption(); assumes _amount of _asset has been already
+     * Triggered by TrenBoxManager.finalizeRedemption(); assumes _amount of _asset has been already
      * transferred to
      * getProtocolRevenueDestination().
      */
-    function handleRedemptionFee(address _asset, uint256 _amount) external onlyVesselManager {
-        if (_routeToGRVTStaking()) {
-            ITRENStaking(grvtStaking).increaseFee_Asset(_asset, _amount);
+    function handleRedemptionFee(address _asset, uint256 _amount) external onlyTrenBoxManager {
+        if (_routeToTRENStaking()) {
+            ITRENStaking(trenStaking).increaseFee_Asset(_asset, _amount);
         }
         emit RedemptionFeeCollected(_asset, _amount);
     }
 
     function getProtocolRevenueDestination() public view override returns (address) {
-        return _routeToGRVTStaking() ? grvtStaking : treasuryAddress;
+        return _routeToTRENStaking() ? trenStaking : treasuryAddress;
     }
 
     // Helper & internal methods
@@ -348,15 +356,15 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
     }
 
     /**
-     * Transfers collected (debt token) fees to either the treasury or the GRVTStaking contract,
+     * Transfers collected (debt token) fees to either the treasury or the TRENStaking contract,
      * depending on a flag.
      */
     function _collectFee(address _borrower, address _asset, uint256 _feeAmount) internal {
         if (_feeAmount != 0) {
             address collector = getProtocolRevenueDestination();
             IERC20(debtToken).safeTransfer(collector, _feeAmount);
-            if (_routeToGRVTStaking()) {
-                ITRENStaking(grvtStaking).increaseFee_DebtToken(_feeAmount);
+            if (_routeToTRENStaking()) {
+                ITRENStaking(trenStaking).increaseFee_DebtToken(_feeAmount);
             }
             emit FeeCollected(_borrower, _asset, collector, _feeAmount);
         }
@@ -372,8 +380,8 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
     /**
      * Use a function for reading the constant, as it will be overwritten by the Tester contract.
      */
-    function _routeToGRVTStaking() internal view virtual returns (bool) {
-        return routeToGRVTStaking;
+    function _routeToTRENStaking() internal view virtual returns (bool) {
+        return routeToTRENStaking;
     }
 
     // Modifiers
@@ -386,17 +394,17 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
         _;
     }
 
-    modifier onlyVesselManager() {
-        if (msg.sender != vesselManager) {
-            revert FeeCollector__VesselManagerOnly(msg.sender, vesselManager);
+    modifier onlyTrenBoxManager() {
+        if (msg.sender != trenBoxManager) {
+            revert FeeCollector__TrenBoxManagerOnly(msg.sender, trenBoxManager);
         }
         _;
     }
 
-    modifier onlyBorrowerOperationsOrVesselManager() {
-        if (msg.sender != borrowerOperations && msg.sender != vesselManager) {
-            revert FeeCollector__BorrowerOperationsOrVesselManagerOnly(
-                msg.sender, borrowerOperations, vesselManager
+    modifier onlyBorrowerOperationsOrTrenBoxManager() {
+        if (msg.sender != borrowerOperations && msg.sender != trenBoxManager) {
+            revert FeeCollector__BorrowerOperationsOrTrenBoxManagerOnly(
+                msg.sender, borrowerOperations, trenBoxManager
             );
         }
         _;

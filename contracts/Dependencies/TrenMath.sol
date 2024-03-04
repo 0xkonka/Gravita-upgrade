@@ -48,7 +48,7 @@ library TrenMath {
      * Uses the efficient "exponentiation by squaring" algorithm. O(log(n)) complexity.
      *
      * Called by two functions that represent time in units of minutes:
-     * 1) VesselManager._calcDecayedBaseRate
+     * 1) TrenBoxManager._calcDecayedBaseRate
      * 2) CommunityIssuance._getCumulativeIssuanceFraction
      *
      * The exponent is capped to avoid reverting due to overflow. The cap 525600000 equals
@@ -99,7 +99,8 @@ library TrenMath {
         if (_debt != 0) {
             return (_coll * NICR_PRECISION) / _debt;
         }
-        // Return the maximal value for uint256 if the Vessel has a debt of 0. Represents "infinite"
+        // Return the maximal value for uint256 if the TrenBox has a debt of 0. Represents
+        // "infinite"
         // CR.
         else {
             // if (_debt == 0)
@@ -121,7 +122,8 @@ library TrenMath {
 
             return newCollRatio;
         }
-        // Return the maximal value for uint256 if the Vessel has a debt of 0. Represents "infinite"
+        // Return the maximal value for uint256 if the TrenBox has a debt of 0. Represents
+        // "infinite"
         // CR.
         else {
             // if (_debt == 0)

@@ -18,8 +18,8 @@ interface IAdminContract {
         uint256 ccr;
         uint256 mcr;
         uint256 debtTokenGasCompensation; // Amount of debtToken to be locked in gas pool on opening
-            // vessels
-        uint256 minNetDebt; // Minimum amount of net debtToken a vessel must have
+            // trenBoxes
+        uint256 minNetDebt; // Minimum amount of net debtToken a trenBox must have
         uint256 mintCap;
         uint256 percentDivisor;
         uint256 redemptionFeeFloor;

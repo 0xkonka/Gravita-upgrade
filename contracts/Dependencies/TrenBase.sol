@@ -17,14 +17,14 @@ import { IDefaultPool } from "../Interfaces/IDefaultPool.sol";
 import { Addresses } from "../Addresses.sol";
 
 /*
-* Base contract for VesselManager, BorrowerOperations and StabilityPool. Contains global system
+* Base contract for TrenBoxManager, BorrowerOperations and StabilityPool. Contains global system
 constants and
  * common functions.
  */
 abstract contract TrenBase is ITrenBase, BaseMath, OwnableUpgradeable, Addresses {
     // --- Gas compensation functions ---
 
-    // Returns the composite debt (drawn debt + gas compensation) of a vessel, for the purpose of
+    // Returns the composite debt (drawn debt + gas compensation) of a trenBox, for the purpose of
     // ICR calculation
     function _getCompositeDebt(address _asset, uint256 _debt) internal view returns (uint256) {
         return _debt + IAdminContract(adminContract).getDebtTokenGasCompensation(_asset);
@@ -34,7 +34,8 @@ abstract contract TrenBase is ITrenBase, BaseMath, OwnableUpgradeable, Addresses
         return _debt - IAdminContract(adminContract).getDebtTokenGasCompensation(_asset);
     }
 
-    // Return the amount of ETH to be drawn from a vessel's collateral and sent as gas compensation.
+    // Return the amount of ETH to be drawn from a trenBox's collateral and sent as gas
+    // compensation.
     function _getCollGasCompensation(
         address _asset,
         uint256 _entireColl

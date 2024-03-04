@@ -5,7 +5,7 @@ pragma solidity ^0.8.23;
 import { ERC20Permit, ERC20 } from "../Dependencies/ERC20Permit.sol";
 
 contract TRENToken is ERC20Permit {
-    string public constant NAME = "GRVTToken";
+    string public constant NAME = "TRENToken";
 
     uint256 internal _1_MILLION = 1e24; // 1e6 * 1e18 = 1e24
 

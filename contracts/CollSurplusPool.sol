@@ -20,7 +20,7 @@ contract CollSurplusPool is UUPSUpgradeable, OwnableUpgradeable, ICollSurplusPoo
 
     // deposited ether tracker
     mapping(address => uint256) internal balances;
-    // Collateral surplus claimable by vessel owners
+    // Collateral surplus claimable by trenBox owners
     mapping(address => mapping(address => uint256)) internal userBalances;
 
     // --- Initializer ---
@@ -53,7 +53,7 @@ contract CollSurplusPool is UUPSUpgradeable, OwnableUpgradeable, ICollSurplusPoo
     // --- Pool functionality ---
 
     function accountSurplus(address _asset, address _account, uint256 _amount) external override {
-        _requireCallerIsVesselManager();
+        _requireCallerIsTrenBoxManager();
 
         mapping(address => uint256) storage userBalance = userBalances[_account];
         uint256 newAmount = userBalance[_asset] + _amount;
@@ -96,10 +96,10 @@ contract CollSurplusPool is UUPSUpgradeable, OwnableUpgradeable, ICollSurplusPoo
         );
     }
 
-    function _requireCallerIsVesselManager() internal view {
+    function _requireCallerIsTrenBoxManager() internal view {
         require(
-            msg.sender == vesselManager || msg.sender == vesselManagerOperations,
-            "CollSurplusPool: Caller is not VesselManager"
+            msg.sender == trenBoxManager || msg.sender == trenBoxManagerOperations,
+            "CollSurplusPool: Caller is not TrenBoxManager"
         );
     }
 

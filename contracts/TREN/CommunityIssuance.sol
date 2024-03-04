@@ -20,12 +20,12 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable, BaseMath {
     uint256 public constant DISTRIBUTION_DURATION = 7 days / 60;
     uint256 public constant SECONDS_IN_ONE_MINUTE = 60;
 
-    uint256 public totalGRVTIssued;
+    uint256 public totalTRENIssued;
     uint256 public lastUpdateTime;
-    uint256 public GRVTSupplyCap;
-    uint256 public grvtDistribution;
+    uint256 public TRENSupplyCap;
+    uint256 public trenDistribution;
 
-    IERC20 public grvtToken;
+    IERC20 public trenToken;
     IStabilityPool public stabilityPool;
 
     address public adminContract;
@@ -55,7 +55,7 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable, BaseMath {
 
     // --- Functions ---
     function setAddresses(
-        address _grvtTokenAddress,
+        address _trenTokenAddress,
         address _stabilityPoolAddress,
         address _adminContract
     )
@@ -64,7 +64,7 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable, BaseMath {
     {
         require(!isSetupInitialized, "Setup is already initialized");
         adminContract = _adminContract;
-        grvtToken = IERC20(_grvtTokenAddress);
+        trenToken = IERC20(_trenTokenAddress);
         stabilityPool = IStabilityPool(_stabilityPoolAddress);
         isSetupInitialized = true;
     }
@@ -79,15 +79,15 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable, BaseMath {
     }
 
     function removeFundFromStabilityPool(uint256 _fundToRemove) external onlyOwner {
-        uint256 newCap = GRVTSupplyCap - _fundToRemove;
+        uint256 newCap = TRENSupplyCap - _fundToRemove;
         require(
-            totalGRVTIssued <= newCap,
+            totalTRENIssued <= newCap,
             "CommunityIssuance: Stability Pool doesn't have enough supply."
         );
 
-        GRVTSupplyCap -= _fundToRemove;
+        TRENSupplyCap -= _fundToRemove;
 
-        grvtToken.safeTransfer(msg.sender, _fundToRemove);
+        trenToken.safeTransfer(msg.sender, _fundToRemove);
     }
 
     function addFundToStabilityPoolFrom(
@@ -106,26 +106,26 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable, BaseMath {
             lastUpdateTime = block.timestamp;
         }
 
-        GRVTSupplyCap += _assignedSupply;
-        grvtToken.safeTransferFrom(_spender, address(this), _assignedSupply);
+        TRENSupplyCap += _assignedSupply;
+        trenToken.safeTransferFrom(_spender, address(this), _assignedSupply);
     }
 
-    function issueGRVT() public override onlyStabilityPool returns (uint256) {
-        uint256 maxPoolSupply = GRVTSupplyCap;
+    function issueTREN() public override onlyStabilityPool returns (uint256) {
+        uint256 maxPoolSupply = TRENSupplyCap;
 
-        if (totalGRVTIssued >= maxPoolSupply) return 0;
+        if (totalTRENIssued >= maxPoolSupply) return 0;
 
         uint256 issuance = _getLastUpdateTokenDistribution();
-        uint256 totalIssuance = issuance + totalGRVTIssued;
+        uint256 totalIssuance = issuance + totalTRENIssued;
 
         if (totalIssuance > maxPoolSupply) {
-            issuance = maxPoolSupply - totalGRVTIssued;
+            issuance = maxPoolSupply - totalTRENIssued;
             totalIssuance = maxPoolSupply;
         }
 
         lastUpdateTime = block.timestamp;
-        totalGRVTIssued = totalIssuance;
-        emit TotalGRVTIssuedUpdated(totalIssuance);
+        totalTRENIssued = totalIssuance;
+        emit TotalTRENIssuedUpdated(totalIssuance);
 
         return issuance;
     }
@@ -133,23 +133,23 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable, BaseMath {
     function _getLastUpdateTokenDistribution() internal view returns (uint256) {
         require(lastUpdateTime != 0, "Stability pool hasn't been assigned");
         uint256 timePassed = (block.timestamp - lastUpdateTime) / SECONDS_IN_ONE_MINUTE;
-        uint256 totalDistribuedSinceBeginning = grvtDistribution * timePassed;
+        uint256 totalDistribuedSinceBeginning = trenDistribution * timePassed;
 
         return totalDistribuedSinceBeginning;
     }
 
-    function sendGRVT(address _account, uint256 _GRVTamount) external override onlyStabilityPool {
-        uint256 balanceGRVT = grvtToken.balanceOf(address(this));
-        uint256 safeAmount = balanceGRVT >= _GRVTamount ? _GRVTamount : balanceGRVT;
+    function sendTREN(address _account, uint256 _TRENamount) external override onlyStabilityPool {
+        uint256 balanceTREN = trenToken.balanceOf(address(this));
+        uint256 safeAmount = balanceTREN >= _TRENamount ? _TRENamount : balanceTREN;
 
         if (safeAmount == 0) {
             return;
         }
 
-        IERC20(address(grvtToken)).safeTransfer(_account, safeAmount);
+        IERC20(address(trenToken)).safeTransfer(_account, safeAmount);
     }
 
-    function setWeeklyGrvtDistribution(uint256 _weeklyReward) external isController {
-        grvtDistribution = _weeklyReward / DISTRIBUTION_DURATION;
+    function setWeeklyTrenDistribution(uint256 _weeklyReward) external isController {
+        trenDistribution = _weeklyReward / DISTRIBUTION_DURATION;
     }
 }
