@@ -1,7 +1,5 @@
-# Foundry + Hardhat Template [![Open in Gitpod][gitpod-badge]][gitpod] [![Github Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry] [![Hardhat][hardhat-badge]][hardhat]
+# Tren Protocol Contracts [![Github Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry] [![Hardhat][hardhat-badge]][hardhat]
 
-[gitpod]: https://gitpod.io/#https://github.com/ahmedali8/foundry-hardhat-template
-[gitpod-badge]: https://img.shields.io/badge/Gitpod-Open%20in%20Gitpod-FFB45B?logo=gitpod
 [gha]: https://github.com/ahmedali8/foundry-hardhat-template/actions
 [gha-badge]:
   https://github.com/ahmedali8/foundry-hardhat-template/actions/workflows/ci.yml/badge.svg
@@ -10,31 +8,12 @@
 [foundry]: https://getfoundry.sh/
 [foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
 
-A Foundry + Hardhat based template for developing Solidity smart contracts, with sensible defaults.
-
-#### Inspiration - [Hardhat Template](https://github.com/paulrberg/hardhat-template) and [Foundry Template](https://github.com/paulrberg/foundry-template)
-
-- [Hardhat](https://github.com/nomiclabs/hardhat): compile, run and test smart contracts
-- [TypeChain](https://github.com/ethereum-ts/TypeChain): generate TypeScript bindings for smart
-  contracts
-- [Ethers](https://github.com/ethers-io/ethers.js/): renowned Ethereum library and wallet
-  implementation
-- [Solcover](https://github.com/sc-forks/solidity-coverage): code coverage
-- [Forge](https://github.com/foundry-rs/foundry/blob/master/forge): compile, test, fuzz, debug and
-  deploy smart contracts
-- [Forge Std](https://github.com/foundry-rs/forge-std): collection of helpful contracts and
-  cheatcodes for testing
-- [Solhint](https://github.com/protofire/solhint): linter for Solidity code
-
 ## Table of Contents
-
-- [Getting Started](#getting-started)
-- [Features](#features)
-  - [Sensible Defaults](#sensible-defaults)
-  - [GitHub Actions](#github-actions)
+- [Tren Protocol Contracts   ](#tren-protocol-contracts---)
+  - [Table of Contents](#table-of-contents)
 - [Usage](#usage)
-  - [Pre Requisites](#pre-requisites)
-  - [Lint Solidity](#lint-solidity)
+    - [Pre Requisites](#pre-requisites)
+    - [Lint Solidity](#lint-solidity)
   - [Foundry](#foundry)
     - [Build or Compile](#build-or-compile)
     - [Coverage](#coverage)
@@ -42,121 +21,22 @@ A Foundry + Hardhat based template for developing Solidity smart contracts, with
     - [Deploy](#deploy)
     - [Gas Usage](#gas-usage)
     - [Test](#test)
-    - [Notes](#notes)
+  - [Notes](#notes)
   - [Hardhat](#hardhat)
     - [Run a Hardhat chain](#run-a-hardhat-chain)
     - [Compile](#compile)
     - [TypeChain](#typechain)
     - [Test](#test-1)
     - [Lint TypeScript](#lint-typescript)
-    - [Forking Mainnet](#forking-mainnet)
+    - [Forking mainnet](#forking-mainnet)
     - [Coverage](#coverage-1)
     - [Clean](#clean-1)
     - [Deploy](#deploy-1)
-    - [Generate NATSPEC Doc](#generate-natspec-doc)
+    - [Generate Natspec Doc](#generate-natspec-doc)
     - [View Contracts Size](#view-contracts-size)
-    - [Verify Contract](#verify-contract)
-      - [Manual Verify](#manual-verify)
-      - [Verify Contract Programmatically](#verify-contract-programmatically)
-- [Syntax Highlighting](#syntax-highlighting)
-- [Using GitPod](#using-gitpod)
-- [Contributing](#contributing)
-- [Resources](#resources)
-
-## Getting Started
-
-Click the [`Use this template`](https://github.com/ahmedali8/foundry-hardhat-template/generate)
-button at the top of the page to create a new repository with this repo as the initial state.
-
-Or, if you prefer to install the template manually:
-
-```sh
-$ mkdir my-project
-$ cd my-project
-$ forge init --template ahmedali8/foundry-hardhat-template
-```
-
-Recommended node version is v20.x
-
-If you have [nvm](https://github.com/nvm-sh/nvm) then run:
-
-```sh
-$ nvm use
-```
-
-Then, install dependencies
-
-```sh
-$ make setup # install Forge and Node.js deps
-```
-
-or
-
-```sh
-$ yarn install
-$ forge install
-```
-
-If this is your first time with Foundry, check out the
-[installation](https://github.com/foundry-rs/foundry#installation) instructions.
-
-## Features
-
-This template builds upon the frameworks and libraries mentioned above, so for details about their
-specific features, please consult their respective documentations.
-
-For example, for Hardhat, you can refer to the [Hardhat Tutorial](https://hardhat.org/tutorial) and
-the [Hardhat Docs](https://hardhat.org/docs). You might be in particular interested in reading the
-[Testing Contracts](https://hardhat.org/tutorial/testing-contracts) section.
-
-For example, for Foundry, you can refer to the [Foundry Book](https://book.getfoundry.sh/). You
-might be in particular interested in reading the
-[Writing Tests](https://book.getfoundry.sh/forge/writing-tests.html) guide.
-
-### Sensible Defaults
-
-This template comes with sensible default configurations in the following files:
-
-```text
-├── .editorconfig
-├── .eslintignore
-├── .eslintrc.yml
-├── .gitignore
-├── .prettierignore
-├── .prettierrc.yml
-├── .solcover.js
-├── .solhintignore
-├── .solhint.json
-├── .yarnrc.yml
-├── foundry.toml
-├── hardhat.config.ts
-└── remappings.txt
-```
-
-### GitHub Actions
-
-This template comes with GitHub Actions pre-configured. Your contracts will be linted and tested on
-every push and pull request made to the `main` branch.
-
-Note though that by default it injects `.env.example` env variables into github action's
-`$GITHUB_ENV`.
-
-You can edit the CI script in [.github/workflows/ci.yml](./.github/workflows/ci.yml).
-
-## Installing Dependencies
-
-Foundry typically uses git submodules to manage dependencies, but this template uses Node.js
-packages because [submodules don't scale](https://twitter.com/PaulRBerg/status/1736695487057531328).
-
-This is how to install dependencies:
-
-1. Install the dependency using your preferred package manager, e.g.
-   `yarn add dependency-name:dependency-url`
-   - Use this syntax to install from GitHub: `yarn add repo-name@github:username/repo-name#tag-name`
-2. Add a remapping for the dependency in [remappings.txt](./remappings.txt), e.g.
-   `dependency-name=node_modules/dependency-name`
-
-Note that OpenZeppelin Contracts is pre-installed, so you can follow that as an example.
+  - [Verify Contract](#verify-contract)
+    - [Manual Verify](#manual-verify)
+    - [Verify Contract Programmatically](#verify-contract-programmatically)
 
 # Usage
 
@@ -420,26 +300,3 @@ insight.
 
 Example deploy script with `verifyContract` function is
 [00_deploy_lock_contract.ts](./deploy/00_deploy_lock_contract.ts)
-
-## Syntax Highlighting
-
-If you use VSCode, you can enjoy syntax highlighting for your Solidity code via the
-[vscode-solidity](https://github.com/juanfranblanco/vscode-solidity) extension.
-
-## Using GitPod
-
-[GitPod](https://www.gitpod.io/) is an open-source developer platform for remote development.
-
-To view the coverage report generated by `yarn coverage`, just click `Go Live` from the status bar
-to turn the server on/off.
-
-## Contributing
-
-Contributions are always welcome! Open a PR or an issue!
-
-## Thank You!
-
-## Resources
-
-- [Hardhat Documentation](https://hardhat.org/getting-started/)
-- [Foundry Book](https://book.getfoundry.sh/)
