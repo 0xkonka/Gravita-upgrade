@@ -5,23 +5,9 @@ __metadata:
   version: 8
   cacheKey: 10
 
-"@aashutoshrathi/word-wrap@npm:^1.2.3":
-  version: 1.2.6
-  resolution: "@aashutoshrathi/word-wrap@npm:1.2.6"
-  checksum: 10/6eebd12a5cd03cee38fcb915ef9f4ea557df6a06f642dfc7fe8eb4839eb5c9ca55a382f3604d52c14200b0c214c12af5e1f23d2a6d8e23ef2d016b105a9d6c0a
-  languageName: node
-  linkType: hard
-
-"@adraffy/ens-normalize@npm:1.10.1":
-  version: 1.10.1
-  resolution: "@adraffy/ens-normalize@npm:1.10.1"
-  checksum: 10/4cb938c4abb88a346d50cb0ea44243ab3574330c81d4f5aaaf9dfee584b96189d0faa404de0fcbef5a1b73909ea4ebc3e63d84bd23f9949e5c8d4085207a5091
-  languageName: node
-  linkType: hard
-
-"@ahmedali8/foundry-hardhat-template@workspace:.":
+"@Tren-Finance/Tren-Contracts@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@ahmedali8/foundry-hardhat-template@workspace:."
+  resolution: "@Tren-Finance/Tren-Contracts@workspace:."
   dependencies:
     "@ethersproject/bignumber": "npm:^5.7.0"
     "@nomicfoundation/hardhat-chai-matchers": "npm:^2.0.5"
@@ -31,6 +17,7 @@ __metadata:
     "@nomicfoundation/hardhat-toolbox": "npm:^4.0.0"
     "@nomicfoundation/hardhat-verify": "npm:^2.0.4"
     "@openzeppelin/contracts": "npm:^5.0.1"
+    "@openzeppelin/contracts-upgradeable": "npm:^5.0.2"
     "@primitivefi/hardhat-dodoc": "npm:^0.2.3"
     "@trivago/prettier-plugin-sort-imports": "npm:^4.3.0"
     "@typechain/ethers-v6": "npm:^0.5.1"
@@ -71,6 +58,20 @@ __metadata:
     typescript: "npm:^5.3.3"
   languageName: unknown
   linkType: soft
+
+"@aashutoshrathi/word-wrap@npm:^1.2.3":
+  version: 1.2.6
+  resolution: "@aashutoshrathi/word-wrap@npm:1.2.6"
+  checksum: 10/6eebd12a5cd03cee38fcb915ef9f4ea557df6a06f642dfc7fe8eb4839eb5c9ca55a382f3604d52c14200b0c214c12af5e1f23d2a6d8e23ef2d016b105a9d6c0a
+  languageName: node
+  linkType: hard
+
+"@adraffy/ens-normalize@npm:1.10.1":
+  version: 1.10.1
+  resolution: "@adraffy/ens-normalize@npm:1.10.1"
+  checksum: 10/4cb938c4abb88a346d50cb0ea44243ab3574330c81d4f5aaaf9dfee584b96189d0faa404de0fcbef5a1b73909ea4ebc3e63d84bd23f9949e5c8d4085207a5091
+  languageName: node
+  linkType: hard
 
 "@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.22.13, @babel/code-frame@npm:^7.23.5":
   version: 7.23.5
@@ -1493,6 +1494,15 @@ __metadata:
   dependencies:
     semver: "npm:^7.3.5"
   checksum: 10/f3a7ab3a31de65e42aeb6ed03ed035ef123d2de7af4deb9d4a003d27acc8618b57d9fb9d259fe6c28ca538032a028f37337264388ba27d26d37fff7dde22476e
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/contracts-upgradeable@npm:^5.0.2":
+  version: 5.0.2
+  resolution: "@openzeppelin/contracts-upgradeable@npm:5.0.2"
+  peerDependencies:
+    "@openzeppelin/contracts": 5.0.2
+  checksum: 10/71847c6bbd7a859a2f02f496215b9664e41375589010e66da32f080d9af9215accf558da63134926e0eb3eb87ee7ab952462bc877ec5c5e1ac077b44cac9c363
   languageName: node
   linkType: hard
 
