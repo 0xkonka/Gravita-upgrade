@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "./IDeposit.sol";
+import { IDeposit } from "./IDeposit.sol";
 
 interface IPool is IDeposit {
     // --- Events ---

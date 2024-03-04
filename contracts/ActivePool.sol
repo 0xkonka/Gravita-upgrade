@@ -13,9 +13,10 @@ import { UUPSUpgradeable } from
 import { ReentrancyGuardUpgradeable } from
     "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-import "./Dependencies/SafetyTransfer.sol";
-import "./Addresses.sol";
-import "./Interfaces/IActivePool.sol";
+import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
+import { Addresses } from "./Addresses.sol";
+import { IActivePool } from "./Interfaces/IActivePool.sol";
+import { IDeposit } from "./Interfaces/IDeposit.sol";
 
 /*
  * The Active Pool holds the collaterals and debt amounts for all active vessels.

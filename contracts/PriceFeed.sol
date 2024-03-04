@@ -2,12 +2,14 @@
 
 pragma solidity ^0.8.23;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { OwnableUpgradeable } from
+    "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { UUPSUpgradeable } from
+    "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import "./Addresses.sol";
-import "./Interfaces/IPriceFeed.sol";
-import "./Pricing/API3ProxyInterface.sol";
+import { Addresses } from "./Addresses.sol";
+import { IPriceFeed, ChainlinkAggregatorV3Interface } from "./Interfaces/IPriceFeed.sol";
+import { API3ProxyInterface } from "./Pricing/API3ProxyInterface.sol";
 
 /**
  * @title The PriceFeed contract contains a directory of oracles for fetching prices for assets

@@ -2,7 +2,8 @@
 
 pragma solidity ^0.8.23;
 
-import { PriceFeed, ChainlinkAggregatorV3Interface } from "../PriceFeed.sol";
+import { ChainlinkAggregatorV3Interface } from "../Interfaces/IPriceFeed.sol";
+import { PriceFeed } from "../PriceFeed.sol";
 
 contract PriceFeedL2 is PriceFeed {
     // Custom Errors
