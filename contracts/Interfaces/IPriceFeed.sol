@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.23;
 
 /*
- * @dev from https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol
+* @dev from
+https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol
  */
 interface ChainlinkAggregatorV3Interface {
     function decimals() external view returns (uint8);
@@ -11,18 +12,26 @@ interface ChainlinkAggregatorV3Interface {
     function latestRoundData()
         external
         view
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        );
 }
 
 interface IPriceFeed {
-    // Enums ----------------------------------------------------------------------------------------------------------
+    // Enums
+    // ----------------------------------------------------------------------------------------------------------
 
     enum ProviderType {
         Chainlink,
         API3
     }
 
-    // Structs --------------------------------------------------------------------------------------------------------
+    // Structs
+    // --------------------------------------------------------------------------------------------------------
 
     struct OracleRecordV2 {
         address oracleAddress;
@@ -56,7 +65,8 @@ interface IPriceFeed {
         uint8 decimals;
     }
 
-    // Custom Errors --------------------------------------------------------------------------------------------------
+    // Custom Errors
+    // --------------------------------------------------------------------------------------------------
 
     error PriceFeed__ExistingOracleRequired();
     error PriceFeed__InvalidDecimalsError();
@@ -64,11 +74,15 @@ interface IPriceFeed {
     error PriceFeed__TimelockOnlyError();
     error PriceFeed__UnknownAssetError();
 
-    // Events ---------------------------------------------------------------------------------------------------------
+    // Events
+    // ---------------------------------------------------------------------------------------------------------
 
-    event NewOracleRegistered(address token, address oracleAddress, bool isEthIndexed, bool isFallback);
+    event NewOracleRegistered(
+        address token, address oracleAddress, bool isEthIndexed, bool isFallback
+    );
 
-    // Functions ------------------------------------------------------------------------------------------------------
+    // Functions
+    // ------------------------------------------------------------------------------------------------------
 
     function fetchPrice(address _token) external view returns (uint256);
 
@@ -79,5 +93,6 @@ interface IPriceFeed {
         uint256 _timeoutSeconds,
         bool _isEthIndexed,
         bool _isFallback
-    ) external;
+    )
+        external;
 }
