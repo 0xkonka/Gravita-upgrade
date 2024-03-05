@@ -1557,8 +1557,201 @@
             }
           ]
         },
-        "Lock": {
+        "PriceFeedTestnet": {
           "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "abi": [
+            {
+              "inputs": [],
+              "name": "PriceFeed__ExistingOracleRequired",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "PriceFeed__InvalidDecimalsError",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                }
+              ],
+              "name": "PriceFeed__InvalidOracleResponseError",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "PriceFeed__TimelockOnlyError",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "PriceFeed__UnknownAssetError",
+              "type": "error"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "oracleAddress",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bool",
+                  "name": "isEthIndexed",
+                  "type": "bool"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bool",
+                  "name": "isFallback",
+                  "type": "bool"
+                }
+              ],
+              "name": "NewOracleRegistered",
+              "type": "event"
+            },
+            {
+              "inputs": [],
+              "name": "NAME",
+              "outputs": [
+                {
+                  "internalType": "string",
+                  "name": "",
+                  "type": "string"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_asset",
+                  "type": "address"
+                }
+              ],
+              "name": "fetchPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_asset",
+                  "type": "address"
+                }
+              ],
+              "name": "getPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "prices",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_oracle",
+                  "type": "address"
+                },
+                {
+                  "internalType": "enum IPriceFeed.ProviderType",
+                  "name": "_type",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_timeoutMinutes",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "_isEthIndexed",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "_isFallback",
+                  "type": "bool"
+                }
+              ],
+              "name": "setOracle",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_asset",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_price",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setPrice",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "Lock": {
+          "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
           "abi": [
             {
               "inputs": [
