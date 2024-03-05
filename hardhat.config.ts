@@ -142,15 +142,6 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  testSuiteGenerator: {
-    // What contracts to exclude from the test suite
-    // Defaults to []
-    excludeContracts: [],
-    // Out directory name for the test suite
-    // Must not contain "/"
-    // Defaults to "test"
-    outDirName: "test",
-  },
   typechain: {
     outDir: "types",
     target: "ethers-v6",

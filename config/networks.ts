@@ -55,6 +55,8 @@ export enum NetworkName {
 export interface Network {
   chainId: number;
   url: string;
+  isTestnet?: boolean;
+  isLayer2?: boolean;
 }
 
 export const NETWORKS: { readonly [key in NetworkName]: Network } = {
@@ -66,10 +68,12 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   [NetworkName.GOERLI]: {
     chainId: 5,
     url: infuraUrl("goerli"),
+    isTestnet: true,
   },
   [NetworkName.SEPOLIA]: {
     chainId: 11_155_111,
     url: infuraUrl("sepolia"),
+    isTestnet: true,
   },
 
   // BINANCE SMART CHAIN
@@ -80,6 +84,7 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   [NetworkName.BSC_TESTNET]: {
     chainId: 97,
     url: "https://data-seed-prebsc-2-s1.binance.org:8545/",
+    isTestnet: true,
   },
 
   // MATIC/POLYGON
@@ -90,26 +95,33 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   [NetworkName.POLYGON_MUMBAI]: {
     chainId: 80_001,
     url: infuraUrl("polygon-mumbai"),
+    isTestnet: true,
   },
 
   // OPTIMISM
   [NetworkName.OPTIMISM_MAINNET]: {
     chainId: 10,
     url: infuraUrl("optimism-mainnet"),
+    isLayer2: true,
   },
   [NetworkName.OPTIMISM_GOERLI]: {
     chainId: 420,
     url: infuraUrl("optimism-goerli"),
+    isTestnet: true,
+    isLayer2: true,
   },
 
   // ARBITRUM
   [NetworkName.ARBITRUM_MAINNET]: {
     chainId: 42_161,
     url: infuraUrl("arbitrum-mainnet"),
+    isLayer2: true,
   },
   [NetworkName.ARBITRUM_GOERLI]: {
     chainId: 421_611,
     url: infuraUrl("arbitrum-goerli"),
+    isTestnet: true,
+    isLayer2: true,
   },
 
   // AVALANCHE
@@ -120,6 +132,7 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   [NetworkName.FUJI_AVALANCHE]: {
     chainId: 43_113,
     url: `https://api.avax-test.network/ext/bc/C/rpc`,
+    isTestnet: true,
   },
 
   // FANTOM
@@ -130,6 +143,7 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   [NetworkName.FANTOM_TESTNET]: {
     chainId: 4_002,
     url: `https://rpc.testnet.fantom.network`,
+    isTestnet: true,
   },
 } as const;
 
