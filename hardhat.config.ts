@@ -5,7 +5,6 @@ import { config as dotenvConfig } from "dotenv";
 import "hardhat-contract-sizer";
 import "hardhat-deploy";
 import { removeConsoleLog } from "hardhat-preprocessor";
-import "hardhat-test-suite-generator";
 import type { HardhatUserConfig } from "hardhat/config";
 import type { HttpNetworkAccountsUserConfig, NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
