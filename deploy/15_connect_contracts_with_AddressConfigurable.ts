@@ -66,7 +66,10 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
   const sortedTrenBoxesDeployment = await deployments.get("SortedTrenBoxes");
   const stabilityPoolDeployment = await deployments.get("StabilityPool");
   const timelockAddress = await deployments.get("Timelock");
+
+  // TODO: Get from configuration
   const treasuryAddress = deployer;
+
   const trenBoxManagerDeployment = await deployments.get("TrenBoxManager");
   const trenBoxManagerOperationsDeployment = await deployments.get("TrenBoxManagerOperations");
 
