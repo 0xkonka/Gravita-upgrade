@@ -5,7 +5,6 @@ import { config as dotenvConfig } from "dotenv";
 import "hardhat-contract-sizer";
 import "hardhat-deploy";
 import { removeConsoleLog } from "hardhat-preprocessor";
-import "hardhat-test-suite-generator";
 import type { HardhatUserConfig } from "hardhat/config";
 import type { HttpNetworkAccountsUserConfig, NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
@@ -96,6 +95,14 @@ const config: HardhatUserConfig = {
     deployer: {
       default: 0, // here this will by default take the first account as deployer
     },
+    treasury: {
+      default: 0,
+      mainnet: 0,
+      goerli: 0,
+    },
+    upgradesAdmin: {
+      default: 0,
+    },
   },
   networks: {
     // Local network configs
@@ -142,15 +149,6 @@ const config: HardhatUserConfig = {
         },
       },
     ],
-  },
-  testSuiteGenerator: {
-    // What contracts to exclude from the test suite
-    // Defaults to []
-    excludeContracts: [],
-    // Out directory name for the test suite
-    // Must not contain "/"
-    // Defaults to "test"
-    outDirName: "test",
   },
   typechain: {
     outDir: "types",
