@@ -35,7 +35,7 @@ func.tags = ["ActivePool"];
 
 async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnvironment) {
   const { deployments, ethers, getChainId, getNamedAccounts } = hre;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, treasury } = await getNamedAccounts();
 
   const chainId = await getChainId();
 
@@ -67,8 +67,7 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
   const stabilityPoolDeployment = await deployments.get("StabilityPool");
   const timelockAddress = await deployments.get("Timelock");
 
-  // TODO: Get from configuration
-  const treasuryAddress = deployer;
+  const treasuryAddress = treasury;
 
   const trenBoxManagerDeployment = await deployments.get("TrenBoxManager");
   const trenBoxManagerOperationsDeployment = await deployments.get("TrenBoxManagerOperations");

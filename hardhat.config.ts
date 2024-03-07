@@ -95,6 +95,14 @@ const config: HardhatUserConfig = {
     deployer: {
       default: 0, // here this will by default take the first account as deployer
     },
+    treasury: {
+      default: 0,
+      mainnet: 0,
+      goerli: 0,
+    },
+    upgradesAdmin: {
+      default: 0,
+    },
   },
   networks: {
     // Local network configs
