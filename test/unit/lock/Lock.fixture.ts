@@ -2,8 +2,7 @@ import type { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
 
-import type { Lock } from "../../../types/Lock";
-import type { Lock__factory } from "../../../types/factories/Lock__factory";
+import type { Lock, Lock__factory } from "../../../types";
 
 export async function lockFixture(): Promise<{
   lock: Lock;

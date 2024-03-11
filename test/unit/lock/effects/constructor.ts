@@ -2,7 +2,7 @@ import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import type { Lock__factory } from "../../../../types/factories/Lock__factory";
+import type { Lock__factory } from "../../../../types";
 
 export default function shouldBehaveLikeConstructor(): void {
   context("when unlockTime is not in the future", function () {
