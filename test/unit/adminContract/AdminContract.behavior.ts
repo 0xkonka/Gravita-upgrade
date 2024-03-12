@@ -1,5 +1,7 @@
+import shouldBehaveLikeCanAddNewCollateral from "./effects/addNewCollateral";
 import shouldBehaveLikeCanSetBorrowingFee from "./effects/setBorrowingFee";
 import shouldBehaveLikeCanSetCriticalCollateralRatio from "./effects/setCriticalCollateralRatio";
+import shouldBehaveLikeCanSetIsActive from "./effects/setIsActive";
 import shouldBehaveLikeCanSetMinNetDebt from "./effects/setMinNetDebt";
 import shouldBehaveLikeCanSetMinimumCollateralRatio from "./effects/setMinimumCollateralRatio";
 import shouldBehaveLikeCanSetMintCap from "./effects/setMintCap";
@@ -127,8 +129,14 @@ export function shouldBehaveLikeAdminContractContract(): void {
 
     describe("#setRedemptionBlockTimestamp", function () {});
 
-    describe("#addNewCollateral", function () {});
+    describe("#addNewCollateral", function () {
+      shouldBehaveLikeCanAddNewCollateral();
+    });
+
     describe("#setCollateralParameters", function () {});
-    describe("#setIsActive", function () {});
+
+    describe("#setIsActive", function () {
+      shouldBehaveLikeCanSetIsActive();
+    });
   });
 }

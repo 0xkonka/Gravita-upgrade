@@ -10,7 +10,12 @@ export async function loadDeploymentFixture(): Promise<Contracts> {
     deploymentSummary.AdminContract.address
   );
 
+  const stabilityPool = await ethers.getContractAt(
+    "StabilityPool",
+    deploymentSummary.StabilityPool.address
+  );
+
   const lock = await ethers.getContractAt("Lock", deploymentSummary.Lock.address);
 
-  return { adminContract, lock } as Contracts;
+  return { adminContract, stabilityPool, lock } as Contracts;
 }

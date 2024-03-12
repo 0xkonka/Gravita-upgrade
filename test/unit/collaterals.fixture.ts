@@ -48,7 +48,7 @@ export async function loadCollateralsFixture(): Promise<Collaterals> {
     notAdded: {
       testCollateral: {
         ...LOCAL_NETWORK_COLLATERALS[0],
-        address: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+        address: "0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF",
       },
     },
   };
