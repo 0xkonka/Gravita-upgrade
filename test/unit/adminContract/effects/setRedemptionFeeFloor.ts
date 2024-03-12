@@ -7,7 +7,7 @@ const MAX_REDEMPTION_FEE_FLOOR = ethers.parseEther("0.1");
 export default function shouldBehaveLikeCanSetRedemptionFeeFloor(): void {
   context("when modifying redemption fee floor on active collateral", function () {
     it("set redemption fee floor should match value", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const redemptionFeeFloor = ethers.parseEther("0.005");
 
       await this.contracts.adminContract.setRedemptionFeeFloor(
@@ -21,7 +21,7 @@ export default function shouldBehaveLikeCanSetRedemptionFeeFloor(): void {
     });
 
     it("should emit RedemptionFeeFloorChanged event", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const oldRedemptionFeeFloor =
         await this.contracts.adminContract.getRedemptionFeeFloor(collateralAddress);
 
@@ -35,7 +35,7 @@ export default function shouldBehaveLikeCanSetRedemptionFeeFloor(): void {
     });
 
     it("setting redemption fee floor too high should revert", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const redemptionFeeFloor = MAX_REDEMPTION_FEE_FLOOR + 1n;
 
       await expect(
@@ -51,7 +51,7 @@ export default function shouldBehaveLikeCanSetRedemptionFeeFloor(): void {
     });
 
     it("setting redemption fee floor too low should revert", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const redemptionFeeFloor = MIN_REDEMPTION_FEE_FLOOR - 1n;
 
       await expect(
@@ -67,7 +67,7 @@ export default function shouldBehaveLikeCanSetRedemptionFeeFloor(): void {
     });
 
     it("only owner can set redemption fee floor", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const redemptionFeeFloor = ethers.parseEther("0.005");
 
       const anotherAccount = this.signers.accounts[0];

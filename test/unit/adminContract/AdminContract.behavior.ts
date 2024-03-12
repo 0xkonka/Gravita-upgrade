@@ -5,22 +5,94 @@ import shouldBehaveLikeCanSetMinimumCollateralRatio from "./effects/setMinimumCo
 import shouldBehaveLikeCanSetMintCap from "./effects/setMintCap";
 import shouldBehaveLikeCanSetPercentDivisor from "./effects/setPercentDivisor";
 import shouldBehaveLikeCanSetRedemptionFeeFloor from "./effects/setRedemptionFeeFloor";
-import shouldHaveDecimalPrecision from "./view/decimalPrecision";
-import shouldHaveHunderdPercent from "./view/oneHundredPercent";
+import shouldHavePublicConstant from "./view/constants";
+import shouldHaveGetBorrowingFee from "./view/getBorrowingFee";
+import shouldHaveGetCCR from "./view/getCriticalCollateralRate";
+import shouldHaveGetDebtTokenGasCompensation from "./view/getDebtTokenGasCompensation";
+import shouldHaveGetDecimals from "./view/getDecimals";
+import shouldHaveGetIndex from "./view/getIndex";
+import shouldHaveGetIndices from "./view/getIndices";
+import shouldHaveGetIsActive from "./view/getIsActive";
+import shouldHaveGetMinNetDebt from "./view/getMinNetDebt";
+import shouldHaveGetMCR from "./view/getMinimalCollateralRate";
+import shouldHaveGetMintCap from "./view/getMintCap";
+import shouldHaveGetPercentDivisor from "./view/getPercentDivisor";
+import shouldHaveGetRedemptionBlockTimestamp from "./view/getRedemptionBlockTimestamp";
+import shouldHaveGetRedemptionFeeFloor from "./view/getRedemptionFeeFloor";
+import shouldHaveGetTotalAssetDebt from "./view/getTotalAssetDebt";
+import shouldHaveValidCollateral from "./view/getValidCollateral";
+import shouldHaveIsSetupInitialized from "./view/isSetupInitialized";
 import shouldBehaveLikeOwner from "./view/owner";
 
 export function shouldBehaveLikeAdminContractContract(): void {
   describe("View Functions", function () {
+    shouldHavePublicConstant();
+
     describe("#owner", function () {
       shouldBehaveLikeOwner();
     });
 
-    describe("#DECIMAL_PRECISION", function () {
-      shouldHaveDecimalPrecision();
+    describe("#getValidCollateral", function () {
+      shouldHaveValidCollateral();
     });
 
-    describe("#_100pct", function () {
-      shouldHaveHunderdPercent();
+    describe("#isSetupInitialized", function () {
+      shouldHaveIsSetupInitialized();
+    });
+
+    describe("#getIsActive", function () {
+      shouldHaveGetIsActive();
+    });
+
+    describe("#getDecimals", function () {
+      shouldHaveGetDecimals();
+    });
+
+    describe("#getIndex", function () {
+      shouldHaveGetIndex();
+    });
+
+    describe("#getIndices", function () {
+      shouldHaveGetIndices();
+    });
+
+    describe("#getMcr", function () {
+      shouldHaveGetMCR();
+    });
+
+    describe("#getCcr", function () {
+      shouldHaveGetCCR();
+    });
+
+    describe("#getDebtTokenGasCompensation", function () {
+      shouldHaveGetDebtTokenGasCompensation();
+    });
+
+    describe("#getMinNetDebt", function () {
+      shouldHaveGetMinNetDebt();
+    });
+    describe("#getPercentDivisor", function () {
+      shouldHaveGetPercentDivisor();
+    });
+
+    describe("#getBorrowingFee", function () {
+      shouldHaveGetBorrowingFee();
+    });
+
+    describe("#getRedemptionFeeFloor", function () {
+      shouldHaveGetRedemptionFeeFloor();
+    });
+
+    describe("#getRedemptionBlockTimestamp", function () {
+      shouldHaveGetRedemptionBlockTimestamp();
+    });
+
+    describe("#getMintCap", function () {
+      shouldHaveGetMintCap();
+    });
+
+    describe("#getTotalAssetDebt", function () {
+      shouldHaveGetTotalAssetDebt();
     });
   });
 
@@ -52,5 +124,11 @@ export function shouldBehaveLikeAdminContractContract(): void {
     describe("#setRedemptionFeeFloor", function () {
       shouldBehaveLikeCanSetRedemptionFeeFloor();
     });
+
+    describe("#setRedemptionBlockTimestamp", function () {});
+
+    describe("#addNewCollateral", function () {});
+    describe("#setCollateralParameters", function () {});
+    describe("#setIsActive", function () {});
   });
 }

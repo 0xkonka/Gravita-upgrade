@@ -7,7 +7,7 @@ const MAX_CCR = ethers.parseEther("10");
 export default function shouldBehaveLikeCanSetCriticalCollateralRatio(): void {
   context("when modifying CCR on active collateral", function () {
     it("set CCR should match value", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const ccr = "1500000000000000000";
 
       await this.contracts.adminContract.setCCR(collateralAddress, ccr);
@@ -16,7 +16,7 @@ export default function shouldBehaveLikeCanSetCriticalCollateralRatio(): void {
     });
 
     it("should emit CCRChanged event", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const oldCCR = await this.contracts.adminContract.getCcr(collateralAddress);
 
       const newCCR = "1500000000000000000";
@@ -27,7 +27,7 @@ export default function shouldBehaveLikeCanSetCriticalCollateralRatio(): void {
     });
 
     it("setting CCR too high should revert", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const newCCR = ethers.parseEther("1001");
 
       await expect(this.contracts.adminContract.setCCR(collateralAddress, newCCR))
@@ -36,7 +36,7 @@ export default function shouldBehaveLikeCanSetCriticalCollateralRatio(): void {
     });
 
     it("setting CCR too low should revert", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const newCCR = ethers.parseEther("0.999");
 
       await expect(this.contracts.adminContract.setCCR(collateralAddress, newCCR))
@@ -45,7 +45,7 @@ export default function shouldBehaveLikeCanSetCriticalCollateralRatio(): void {
     });
 
     it("only owner can set CCR", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const newCCR = "1500000000000000000";
 
       const anotherAccount = this.signers.accounts[0];

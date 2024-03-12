@@ -22,14 +22,14 @@ describe("Unit tests", function () {
 
     this.loadFixture = loadFixture;
     this.contracts = await this.loadFixture(loadDeploymentFixture);
+    this.collaterals = await this.loadFixture(loadCollateralsFixture);
+
     this.initialSnapshotId = await network.provider.send("evm_snapshot", []);
     this.snapshotId = this.initialSnapshotId;
 
     this.revertToInitialSnapshot = async () => {
       await network.provider.send("evm_revert", [this.initialSnapshotId]);
     };
-
-    this.collaterals = loadCollateralsFixture();
   });
 
   beforeEach(async function () {

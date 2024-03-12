@@ -29,5 +29,13 @@ export interface Signers {
 }
 
 export interface Collaterals {
-  wETH: Collateral;
+  active: {
+    wETH: Collateral;
+  };
+  inactive: {
+    dai: Collateral;
+  };
+  notAdded: {
+    testCollateral: Collateral;
+  };
 }

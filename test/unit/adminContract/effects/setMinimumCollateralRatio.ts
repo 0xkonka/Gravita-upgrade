@@ -7,7 +7,7 @@ const MAX_MCR = ethers.parseEther("10");
 export default function shouldBehaveLikeCanSetMinimumCollateralRatio(): void {
   context("when modifying MCR on active collateral", function () {
     it("set MCR should match value", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const mcr = "1500000000000000000";
 
       await this.contracts.adminContract.setMCR(collateralAddress, mcr);
@@ -16,7 +16,7 @@ export default function shouldBehaveLikeCanSetMinimumCollateralRatio(): void {
     });
 
     it("should emit MCRChanged event", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const oldMCR = await this.contracts.adminContract.getMcr(collateralAddress);
 
       const newMCR = "1500000000000000000";
@@ -27,7 +27,7 @@ export default function shouldBehaveLikeCanSetMinimumCollateralRatio(): void {
     });
 
     it("setting MCR too high should revert", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const newMCR = MAX_MCR + 1n;
 
       await expect(this.contracts.adminContract.setMCR(collateralAddress, newMCR))
@@ -36,7 +36,7 @@ export default function shouldBehaveLikeCanSetMinimumCollateralRatio(): void {
     });
 
     it("setting MCR too low should revert", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const newMCR = MIN_MCR - 1n;
 
       await expect(this.contracts.adminContract.setMCR(collateralAddress, newMCR))
@@ -45,7 +45,7 @@ export default function shouldBehaveLikeCanSetMinimumCollateralRatio(): void {
     });
 
     it("only owner can set MCR", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const newMCR = "1500000000000000000";
 
       const anotherAccount = this.signers.accounts[0];

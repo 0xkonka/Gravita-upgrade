@@ -7,7 +7,7 @@ const MAX_PERCENT_DIVISOR = 200n;
 export default function shouldBehaveLikeCanSetPercentDivisor(): void {
   context("when modifying percent divisor on active collateral", function () {
     it("set percent divisor should match value", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const percentDivisor = 10n;
 
       await this.contracts.adminContract.setPercentDivisor(collateralAddress, percentDivisor);
@@ -18,7 +18,7 @@ export default function shouldBehaveLikeCanSetPercentDivisor(): void {
     });
 
     it("should emit PercentDivisorChanged event", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const oldPercentDivisor =
         await this.contracts.adminContract.getPercentDivisor(collateralAddress);
 
@@ -32,7 +32,7 @@ export default function shouldBehaveLikeCanSetPercentDivisor(): void {
     });
 
     it("setting percent divisor too high should revert", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const percentDivisor = MAX_PERCENT_DIVISOR + 1n;
 
       await expect(
@@ -43,7 +43,7 @@ export default function shouldBehaveLikeCanSetPercentDivisor(): void {
     });
 
     it("setting percent divisor too low should revert", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const percentDivisor = MIN_PERCENT_DIVISOR - 1n;
 
       await expect(
@@ -54,7 +54,7 @@ export default function shouldBehaveLikeCanSetPercentDivisor(): void {
     });
 
     it("only owner can set percent divisor", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const percentDivisor = 10n;
 
       const anotherAccount = this.signers.accounts[0];

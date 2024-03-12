@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 export default function shouldBehaveLikeCanSetMintCap(): void {
   context("when modifying mint cap on active collateral", function () {
     it("setting mint cap should match value", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const mintCap = ethers.parseEther("10000");
 
       await this.contracts.adminContract.setMintCap(collateralAddress, mintCap);
@@ -13,7 +13,7 @@ export default function shouldBehaveLikeCanSetMintCap(): void {
     });
 
     it("should emit MintCapChanged event", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const oldMintCap = await this.contracts.adminContract.getMintCap(collateralAddress);
 
       const mintCap = ethers.parseEther("10000");
@@ -24,7 +24,7 @@ export default function shouldBehaveLikeCanSetMintCap(): void {
     });
 
     it("only owner can set mint cap", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const mintCap = ethers.parseEther("10000");
 
       const anotherAccount = this.signers.accounts[0];

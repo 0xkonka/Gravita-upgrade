@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 export default function shouldBehaveLikeCanSetBorrowingFee(): void {
   context("when modifying borrowing fee on active collateral", function () {
     it("setting borrowing fee should match value", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const borrowingFee = (0.005e18).toString();
 
       await this.contracts.adminContract.setBorrowingFee(collateralAddress, borrowingFee);
@@ -15,7 +15,7 @@ export default function shouldBehaveLikeCanSetBorrowingFee(): void {
     });
 
     it("should emit BorrowingFeeChanged event", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const oldBorrowingFee = await this.contracts.adminContract.getBorrowingFee(collateralAddress);
 
       const borrowingFee = (0.005e18).toString();
@@ -26,7 +26,7 @@ export default function shouldBehaveLikeCanSetBorrowingFee(): void {
     });
 
     it("setting borrowing fee too high should revert", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const borrowingFee = (1e18).toString();
       const zeroPercent = 0n;
       const maxBorrowingFee = ethers.parseEther("0.1");
@@ -37,7 +37,7 @@ export default function shouldBehaveLikeCanSetBorrowingFee(): void {
     });
 
     it("only owner can set borrowing fee", async function () {
-      const collateralAddress = this.collaterals.wETH.address;
+      const collateralAddress = this.collaterals.active.wETH.address;
       const borrowingFee = (0.005e18).toString();
 
       const anotherAccount = this.signers.accounts[0];
