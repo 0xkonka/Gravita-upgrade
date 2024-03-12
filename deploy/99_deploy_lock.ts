@@ -14,11 +14,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const chainId = await getChainId();
 
   const ONE_YEAR_IN_SECS = time.duration.years(1);
-  const ONE_WEI = "1";
+  const ONE_GWEI = 1_000_000_000;
 
-  const currentTimestampInSeconds = await time.latest();
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
-  const lockedAmount = ONE_WEI;
+  const lockedAmount = ONE_GWEI;
+  const unlockTime = (await time.latest()) + ONE_YEAR_IN_SECS;
 
   type ConstructorParams = [BigNumberish];
   const args: ConstructorParams = [unlockTime];

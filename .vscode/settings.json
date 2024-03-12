@@ -16,5 +16,6 @@
   },
   "npm.exclude": "**/lib/**",
   "search.exclude": { "**/node_modules": true, "lib": true },
-  "solidity.formatter": "forge"
+  "solidity.formatter": "forge",
+  "solidity.compileUsingRemoteVersion": "v0.8.23+commit.f704f362"
 }
