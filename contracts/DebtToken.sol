@@ -10,21 +10,7 @@ import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 
 contract DebtToken is IDebtToken, ERC20Permit, Ownable {
     string public constant NAME = "TREN Debt Token";
-    string public constant SYMBOL = "TREN";
-
-    // MAINNET-ONLY SECTION START
-    // -------------------------------------------------------------------------------------
-
-    // address public constant borrowerOperationsAddress =
-    // 0x2bCA0300c2aa65de6F19c2d241B54a445C9990E2;
-    // address public constant stabilityPoolAddress = 0x4F39F12064D83F6Dd7A2BDb0D53aF8be560356A6;
-    // address public constant trenBoxManagerAddress = 0xdB5DAcB1DFbe16326C3656a88017f0cB4ece0977;
-
-    // MAINNET-ONLY SECTION END
-    // ---------------------------------------------------------------------------------------
-
-    // TESTNET-ONLY SECTION START
-    // -------------------------------------------------------------------------------------
+    string public constant SYMBOL = "trenUSD";
 
     address public borrowerOperationsAddress;
     address public stabilityPoolAddress;
@@ -49,9 +35,6 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         stabilityPoolAddress = _stabilityPoolAddress;
         trenBoxManagerAddress = _trenBoxManagerAddress;
     }
-
-    // TESTNET-ONLY SECTION END
-    // ---------------------------------------------------------------------------------------
 
     mapping(address => bool) public emergencyStopMintingCollateral;
 

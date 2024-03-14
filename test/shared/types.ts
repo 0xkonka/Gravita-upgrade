@@ -1,7 +1,14 @@
 import type { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 import { Collateral } from "../../config/collaterals";
-import type { AdminContract, Lock, StabilityPool } from "../../types";
+import type {
+  AdminContract,
+  BorrowerOperations,
+  DebtToken,
+  Lock,
+  StabilityPool,
+  TrenBoxManager,
+} from "../../types";
 
 type Fixture<T> = () => Promise<T>;
 
@@ -21,7 +28,10 @@ declare module "mocha" {
 export interface Contracts {
   lock: Lock;
   adminContract: AdminContract;
+  borrowerOperations: BorrowerOperations;
+  debtToken: DebtToken;
   stabilityPool: StabilityPool;
+  trenBoxManager: TrenBoxManager;
 }
 
 export interface Signers {
