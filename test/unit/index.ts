@@ -3,6 +3,7 @@ import { ethers, getNamedAccounts, getUnnamedAccounts, network } from "hardhat";
 
 import type { Contracts, Signers } from "../shared/types";
 import { testAdminContract } from "./adminContract/AdminContract";
+import { testBorrowerOperations } from "./borrowerOperations/BorrowerOperations";
 import { loadCollateralsFixture } from "./collaterals.fixture";
 import { testDebtToken } from "./debtToken/DebtToken";
 import { loadDeploymentFixture } from "./deployment.fixture";
@@ -46,6 +47,7 @@ describe("Unit tests", function () {
   });
 
   testAdminContract();
+  testBorrowerOperations();
   testDebtToken();
   testLock();
 });
