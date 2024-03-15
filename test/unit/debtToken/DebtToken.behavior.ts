@@ -1,9 +1,16 @@
 import shouldBehaveLikeCanAddWhitelist from "./effects/addWhitelist";
+import shouldBehaveLikeCanApprove from "./effects/approve";
 import shouldBehaveLikeCanBurn from "./effects/burn";
+import shouldBehaveLikeCanBurnFromWhitelistedContract from "./effects/burnFromWhitelistedContract";
+import shouldBehaveLikeHaveCanEmergencyStopMinting from "./effects/emergencyStopMinting";
 import shouldBehaveLikeCanMint from "./effects/mint";
+import shouldBehaveLikeCanMintFromWhitelistedContract from "./effects/mintFromWhitelistedContract";
 import shouldBehaveLikeCanRemoveWhitelist from "./effects/removeWhitelist";
+import shouldBehaveLikeCanReturnFromPool from "./effects/returnFromPool";
 import shouldBehaveLikeCanSendToPool from "./effects/sendToPool";
 import shouldBehaveLikeCanSetAddresses from "./effects/setAddresses";
+import shouldBehaveLikeCanTransfer from "./effects/transfer";
+import shouldBehaveLikeCanTransferFrom from "./effects/transferFrom";
 import shouldBehaveLikeHaveBorrowerOperationsAddress from "./view/borrowerOperationsAddress";
 import shouldBehaveLikeDecimals from "./view/constants/decimals";
 import shouldBehaveLikeNamed from "./view/constants/name";
@@ -73,20 +80,37 @@ export function shouldBehaveLikeDebtTokenContract(): void {
         shouldBehaveLikeCanRemoveWhitelist();
       });
 
-      describe("#mintFromWhitelistedContract", function () {});
-      describe("#burnFromWhitelistedContract", function () {});
+      describe("#mintFromWhitelistedContract", function () {
+        shouldBehaveLikeCanMintFromWhitelistedContract();
+      });
 
-      describe("#emergencyStopMinting", function () {});
+      describe("#burnFromWhitelistedContract", function () {
+        shouldBehaveLikeCanBurnFromWhitelistedContract();
+      });
+
+      describe("#emergencyStopMinting", function () {
+        shouldBehaveLikeHaveCanEmergencyStopMinting();
+      });
 
       describe("#sendToPool", function () {
         shouldBehaveLikeCanSendToPool();
       });
 
-      describe("#returnFromPool", function () {});
+      describe("#returnFromPool", function () {
+        shouldBehaveLikeCanReturnFromPool();
+      });
 
-      describe("#transfer", function () {});
-      describe("#transferFrom", function () {});
-      describe("#approve", function () {});
+      describe("#transfer", function () {
+        shouldBehaveLikeCanTransfer();
+      });
+
+      describe("#approve", function () {
+        shouldBehaveLikeCanApprove();
+      });
+
+      describe("#transferFrom", function () {
+        shouldBehaveLikeCanTransferFrom();
+      });
     });
   });
 }

@@ -34,33 +34,49 @@ export default function shouldBehaveLikeCanSendToPool(): void {
       this.poolAddress = this.signers.accounts[2].address;
     });
 
-    it("transfers tokens to specified pool address", async function () {
-      const amountToSend = 100n;
+    context("when sending to correct pool address", function () {
+      it("transfers tokens to specified pool address", async function () {
+        const amountToSend = 100n;
 
-      const initialPoolBalance = await this.contracts.debtToken.balanceOf(this.poolAddress);
-      const initialHolderBalance = await this.contracts.debtToken.balanceOf(this.tokenHolder);
+        const initialPoolBalance = await this.contracts.debtToken.balanceOf(this.poolAddress);
+        const initialHolderBalance = await this.contracts.debtToken.balanceOf(this.tokenHolder);
 
-      await this.contracts.debtToken
-        .connect(this.stabilityPool)
-        .sendToPool(this.tokenHolder, this.poolAddress, amountToSend);
+        await this.contracts.debtToken
+          .connect(this.stabilityPool)
+          .sendToPool(this.tokenHolder, this.poolAddress, amountToSend);
 
-      const poolBalance = await this.contracts.debtToken.balanceOf(this.poolAddress);
-      const holderBalance = await this.contracts.debtToken.balanceOf(this.tokenHolder);
+        const poolBalance = await this.contracts.debtToken.balanceOf(this.poolAddress);
+        const holderBalance = await this.contracts.debtToken.balanceOf(this.tokenHolder);
 
-      expect(poolBalance).to.be.equal(initialPoolBalance + amountToSend);
-      expect(holderBalance).to.be.equal(initialHolderBalance - amountToSend);
+        expect(poolBalance).to.be.equal(initialPoolBalance + amountToSend);
+        expect(holderBalance).to.be.equal(initialHolderBalance - amountToSend);
+      });
+
+      it("emits a Transfer event", async function () {
+        const amountToSend = 100n;
+
+        await expect(
+          this.contracts.debtToken
+            .connect(this.stabilityPool)
+            .sendToPool(this.tokenHolder, this.poolAddress, amountToSend)
+        )
+          .to.emit(this.contracts.debtToken, "Transfer")
+          .withArgs(this.tokenHolder, this.poolAddress, amountToSend);
+      });
     });
 
-    it("emits a Transfer event", async function () {
-      const amountToSend = 100n;
+    context("when sending to incorrect pool address", function () {
+      context("when pool address is zero", function () {
+        it.skip("reverts", async function () {
+          const amountToSend = 100n;
 
-      await expect(
-        this.contracts.debtToken
-          .connect(this.stabilityPool)
-          .sendToPool(this.tokenHolder, this.poolAddress, amountToSend)
-      )
-        .to.emit(this.contracts.debtToken, "Transfer")
-        .withArgs(this.tokenHolder, this.poolAddress, amountToSend);
+          await expect(
+            this.contracts.debtToken
+              .connect(this.stabilityPool)
+              .sendToPool(this.tokenHolder, this.signers.accounts[0].address, amountToSend)
+          ).to.be.reverted;
+        });
+      });
     });
   });
 
