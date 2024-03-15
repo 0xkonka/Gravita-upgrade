@@ -10,12 +10,31 @@ export async function loadDeploymentFixture(): Promise<Contracts> {
     deploymentSummary.AdminContract.address
   );
 
+  const borrowerOperations = await ethers.getContractAt(
+    "BorrowerOperations",
+    deploymentSummary.BorrowerOperations.address
+  );
+
   const stabilityPool = await ethers.getContractAt(
     "StabilityPool",
     deploymentSummary.StabilityPool.address
   );
 
+  const debtToken = await ethers.getContractAt("DebtToken", deploymentSummary.DebtToken.address);
+
+  const trenBoxManager = await ethers.getContractAt(
+    "TrenBoxManager",
+    deploymentSummary.TrenBoxManager.address
+  );
+
   const lock = await ethers.getContractAt("Lock", deploymentSummary.Lock.address);
 
-  return { adminContract, stabilityPool, lock } as Contracts;
+  return {
+    adminContract,
+    borrowerOperations,
+    debtToken,
+    stabilityPool,
+    trenBoxManager,
+    lock,
+  } as Contracts;
 }

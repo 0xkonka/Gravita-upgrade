@@ -11,7 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const borrowerOperationsDeployment = await deployments.get("BorrowerOperations");
   const stabilityPoolDeployment = await deployments.get("StabilityPool");
-  const trenBoxManagerDeployment = await deployments.get("TrenBoxManagerOperations");
+  const trenBoxManagerDeployment = await deployments.get("TrenBoxManager");
 
   const setAddressesTx = await debtToken.setAddresses(
     borrowerOperationsDeployment.address,
