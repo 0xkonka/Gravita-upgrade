@@ -2,6 +2,7 @@ import type { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 
 import { Collateral } from "../../config/collaterals";
 import type {
+  ActivePool,
   AdminContract,
   BorrowerOperations,
   DebtToken,
@@ -20,13 +21,13 @@ declare module "mocha" {
     revertToInitialSnapshot: () => Promise<void>;
     initialSnapshotId: string;
     snapshotId: string;
-
     collaterals: Collaterals;
   }
 }
 
 export interface Contracts {
   lock: Lock;
+  activePool: ActivePool;
   adminContract: AdminContract;
   borrowerOperations: BorrowerOperations;
   debtToken: DebtToken;

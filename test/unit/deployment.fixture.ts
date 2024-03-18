@@ -5,6 +5,11 @@ import { Contracts } from "../shared/types";
 export async function loadDeploymentFixture(): Promise<Contracts> {
   const deploymentSummary = await deployments.fixture();
 
+  const activePool = await ethers.getContractAt(
+    "ActivePool",
+    deploymentSummary.ActivePool.address
+  );
+
   const adminContract = await ethers.getContractAt(
     "AdminContract",
     deploymentSummary.AdminContract.address
@@ -30,6 +35,7 @@ export async function loadDeploymentFixture(): Promise<Contracts> {
   const lock = await ethers.getContractAt("Lock", deploymentSummary.Lock.address);
 
   return {
+    activePool,
     adminContract,
     borrowerOperations,
     debtToken,

@@ -8,6 +8,7 @@ import { loadCollateralsFixture } from "./collaterals.fixture";
 import { testDebtToken } from "./debtToken/DebtToken";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testLock } from "./lock/Lock";
+import { testActivePool } from "./activePool/ActivePool";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -46,6 +47,7 @@ describe("Unit tests", function () {
     await this.revertToInitialSnapshot();
   });
 
+  testActivePool();
   testAdminContract();
   testBorrowerOperations();
   testDebtToken();
