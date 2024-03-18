@@ -1,5 +1,5 @@
-import shouldHaveGetAssetBalance from "./view/getAssetBalance";
-import shouldHaveGetDebtTokenBalance from "./view/getDebtTokenBalance";
+import shouldBehaveLikeGetAssetBalance from "./view/getAssetBalance";
+import shouldBehaveLikeGetDebtTokenBalance from "./view/getDebtTokenBalance";
 import shouldBehaveLikeCanSendAsset from "./effects/sendAsset";
 import shouldBehaveLikeCanIncreaseDebt from "./effects/increaseDebt";
 import shouldBehaveLikeCanDecreaseDebt from "./effects/decreaseDebt";
@@ -9,11 +9,11 @@ import shouldBehaveLikeCanAuthorizeUpgrade from "./effects/authorizeUpgrade";
 export function shouldBehaveLikeActivePoolContract(): void {
   describe("View Functions", function () {
     describe("#getAssetBalance", function () {
-      shouldHaveGetAssetBalance();
+      shouldBehaveLikeGetAssetBalance();
     });
 
     describe("#getDebtTokenBalance", function () {
-      shouldHaveGetDebtTokenBalance();
+      shouldBehaveLikeGetDebtTokenBalance();
     });
   });
 

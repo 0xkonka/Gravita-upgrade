@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "ethers";
 
-export default function shouldHaveGetAssetBalance(): void {
+export default function shouldBehaveLikeGetAssetBalance(): void {
   context("for active collateral", function () {
     it("should return correct borrowing fee", async function () {
       const { wETH } = this.collaterals.active;
