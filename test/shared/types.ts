@@ -22,6 +22,7 @@ import type {
   TrenBoxManager,
   TrenBoxManagerOperations,
 } from "../../types";
+import { ERC20Test } from "../../types/contracts/TestContracts/TestErc20.sol";
 
 type Fixture<T> = () => Promise<T>;
 
@@ -33,9 +34,9 @@ declare module "mocha" {
     initialSnapshotId: string;
     snapshotId: string;
     collaterals: Collaterals;
-
     utils: TestUtils;
     redeployedContracts: Contracts;
+    testContracts: TestContracts;
   }
 }
 
@@ -86,4 +87,8 @@ export interface TestUtils {
   getAddressesForSetAddresses: (
     overrides?: GetAddressesForSetAddressesOverrides
   ) => Promise<GetAddressesForSetAddressesResult>;
+}
+
+export interface TestContracts {
+  erc20: ERC20Test;
 }

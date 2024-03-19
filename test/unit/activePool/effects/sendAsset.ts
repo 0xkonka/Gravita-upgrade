@@ -1,10 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { TRENToken, TRENToken__factory } from ".../../../types";
-
-let erc20token: TRENToken;
-
 export default function shouldBehaveLikeCanSendAsset(): void {
   beforeEach(async function () {
     const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
@@ -16,12 +12,10 @@ export default function shouldBehaveLikeCanSendAsset(): void {
 
     this.impostor = this.signers.accounts[1];
 
-    const ERC20Token: TRENToken__factory = await ethers.getContractFactory("TRENToken");
-    erc20token = await ERC20Token.connect(this.signers.deployer).deploy(this.signers.deployer);
-    await erc20token.waitForDeployment();
-
-    await erc20token.transfer(redeployedActivePool, 5n);
-    await erc20token.approve(this.impostor, 2n);
+    const { erc20 } = this.testContracts;
+    await erc20.mint(this.signers.deployer, 1000n);
+    await erc20.transfer(redeployedActivePool, 5n);
+    await erc20.approve(this.impostor, 2n);
   });
 
   context("when caller is borrower operations", function () {
@@ -96,17 +90,18 @@ export default function shouldBehaveLikeCanSendAsset(): void {
 function shouldBehaveLikeCanSendAssetCorrectly() {
   it("sends asset amount", async function () {
     const { activePool } = this.redeployedContracts;
+    const { erc20 } = this.testContracts;
 
-    await activePool.connect(this.impostor).receivedERC20(erc20token, 5n);
+    await activePool.connect(this.impostor).receivedERC20(erc20, 5n);
 
     const assetAmount = 2n;
     const recipient = this.signers.accounts[2];
-    const balanceBefore = await erc20token.balanceOf(recipient.address);
-    const activePoolBalanceBefore = await erc20token.balanceOf(activePool);
+    const balanceBefore = await erc20.balanceOf(recipient.address);
+    const activePoolBalanceBefore = await erc20.balanceOf(activePool);
 
-    await activePool.connect(this.impostor).sendAsset(erc20token, recipient, assetAmount);
-    const balanceAfter = await erc20token.balanceOf(recipient.address);
-    const activePoolBalanceAfter = await erc20token.balanceOf(activePool);
+    await activePool.connect(this.impostor).sendAsset(erc20, recipient, assetAmount);
+    const balanceAfter = await erc20.balanceOf(recipient.address);
+    const activePoolBalanceAfter = await erc20.balanceOf(activePool);
 
     expect(balanceAfter).to.be.equal(balanceBefore + assetAmount);
     expect(activePoolBalanceAfter).to.be.equal(activePoolBalanceBefore - assetAmount);
@@ -114,32 +109,34 @@ function shouldBehaveLikeCanSendAssetCorrectly() {
 
   it("should emit ActivePoolAssetBalanceUpdated", async function () {
     const { activePool } = this.redeployedContracts;
+    const { erc20 } = this.testContracts;
 
-    await activePool.connect(this.impostor).receivedERC20(erc20token, 5n);
+    await activePool.connect(this.impostor).receivedERC20(erc20, 5n);
 
     const assetAmount = 2n;
     const recipient = this.signers.accounts[2];
 
     const sendAssetTx = await activePool
       .connect(this.impostor)
-      .sendAsset(erc20token, recipient, assetAmount);
+      .sendAsset(erc20, recipient, assetAmount);
     await expect(sendAssetTx)
       .to.emit(activePool, "ActivePoolAssetBalanceUpdated")
-      .withArgs(erc20token, 3n);
+      .withArgs(erc20, 3n);
   });
 
   it("should emit AssetSent", async function () {
     const { activePool } = this.redeployedContracts;
-    await activePool.connect(this.impostor).receivedERC20(erc20token, 5n);
+    const { erc20 } = this.testContracts;
+    await activePool.connect(this.impostor).receivedERC20(erc20, 5n);
 
     const assetAmount = 2n;
     const recipient = this.signers.accounts[2];
 
     const sendAssetTx = await activePool
       .connect(this.impostor)
-      .sendAsset(erc20token, recipient, assetAmount);
+      .sendAsset(erc20, recipient, assetAmount);
     await expect(sendAssetTx)
       .to.emit(activePool, "AssetSent")
-      .withArgs(recipient, erc20token, assetAmount);
+      .withArgs(recipient, erc20, assetAmount);
   });
 }
