@@ -1,4 +1,3 @@
-import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
@@ -39,6 +38,7 @@ export default function shouldBehaveLikeCanReturnFromPool(): void {
 
     shouldBeAbleToReturnFromPool();
   });
+
   context("when caller is stabilityPool", function () {
     beforeEach(async function () {
       this.caller = this.signers.accounts[2];

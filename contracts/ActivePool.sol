@@ -46,7 +46,7 @@ contract ActivePool is
     modifier callerIsBorrowerOpsOrDefaultPool() {
         require(
             msg.sender == borrowerOperations || msg.sender == defaultPool,
-            "ActivePool: Caller is not an authorized Gravita contract"
+            "ActivePool: Caller is not an authorized Tren contract"
         );
         _;
     }
@@ -54,7 +54,7 @@ contract ActivePool is
     modifier callerIsBorrowerOpsOrTrenBoxMgr() {
         require(
             msg.sender == borrowerOperations || msg.sender == trenBoxManager,
-            "ActivePool: Caller is not an authorized Gravita contract"
+            "ActivePool: Caller is not an authorized Tren contract"
         );
         _;
     }
@@ -63,7 +63,7 @@ contract ActivePool is
         require(
             msg.sender == borrowerOperations || msg.sender == stabilityPool
                 || msg.sender == trenBoxManager,
-            "ActivePool: Caller is not an authorized Gravita contract"
+            "ActivePool: Caller is not an authorized Tren contract"
         );
         _;
     }
@@ -72,7 +72,7 @@ contract ActivePool is
         require(
             msg.sender == borrowerOperations || msg.sender == stabilityPool
                 || msg.sender == trenBoxManager || msg.sender == trenBoxManagerOperations,
-            "ActivePool: Caller is not an authorized Gravita contract"
+            "ActivePool: Caller is not an authorized Tren contract"
         );
         _;
     }
