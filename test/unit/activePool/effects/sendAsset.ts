@@ -1,37 +1,18 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { ActivePool, ActivePool__factory, TRENToken, TRENToken__factory } from ".../../../types";
-import { impostorContractInArray } from "../../../shared/utils";
 
-let activePool: ActivePool;
+import { TRENToken, TRENToken__factory } from ".../../../types";
+
 let erc20token: TRENToken;
-let contracts: any[];
 
 export default function shouldBehaveLikeCanSendAsset(): void {
   beforeEach(async function () {
-    contracts = [
-      this.contracts.activePool,
-      this.contracts.adminContract,
-      this.contracts.borrowerOperations,
-      this.contracts.adminContract, // collSurplusPool
-      this.contracts.debtToken,
-      this.contracts.debtToken, // defaultPool
-      this.contracts.debtToken, // feeCollector
-      this.contracts.debtToken, // gasPool
-      this.contracts.debtToken, // priceFeed
-      this.contracts.debtToken, // sortedVessels
-      this.contracts.debtToken, // stabilityPool
-      this.contracts.lock,
-      this.signers.deployer,
-      this.contracts.trenBoxManager,
-      this.contracts.debtToken, // trenBoxManagerOperations
-    ];
+    const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
+    const redeployedActivePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
+    await redeployedActivePool.waitForDeployment();
+    await redeployedActivePool.initialize();
 
-    const ActivePoolFactory: ActivePool__factory = await ethers.getContractFactory("ActivePool");
-    activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
-    await activePool.waitForDeployment();
-
-    await activePool.initialize();
+    this.redeployedContracts.activePool = redeployedActivePool;
 
     this.impostor = this.signers.accounts[1];
 
@@ -39,15 +20,17 @@ export default function shouldBehaveLikeCanSendAsset(): void {
     erc20token = await ERC20Token.connect(this.signers.deployer).deploy(this.signers.deployer);
     await erc20token.waitForDeployment();
 
-    await erc20token.transfer(activePool, 5n);
+    await erc20token.transfer(redeployedActivePool, 5n);
     await erc20token.approve(this.impostor, 2n);
   });
 
   context("when caller is borrower operations", function () {
     beforeEach(async function () {
-      contracts = impostorContractInArray(contracts, this.impostor, 2);
+      const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
+        borrowerOperations: this.impostor,
+      });
 
-      await activePool.setAddresses(contracts);
+      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses);
     });
 
     shouldBehaveLikeCanSendAssetCorrectly();
@@ -55,9 +38,12 @@ export default function shouldBehaveLikeCanSendAsset(): void {
 
   context("when caller is tren box manager", function () {
     beforeEach(async function () {
-      contracts = impostorContractInArray(contracts, this.impostor, 2, 13);
+      const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
+        borrowerOperations: this.impostor,
+        trenBoxManager: this.impostor,
+      });
 
-      await activePool.setAddresses(contracts);
+      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses);
     });
 
     shouldBehaveLikeCanSendAssetCorrectly();
@@ -65,9 +51,12 @@ export default function shouldBehaveLikeCanSendAsset(): void {
 
   context("when caller is tren box manager operations", function () {
     beforeEach(async function () {
-      contracts = impostorContractInArray(contracts, this.impostor, 2, 14);
+      const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
+        borrowerOperations: this.impostor,
+        trenBoxManagerOperations: this.impostor,
+      });
 
-      await activePool.setAddresses(contracts);
+      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses);
     });
 
     shouldBehaveLikeCanSendAssetCorrectly();
@@ -75,9 +64,12 @@ export default function shouldBehaveLikeCanSendAsset(): void {
 
   context("when caller is stability pool", function () {
     beforeEach(async function () {
-      contracts = impostorContractInArray(contracts, this.impostor, 2, 10);
+      const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
+        borrowerOperations: this.impostor,
+        stabilityPool: this.impostor,
+      });
 
-      await activePool.setAddresses(contracts);
+      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses);
     });
 
     shouldBehaveLikeCanSendAssetCorrectly();
@@ -89,15 +81,13 @@ export default function shouldBehaveLikeCanSendAsset(): void {
       it("reverts", async function () {
         const { wETH } = this.collaterals.active;
         const assetAmount = 2n;
-        const recepient = this.signers.accounts[2];
+        const recipient = this.signers.accounts[2];
 
         await expect(
           this.contracts.activePool
-          .connect(this.impostor)
-          .sendAsset(wETH.address, recepient, assetAmount)
-        ).to.be.revertedWith(
-          "ActivePool: Caller is not an authorized Tren contract"
-        );
+            .connect(this.impostor)
+            .sendAsset(wETH.address, recipient, assetAmount)
+        ).to.be.revertedWith("ActivePool: Caller is not an authorized Tren contract");
       });
     }
   );
@@ -105,15 +95,17 @@ export default function shouldBehaveLikeCanSendAsset(): void {
 
 function shouldBehaveLikeCanSendAssetCorrectly() {
   it("sends asset amount", async function () {
+    const { activePool } = this.redeployedContracts;
+
     await activePool.connect(this.impostor).receivedERC20(erc20token, 5n);
 
     const assetAmount = 2n;
-    const recepient = this.signers.accounts[2];
-    const balanceBefore = await erc20token.balanceOf(recepient.address);
+    const recipient = this.signers.accounts[2];
+    const balanceBefore = await erc20token.balanceOf(recipient.address);
     const activePoolBalanceBefore = await erc20token.balanceOf(activePool);
 
-    await activePool.connect(this.impostor).sendAsset(erc20token, recepient, assetAmount);
-    const balanceAfter = await erc20token.balanceOf(recepient.address);
+    await activePool.connect(this.impostor).sendAsset(erc20token, recipient, assetAmount);
+    const balanceAfter = await erc20token.balanceOf(recipient.address);
     const activePoolBalanceAfter = await erc20token.balanceOf(activePool);
 
     expect(balanceAfter).to.be.equal(balanceBefore + assetAmount);
@@ -121,26 +113,33 @@ function shouldBehaveLikeCanSendAssetCorrectly() {
   });
 
   it("should emit ActivePoolAssetBalanceUpdated", async function () {
+    const { activePool } = this.redeployedContracts;
+
     await activePool.connect(this.impostor).receivedERC20(erc20token, 5n);
 
     const assetAmount = 2n;
-    const recepient = this.signers.accounts[2];
+    const recipient = this.signers.accounts[2];
 
-    const sendAssetTx = await activePool.connect(this.impostor).sendAsset(erc20token, recepient, assetAmount);
+    const sendAssetTx = await activePool
+      .connect(this.impostor)
+      .sendAsset(erc20token, recipient, assetAmount);
     await expect(sendAssetTx)
       .to.emit(activePool, "ActivePoolAssetBalanceUpdated")
       .withArgs(erc20token, 3n);
   });
 
   it("should emit AssetSent", async function () {
+    const { activePool } = this.redeployedContracts;
     await activePool.connect(this.impostor).receivedERC20(erc20token, 5n);
 
     const assetAmount = 2n;
-    const recepient = this.signers.accounts[2];
+    const recipient = this.signers.accounts[2];
 
-    const sendAssetTx = await activePool.connect(this.impostor).sendAsset(erc20token, recepient, assetAmount);
+    const sendAssetTx = await activePool
+      .connect(this.impostor)
+      .sendAsset(erc20token, recipient, assetAmount);
     await expect(sendAssetTx)
       .to.emit(activePool, "AssetSent")
-      .withArgs(recepient, erc20token, assetAmount);
+      .withArgs(recipient, erc20token, assetAmount);
   });
 }

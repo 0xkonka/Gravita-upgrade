@@ -1,45 +1,25 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { ActivePool, ActivePool__factory } from ".../../../types";
-import { impostorContractInArray } from "../../../shared/utils";
-
-let activePool: ActivePool;
-let contracts: any[];
 
 export default function shouldBehaveLikeCanIncreaseDebt(): void {
   beforeEach(async function () {
-    contracts = [
-      this.contracts.activePool,
-      this.contracts.adminContract,
-      this.contracts.borrowerOperations,
-      this.contracts.adminContract, // collSurplusPool
-      this.contracts.debtToken,
-      this.contracts.debtToken, // defaultPool
-      this.contracts.debtToken, // feeCollector
-      this.contracts.debtToken, // gasPool
-      this.contracts.debtToken, // priceFeed
-      this.contracts.debtToken, // sortedVessels
-      this.contracts.debtToken, // stabilityPool
-      this.contracts.lock,
-      this.signers.deployer,
-      this.contracts.trenBoxManager,
-      this.contracts.debtToken, // trenBoxManagerOperations
-    ];
-
-    const ActivePoolFactory: ActivePool__factory = await ethers.getContractFactory("ActivePool");
-    activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
+    const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
+    const activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
     await activePool.waitForDeployment();
-
     await activePool.initialize();
 
+    this.redeployedContracts.activePool = activePool;
+
     this.impostor = this.signers.accounts[1];
-  })
+  });
 
   context("when caller is borrower operations", function () {
     beforeEach(async function () {
-      contracts = impostorContractInArray(contracts, this.impostor, 2);
+      const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
+        borrowerOperations: this.impostor,
+      });
 
-      await activePool.setAddresses(contracts);
+      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses);
     });
 
     shouldBehaveLikeCanIncreaseDebtCorrectly();
@@ -47,42 +27,43 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
 
   context("when caller is tren box manager", function () {
     beforeEach(async function () {
-      contracts = impostorContractInArray(contracts, this.impostor, 13);
+      const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
+        trenBoxManager: this.impostor,
+      });
 
-      await activePool.setAddresses(contracts);
+      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses);
     });
 
     shouldBehaveLikeCanIncreaseDebtCorrectly();
   });
 
-  context(
-    "when caller is not borrower operations, or tren box manager",
-    function () {
-      it("reverts custom error", async function () {
-        this.impostor = this.signers.accounts[1];
-        const { wETH } = this.collaterals.active;
-        const debtAmount = 50n;
+  context("when caller is not borrower operations, or tren box manager", function () {
+    it("reverts custom error", async function () {
+      this.impostor = this.signers.accounts[1];
+      const { wETH } = this.collaterals.active;
+      const debtAmount = 50n;
 
-        await expect(
-          this.contracts.activePool
-            .connect(this.impostor)
-            .increaseDebt(wETH.address, debtAmount)
-        ).to.be.revertedWith(
-          "ActivePool: Caller is not an authorized Tren contract"
-        );
-      });
-    }
-  );
+      await expect(
+        this.contracts.activePool.connect(this.impostor).increaseDebt(wETH.address, debtAmount)
+      ).to.be.revertedWith("ActivePool: Caller is not an authorized Tren contract");
+    });
+  });
 }
 
 function shouldBehaveLikeCanIncreaseDebtCorrectly() {
   it("increases debt tokens balance", async function () {
     const { wETH } = this.collaterals.active;
-    const debtBalanceBefore = await activePool.getDebtTokenBalance(wETH.address);
+    const debtBalanceBefore = await this.redeployedContracts.activePool.getDebtTokenBalance(
+      wETH.address
+    );
     const debtAmount = 50n;
 
-    await activePool.connect(this.impostor).increaseDebt(wETH.address, debtAmount);
-    const debtBalanceAfter = await activePool.getDebtTokenBalance(wETH.address);
+    await this.redeployedContracts.activePool
+      .connect(this.impostor)
+      .increaseDebt(wETH.address, debtAmount);
+    const debtBalanceAfter = await this.redeployedContracts.activePool.getDebtTokenBalance(
+      wETH.address
+    );
 
     expect(debtBalanceAfter).to.be.equal(debtBalanceBefore + debtAmount);
   });
@@ -91,10 +72,12 @@ function shouldBehaveLikeCanIncreaseDebtCorrectly() {
     const { wETH } = this.collaterals.active;
     const debtAmount = 50n;
 
-    const increaseDebtTx = await activePool.connect(this.impostor).increaseDebt(wETH.address, debtAmount);
+    const increaseDebtTx = await this.redeployedContracts.activePool
+      .connect(this.impostor)
+      .increaseDebt(wETH.address, debtAmount);
 
     await expect(increaseDebtTx)
-      .to.emit(activePool, "ActivePoolDebtUpdated")
+      .to.emit(this.redeployedContracts.activePool, "ActivePoolDebtUpdated")
       .withArgs(wETH.address, debtAmount);
   });
 }

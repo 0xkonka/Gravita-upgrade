@@ -1,13 +1,22 @@
+import shouldBehaveLikeCanAuthorizeUpgrade from "./effects/authorizeUpgrade";
+import shouldBehaveLikeCanDecreaseDebt from "./effects/decreaseDebt";
+import shouldBehaveLikeCanIncreaseDebt from "./effects/increaseDebt";
+import shouldBehaveLikeCanReceivedERC20 from "./effects/receivedERC20";
+import shouldBehaveLikeCanSendAsset from "./effects/sendAsset";
+import shouldHaveName from "./view/constants/name";
 import shouldBehaveLikeGetAssetBalance from "./view/getAssetBalance";
 import shouldBehaveLikeGetDebtTokenBalance from "./view/getDebtTokenBalance";
-import shouldBehaveLikeCanSendAsset from "./effects/sendAsset";
-import shouldBehaveLikeCanIncreaseDebt from "./effects/increaseDebt";
-import shouldBehaveLikeCanDecreaseDebt from "./effects/decreaseDebt";
-import shouldBehaveLikeCanReceivedERC20 from "./effects/receivedERC20";
-import shouldBehaveLikeCanAuthorizeUpgrade from "./effects/authorizeUpgrade";
+import shouldBehaveLikeOwner from "./view/owner";
 
 export function shouldBehaveLikeActivePoolContract(): void {
   describe("View Functions", function () {
+    describe("#owner", function () {
+      shouldBehaveLikeOwner();
+    });
+    describe("#NAME", function () {
+      shouldHaveName();
+    });
+
     describe("#getAssetBalance", function () {
       shouldBehaveLikeGetAssetBalance();
     });
