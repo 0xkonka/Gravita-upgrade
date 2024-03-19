@@ -95,7 +95,8 @@ contract BorrowerOperations is
         override
     {
         require(
-            IAdminContract(adminContract).getIsActive(_asset), "BorrowerOps: Asset is not active"
+            IAdminContract(adminContract).getIsActive(_asset),
+            "BorrowerOperations: Asset is not active"
         );
         LocalVariables_openTrenBox memory vars;
         vars.asset = _asset;

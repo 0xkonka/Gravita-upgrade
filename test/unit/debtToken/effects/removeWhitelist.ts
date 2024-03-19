@@ -23,6 +23,7 @@ export default function shouldBehaveLikeCanRemoveWhitelist(): void {
         .withArgs(this.whitelistedAddress, false);
     });
   });
+
   context("when called by not owner", function () {
     it("reverts", async function () {
       const notOwner = this.signers.accounts[1];

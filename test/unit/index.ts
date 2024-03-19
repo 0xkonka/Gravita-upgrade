@@ -11,10 +11,10 @@ import type {
 import { testActivePool } from "./activePool/ActivePool";
 import { testAdminContract } from "./adminContract/AdminContract";
 import { testBorrowerOperations } from "./borrowerOperations/BorrowerOperations";
-import { loadCollateralsFixture } from "./collaterals.fixture";
 import { testDebtToken } from "./debtToken/DebtToken";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testLock } from "./lock/Lock";
+import { loadTestFixture } from "./testContracts.fixture";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -38,7 +38,9 @@ describe("Unit tests", function () {
 
     this.loadFixture = loadFixture;
     this.contracts = await this.loadFixture(loadDeploymentFixture);
-    this.collaterals = await this.loadFixture(loadCollateralsFixture);
+    const { testContracts, collaterals } = await this.loadFixture(loadTestFixture);
+    this.collaterals = collaterals;
+    this.testContracts = testContracts;
 
     this.initialSnapshotId = await network.provider.send("evm_snapshot", []);
     this.snapshotId = this.initialSnapshotId;

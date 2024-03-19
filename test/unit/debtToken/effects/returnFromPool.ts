@@ -52,6 +52,7 @@ export default function shouldBehaveLikeCanReturnFromPool(): void {
 
     shouldBeAbleToReturnFromPool();
   });
+
   context("when caller is not trenBoxManager or stabilityPool", function () {
     it("reverts", async function () {
       const impostorCaller = this.signers.accounts[2];
