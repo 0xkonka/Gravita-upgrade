@@ -21,6 +21,8 @@ import type {
   Timelock,
   TrenBoxManager,
   TrenBoxManagerOperations,
+  PriceFeed,
+  PriceFeedL2
 } from "../../types";
 import { ERC20Test } from "../../types/contracts/TestContracts/TestErc20.sol";
 
@@ -35,7 +37,7 @@ declare module "mocha" {
     snapshotId: string;
     collaterals: Collaterals;
     utils: TestUtils;
-    redeployedContracts: Contracts;
+    redeployedContracts: RedeployedContracts;
     testContracts: TestContracts;
   }
 }
@@ -56,6 +58,11 @@ export interface Contracts {
   timelock: Timelock;
   trenBoxManager: TrenBoxManager;
   trenBoxManagerOperations: TrenBoxManagerOperations;
+}
+
+export interface RedeployedContracts extends Contracts {
+  priceFeed: PriceFeed;
+  priceFeedL2: PriceFeedL2;
 }
 
 export interface Signers {
