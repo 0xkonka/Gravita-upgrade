@@ -12,6 +12,7 @@ import { testActivePool } from "./activePool/ActivePool";
 import { testAdminContract } from "./adminContract/AdminContract";
 import { testBorrowerOperations } from "./borrowerOperations/BorrowerOperations";
 import { testDebtToken } from "./debtToken/DebtToken";
+import { testPriceFeed } from "./priceFeed/PriceFeed";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testLock } from "./lock/Lock";
 import { loadTestFixture } from "./testContracts.fixture";
@@ -90,5 +91,6 @@ describe("Unit tests", function () {
   testAdminContract();
   testBorrowerOperations();
   testDebtToken();
+  testPriceFeed();
   testLock();
 });
