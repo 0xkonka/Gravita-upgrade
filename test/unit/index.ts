@@ -7,6 +7,7 @@ import type {
   GetAddressesForSetAddressesResult,
   Signers,
   TestUtils,
+  RedeployedContracts
 } from "../shared/types";
 import { testActivePool } from "./activePool/ActivePool";
 import { testAdminContract } from "./adminContract/AdminContract";
@@ -21,7 +22,7 @@ describe("Unit tests", function () {
   before(async function () {
     this.signers = {} as Signers;
     this.contracts = {} as Contracts;
-    this.redeployedContracts = {} as Contracts;
+    this.redeployedContracts = {} as RedeployedContracts;
     this.utils = {
       revertToInitialSnapshot: async () => {
         await network.provider.send("evm_revert", [this.initialSnapshotId]);
