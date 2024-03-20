@@ -15,6 +15,7 @@ import { testDebtToken } from "./debtToken/DebtToken";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testLock } from "./lock/Lock";
 import { loadTestFixture } from "./testContracts.fixture";
+import { testTrenBoxManager } from "./trenBoxManager/TrenBoxManager";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -91,4 +92,5 @@ describe("Unit tests", function () {
   testBorrowerOperations();
   testDebtToken();
   testLock();
+  testTrenBoxManager();
 });
