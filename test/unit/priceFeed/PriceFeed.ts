@@ -1,14 +1,10 @@
 import { shouldBehaveLikePriceFeedContract } from "./PriceFeed.behavior";
-import { ethers } from "hardhat";
+import { priceFeedFixture } from "./PriceFeed.fixture";
 
 export function testPriceFeed(): void {
   describe("PriceFeed", function () {
     beforeEach(async function () {
-      const PriceFeedFactory = await ethers.getContractFactory("PriceFeed");
-      const priceFeed = await PriceFeedFactory.connect(this.signers.deployer).deploy();
-      await priceFeed.waitForDeployment();
-      await priceFeed.initialize();
-
+      const { priceFeed } = await priceFeedFixture();
       this.redeployedContracts.priceFeed = priceFeed;
     });
 
