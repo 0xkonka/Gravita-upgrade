@@ -40,12 +40,12 @@ export function shouldBehaveLikeDefaultPoolContract(): void {
       shouldBehaveLikeCanReceivedERC20();
     });
 
-    // describe("#sendAssetToActivePool", function () {
-    //   shouldBehaveLikeCanSendAssetToActivePool();
-    // });
+    describe("#sendAssetToActivePool", function () {
+      shouldBehaveLikeCanSendAssetToActivePool();
+    });
 
-    // describe("#authorizeUpgrade", function () {
-    //   shouldBehaveLikeCanAuthorizeUpgrade();
-    // });
+    describe("#authorizeUpgrade", function () {
+      shouldBehaveLikeCanAuthorizeUpgrade();
+    });
   });
 }
