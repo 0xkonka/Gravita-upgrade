@@ -3,7 +3,7 @@ import { parseEther } from "ethers";
 import { deployments, ethers } from "hardhat";
 
 import { LOCAL_NETWORK_COLLATERALS } from "../../config/collaterals";
-import type { ERC20Test, ERC20Test__factory } from "../../types";
+import type { ERC20Test, ERC20Test__factory, MockAggregator, MockAggregator__factory } from "../../types";
 import { Collaterals, TestContracts } from "../shared/types";
 
 const COLLATERALS_TO_ADD_AS_INACTIVE = [
@@ -56,9 +56,20 @@ export async function loadTestFixture(): Promise<{
   const erc20: ERC20Test = (await ERC20Factory.connect(deployer).deploy(...args)) as ERC20Test;
   await erc20.waitForDeployment();
 
+  const MockAggregatorFactory: MockAggregator__factory = (await ethers.getContractFactory(
+    "MockAggregator"
+  )) as MockAggregator__factory;
+
+  type AggregatorDeployArgs = Parameters<typeof MockAggregatorFactory.deploy>;
+  const aggregatorArgs: AggregatorDeployArgs = [];
+
+  const mockAggregator: MockAggregator = (await MockAggregatorFactory.connect(deployer).deploy(...aggregatorArgs)) as MockAggregator;
+  await mockAggregator.waitForDeployment();
+
   return {
     testContracts: {
       erc20,
+      mockAggregator
     },
     collaterals: {
       active: {

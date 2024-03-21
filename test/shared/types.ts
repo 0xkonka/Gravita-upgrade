@@ -24,7 +24,8 @@ import type {
   PriceFeed,
   PriceFeedL2
 } from "../../types";
-import { ERC20Test } from "../../types/contracts/TestContracts/TestErc20.sol";
+import { ERC20Test } from "../../types/contracts/TestContracts/ERC20Test";
+import { MockAggregator } from "../../types/contracts/TestContracts/MockAggregator";
 
 type Fixture<T> = () => Promise<T>;
 
@@ -98,4 +99,5 @@ export interface TestUtils {
 
 export interface TestContracts {
   erc20: ERC20Test;
+  mockAggregator: MockAggregator;
 }
