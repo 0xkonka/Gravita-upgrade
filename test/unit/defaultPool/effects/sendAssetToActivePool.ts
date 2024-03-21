@@ -4,30 +4,83 @@ import { ethers } from "hardhat";
 export default function shouldBehaveLikeCanSendAsset(): void {
   beforeEach(async function () {
     const DefaultPoolFactory = await ethers.getContractFactory("DefaultPool");
-    const redeployedDefaultPool = await DefaultPoolFactory.connect(this.signers.deployer).deploy();
-    await redeployedDefaultPool.waitForDeployment();
-    await redeployedDefaultPool.initialize();
+    const defaultPool = await DefaultPoolFactory.connect(this.signers.deployer).deploy();
+    await defaultPool.waitForDeployment();
+    await defaultPool.initialize();
 
-    this.redeployedContracts.defaultPool = redeployedDefaultPool;
+    const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
+    const activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
+    await activePool.waitForDeployment();
+    await activePool.initialize();
+
+    this.redeployedContracts.defaultPool = defaultPool;
+    this.redeployedContracts.activePool = activePool;
 
     this.impostor = this.signers.accounts[1];
+    this.impostor2 = this.signers.accounts[2];
 
     const { erc20 } = this.testContracts;
     await erc20.mint(this.signers.deployer, 1000n);
-    await erc20.transfer(redeployedDefaultPool, 5n);
-    await erc20.approve(this.impostor, 2n);
+    await erc20.transfer(this.redeployedContracts.defaultPool, 100n);
+    await erc20.transfer(this.redeployedContracts.activePool, 100n);
   });
 
   context("when caller is tren box manager", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
         trenBoxManager: this.impostor,
+        activePool: this.redeployedContracts.activePool
+      });
+
+      const addressesForSetAddresses2 = await this.utils.getAddressesForSetAddresses({
+        trenBoxManager: this.impostor,
+        borrowerOperations: this.impostor2,
+        defaultPool: this.redeployedContracts.defaultPool,
       });
 
       await this.redeployedContracts.defaultPool.setAddresses(addressesForSetAddresses);
+      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses2);
     });
 
-    shouldBehaveLikeCanSendAssetCorrectly();
+    it("should return because of zero amount's value", async function () {
+      const { defaultPool } = this.redeployedContracts;
+      const { erc20 } = this.testContracts;
+  
+      const assetAmount = 0n;
+      const balanceBefore = await erc20.balanceOf(this.impostor.address);
+      const defaultPoolBalanceBefore = await erc20.balanceOf(defaultPool);
+  
+      await defaultPool.connect(this.impostor).sendAssetToActivePool(erc20, assetAmount);
+      const balanceAfter = await erc20.balanceOf(this.impostor.address);
+      const defaultPoolBalanceAfter = await erc20.balanceOf(defaultPool);
+  
+      expect(balanceAfter).to.be.equal(balanceBefore + assetAmount);
+      expect(defaultPoolBalanceAfter).to.be.equal(defaultPoolBalanceBefore - assetAmount);
+    });
+  
+    it("should emit DefaultPoolAssetBalanceUpdated and AssetSent", async function () {
+      const { defaultPool } = this.redeployedContracts;
+      const { erc20 } = this.testContracts;
+      const sendAmount = 50n;
+      const assetAmount = 15n;
+
+      await this.redeployedContracts.activePool.connect(this.impostor2)
+        .receivedERC20(erc20, sendAmount);
+      await this.redeployedContracts.activePool.connect(this.impostor2)
+        .sendAsset(erc20, this.redeployedContracts.defaultPool, sendAmount);
+
+      const sendAssetTx = await defaultPool
+        .connect(this.impostor)
+        .sendAssetToActivePool(erc20, assetAmount);
+
+      await expect(sendAssetTx)
+        .to.emit(defaultPool, "DefaultPoolAssetBalanceUpdated")
+        .withArgs(erc20, sendAmount - assetAmount);
+
+      await expect(sendAssetTx)
+        .to.emit(defaultPool, "AssetSent")
+        .withArgs(this.redeployedContracts.activePool, erc20, assetAmount);
+    });
   });
 
   context(
@@ -45,49 +98,4 @@ export default function shouldBehaveLikeCanSendAsset(): void {
       });
     }
   );
-}
-
-function shouldBehaveLikeCanSendAssetCorrectly() {
-  it("sends asset amount", async function () {
-    const { defaultPool } = this.redeployedContracts;
-    const { erc20 } = this.testContracts;
-
-    const assetAmount = 0n;
-    const balanceBefore = await erc20.balanceOf(this.impostor.address);
-    const defaultPoolBalanceBefore = await erc20.balanceOf(defaultPool);
-
-    await defaultPool.connect(this.impostor).sendAssetToActivePool(erc20, assetAmount);
-    const balanceAfter = await erc20.balanceOf(this.impostor.address);
-    const defaultPoolBalanceAfter = await erc20.balanceOf(defaultPool);
-
-    expect(balanceAfter).to.be.equal(balanceBefore + assetAmount);
-    expect(defaultPoolBalanceAfter).to.be.equal(defaultPoolBalanceBefore - assetAmount);
-  });
-
-  // it("should emit DefaultPoolAssetBalanceUpdated", async function () {
-  //   const { defaultPool } = this.redeployedContracts;
-  //   const { erc20 } = this.testContracts;
-
-  //   const assetAmount = 0n;
-  //   const sendAssetTx = await defaultPool
-  //     .connect(this.impostor)
-  //     .sendAssetToActivePool(erc20, assetAmount);
-  //   await expect(sendAssetTx)
-  //     .to.emit(defaultPool, "DefaultPoolAssetBalanceUpdated")
-  //     .withArgs(erc20, 0n);
-  // });
-
-  // it("should emit AssetSent", async function () {
-  //   const { defaultPool } = this.redeployedContracts;
-  //   const { erc20 } = this.testContracts;
-
-  //   const assetAmount = 0n;
-
-  //   const sendAssetTx = await defaultPool
-  //     .connect(this.impostor)
-  //     .sendAssetToActivePool(erc20, assetAmount);
-  //   await expect(sendAssetTx)
-  //     .to.emit(defaultPool, "AssetSent")
-  //     .withArgs(this.impostor, erc20, assetAmount);
-  // });
 }

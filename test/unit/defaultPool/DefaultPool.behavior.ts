@@ -27,7 +27,6 @@ export function shouldBehaveLikeDefaultPoolContract(): void {
   });
 
   describe("Effects Functions", function () {
-
     describe("#increaseDebt", function () {
       shouldBehaveLikeCanIncreaseDebt();
     });
