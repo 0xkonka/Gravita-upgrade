@@ -3,8 +3,13 @@ import { ethers, getNamedAccounts, getUnnamedAccounts, network } from "hardhat";
 
 import type {
   Contracts,
+  GetActualDebtFromCompositeDebtArgs,
   GetAddressesForSetAddressesOverrides,
   GetAddressesForSetAddressesResult,
+  GetCompositeDebtArgs,
+  GetNetBorrowingAmountArgs,
+  GetOpenTrenBoxTotalDebtArgs,
+  OpenTrenBoxArgs,
   Signers,
   TestUtils,
 } from "../shared/types";
@@ -71,6 +76,105 @@ describe("Unit tests", function () {
       ]);
 
       return addressesForSetAddresses;
+    };
+
+    this.utils.getNetBorrowingAmount = async (args: GetNetBorrowingAmountArgs) => {
+      const { asset, debtWithFees, overrideTrenBoxManager } = args;
+      const trenBoxManager = overrideTrenBoxManager || this.contracts.trenBoxManager;
+
+      const borrowingRate = await trenBoxManager.getBorrowingRate(asset);
+
+      return (debtWithFees * ethers.WeiPerEther) / (ethers.WeiPerEther + borrowingRate);
+    };
+
+    this.utils.getCompositeDebt = async (args: GetCompositeDebtArgs) => {
+      const { asset, debtTokenAmount, overrideBorrowerOperations } = args;
+      const borrowerOperations = overrideBorrowerOperations || this.contracts.borrowerOperations;
+
+      const compositeDebt = await borrowerOperations.getCompositeDebt(asset, debtTokenAmount);
+
+      return compositeDebt;
+    };
+
+    this.utils.getOpenTrenBoxTotalDebt = async (args: GetOpenTrenBoxTotalDebtArgs) => {
+      const { asset, debtTokenAmount, overrideTrenBoxManager } = args;
+      const trenBoxManager = overrideTrenBoxManager || this.contracts.trenBoxManager;
+
+      const fee = await trenBoxManager.getBorrowingFee(asset, debtTokenAmount);
+      const compositeDebt = await this.utils.getCompositeDebt(args);
+
+      return fee + compositeDebt;
+    };
+
+    this.utils.getActualDebtFromCompositeDebt = async (
+      args: GetActualDebtFromCompositeDebtArgs
+    ) => {
+      const { asset, compositeDebt, overrideTrenBoxManager } = args;
+      const trenBoxManager = overrideTrenBoxManager || this.contracts.trenBoxManager;
+
+      const issuedDebt = await trenBoxManager.getNetDebt(asset, compositeDebt);
+
+      return issuedDebt;
+    };
+
+    this.utils.openTrenBox = async (args: OpenTrenBoxArgs) => {
+      const defaultArgs = {
+        upperHint: ethers.ZeroAddress,
+        lowerHint: ethers.ZeroAddress,
+        extraDebtTokenAmount: 0n,
+        from: this.signers.deployer,
+      };
+
+      const {
+        asset,
+        assetAmount,
+        upperHint,
+        lowerHint,
+        extraDebtTokenAmount,
+        overrideBorrowerOperations,
+        overrideAdminContract,
+        overrideTrenBoxManager,
+        from,
+      } = { ...defaultArgs, ...args };
+
+      const adminContract = overrideAdminContract || this.contracts.adminContract;
+      const borrowerOperations = overrideBorrowerOperations || this.contracts.borrowerOperations;
+      const trenBoxManager = overrideTrenBoxManager || this.contracts.trenBoxManager;
+
+      const minNetDebt = await adminContract.getMinNetDebt(asset);
+
+      const netBorrowingAmount = await this.utils.getNetBorrowingAmount({
+        asset,
+        debtWithFees: minNetDebt,
+      });
+
+      const minDebt = netBorrowingAmount + 1n;
+      const debtTokenAmount = minDebt + extraDebtTokenAmount;
+
+      const totalDebt = await this.utils.getOpenTrenBoxTotalDebt({
+        asset,
+        debtTokenAmount,
+        overrideBorrowerOperations: borrowerOperations,
+        overrideTrenBoxManager: trenBoxManager,
+      });
+
+      const netDebt = await this.utils.getActualDebtFromCompositeDebt({
+        asset,
+        compositeDebt: totalDebt,
+        overrideTrenBoxManager: trenBoxManager,
+      });
+
+      const openTrenBoxTx = borrowerOperations
+        .connect(from)
+        .openTrenBox(asset, assetAmount, debtTokenAmount, upperHint, lowerHint);
+
+      return {
+        debtTokenAmount,
+        netDebt,
+        totalDebt,
+        collateralAmount: assetAmount,
+        openTrenBoxTx,
+      };
     };
   });
 
