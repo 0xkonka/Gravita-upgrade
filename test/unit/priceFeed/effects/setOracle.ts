@@ -1,8 +1,4 @@
 import { expect } from "chai";
-import { ERC20Test, MockAggregator } from "../../../../types";
-import type {
-  SignerWithAddress,
-} from "@nomicfoundation/hardhat-ethers/signers";
 
 export default function shouldBehaveLikeCanSetOracle(): void {
   beforeEach(async function () {
@@ -85,7 +81,7 @@ export default function shouldBehaveLikeCanSetOracle(): void {
             this.defaultOracleOptions.providerType,
             this.defaultOracleOptions.timeoutSeconds,
             this.defaultOracleOptions.isEthIndexed,
-            this.defaultOracleOptions.isFallback
+            !this.defaultOracleOptions.isFallback
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
