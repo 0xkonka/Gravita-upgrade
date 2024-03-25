@@ -12,8 +12,10 @@ import type {
 import { testActivePool } from "./activePool/ActivePool";
 import { testAdminContract } from "./adminContract/AdminContract";
 import { testBorrowerOperations } from "./borrowerOperations/BorrowerOperations";
+import { testCollSurplusPool } from "./collSurplusPool/CollSurplusPool";
 import { testDebtToken } from "./debtToken/DebtToken";
 import { testPriceFeed } from "./priceFeed/PriceFeed";
+import { testDefaultPool } from "./defaultPool/DefaultPool";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testLock } from "./lock/Lock";
 import { loadTestFixture } from "./testContracts.fixture";
@@ -94,4 +96,6 @@ describe("Unit tests", function () {
   testDebtToken();
   testPriceFeed();
   testLock();
+  testCollSurplusPool();
+  testDefaultPool();
 });
