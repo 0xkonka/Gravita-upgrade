@@ -940,6 +940,10 @@ contract TrenBoxManager is
         return TrenBoxOwners[_asset][_index];
     }
 
+    function getNetDebt(address _asset, uint256 _debt) external view returns (uint256) {
+        return _getNetDebt(_asset, _debt);
+    }
+
     // --- TrenBox property setters, called by Tren's
     // BorrowerOperations/VMRedemptions/VMLiquidations ---------------
 

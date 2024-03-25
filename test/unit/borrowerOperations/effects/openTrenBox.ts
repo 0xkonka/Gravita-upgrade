@@ -15,11 +15,32 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
       await adminContract.addNewCollateral(await erc20.getAddress(), 200n, 18);
       await adminContract.setIsActive(await erc20.getAddress(), true);
 
-      await erc20.mint(user.address, ethers.parseEther("1000"));
+      await erc20.mint(user.address, ethers.parseUnits("100", 30));
+
+      const price = ethers.parseUnits("200", "ether");
+      await this.testContracts.priceFeedTestnet.setPrice(await erc20.getAddress(), price);
 
       this.user = user;
     });
+
+    it("should open tren box", async function () {
+      const { erc20 } = this.testContracts;
+      const assetAddress = await erc20.getAddress();
+      const assetAmount = ethers.parseUnits("100", 30);
+
+      const mintCap = ethers.parseUnits("100", 35);
+      await this.contracts.adminContract.setMintCap(assetAddress, mintCap);
+
+      const { openTrenBoxTx } = await this.utils.openTrenBox({
+        asset: assetAddress,
+        assetAmount,
+        from: this.user,
+      });
+
+      await expect(openTrenBoxTx).to.not.be.rejected;
+    });
   });
+
   context("when asset is not active", function () {
     it("should revert", async function () {
       const notActiveAsset = this.collaterals.inactive.dai;

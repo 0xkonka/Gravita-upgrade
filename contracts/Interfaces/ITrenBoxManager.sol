@@ -291,4 +291,6 @@ interface ITrenBoxManager is ITrenBase {
         uint256 _assetAmount
     )
         external;
+
+    function getNetDebt(address _asset, uint256 _debt) external view returns (uint256);
 }
