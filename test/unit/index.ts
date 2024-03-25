@@ -2,6 +2,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers, getNamedAccounts, getUnnamedAccounts, network } from "hardhat";
 
 import type { Contracts, Signers } from "../shared/types";
+import { setupUtils } from "../utils";
 import { testActivePool } from "./activePool/ActivePool";
 import { testAdminContract } from "./adminContract/AdminContract";
 import { testBorrowerOperations } from "./borrowerOperations/BorrowerOperations";
@@ -11,7 +12,6 @@ import { testDefaultPool } from "./defaultPool/DefaultPool";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testLock } from "./lock/Lock";
 import { loadTestFixture } from "./testContracts.fixture";
-import { setupUtils } from "./utils";
 
 describe("Unit tests", function () {
   before(async function () {
