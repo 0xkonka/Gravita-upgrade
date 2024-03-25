@@ -56,9 +56,15 @@ export async function loadTestFixture(): Promise<{
   const erc20: ERC20Test = (await ERC20Factory.connect(deployer).deploy(...args)) as ERC20Test;
   await erc20.waitForDeployment();
 
+  const priceFeedTestnet = await ethers.getContractAt(
+    "PriceFeedTestnet",
+    deploymentSummary.PriceFeedTestnet.address
+  );
+
   return {
     testContracts: {
       erc20,
+      priceFeedTestnet,
     },
     collaterals: {
       active: {

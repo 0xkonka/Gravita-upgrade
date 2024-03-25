@@ -1,32 +1,24 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers, getNamedAccounts, getUnnamedAccounts, network } from "hardhat";
 
-import type {
-  Contracts,
-  GetAddressesForSetAddressesOverrides,
-  GetAddressesForSetAddressesResult,
-  Signers,
-  TestUtils,
-} from "../shared/types";
+import type { Contracts, Signers } from "../shared/types";
 import { testActivePool } from "./activePool/ActivePool";
 import { testAdminContract } from "./adminContract/AdminContract";
 import { testBorrowerOperations } from "./borrowerOperations/BorrowerOperations";
+import { testCollSurplusPool } from "./collSurplusPool/CollSurplusPool";
 import { testDebtToken } from "./debtToken/DebtToken";
 import { testSortedTrenBoxes } from "./sortedTrenBoxes/SortedTrenBoxes";
+import { testDefaultPool } from "./defaultPool/DefaultPool";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testLock } from "./lock/Lock";
 import { loadTestFixture } from "./testContracts.fixture";
+import { setupUtils } from "./utils";
 
 describe("Unit tests", function () {
   before(async function () {
     this.signers = {} as Signers;
     this.contracts = {} as Contracts;
     this.redeployedContracts = {} as Contracts;
-    this.utils = {
-      revertToInitialSnapshot: async () => {
-        await network.provider.send("evm_revert", [this.initialSnapshotId]);
-      },
-    } as TestUtils;
 
     const { deployer, treasury } = await getNamedAccounts();
     const unnamedAccounts = await getUnnamedAccounts();
@@ -45,34 +37,7 @@ describe("Unit tests", function () {
 
     this.initialSnapshotId = await network.provider.send("evm_snapshot", []);
     this.snapshotId = this.initialSnapshotId;
-
-    this.utils.getAddressesForSetAddresses = async (
-      overrides?: GetAddressesForSetAddressesOverrides
-    ): Promise<GetAddressesForSetAddressesResult> => {
-      overrides = overrides || {};
-      const contracts = { ...this.contracts, ...overrides };
-      const treasury = overrides.treasury || this.signers.treasury;
-
-      const addressesForSetAddresses = await Promise.all([
-        await contracts.activePool.getAddress(),
-        await contracts.adminContract.getAddress(),
-        await contracts.borrowerOperations.getAddress(),
-        await contracts.collSurplusPool.getAddress(),
-        await contracts.debtToken.getAddress(),
-        await contracts.defaultPool.getAddress(),
-        await contracts.feeCollector.getAddress(),
-        await contracts.gasPool.getAddress(),
-        await contracts.priceFeed.getAddress(),
-        await contracts.sortedTrenBoxes.getAddress(),
-        await contracts.stabilityPool.getAddress(),
-        await contracts.timelock.getAddress(),
-        await treasury.getAddress(),
-        await contracts.trenBoxManager.getAddress(),
-        await contracts.trenBoxManagerOperations.getAddress(),
-      ]);
-
-      return addressesForSetAddresses;
-    };
+    this.utils = setupUtils(this);
   });
 
   beforeEach(async function () {
@@ -93,4 +58,6 @@ describe("Unit tests", function () {
   testDebtToken();
   testLock();
   testSortedTrenBoxes()
+  testCollSurplusPool();
+  testDefaultPool();
 });
