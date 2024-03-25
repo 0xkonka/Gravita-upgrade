@@ -10,15 +10,20 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
       this.lowerHint = ethers.ZeroAddress;
 
       const { erc20 } = this.testContracts;
-      const { adminContract } = this.contracts;
 
-      await adminContract.addNewCollateral(await erc20.getAddress(), 200n, 18);
-      await adminContract.setIsActive(await erc20.getAddress(), true);
-
-      await erc20.mint(user.address, ethers.parseUnits("100", 30));
-
-      const price = ethers.parseUnits("200", "ether");
-      await this.testContracts.priceFeedTestnet.setPrice(await erc20.getAddress(), price);
+      await this.utils.setupCollateralForTests({
+        collateral: erc20,
+        collateralOptions: {
+          setAsActive: true,
+          price: ethers.parseUnits("200", "ether"),
+          mints: [
+            {
+              to: user.address,
+              amount: ethers.parseUnits("100", 30),
+            },
+          ],
+        },
+      });
 
       this.user = user;
     });

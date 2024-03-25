@@ -2,7 +2,7 @@ import type {
   HardhatEthersSigner,
   SignerWithAddress,
 } from "@nomicfoundation/hardhat-ethers/signers";
-import { AddressLike, BaseContract, BigNumberish, ContractTransactionResponse } from "ethers";
+import { AddressLike, BaseContract, ContractTransactionResponse } from "ethers";
 
 import { Collateral } from "../../config/collaterals";
 import type {
@@ -12,6 +12,7 @@ import type {
   CollSurplusPool,
   DebtToken,
   DefaultPool,
+  ERC20Test,
   FeeCollector,
   GasPool,
   IPriceFeed,
@@ -23,7 +24,6 @@ import type {
   TrenBoxManager,
   TrenBoxManagerOperations,
 } from "../../types";
-import { ERC20Test } from "../../types/contracts/TestContracts/TestErc20.sol";
 
 type Fixture<T> = () => Promise<T>;
 
@@ -125,6 +125,35 @@ export type GetActualDebtFromCompositeDebtArgs = {
   overrideTrenBoxManager?: TrenBoxManager;
 };
 
+export type SetupCollateralForTestsArgs = {
+  collateral: ERC20Test;
+  collateralOptions: {
+    mints?: {
+      to: AddressLike;
+      amount: bigint;
+    }[];
+    approve?: {
+      from: HardhatEthersSigner;
+      spender: AddressLike;
+      amount: bigint;
+    }[];
+    price: bigint;
+    debtTokenGasCompensation?: bigint;
+    setAsActive?: boolean;
+    setCollateralParams?: {
+      borrowingFee: bigint;
+      criticalCollateralRate: bigint;
+      minimumCollateralRatio: bigint;
+      minNetDebt: bigint;
+      mintCap: bigint;
+      percentDivisor: bigint;
+      redemptionFeeFloor: bigint;
+    };
+  };
+  overrideAdminContract?: AdminContract;
+  overridePriceFeed?: PriceFeedTestnet;
+};
+
 export interface TestUtils {
   revertToInitialSnapshot: () => Promise<void>;
   getAddressesForSetAddresses: (
@@ -135,6 +164,7 @@ export interface TestUtils {
   getOpenTrenBoxTotalDebt(args: GetOpenTrenBoxTotalDebtArgs): Promise<bigint>;
   getCompositeDebt: (args: GetCompositeDebtArgs) => Promise<bigint>;
   getActualDebtFromCompositeDebt: (args: GetActualDebtFromCompositeDebtArgs) => Promise<bigint>;
+  setupCollateralForTests: (args: SetupCollateralForTestsArgs) => Promise<void>;
 }
 
 export interface TestContracts {
