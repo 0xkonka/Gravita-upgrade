@@ -24,8 +24,11 @@ import type {
   PriceFeed,
   PriceFeedL2
 } from "../../types";
-import { ERC20Test } from "../../types/contracts/TestContracts/ERC20Test";
-import { MockAggregator } from "../../types/contracts/TestContracts/MockAggregator";
+import {
+  ERC20Test,
+  MockAggregator,
+  MockApi3Proxy
+} from "../../types/contracts/TestContracts";
 
 type Fixture<T> = () => Promise<T>;
 
@@ -100,4 +103,5 @@ export interface TestUtils {
 export interface TestContracts {
   erc20: ERC20Test;
   mockAggregator: MockAggregator;
+  mockApi3: MockApi3Proxy;
 }
