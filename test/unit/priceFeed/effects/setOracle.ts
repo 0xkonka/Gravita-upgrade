@@ -71,7 +71,7 @@ export default function shouldBehaveLikeCanSetOracle(): void {
   });
 
   context("when caller is owner and the oracle is first set", function () {
-    it("should revert when fallback is true", async function () {
+    it("should revert if fallback is true", async function () {
       await expect(
         this.redeployedContracts.priceFeed
           .connect(this.owner)
