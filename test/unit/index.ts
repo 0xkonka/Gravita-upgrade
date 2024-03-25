@@ -14,6 +14,7 @@ import { testBorrowerOperations } from "./borrowerOperations/BorrowerOperations"
 import { testDebtToken } from "./debtToken/DebtToken";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testLock } from "./lock/Lock";
+import { testDefaultPool } from "./defaultPool/DefaultPool";
 import { loadTestFixture } from "./testContracts.fixture";
 
 describe("Unit tests", function () {
@@ -91,4 +92,5 @@ describe("Unit tests", function () {
   testBorrowerOperations();
   testDebtToken();
   testLock();
+  testDefaultPool();
 });
