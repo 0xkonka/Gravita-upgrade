@@ -2,15 +2,20 @@ import { expect } from "chai";
 
 export default function shouldBehaveLikeCanSetOracle(): void {
   beforeEach(async function () {
+    const providerType = {
+      Chainlink: 0,
+      API3: 1,
+    };
+
     this.defaultOracleOptions = {
-      providerType: 0, // enum ProviderType.Chainlink
+      providerType: providerType.Chainlink,
       timeoutSeconds: 3600,
       isEthIndexed: false,
       isFallback: false,
-    }
+    };
 
     this.api3OracleOptions = {
-      providerType: 1, // enum ProviderType.API3
+      providerType: providerType.API3,
       timeoutSeconds: 7200,
       isEthIndexed: false,
       isFallback: true,
@@ -18,13 +23,12 @@ export default function shouldBehaveLikeCanSetOracle(): void {
 
     this.owner = this.signers.deployer;
     this.notOwner = this.signers.accounts[1];
-    this.impostor = this.signers.accounts[2]; // mock timelock
+    this.timelockImpostor = this.signers.accounts[2];
 
-    this.mockAggregator = this.testContracts.mockAggregator;
-    this.mockApi3 = this.testContracts.mockApi3;
-    this.erc20Address = await (this.testContracts.erc20).getAddress();
-    this.mockAggregatorAddress = await this.mockAggregator.getAddress();
-    this.mockApi3Address = await this.mockApi3.getAddress();
+    const { mockAggregator, mockApi3 } = this.testContracts;
+    this.erc20Address = await this.testContracts.erc20.getAddress();
+    this.mockAggregatorAddress = await mockAggregator.getAddress();
+    this.mockApi3Address = await mockApi3.getAddress();
   });
 
   context("when the oracle is first set", function () {
@@ -66,7 +70,8 @@ export default function shouldBehaveLikeCanSetOracle(): void {
     });
 
     it("should revert if decimals is zero", async function () {
-      await this.mockAggregator.setDecimals(0);
+      const { mockAggregator } = this.testContracts;
+      await mockAggregator.setDecimals(0);
 
       await expect(
         this.redeployedContracts.priceFeed
@@ -86,7 +91,8 @@ export default function shouldBehaveLikeCanSetOracle(): void {
     });
 
     it("should revert if chainlink price is zero", async function () {
-      await this.mockAggregator.setPrice(0);
+      const { mockAggregator } = this.testContracts;
+      await mockAggregator.setPrice(0);
 
       await expect(
         this.redeployedContracts.priceFeed
@@ -106,7 +112,8 @@ export default function shouldBehaveLikeCanSetOracle(): void {
     });
 
     it("should revert if api3 price is zero", async function () {
-      await this.mockApi3.setValue(0);
+      const { mockApi3 } = this.testContracts;
+      await mockApi3.setValue(0);
 
       await expect(
         this.redeployedContracts.priceFeed
@@ -173,28 +180,32 @@ export default function shouldBehaveLikeCanSetOracle(): void {
   context("when the oracle is not first set", function () {
     beforeEach(async function () {
       // set primary oracle as chainlink
-      await this.redeployedContracts.priceFeed.connect(this.owner).setOracle(
-        this.erc20Address,
-        this.mockAggregatorAddress,
-        this.defaultOracleOptions.providerType,
-        this.defaultOracleOptions.timeoutSeconds,
-        this.defaultOracleOptions.isEthIndexed,
-        this.defaultOracleOptions.isFallback
-      );
+      await this.redeployedContracts.priceFeed
+        .connect(this.owner)
+        .setOracle(
+          this.erc20Address,
+          this.mockAggregatorAddress,
+          this.defaultOracleOptions.providerType,
+          this.defaultOracleOptions.timeoutSeconds,
+          this.defaultOracleOptions.isEthIndexed,
+          this.defaultOracleOptions.isFallback
+        );
 
       // set fallback oracle as api3
-      await this.redeployedContracts.priceFeed.connect(this.owner).setOracle(
-        this.erc20Address,
-        this.mockApi3Address,
-        this.api3OracleOptions.providerType,
-        this.api3OracleOptions.timeoutSeconds,
-        this.api3OracleOptions.isEthIndexed,
-        this.api3OracleOptions.isFallback
-      );
+      await this.redeployedContracts.priceFeed
+        .connect(this.owner)
+        .setOracle(
+          this.erc20Address,
+          this.mockApi3Address,
+          this.api3OracleOptions.providerType,
+          this.api3OracleOptions.timeoutSeconds,
+          this.api3OracleOptions.isEthIndexed,
+          this.api3OracleOptions.isFallback
+        );
 
       // set timelock
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        timelock: this.impostor,
+        timelock: this.timelockImpostor,
       });
       await this.redeployedContracts.priceFeed.setAddresses(addressesForSetAddresses);
     });
@@ -239,7 +250,7 @@ export default function shouldBehaveLikeCanSetOracle(): void {
 
     it("should update primary oracle if caller is timelock", async function () {
       await this.redeployedContracts.priceFeed
-        .connect(this.impostor)
+        .connect(this.timelockImpostor)
         .setOracle(
           this.erc20Address,
           this.mockApi3Address,
@@ -254,7 +265,7 @@ export default function shouldBehaveLikeCanSetOracle(): void {
 
     it("should update fallback oracle if caller is timelock", async function () {
       await this.redeployedContracts.priceFeed
-        .connect(this.impostor)
+        .connect(this.timelockImpostor)
         .setOracle(
           this.erc20Address,
           this.mockAggregatorAddress,
