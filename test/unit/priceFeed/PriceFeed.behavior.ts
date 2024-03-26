@@ -1,4 +1,5 @@
 import shouldBehaveLikeCanSetOracle from "./effects/setOracle";
+import shouldBehaveLikeCanAuthorizeUpgrade from "./effects/authorizeUpgrade";
 import shouldHavePublicConstant from "./view/constants";
 import shouldBehaveLikeOwner from "./view/owner";
 import shouldHaveFetchPrice from "./view/fetchPrice";
@@ -24,6 +25,10 @@ export function shouldBehaveLikePriceFeedContract(): void {
   describe("Effects Functions", function() {
     describe("#setOracle", function () {
       shouldBehaveLikeCanSetOracle();
+    });
+
+    describe("#authorizeUpgrade", function () {
+      shouldBehaveLikeCanAuthorizeUpgrade();
     });
   });
 }
