@@ -45,32 +45,7 @@ export default function shouldHaveFetchPrice(): void {
 
   context("for known asset", function () {
     beforeEach(async function () {
-      const setPrimaryOracleTx = await this.redeployedContracts.priceFeed
-        .connect(this.owner)
-        .setOracle(
-          this.erc20Address,
-          this.mockAggregatorAddress,
-          this.defaultOracleOptions.providerType,
-          this.defaultOracleOptions.timeoutSeconds,
-          this.defaultOracleOptions.isEthIndexed,
-          this.defaultOracleOptions.isFallback
-        );
-
-      await setPrimaryOracleTx.wait();
-
-      const setFallbackOracleTx = await this.redeployedContracts.priceFeed
-        .connect(this.owner)
-        .setOracle(
-          this.erc20Address,
-          this.mockApi3Address,
-          this.api3OracleOptions.providerType,
-          this.api3OracleOptions.timeoutSeconds,
-          this.api3OracleOptions.isEthIndexed,
-          this.api3OracleOptions.isFallback
-        );
-
-      await setFallbackOracleTx.wait();
-
+      // set ETH:USD chainlink oracle
       const setETHtoUSDOracleTx = await this.redeployedContracts.priceFeed
         .connect(this.owner)
         .setOracle(
@@ -90,12 +65,38 @@ export default function shouldHaveFetchPrice(): void {
     });
 
     context("when Chainlink oracle is primary oracle for asset", function () {
-      it("should return erc20 oracle price, decimal < 18", async function () {
-        const { mockAggregator } = this.testContracts;
+      beforeEach(async function () {
+        const setPrimaryOracleTx = await this.redeployedContracts.priceFeed
+        .connect(this.owner)
+        .setOracle(
+          this.erc20Address,
+          this.mockAggregatorAddress,
+          this.defaultOracleOptions.providerType,
+          this.defaultOracleOptions.timeoutSeconds,
+          this.defaultOracleOptions.isEthIndexed,
+          this.defaultOracleOptions.isFallback
+        );
 
+        await setPrimaryOracleTx.wait();
+
+        const setFallbackOracleTx = await this.redeployedContracts.priceFeed
+          .connect(this.owner)
+          .setOracle(
+            this.erc20Address,
+            this.mockApi3Address,
+            this.api3OracleOptions.providerType,
+            this.api3OracleOptions.timeoutSeconds,
+            this.api3OracleOptions.isEthIndexed,
+            this.api3OracleOptions.isFallback
+          );
+
+        await setFallbackOracleTx.wait();
+      });
+
+      it("should return erc20 oracle price, decimal < 18", async function () {
         const price = await this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address);
 
-        const roundData = await mockAggregator.latestRoundData();
+        const roundData = await this.mockAggregator.latestRoundData();
         const priceFeedAnswer = roundData[1];
 
         const expectedPrice = priceFeedAnswer * 10n ** 10n;
@@ -111,7 +112,7 @@ export default function shouldHaveFetchPrice(): void {
           .connect(this.timelockImpostor)
           .setOracle(
             this.erc20Address,
-            this.mockAggregatorAddress,
+            await mockAggregator.getAddress(),
             this.defaultOracleOptions.providerType,
             this.defaultOracleOptions.timeoutSeconds,
             this.defaultOracleOptions.isEthIndexed,
@@ -126,7 +127,31 @@ export default function shouldHaveFetchPrice(): void {
         expect(price).to.be.equal(expectedPrice);
       });
 
-      it.skip("should return ETH-indexed oracle price", async function () {});
+      it("should return ETH-indexed oracle price", async function () {
+        // set ERC20/ETH indexed oracle
+        const ethAmount = ethers.WeiPerEther;
+        const { mockAggregator } = this.testContracts;
+        await mockAggregator.setPrice(ethAmount);
+        await mockAggregator.setDecimals(18);
+        await this.redeployedContracts.priceFeed
+          .connect(this.timelockImpostor)
+          .setOracle(
+            this.erc20Address,
+            await mockAggregator.getAddress(),
+            this.defaultOracleOptions.providerType,
+            this.defaultOracleOptions.timeoutSeconds,
+            !this.defaultOracleOptions.isEthIndexed,
+            this.defaultOracleOptions.isFallback
+          );
+
+        const ethUsdRoundData = await this.mockAggregator.latestRoundData();
+
+        const price = await this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address);
+        const priceAnswer = ethUsdRoundData[1];
+        const expectedPrice = priceAnswer * 10n ** 10n;
+
+        expect(price).to.be.equal(expectedPrice);
+      });
 
       it("should return fallback oracle price", async function () {
         await this.mockAggregator.setPrice(0);
@@ -149,35 +174,80 @@ export default function shouldHaveFetchPrice(): void {
       });
     });
 
-    context("when API3 oracle is when Chainlink oracle is primary oracle for asset", function () {
-      beforeEach(async function () {});
-      it.skip("should return erc20 oracle price, decimal < 18", async function () {});
-      it.skip("should return different scaled price, decimal > 18", async function () {});
-      it.skip("should return fallback Chainlink oracle price when its set as fallback", async function () {});
+    context("when API3 oracle is primary oracle for asset", function () {
+      beforeEach(async function () {
+        const setPrimaryOracleTx = await this.redeployedContracts.priceFeed
+          .connect(this.owner)
+          .setOracle(
+            this.erc20Address,
+            this.mockApi3Address,
+            this.api3OracleOptions.providerType,
+            this.api3OracleOptions.timeoutSeconds,
+            this.api3OracleOptions.isEthIndexed,
+            !this.api3OracleOptions.isFallback
+          );
+
+        await setPrimaryOracleTx.wait();
+
+        const setFallbackOracleTx = await this.redeployedContracts.priceFeed
+          .connect(this.owner)
+          .setOracle(
+            this.erc20Address,
+            this.mockAggregatorAddress,
+            this.defaultOracleOptions.providerType,
+            this.defaultOracleOptions.timeoutSeconds,
+            this.defaultOracleOptions.isEthIndexed,
+            !this.defaultOracleOptions.isFallback
+          );
+
+        await setFallbackOracleTx.wait();
+      });
+
+      it("should return fallback Chainlink oracle price when its set as fallback", async function () {
+        await this.mockApi3.setValue(0);
+        const price = await this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address);
+
+        const roundData = await this.mockAggregator.latestRoundData();
+        const expectedPrice = roundData[1] * 10n ** 10n;
+
+        expect(price).to.equal(expectedPrice);
+      });
+
       it("should return ETH-indexed oracle price", async function () {
         // set ERC20/ETH indexed oracle
         const ethAmount = ethers.WeiPerEther;
-        await this.mockApi3.setValue(ethAmount);
+        const { mockApi3 } = this.testContracts;
+        await mockApi3.setValue(ethAmount);
         await this.redeployedContracts.priceFeed
           .connect(this.timelockImpostor)
           .setOracle(
             this.erc20Address,
-            this.mockApi3Address,
+            await mockApi3.getAddress(),
             this.api3OracleOptions.providerType,
             this.api3OracleOptions.timeoutSeconds,
             !this.api3OracleOptions.isEthIndexed,
             !this.api3OracleOptions.isFallback
           );
 
-        const roundData = await this.mockAggregator.latestRoundData();
+        const ethUsdRoundData = await this.mockAggregator.latestRoundData();
 
         const price = await this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address);
-        const priceAnswer = roundData[1];
+        const priceAnswer = ethUsdRoundData[1];
         const expectedPrice = priceAnswer * 10n ** 10n;
 
         expect(price).to.be.equal(expectedPrice);
       });
-      it.skip("should revert if price is zero", async function () {});
+
+      it("should revert if price is zero", async function () {
+        await this.mockAggregator.setPrice(0);
+        await this.mockApi3.setValue(0);
+        await expect(
+          this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address)
+        ).to.be.revertedWithCustomError(
+          this.redeployedContracts.priceFeed,
+          "PriceFeed__InvalidOracleResponseError"
+        );
+      });
     });
   });
 }
