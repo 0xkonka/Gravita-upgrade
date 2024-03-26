@@ -1,105 +1,190 @@
-import shouldHavePublicConstant from "./view/constants";
-import shouldBehaveLikeOwner from "./view/owner";
-import shouldHaveIsSetupInitialized from "./view/isSetupInitialized";
-import shouldBehaveLikeIsValidFirstRedemptionHint from "./view/isValidFirstRedemptionHint";
-import shouldBehaveLikeGetNominalICR from "./view/getNominalICR";
-import shouldBehaveLikeGetCurrentICR from "./view/getCurrentICR";
-import shouldBehaveLikeGetPendingAssetReward from "./view/getPendingAssetReward";
-import shouldBehaveLikeGetPendingDebtTokenReward from "./view/getPendingDebtTokenReward";
-import shouldBehaveLikeHasPendingRewards from "./view/hasPendingRewards";
-import shouldBehaveLikeGetEntireDebtAndColl from "./view/getEntireDebtAndColl";
-import shouldBehaveLikeIsTrenBoxActive from "./view/isTrenBoxActive";
-import shouldBehaveLikeGetTCR from "./view/getTCR";
-import shouldBehaveLikeCheckRecoveryMode from "./view/checkRecoveryMode";
-import shouldBehaveLikeGetBorrowingRate from "./view/getBorrowingRate";
-import shouldBehaveLikeGetBorrowingFee from "./view/getBorrowingFee";
-import shouldBehaveLikeGetRedemptionFee from "./view/getRedemptionFee";
-import shouldBehaveLikeGetRedemptionFeeWithDecay from "./view/getRedemptionFeeWithDecay";
-import shouldBehaveLikeGetRedemptionRate from "./view/getRedemptionRate";
-import shouldBehaveLikeGetRedemptionRateWithDecay from "./view/getRedemptionRateWithDecay";
+import * as view from "./view/index";
+import * as effects from "./effects/index";
 
 export function shouldBehaveLikeTrenBoxManagerContract(): void {
   describe("View functions", function () {
-    shouldHavePublicConstant();
+    view.shouldHavePublicConstant();
 
     describe("#owner", function () {
-      shouldBehaveLikeOwner();
+      view.shouldBehaveLikeOwner();
     })
 
     describe("#IsSetupInitialized", function () {
-      shouldHaveIsSetupInitialized();
+      view.shouldHaveIsSetupInitialized();
     })
 
     describe("#isValidFirstRedemptionHint", function () {
-      shouldBehaveLikeIsValidFirstRedemptionHint();
+      view.shouldBehaveLikeIsValidFirstRedemptionHint();
     });
 
     describe("#getNominalICR", function () {
-      shouldBehaveLikeGetNominalICR();
+      view.shouldBehaveLikeGetNominalICR();
     });
 
     describe("#getCurrentICR", function () {
-      shouldBehaveLikeGetCurrentICR();
+      view.shouldBehaveLikeGetCurrentICR();
     });
 
     describe("#getPendingAssetReward", function () {
-      shouldBehaveLikeGetPendingAssetReward();
+      view.shouldBehaveLikeGetPendingAssetReward();
     });
 
     describe("#getPendingDebtTokenReward", function () {
-      shouldBehaveLikeGetPendingDebtTokenReward();
+      view.shouldBehaveLikeGetPendingDebtTokenReward();
     });
 
     describe("#hasPendingRewards", function () {
-      shouldBehaveLikeHasPendingRewards();
+      view.shouldBehaveLikeHasPendingRewards();
     });
 
     describe("#getEntireDebtAndColl", function () {
-      shouldBehaveLikeGetEntireDebtAndColl();
+      view.shouldBehaveLikeGetEntireDebtAndColl();
     });
 
     describe("#isTrenBoxActive", function () {
-      shouldBehaveLikeIsTrenBoxActive();
+      view.shouldBehaveLikeIsTrenBoxActive();
     });
 
     describe("#getTCR", function () {
-      shouldBehaveLikeGetTCR();
+      view.shouldBehaveLikeGetTCR();
     });
 
     describe("#checkRecoveryMode", function () {
-      shouldBehaveLikeCheckRecoveryMode();
+      view.shouldBehaveLikeCheckRecoveryMode();
     });
     
     describe("#getBorrowingRate", function () {
-      shouldBehaveLikeGetBorrowingRate();
+      view.shouldBehaveLikeGetBorrowingRate();
     });
 
     describe("#getBorrowingFee", function () {
-      shouldBehaveLikeGetBorrowingFee();
+      view.shouldBehaveLikeGetBorrowingFee();
     });
 
     describe("#getRedemptionFee", function () {
-      shouldBehaveLikeGetRedemptionFee();
+      view.shouldBehaveLikeGetRedemptionFee();
     });
 
     describe("#getRedemptionFeeWithDecay", function () {
-      shouldBehaveLikeGetRedemptionFeeWithDecay();
+      view.shouldBehaveLikeGetRedemptionFeeWithDecay();
     });
 
     describe("#getRedemptionRate", function () {
-      shouldBehaveLikeGetRedemptionRate();
+      view.shouldBehaveLikeGetRedemptionRate();
     });
 
     describe("#getRedemptionRateWithDecay", function () {
-      shouldBehaveLikeGetRedemptionRateWithDecay();
+      view.shouldBehaveLikeGetRedemptionRateWithDecay();
+    });
+
+    describe("#getTrenBoxStatus", function () {
+      view.shouldBehaveLikeGetTrenBoxStatus();
+    });
+
+    describe("#getTrenBoxStake", function () {
+      view.shouldBehaveLikeGetTrenBoxStake();
+    });
+
+    describe("#getTrenBoxDebt", function () {
+      view.shouldBehaveLikeGetTrenBoxDebt();
+    });
+
+    describe("#getTrenBoxColl", function () {
+      view.shouldBehaveLikeGetTrenBoxColl();
+    });
+
+    describe("#getTrenBoxOwnersCount", function () {
+      view.shouldBehaveLikeGetTrenBoxOwnersCount();
+    });
+
+    describe("#getNetDebt", function () {
+      view.shouldBehaveLikeGetNetDebt();
     });
   });
 
   describe("Effects Functions", function () {
-    // describe("#decreaseDebt", function () {
-    //   shouldBehaveLikeCanDecreaseDebt();
-    // });
+    describe("#addTrenBoxOwnerToArray", function () {
+      effects.shouldBehaveLikeCanAddTrenBoxOwnerToArray();
+    });
 
+    describe("#executeFullRedemption", function () {
+      effects.shouldBehaveLikeCanExecuteFullRedemption();
+    });
     
+    describe("#executePartialRedemption", function () {
+      effects.shouldBehaveLikCanExecutePartialRedemption();
+    });
+
+    describe("#finalizeRedemption", function () {
+      effects.shouldBehaveLikeCanFinalizeRedemption();
+    });
+
+    describe("#updateBaseRateFromRedemption", function () {
+      effects.shouldBehaveLikeCanUpdateBaseRateFromRedemption();
+    });
+
+    describe("#applyPendingRewards", function () { 
+      effects.shouldBehaveLikeCanApplyPendingRewards();
+    });
+
+    describe("#movePendingTrenBoxRewardsToActivePool", function () {
+      effects.shouldBehaveLikeCanMovePendingTrenBoxRewardsToActivePool();
+    });
+
+    describe("#updateTrenBoxRewardSnapshots", function () {
+      effects.shouldBehaveLikeCanUpdateTrenBoxRewardSnapshots();
+    });
+
+    describe("#updateStakeAndTotalStakes", function () {
+      effects.shouldBehaveLikeCanUpdateStakeAndTotalStakes();
+    });
+    
+    describe("#removeStake", function () {
+      effects.shouldBehaveLikeCanRemoveStake();
+    });
+
+    describe("#redistributeDebtAndColl", function () {
+      effects.shouldBehaveLikeCanRedistributeDebtAndColl();
+    });
+
+    describe("#updateSystemSnapshots_excludeCollRemainder", function () {
+      effects.shouldBehaveLikeCanUpdateSystemSnapshots_excludeCollRemainder();
+    });
+
+    describe("#closeTrenBox", function () {
+      effects.shouldBehaveLikeCanCloseTrenBox();
+    });
+
+    describe("#closeTrenBoxLiquidation", function () {
+      effects.shouldBehaveLikeCanCloseTrenBoxLiquidation();
+    });
+
+    describe("#sendGasCompensation", function () {
+      effects.shouldBehaveLikeCanSendGasCompensation();
+    });
+
+    describe("#setTrenBoxStatus", function () {
+      effects.shouldBehaveLikeCanSetTrenBoxStatus();
+    });
+
+    describe("#increaseTrenBoxColl", function () {
+      effects.shouldBehaveLikeCanIncreaseTrenBoxColl();
+    });
+
+    describe("#decreaseTrenBoxColl", function () {
+      effects.shouldBehaveLikeCanDecreaseTrenBoxColl();
+    });
+    
+    describe("#increaseTrenBoxDebt", function () {
+      effects.shouldBehaveLikeCanIncreaseTrenBoxDebt();
+    });
+
+    describe("#decreaseTrenBoxDebt", function () {
+      effects.shouldBehaveLikeCanDecreaseTrenBoxDebt();
+    });
+    
+    describe("#authorizeUpgrade", function () {
+      effects.shouldBehaveLikeCanAuthorizeUpgrade();
+    });
   });
 }
