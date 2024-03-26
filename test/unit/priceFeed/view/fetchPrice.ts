@@ -76,13 +76,30 @@ export default function shouldHaveFetchPrice(): void {
       await this.redeployedContracts.priceFeed.setAddresses(addressesForSetAddresses);
     });
 
-    it("should return erc20 oracle price", async function () {
+    it("should return erc20 oracle price, decimal < 18", async function () {
       const price = await this.redeployedContracts.priceFeed.fetchPrice(
         this.erc20Address
       );
 
       const roundData = await this.mockAggregator.latestRoundData();
       expect(price).to.be.equal(ethers.parseUnits(roundData[1].toString(), 18 - 8));
+    });
+
+    it("should return different scaled price, decimal > 18", async function () {
+      await this.mockAggregator.setDecimals(20);
+      await this.redeployedContracts.priceFeed.connect(this.impostor).setOracle(
+        this.erc20Address,
+        this.mockAggregatorAddress,
+        this.defaultOracleOptions.providerType,
+        this.defaultOracleOptions.timeoutSeconds,
+        this.defaultOracleOptions.isEthIndexed,
+        this.defaultOracleOptions.isFallback
+      );
+      const price = await this.redeployedContracts.priceFeed.fetchPrice(
+        this.erc20Address
+      );
+      const roundData = await this.mockAggregator.latestRoundData();
+      expect(price).to.be.equal(parseFloat(roundData[1]) / 10 ** (20 - 18));
     });
 
     it("should return ETH-indexed oracle price", async function () {
