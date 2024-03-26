@@ -21,7 +21,16 @@ export default function shouldBehaveLikeContains(): void {
 
             await this.redeployedContracts.sortedTrenBoxes.setAddresses(addressesForSetAddresses);
         });
-        it("should contain module", async function () {
+        it("size should be 0", async function () {
+            const { sortedTrenBoxes } = this.redeployedContracts;
+            const { wETH } = this.collaterals.active;
+
+            const size = await sortedTrenBoxes.getSize(wETH.address);
+
+            expect(size).to.be.equal(0);
+        });
+
+        it("size should be 1", async function () {
             const { sortedTrenBoxes } = this.redeployedContracts;
             const { wETH } = this.collaterals.active;
 
@@ -34,20 +43,9 @@ export default function shouldBehaveLikeContains(): void {
                 .connect(this.impostor)
                 .insert(wETH.address, user1, 1n, prevId, nextId);
 
-            const exist = await sortedTrenBoxes.contains(wETH.address, user1);
+            const size = await sortedTrenBoxes.getSize(wETH.address);
 
-            expect(exist).to.be.equal(true);
-        });
-
-        it("should not contain module", async function () {
-            const { sortedTrenBoxes } = this.redeployedContracts;
-            const { wETH } = this.collaterals.active;
-
-            const user1 = this.signers.accounts[1];
-
-            const exist = await sortedTrenBoxes.contains(wETH.address, user1);
-
-            expect(exist).to.be.equal(false);
+            expect(size).to.be.equal(1);
         });
     });
 }

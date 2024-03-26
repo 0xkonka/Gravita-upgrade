@@ -1,8 +1,15 @@
 import shouldBehaveLikeCanAuthorizeUpgrade from "./effects/authorizeUpgrade";
+import shouldBehaveLikeInsert from "./effects/insert";
+import shouldBehaveLikeCanReInsert from "./effects/reinsert";
+import shouldBehaveLikeCanRemove from "./effects/remove";
 import shouldHaveName from "./view/constants/name";
 import shouldBehaveLikeContains from "./view/contains";
-// import shouldBehaveLikeGetDebtTokenBalance from "./view/getDebtTokenBalance";
+import shouldBehaveLikeFindValidInsertPosition from "./view/findInsertPosition";
+import shouldBehaveLikeGetNodes from "./view/getNodes";
+import shouldBehaveLikeGetSize from "./view/getSize";
+import shouldBehaveLikeIsEmpty from "./view/isEmpty";
 import shouldBehaveLikeOwner from "./view/owner";
+import shouldBehaveLikeValidInsertPosition from "./view/validInsertPosition";
 
 export function shouldBehaveLikeSortedTrenBoxesContract(): void {
   describe("View Functions", function () {
@@ -17,51 +24,39 @@ export function shouldBehaveLikeSortedTrenBoxesContract(): void {
       shouldBehaveLikeContains();
     });
 
-    // describe("#isEmpty", function () {
-    //   shouldBehaveLikeGetDebtTokenBalance();
-    // });
+    describe("#isEmpty", function () {
+      shouldBehaveLikeIsEmpty();
+    });
 
-    // describe("#getSize", function () {
-    //   shouldBehaveLikeGetAssetBalance();
-    // });
+    describe("#getSize", function () {
+      shouldBehaveLikeGetSize();
+    });
 
-    // describe("#getFirst", function () {
-    //   shouldBehaveLikeGetDebtTokenBalance();
-    // });
+    describe("#getNodes", function () {
+      shouldBehaveLikeGetNodes();
+    });
 
-    // describe("#getLast", function () {
-    //   shouldBehaveLikeGetAssetBalance();
-    // });
+    describe("#validInsertPosition", function () {
+      shouldBehaveLikeValidInsertPosition();
+    });
 
-    // describe("#getNext", function () {
-    //   shouldBehaveLikeGetDebtTokenBalance();
-    // });
-
-    // describe("#getPrev", function () {
-    //   shouldBehaveLikeGetAssetBalance();
-    // });
-
-    // describe("#validInsertPosition", function () {
-    //   shouldBehaveLikeGetDebtTokenBalance();
-    // });
-
-    // describe("#findInsertPosition", function () {
-    //   shouldBehaveLikeGetDebtTokenBalance();
-    // });
+    describe("#findInsertPosition", function () {
+      shouldBehaveLikeFindValidInsertPosition();
+    });
   });
 
   describe("Effects Functions", function () {
-    // describe("#insert", function () {
-    //   shouldBehaveLikeCanDecreaseDebt();
-    // });
+    describe("#remove", function () {
+      shouldBehaveLikeCanRemove();
+    });
 
-    // describe("#remove", function () {
-    //   shouldBehaveLikeCanIncreaseDebt();
-    // });
+    describe("#insert", function () {
+      shouldBehaveLikeInsert();
+    });
 
-    // describe("#reinsert", function () {
-    //   shouldBehaveLikeCanReceivedERC20();
-    // });
+    describe("#reinsert", function () {
+      shouldBehaveLikeCanReInsert();
+    });
 
     describe("#authorizeUpgrade", function () {
       shouldBehaveLikeCanAuthorizeUpgrade();

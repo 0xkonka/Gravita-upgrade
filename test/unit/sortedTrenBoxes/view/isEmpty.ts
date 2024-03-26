@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-export default function shouldBehaveLikeContains(): void {
+export default function shouldBehaveLikeIsEmpty(): void {
     beforeEach(async function () {
         const SortedTrenBoxeslFactory = await ethers.getContractFactory("SortedTrenBoxes");
         const sortedTrenBoxes = await SortedTrenBoxeslFactory.connect(this.signers.deployer).deploy();
@@ -21,33 +21,13 @@ export default function shouldBehaveLikeContains(): void {
 
             await this.redeployedContracts.sortedTrenBoxes.setAddresses(addressesForSetAddresses);
         });
-        it("should contain module", async function () {
+        it("check isEmpty", async function () {
             const { sortedTrenBoxes } = this.redeployedContracts;
             const { wETH } = this.collaterals.active;
 
-            const user1 = this.signers.accounts[1];
+            const isEmpty = await sortedTrenBoxes.isEmpty(wETH.address);
 
-            const prevId = ethers.ZeroAddress;
-            const nextId = ethers.ZeroAddress;
-
-            await this.redeployedContracts.sortedTrenBoxes
-                .connect(this.impostor)
-                .insert(wETH.address, user1, 1n, prevId, nextId);
-
-            const exist = await sortedTrenBoxes.contains(wETH.address, user1);
-
-            expect(exist).to.be.equal(true);
-        });
-
-        it("should not contain module", async function () {
-            const { sortedTrenBoxes } = this.redeployedContracts;
-            const { wETH } = this.collaterals.active;
-
-            const user1 = this.signers.accounts[1];
-
-            const exist = await sortedTrenBoxes.contains(wETH.address, user1);
-
-            expect(exist).to.be.equal(false);
+            expect(isEmpty).to.be.equal(true);
         });
     });
 }

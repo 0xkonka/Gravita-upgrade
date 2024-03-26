@@ -1,7 +1,7 @@
 import { shouldBehaveLikeSortedTrenBoxesContract } from "./SortedTrenBoxes.behavior";
 
 export function testSortedTrenBoxes(): void {
-  describe("ActivePool", function () {
+  describe("SortedTrenBoxes", function () {
     beforeEach(async function () { });
 
     shouldBehaveLikeSortedTrenBoxesContract();
