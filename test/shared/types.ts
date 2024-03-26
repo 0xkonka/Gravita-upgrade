@@ -2,7 +2,7 @@ import type {
   HardhatEthersSigner,
   SignerWithAddress,
 } from "@nomicfoundation/hardhat-ethers/signers";
-import { AddressLike, BaseContract } from "ethers";
+import { AddressLike, BaseContract, ContractTransactionResponse } from "ethers";
 
 import { Collateral } from "../../config/collaterals";
 import type {
@@ -16,6 +16,7 @@ import type {
   GasPool,
   IPriceFeed,
   Lock,
+  PriceFeedTestnet,
   SortedTrenBoxes,
   StabilityPool,
   Timelock,
@@ -24,6 +25,7 @@ import type {
   PriceFeed,
   PriceFeedL2
 } from "../../types";
+
 import {
   ERC20Test,
   MockAggregator,
@@ -93,15 +95,93 @@ export type GetAddressesForSetAddressesOverrides = Partial<
 
 export type GetAddressesForSetAddressesResult = AddressLike[];
 
+export type OpenTrenBoxArgs = {
+  asset: AddressLike;
+  assetAmount: bigint;
+  upperHint?: string;
+  lowerHint?: string;
+  extraDebtTokenAmount?: bigint;
+  overrideAdminContract?: AdminContract;
+  overrideBorrowerOperations?: BorrowerOperations;
+  overrideTrenBoxManager?: TrenBoxManager;
+  from?: SignerWithAddress;
+};
+
+export type OpenTrenBoxResult = {
+  openTrenBoxTx: Promise<ContractTransactionResponse>;
+  debtTokenAmount: bigint;
+  netDebt: bigint;
+  totalDebt: bigint;
+  collateralAmount: bigint;
+};
+
+export type GetNetBorrowingAmountArgs = {
+  asset: AddressLike;
+  debtWithFees: bigint;
+  overrideTrenBoxManager?: TrenBoxManager;
+};
+
+export type GetCompositeDebtArgs = {
+  asset: AddressLike;
+  debtTokenAmount: bigint;
+  overrideBorrowerOperations?: BorrowerOperations;
+};
+
+export type GetOpenTrenBoxTotalDebtArgs = GetCompositeDebtArgs & {
+  overrideTrenBoxManager?: TrenBoxManager;
+};
+
+export type GetActualDebtFromCompositeDebtArgs = {
+  asset: AddressLike;
+  compositeDebt: bigint;
+  overrideTrenBoxManager?: TrenBoxManager;
+};
+
+export type SetupCollateralForTestsArgs = {
+  collateral: ERC20Test;
+  collateralOptions: {
+    mints?: {
+      to: AddressLike;
+      amount: bigint;
+    }[];
+    approve?: {
+      from: HardhatEthersSigner;
+      spender: AddressLike;
+      amount: bigint;
+    }[];
+    price: bigint;
+    debtTokenGasCompensation?: bigint;
+    setAsActive?: boolean;
+    setCollateralParams?: {
+      borrowingFee: bigint;
+      criticalCollateralRate: bigint;
+      minimumCollateralRatio: bigint;
+      minNetDebt: bigint;
+      mintCap: bigint;
+      percentDivisor: bigint;
+      redemptionFeeFloor: bigint;
+    };
+  };
+  overrideAdminContract?: AdminContract;
+  overridePriceFeed?: PriceFeedTestnet;
+};
+
 export interface TestUtils {
   revertToInitialSnapshot: () => Promise<void>;
   getAddressesForSetAddresses: (
     overrides?: GetAddressesForSetAddressesOverrides
   ) => Promise<GetAddressesForSetAddressesResult>;
+  openTrenBox: (args: OpenTrenBoxArgs) => Promise<OpenTrenBoxResult>;
+  getNetBorrowingAmount(args: GetNetBorrowingAmountArgs): Promise<bigint>;
+  getOpenTrenBoxTotalDebt(args: GetOpenTrenBoxTotalDebtArgs): Promise<bigint>;
+  getCompositeDebt: (args: GetCompositeDebtArgs) => Promise<bigint>;
+  getActualDebtFromCompositeDebt: (args: GetActualDebtFromCompositeDebtArgs) => Promise<bigint>;
+  setupCollateralForTests: (args: SetupCollateralForTestsArgs) => Promise<void>;
 }
 
 export interface TestContracts {
   erc20: ERC20Test;
   mockAggregator: MockAggregator;
   mockApi3: MockApi3Proxy;
+  priceFeedTestnet: PriceFeedTestnet;
 }

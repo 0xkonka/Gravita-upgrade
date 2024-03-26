@@ -80,11 +80,17 @@ export async function loadTestFixture(): Promise<{
   const mockApi3: MockApi3Proxy = (await MockApi3Factory.connect(deployer).deploy(...api3Args)) as MockApi3Proxy;
   await mockApi3.waitForDeployment();
 
+  const priceFeedTestnet = await ethers.getContractAt(
+    "PriceFeedTestnet",
+    deploymentSummary.PriceFeedTestnet.address
+  );
+
   return {
     testContracts: {
       erc20,
       mockAggregator,
-      mockApi3
+      mockApi3,
+      priceFeedTestnet,
     },
     collaterals: {
       active: {

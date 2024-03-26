@@ -9,6 +9,8 @@ import type {
   TestUtils,
   RedeployedContracts
 } from "../shared/types";
+
+import { setupUtils } from "../utils";
 import { testActivePool } from "./activePool/ActivePool";
 import { testAdminContract } from "./adminContract/AdminContract";
 import { testBorrowerOperations } from "./borrowerOperations/BorrowerOperations";
@@ -48,34 +50,7 @@ describe("Unit tests", function () {
 
     this.initialSnapshotId = await network.provider.send("evm_snapshot", []);
     this.snapshotId = this.initialSnapshotId;
-
-    this.utils.getAddressesForSetAddresses = async (
-      overrides?: GetAddressesForSetAddressesOverrides
-    ): Promise<GetAddressesForSetAddressesResult> => {
-      overrides = overrides || {};
-      const contracts = { ...this.contracts, ...overrides };
-      const treasury = overrides.treasury || this.signers.treasury;
-
-      const addressesForSetAddresses = await Promise.all([
-        await contracts.activePool.getAddress(),
-        await contracts.adminContract.getAddress(),
-        await contracts.borrowerOperations.getAddress(),
-        await contracts.collSurplusPool.getAddress(),
-        await contracts.debtToken.getAddress(),
-        await contracts.defaultPool.getAddress(),
-        await contracts.feeCollector.getAddress(),
-        await contracts.gasPool.getAddress(),
-        await contracts.priceFeed.getAddress(),
-        await contracts.sortedTrenBoxes.getAddress(),
-        await contracts.stabilityPool.getAddress(),
-        await contracts.timelock.getAddress(),
-        await treasury.getAddress(),
-        await contracts.trenBoxManager.getAddress(),
-        await contracts.trenBoxManagerOperations.getAddress(),
-      ]);
-
-      return addressesForSetAddresses;
-    };
+    this.utils = setupUtils(this);
   });
 
   beforeEach(async function () {
