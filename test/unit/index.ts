@@ -9,6 +9,7 @@ import { testBorrowerOperations } from "./borrowerOperations/BorrowerOperations"
 import { testCollSurplusPool } from "./collSurplusPool/CollSurplusPool";
 import { testDebtToken } from "./debtToken/DebtToken";
 import { testDefaultPool } from "./defaultPool/DefaultPool";
+import { testFeeCollector } from "./feeCollector/FeeCollector";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testLock } from "./lock/Lock";
 import { loadTestFixture } from "./testContracts.fixture";
@@ -58,4 +59,5 @@ describe("Unit tests", function () {
   testLock();
   testCollSurplusPool();
   testDefaultPool();
+  testFeeCollector();
 });
