@@ -12,6 +12,7 @@ import { testDefaultPool } from "./defaultPool/DefaultPool";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testLock } from "./lock/Lock";
 import { testPriceFeed } from "./priceFeed/PriceFeed";
+import { testSortedTrenBoxes } from "./sortedTrenBoxes/SortedTrenBoxes";
 import { loadTestFixture } from "./testContracts.fixture";
 import { testTrenBoxManager } from "./trenBoxManager/TrenBoxManager";
 
@@ -34,6 +35,7 @@ describe("Unit tests", function () {
     this.signers.accounts = await Promise.all(
       unnamedAccounts.map((address) => ethers.getSigner(address))
     );
+    this.users = [];
 
     this.loadFixture = loadFixture;
     this.contracts = await this.loadFixture(loadDeploymentFixture);
@@ -48,6 +50,7 @@ describe("Unit tests", function () {
 
   beforeEach(async function () {
     this.snapshotId = await network.provider.send("evm_snapshot");
+    this.users = [];
   });
 
   afterEach(async function () {
@@ -64,6 +67,7 @@ describe("Unit tests", function () {
   testDebtToken();
   testPriceFeed();
   testLock();
+  testSortedTrenBoxes();
   testTrenBoxManager();
   testCollSurplusPool();
   testDefaultPool();

@@ -6,8 +6,7 @@ export default function shouldBehaveLikeGetNetDebt(): void {
     const { wETH } = this.collaterals.active;
     const debt = ethers.parseEther("300");
 
-    expect(await this.contracts.trenBoxManager.getNetDebt(wETH.address, debt))
-      .to.be.equal(0);
+    expect(await this.contracts.trenBoxManager.getNetDebt(wETH.address, debt)).to.be.equal(0);
   });
 
   it("should not return zero", async function () {
@@ -15,7 +14,6 @@ export default function shouldBehaveLikeGetNetDebt(): void {
     const debt = ethers.parseEther("400");
     const res = ethers.parseEther("100");
 
-    expect(await this.contracts.trenBoxManager.getNetDebt(wETH.address, debt))
-      .to.be.equal(res);
+    expect(await this.contracts.trenBoxManager.getNetDebt(wETH.address, debt)).to.be.equal(res);
   });
 }

@@ -9,11 +9,12 @@
 [foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
 
 ## Table of Contents
-- [Tren Protocol Contracts   ](#tren-protocol-contracts---)
+
+- [Tren Protocol Contracts ](#tren-protocol-contracts---)
   - [Table of Contents](#table-of-contents)
 - [Usage](#usage)
-    - [Pre Requisites](#pre-requisites)
-    - [Lint Solidity](#lint-solidity)
+  - [Pre Requisites](#pre-requisites)
+  - [Lint Solidity](#lint-solidity)
   - [Foundry](#foundry)
     - [Build or Compile](#build-or-compile)
     - [Coverage](#coverage)

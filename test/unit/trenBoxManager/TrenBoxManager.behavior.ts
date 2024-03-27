@@ -1,5 +1,5 @@
-import * as view from "./view/index";
 import * as effects from "./effects/index";
+import * as view from "./view/index";
 
 export function shouldBehaveLikeTrenBoxManagerContract(): void {
   describe("View functions", function () {
@@ -7,11 +7,11 @@ export function shouldBehaveLikeTrenBoxManagerContract(): void {
 
     describe("#owner", function () {
       view.shouldBehaveLikeOwner();
-    })
+    });
 
     describe("#IsSetupInitialized", function () {
       view.shouldHaveIsSetupInitialized();
-    })
+    });
 
     describe("#isValidFirstRedemptionHint", function () {
       view.shouldBehaveLikeIsValidFirstRedemptionHint();
@@ -52,7 +52,7 @@ export function shouldBehaveLikeTrenBoxManagerContract(): void {
     describe("#checkRecoveryMode", function () {
       view.shouldBehaveLikeCheckRecoveryMode();
     });
-    
+
     describe("#getBorrowingRate", function () {
       view.shouldBehaveLikeGetBorrowingRate();
     });
@@ -110,7 +110,7 @@ export function shouldBehaveLikeTrenBoxManagerContract(): void {
     describe("#executeFullRedemption", function () {
       effects.shouldBehaveLikeCanExecuteFullRedemption();
     });
-    
+
     describe("#executePartialRedemption", function () {
       effects.shouldBehaveLikCanExecutePartialRedemption();
     });
@@ -123,7 +123,7 @@ export function shouldBehaveLikeTrenBoxManagerContract(): void {
       effects.shouldBehaveLikeCanUpdateBaseRateFromRedemption();
     });
 
-    describe("#applyPendingRewards", function () { 
+    describe("#applyPendingRewards", function () {
       effects.shouldBehaveLikeCanApplyPendingRewards();
     });
 
@@ -138,7 +138,7 @@ export function shouldBehaveLikeTrenBoxManagerContract(): void {
     describe("#updateStakeAndTotalStakes", function () {
       effects.shouldBehaveLikeCanUpdateStakeAndTotalStakes();
     });
-    
+
     describe("#removeStake", function () {
       effects.shouldBehaveLikeCanRemoveStake();
     });
@@ -174,7 +174,7 @@ export function shouldBehaveLikeTrenBoxManagerContract(): void {
     describe("#decreaseTrenBoxColl", function () {
       effects.shouldBehaveLikeCanDecreaseTrenBoxColl();
     });
-    
+
     describe("#increaseTrenBoxDebt", function () {
       effects.shouldBehaveLikeCanIncreaseTrenBoxDebt();
     });
@@ -182,7 +182,7 @@ export function shouldBehaveLikeTrenBoxManagerContract(): void {
     describe("#decreaseTrenBoxDebt", function () {
       effects.shouldBehaveLikeCanDecreaseTrenBoxDebt();
     });
-    
+
     describe("#authorizeUpgrade", function () {
       effects.shouldBehaveLikeCanAuthorizeUpgrade();
     });

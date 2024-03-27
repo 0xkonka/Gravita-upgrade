@@ -2,10 +2,10 @@ import { expect } from "chai";
 
 export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
   context("when caller is owner", function () {
-    it("should emit CollSurplusPoolDebtUpdated", async function () {
+    it("should SortedTrenBox updated", async function () {
       const { wETH } = this.collaterals.active;
 
-      await this.contracts.collSurplusPool
+      await this.contracts.sortedTrenBoxes
         .connect(this.signers.deployer)
         .authorizeUpgrade(wETH.address);
     });
@@ -13,12 +13,12 @@ export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
 
   context("when caller is not an owner", function () {
     it("reverts custom error", async function () {
-      this.impostor = this.signers.accounts[1];
+      const impostor = this.signers.accounts[1];
       const { wETH } = this.collaterals.active;
 
       await expect(
-        this.contracts.collSurplusPool.connect(this.impostor).authorizeUpgrade(wETH.address)
-      ).to.be.revertedWithCustomError(this.contracts.collSurplusPool, "OwnableUnauthorizedAccount");
+        this.contracts.sortedTrenBoxes.connect(impostor).authorizeUpgrade(wETH.address)
+      ).to.be.revertedWithCustomError(this.contracts.sortedTrenBoxes, "OwnableUnauthorizedAccount");
     });
   });
 }

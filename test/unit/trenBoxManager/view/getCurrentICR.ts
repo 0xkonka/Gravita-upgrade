@@ -6,7 +6,8 @@ export default function shouldBehaveLikeGetCurrentICR(): void {
     const borrower = this.signers.accounts[1];
     const price = 10n;
 
-    expect(await this.contracts.trenBoxManager.getCurrentICR(wETH.address, borrower, price))
-      .to.not.be.equal(0);
+    expect(
+      await this.contracts.trenBoxManager.getCurrentICR(wETH.address, borrower, price)
+    ).to.not.be.equal(0);
   });
 }

@@ -1,7 +1,7 @@
-import shouldHaveSecondsInOneMinute from "./secondsInOneMinute";
-import shouldHaveName from "./name";
-import shouldHaveMinuteDecayFactor from "./minuteDecayFactor";
 import shouldHaveBeta from "./beta";
+import shouldHaveMinuteDecayFactor from "./minuteDecayFactor";
+import shouldHaveName from "./name";
+import shouldHaveSecondsInOneMinute from "./secondsInOneMinute";
 
 export default function shouldHavePublicConstant(): void {
   describe("Constants", function () {

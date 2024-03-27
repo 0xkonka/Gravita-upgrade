@@ -6,7 +6,12 @@ export default function shouldBehaveLikeIsValidFirstRedemptionHint(): void {
     const firstRedemptionHint = this.signers.accounts[1];
     const price = 50n;
 
-    expect(await this.contracts.trenBoxManager.isValidFirstRedemptionHint(wETH.address, firstRedemptionHint, price))
-      .to.be.equal(false);
+    expect(
+      await this.contracts.trenBoxManager.isValidFirstRedemptionHint(
+        wETH.address,
+        firstRedemptionHint,
+        price
+      )
+    ).to.be.equal(false);
   });
 }

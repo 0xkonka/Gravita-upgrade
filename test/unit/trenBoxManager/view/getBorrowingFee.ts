@@ -6,8 +6,9 @@ export default function shouldBehaveLikeGetBorrowingFee(): void {
       const { wETH } = this.collaterals.active;
       const debtAmount = 100n;
 
-      expect(await this.contracts.trenBoxManager.getBorrowingFee(wETH.address, debtAmount))
-        .to.be.equal(1n);
+      expect(
+        await this.contracts.trenBoxManager.getBorrowingFee(wETH.address, debtAmount)
+      ).to.be.equal(1n);
     });
   });
 
@@ -16,8 +17,9 @@ export default function shouldBehaveLikeGetBorrowingFee(): void {
       const { dai } = this.collaterals.inactive;
       const debtAmount = 100n;
 
-      expect(await this.contracts.trenBoxManager.getBorrowingFee(dai.address, debtAmount))
-        .to.be.equal(0n);
+      expect(
+        await this.contracts.trenBoxManager.getBorrowingFee(dai.address, debtAmount)
+      ).to.be.equal(0n);
     });
   });
 
@@ -26,8 +28,9 @@ export default function shouldBehaveLikeGetBorrowingFee(): void {
       const { testCollateral } = this.collaterals.notAdded;
       const debtAmount = 100n;
 
-      expect(await this.contracts.trenBoxManager.getBorrowingFee(testCollateral.address, debtAmount))
-        .to.be.equal(0n);
+      expect(
+        await this.contracts.trenBoxManager.getBorrowingFee(testCollateral.address, debtAmount)
+      ).to.be.equal(0n);
     });
   });
 }

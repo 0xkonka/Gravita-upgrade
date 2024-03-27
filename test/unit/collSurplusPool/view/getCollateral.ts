@@ -32,7 +32,10 @@ export default function shouldBehaveLikeGetCollateral(): void {
 
       const user = this.signers.accounts[1];
 
-      const assetBalance = await this.contracts.collSurplusPool.getCollateral(nonExistentCollateral, user.address);
+      const assetBalance = await this.contracts.collSurplusPool.getCollateral(
+        nonExistentCollateral,
+        user.address
+      );
 
       expect(assetBalance).to.be.equal(0n);
     });

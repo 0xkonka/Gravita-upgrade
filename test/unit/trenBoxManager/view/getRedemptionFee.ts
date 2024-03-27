@@ -5,7 +5,8 @@ export default function shouldBehaveLikeGetRedemptionFee(): void {
     const { wETH } = this.collaterals.active;
     const assetDraw = 100n;
 
-    expect(await this.contracts.trenBoxManager.getRedemptionFee(wETH.address, assetDraw))
-      .to.be.equal(0);
+    expect(
+      await this.contracts.trenBoxManager.getRedemptionFee(wETH.address, assetDraw)
+    ).to.be.equal(0);
   });
 }

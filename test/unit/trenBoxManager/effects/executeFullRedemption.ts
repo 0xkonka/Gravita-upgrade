@@ -5,7 +5,8 @@ export default function shouldBehaveLikeCanExecuteFullRedemption(): void {
   beforeEach(async function () {
     const owner = this.signers.deployer;
     this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
-    this.users = [this.signers.accounts[2], this.signers.accounts[3]];
+
+    await this.utils.setUsers([this.signers.accounts[2], this.signers.accounts[3]]);
 
     const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
     const activePool = await ActivePoolFactory.connect(owner).deploy();

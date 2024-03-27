@@ -5,7 +5,8 @@ export default function shouldBehaveLikeHasPendingRewards(): void {
     const { wETH } = this.collaterals.active;
     const borrower = this.signers.accounts[1];
 
-    expect(await this.contracts.trenBoxManager.hasPendingRewards(wETH.address, borrower))
-      .to.be.equal(false);
+    expect(
+      await this.contracts.trenBoxManager.hasPendingRewards(wETH.address, borrower)
+    ).to.be.equal(false);
   });
 }

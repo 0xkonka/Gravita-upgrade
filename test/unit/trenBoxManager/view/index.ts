@@ -1,29 +1,29 @@
+import shouldBehaveLikeCheckRecoveryMode from "./checkRecoveryMode";
 import shouldHavePublicConstant from "./constants";
-import shouldBehaveLikeOwner from "./owner";
-import shouldHaveIsSetupInitialized from "./isSetupInitialized";
-import shouldBehaveLikeIsValidFirstRedemptionHint from "./isValidFirstRedemptionHint";
-import shouldBehaveLikeGetNominalICR from "./getNominalICR";
+import shouldBehaveLikeGetBorrowingFee from "./getBorrowingFee";
+import shouldBehaveLikeGetBorrowingRate from "./getBorrowingRate";
 import shouldBehaveLikeGetCurrentICR from "./getCurrentICR";
+import shouldBehaveLikeGetEntireDebtAndColl from "./getEntireDebtAndColl";
+import shouldBehaveLikeGetNetDebt from "./getNetDebt";
+import shouldBehaveLikeGetNominalICR from "./getNominalICR";
 import shouldBehaveLikeGetPendingAssetReward from "./getPendingAssetReward";
 import shouldBehaveLikeGetPendingDebtTokenReward from "./getPendingDebtTokenReward";
-import shouldBehaveLikeHasPendingRewards from "./hasPendingRewards";
-import shouldBehaveLikeGetEntireDebtAndColl from "./getEntireDebtAndColl";
-import shouldBehaveLikeIsTrenBoxActive from "./isTrenBoxActive";
-import shouldBehaveLikeGetTCR from "./getTCR";
-import shouldBehaveLikeCheckRecoveryMode from "./checkRecoveryMode";
-import shouldBehaveLikeGetBorrowingRate from "./getBorrowingRate";
-import shouldBehaveLikeGetBorrowingFee from "./getBorrowingFee";
 import shouldBehaveLikeGetRedemptionFee from "./getRedemptionFee";
 import shouldBehaveLikeGetRedemptionFeeWithDecay from "./getRedemptionFeeWithDecay";
 import shouldBehaveLikeGetRedemptionRate from "./getRedemptionRate";
 import shouldBehaveLikeGetRedemptionRateWithDecay from "./getRedemptionRateWithDecay";
-import shouldBehaveLikeGetTrenBoxStatus from "./getTrenBoxStatus";
-import shouldBehaveLikeGetTrenBoxStake from "./getTrenBoxStake";
-import shouldBehaveLikeGetTrenBoxDebt from "./getTrenBoxDebt";
+import shouldBehaveLikeGetTCR from "./getTCR";
 import shouldBehaveLikeGetTrenBoxColl from "./getTrenBoxColl";
-import shouldBehaveLikeGetTrenBoxOwnersCount from "./getTrenBoxOwnersCount";
+import shouldBehaveLikeGetTrenBoxDebt from "./getTrenBoxDebt";
 import shouldBehaveLikeGetTrenBoxFromTrenBoxOwnersArray from "./getTrenBoxFromTrenBoxOwnersArray";
-import shouldBehaveLikeGetNetDebt from "./getNetDebt";
+import shouldBehaveLikeGetTrenBoxOwnersCount from "./getTrenBoxOwnersCount";
+import shouldBehaveLikeGetTrenBoxStake from "./getTrenBoxStake";
+import shouldBehaveLikeGetTrenBoxStatus from "./getTrenBoxStatus";
+import shouldBehaveLikeHasPendingRewards from "./hasPendingRewards";
+import shouldHaveIsSetupInitialized from "./isSetupInitialized";
+import shouldBehaveLikeIsTrenBoxActive from "./isTrenBoxActive";
+import shouldBehaveLikeIsValidFirstRedemptionHint from "./isValidFirstRedemptionHint";
+import shouldBehaveLikeOwner from "./owner";
 
 export {
   shouldHavePublicConstant,
@@ -52,4 +52,4 @@ export {
   shouldBehaveLikeGetTrenBoxOwnersCount,
   shouldBehaveLikeGetTrenBoxFromTrenBoxOwnersArray,
   shouldBehaveLikeGetNetDebt,
-}
+};
