@@ -1,18 +1,17 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers, getNamedAccounts, getUnnamedAccounts, network } from "hardhat";
 
-import type { Contracts, Signers } from "../shared/types";
+import type { Contracts, RedeployedContracts, Signers, TestUtils } from "../shared/types";
 import { setupUtils } from "../utils";
 import { testActivePool } from "./activePool/ActivePool";
 import { testAdminContract } from "./adminContract/AdminContract";
 import { testBorrowerOperations } from "./borrowerOperations/BorrowerOperations";
 import { testCollSurplusPool } from "./collSurplusPool/CollSurplusPool";
 import { testDebtToken } from "./debtToken/DebtToken";
-import { testCollSurplusPool } from "./collSurplusPool/CollSurplusPool";
 import { testDefaultPool } from "./defaultPool/DefaultPool";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testLock } from "./lock/Lock";
-import { testDefaultPool } from "./defaultPool/DefaultPool";
+import { testPriceFeed } from "./priceFeed/PriceFeed";
 import { loadTestFixture } from "./testContracts.fixture";
 import { testTrenBoxManager } from "./trenBoxManager/TrenBoxManager";
 
@@ -20,7 +19,12 @@ describe("Unit tests", function () {
   before(async function () {
     this.signers = {} as Signers;
     this.contracts = {} as Contracts;
-    this.redeployedContracts = {} as Contracts;
+    this.redeployedContracts = {} as RedeployedContracts;
+    this.utils = {
+      revertToInitialSnapshot: async () => {
+        await network.provider.send("evm_revert", [this.initialSnapshotId]);
+      },
+    } as TestUtils;
 
     const { deployer, treasury } = await getNamedAccounts();
     const unnamedAccounts = await getUnnamedAccounts();
@@ -58,6 +62,7 @@ describe("Unit tests", function () {
   testAdminContract();
   testBorrowerOperations();
   testDebtToken();
+  testPriceFeed();
   testLock();
   testTrenBoxManager();
   testCollSurplusPool();
