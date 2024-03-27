@@ -4,17 +4,22 @@ import { ethers } from "hardhat";
 export default function shouldBehaveLikeCanBurn(): void {
   beforeEach(async function () {
     this.impostor = this.signers.accounts[1];
+
+    this.borrowerOperationsImpostor = this.signers.accounts[2];
+    this.stabilityPoolImpostor = this.signers.accounts[3];
+    this.trenBoxManagerImpostor = this.signers.accounts[4];
+
     this.collateral = this.collaterals.active.wETH;
     this.tokenRecipient = this.signers.accounts[2];
 
     await this.contracts.debtToken.setAddresses(
-      this.impostor.address,
+      this.borrowerOperationsImpostor.address,
       await this.contracts.stabilityPool.getAddress(),
       await this.contracts.trenBoxManager.getAddress()
     );
 
     await this.contracts.debtToken
-      .connect(this.impostor)
+      .connect(this.borrowerOperationsImpostor)
       .mint(this.collateral.address, this.tokenRecipient.address, 100);
 
     await this.contracts.debtToken.setAddresses(
@@ -26,13 +31,13 @@ export default function shouldBehaveLikeCanBurn(): void {
 
   context("when caller is borrower operations", function () {
     beforeEach(async function () {
-      this.impostor = this.signers.accounts[1];
-
       await this.contracts.debtToken.setAddresses(
-        this.impostor.address,
+        this.borrowerOperationsImpostor.address,
         await this.contracts.stabilityPool.getAddress(),
         await this.contracts.trenBoxManager.getAddress()
       );
+
+      this.impostor = this.borrowerOperationsImpostor;
     });
 
     shouldBehaveLikeCanBurnCorrectly();
@@ -40,26 +45,27 @@ export default function shouldBehaveLikeCanBurn(): void {
 
   context("when caller is tren box manager", function () {
     beforeEach(async function () {
-      this.impostor = this.signers.accounts[1];
-
       await this.contracts.debtToken.setAddresses(
         await this.contracts.borrowerOperations.getAddress(),
         await this.contracts.stabilityPool.getAddress(),
-        this.impostor.address
+        this.trenBoxManagerImpostor.address
       );
+
+      this.impostor = this.trenBoxManagerImpostor;
     });
 
     shouldBehaveLikeCanBurnCorrectly();
   });
+
   context("when caller is stability pool", function () {
     beforeEach(async function () {
-      this.impostor = this.signers.accounts[1];
-
       await this.contracts.debtToken.setAddresses(
         await this.contracts.borrowerOperations.getAddress(),
-        this.impostor.address,
+        this.stabilityPoolImpostor.address,
         await this.contracts.trenBoxManager.getAddress()
       );
+
+      this.impostor = this.stabilityPoolImpostor;
     });
 
     shouldBehaveLikeCanBurnCorrectly();

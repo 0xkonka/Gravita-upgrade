@@ -10,13 +10,13 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
 
     this.redeployedContracts.defaultPool = defaultPool;
 
-    this.impostor = this.signers.accounts[1];
+    this.trenBoxManagerImpostor = this.signers.accounts[1];
   });
 
   context("when caller is Tren box manager", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        trenBoxManager: this.impostor,
+        trenBoxManager: this.trenBoxManagerImpostor,
       });
 
       await this.redeployedContracts.defaultPool.setAddresses(addressesForSetAddresses);
@@ -27,12 +27,14 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
 
   context("when caller is not Tren box manager", function () {
     it("reverts custom error", async function () {
-      this.impostor = this.signers.accounts[1];
+      const impostor = this.signers.accounts[1];
       const { wETH } = this.collaterals.active;
       const debtAmount = 50n;
 
       await expect(
-        this.redeployedContracts.defaultPool.connect(this.impostor).increaseDebt(wETH.address, debtAmount)
+        this.redeployedContracts.defaultPool
+          .connect(impostor)
+          .increaseDebt(wETH.address, debtAmount)
       ).to.be.revertedWith("DefaultPool: Caller is not the TrenBoxManager");
     });
   });
@@ -47,8 +49,9 @@ function shouldBehaveLikeCanIncreaseDebtCorrectly() {
     const debtAmount = 50n;
 
     await this.redeployedContracts.defaultPool
-      .connect(this.impostor)
+      .connect(this.trenBoxManagerImpostor)
       .increaseDebt(wETH.address, debtAmount);
+
     const debtBalanceAfter = await this.redeployedContracts.defaultPool.getDebtTokenBalance(
       wETH.address
     );
@@ -61,7 +64,7 @@ function shouldBehaveLikeCanIncreaseDebtCorrectly() {
     const debtAmount = 50n;
 
     const increaseDebtTx = await this.redeployedContracts.defaultPool
-      .connect(this.impostor)
+      .connect(this.trenBoxManagerImpostor)
       .increaseDebt(wETH.address, debtAmount);
 
     await expect(increaseDebtTx)

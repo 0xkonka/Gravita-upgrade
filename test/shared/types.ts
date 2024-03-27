@@ -12,11 +12,12 @@ import type {
   CollSurplusPool,
   DebtToken,
   DefaultPool,
-  ERC20Test,
   FeeCollector,
   GasPool,
   IPriceFeed,
   Lock,
+  PriceFeed,
+  PriceFeedL2,
   PriceFeedTestnet,
   SortedTrenBoxes,
   StabilityPool,
@@ -24,6 +25,7 @@ import type {
   TrenBoxManager,
   TrenBoxManagerOperations,
 } from "../../types";
+import { ERC20Test, MockAggregator, MockApi3Proxy } from "../../types/contracts/TestContracts";
 
 type Fixture<T> = () => Promise<T>;
 
@@ -36,7 +38,7 @@ declare module "mocha" {
     snapshotId: string;
     collaterals: Collaterals;
     utils: TestUtils;
-    redeployedContracts: Contracts;
+    redeployedContracts: RedeployedContracts;
     testContracts: TestContracts;
   }
 }
@@ -57,6 +59,11 @@ export interface Contracts {
   timelock: Timelock;
   trenBoxManager: TrenBoxManager;
   trenBoxManagerOperations: TrenBoxManagerOperations;
+}
+
+export interface RedeployedContracts extends Contracts {
+  priceFeed: PriceFeed;
+  priceFeedL2: PriceFeedL2;
 }
 
 export interface Signers {
@@ -125,6 +132,10 @@ export type GetActualDebtFromCompositeDebtArgs = {
   overrideTrenBoxManager?: TrenBoxManager;
 };
 
+export type ConnectRedeployedContractArgs = Partial<
+  Record<keyof Contracts | "treasury", BaseContract | HardhatEthersSigner>
+>;
+
 export type SetupCollateralForTestsArgs = {
   collateral: ERC20Test;
   collateralOptions: {
@@ -165,9 +176,12 @@ export interface TestUtils {
   getCompositeDebt: (args: GetCompositeDebtArgs) => Promise<bigint>;
   getActualDebtFromCompositeDebt: (args: GetActualDebtFromCompositeDebtArgs) => Promise<bigint>;
   setupCollateralForTests: (args: SetupCollateralForTestsArgs) => Promise<void>;
+  connectRedeployedContracts: (args: ConnectRedeployedContractArgs) => Promise<void>;
 }
 
 export interface TestContracts {
   erc20: ERC20Test;
+  mockAggregator: MockAggregator;
+  mockApi3: MockApi3Proxy;
   priceFeedTestnet: PriceFeedTestnet;
 }
