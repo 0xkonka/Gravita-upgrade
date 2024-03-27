@@ -12,7 +12,6 @@ import type {
   CollSurplusPool,
   DebtToken,
   DefaultPool,
-  ERC20Test,
   FeeCollector,
   GasPool,
   IPriceFeed,
@@ -23,7 +22,15 @@ import type {
   Timelock,
   TrenBoxManager,
   TrenBoxManagerOperations,
+  PriceFeed,
+  PriceFeedL2
 } from "../../types";
+
+import {
+  ERC20Test,
+  MockAggregator,
+  MockApi3Proxy
+} from "../../types/contracts/TestContracts";
 
 type Fixture<T> = () => Promise<T>;
 
@@ -36,7 +43,7 @@ declare module "mocha" {
     snapshotId: string;
     collaterals: Collaterals;
     utils: TestUtils;
-    redeployedContracts: Contracts;
+    redeployedContracts: RedeployedContracts;
     testContracts: TestContracts;
   }
 }
@@ -57,6 +64,11 @@ export interface Contracts {
   timelock: Timelock;
   trenBoxManager: TrenBoxManager;
   trenBoxManagerOperations: TrenBoxManagerOperations;
+}
+
+export interface RedeployedContracts extends Contracts {
+  priceFeed: PriceFeed;
+  priceFeedL2: PriceFeedL2;
 }
 
 export interface Signers {
@@ -169,5 +181,7 @@ export interface TestUtils {
 
 export interface TestContracts {
   erc20: ERC20Test;
+  mockAggregator: MockAggregator;
+  mockApi3: MockApi3Proxy;
   priceFeedTestnet: PriceFeedTestnet;
 }
