@@ -14,7 +14,7 @@ export default function shouldHaveGetProtocolRevenueDestination(): void {
     this.trenStakingImposter = this.signers.accounts[2];
 
     const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-      treasury: this.treasuryImposter
+      treasury: this.treasuryImposter,
     });
 
     await this.redeployedContracts.feeCollector.setAddresses(addressesForSetAddresses);
@@ -23,8 +23,11 @@ export default function shouldHaveGetProtocolRevenueDestination(): void {
 
   it("should return correct revenue destination", async function () {
     const routeToTRENStaking = await this.redeployedContracts.feeCollector.routeToTRENStaking();
-    const actualDestination = await this.redeployedContracts.feeCollector.getProtocolRevenueDestination();
-    const expectedDestination = routeToTRENStaking ? this.trenStakingImposter: this.treasuryImposter;
+    const actualDestination =
+      await this.redeployedContracts.feeCollector.getProtocolRevenueDestination();
+    const expectedDestination = routeToTRENStaking
+      ? this.trenStakingImposter
+      : this.treasuryImposter;
 
     expect(actualDestination).to.be.equal(expectedDestination);
   });

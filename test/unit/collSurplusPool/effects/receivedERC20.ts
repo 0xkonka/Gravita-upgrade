@@ -4,7 +4,9 @@ import { ethers } from "hardhat";
 export default function shouldBehaveLikeCanReceivedERC20(): void {
   beforeEach(async function () {
     const CollSurplusPoolFactory = await ethers.getContractFactory("CollSurplusPool");
-    const redeployedCollSurplusPool = await CollSurplusPoolFactory.connect(this.signers.deployer).deploy();
+    const redeployedCollSurplusPool = await CollSurplusPoolFactory.connect(
+      this.signers.deployer
+    ).deploy();
     await redeployedCollSurplusPool.waitForDeployment();
     await redeployedCollSurplusPool.initialize();
 
@@ -25,7 +27,6 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
     shouldBehaveLikeCanReceivedERC20Correctly();
   });
 
-
   context("when caller is not active pool", function () {
     it("reverts custom error", async function () {
       this.impostor = this.signers.accounts[1];
@@ -33,7 +34,9 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
       const debtAmount = 50n;
 
       await expect(
-        this.contracts.collSurplusPool.connect(this.impostor).receivedERC20(wETH.address, debtAmount)
+        this.contracts.collSurplusPool
+          .connect(this.impostor)
+          .receivedERC20(wETH.address, debtAmount)
       ).to.be.revertedWith("CollSurplusPool: Caller is not Active Pool");
     });
   });
@@ -57,6 +60,4 @@ function shouldBehaveLikeCanReceivedERC20Correctly() {
 
     expect(assetBalanceAfter).to.be.equal(assetBalanceBefore + assetAmount);
   });
-
-
 }

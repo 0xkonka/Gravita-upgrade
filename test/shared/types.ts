@@ -16,21 +16,16 @@ import type {
   GasPool,
   IPriceFeed,
   Lock,
+  PriceFeed,
+  PriceFeedL2,
   PriceFeedTestnet,
   SortedTrenBoxes,
   StabilityPool,
   Timelock,
   TrenBoxManager,
   TrenBoxManagerOperations,
-  PriceFeed,
-  PriceFeedL2
 } from "../../types";
-
-import {
-  ERC20Test,
-  MockAggregator,
-  MockApi3Proxy
-} from "../../types/contracts/TestContracts";
+import { ERC20Test, MockAggregator, MockApi3Proxy } from "../../types/contracts/TestContracts";
 
 type Fixture<T> = () => Promise<T>;
 

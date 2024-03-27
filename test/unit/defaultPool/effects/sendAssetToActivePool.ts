@@ -29,7 +29,7 @@ export default function shouldBehaveLikeCanSendAsset(): void {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
         trenBoxManager: this.impostor,
-        activePool: this.redeployedContracts.activePool
+        activePool: this.redeployedContracts.activePool,
       });
 
       const addressesForSetAddresses2 = await this.utils.getAddressesForSetAddresses({
@@ -45,28 +45,30 @@ export default function shouldBehaveLikeCanSendAsset(): void {
     it("should return because of zero amount's value", async function () {
       const { defaultPool } = this.redeployedContracts;
       const { erc20 } = this.testContracts;
-  
+
       const assetAmount = 0n;
       const balanceBefore = await erc20.balanceOf(this.impostor.address);
       const defaultPoolBalanceBefore = await erc20.balanceOf(defaultPool);
-  
+
       await defaultPool.connect(this.impostor).sendAssetToActivePool(erc20, assetAmount);
       const balanceAfter = await erc20.balanceOf(this.impostor.address);
       const defaultPoolBalanceAfter = await erc20.balanceOf(defaultPool);
-  
+
       expect(balanceAfter).to.be.equal(balanceBefore + assetAmount);
       expect(defaultPoolBalanceAfter).to.be.equal(defaultPoolBalanceBefore - assetAmount);
     });
-  
+
     it("should emit DefaultPoolAssetBalanceUpdated and AssetSent", async function () {
       const { defaultPool } = this.redeployedContracts;
       const { erc20 } = this.testContracts;
       const sendAmount = 50n;
       const assetAmount = 15n;
 
-      await this.redeployedContracts.activePool.connect(this.impostor2)
+      await this.redeployedContracts.activePool
+        .connect(this.impostor2)
         .receivedERC20(erc20, sendAmount);
-      await this.redeployedContracts.activePool.connect(this.impostor2)
+      await this.redeployedContracts.activePool
+        .connect(this.impostor2)
         .sendAsset(erc20, this.redeployedContracts.defaultPool, sendAmount);
 
       const sendAssetTx = await defaultPool
@@ -83,19 +85,16 @@ export default function shouldBehaveLikeCanSendAsset(): void {
     });
   });
 
-  context(
-    "when caller is not tren box manager",
-    function () {
-      it("reverts", async function () {
-        const { wETH } = this.collaterals.active;
-        const assetAmount = 2n;
+  context("when caller is not tren box manager", function () {
+    it("reverts", async function () {
+      const { wETH } = this.collaterals.active;
+      const assetAmount = 2n;
 
-        await expect(
-          this.contracts.defaultPool
-            .connect(this.impostor)
-            .sendAssetToActivePool(wETH.address, assetAmount)
-        ).to.be.revertedWith("DefaultPool: Caller is not the TrenBoxManager");
-      });
-    }
-  );
+      await expect(
+        this.contracts.defaultPool
+          .connect(this.impostor)
+          .sendAssetToActivePool(wETH.address, assetAmount)
+      ).to.be.revertedWith("DefaultPool: Caller is not the TrenBoxManager");
+    });
+  });
 }

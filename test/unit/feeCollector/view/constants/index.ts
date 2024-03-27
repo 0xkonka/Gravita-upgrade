@@ -1,7 +1,7 @@
-import shouldHaveName from "./name";
+import shouldHaveFeeExpirationSeconds from "./feeExpirationSeconds";
 import shouldHaveMinFeeDays from "./minFeeDays";
 import shouldHaveMinFeeFraction from "./minFeeFraction";
-import shouldHaveFeeExpirationSeconds from "./feeExpirationSeconds";
+import shouldHaveName from "./name";
 import shouldHaveRouteToTrenStaking from "./routeToTrenStaking";
 
 export default function shouldHavePublicConstant(): void {

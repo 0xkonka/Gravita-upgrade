@@ -67,15 +67,15 @@ export default function shouldHaveFetchPrice(): void {
     context("when Chainlink oracle is primary oracle for asset", function () {
       beforeEach(async function () {
         const setPrimaryOracleTx = await this.redeployedContracts.priceFeed
-        .connect(this.owner)
-        .setOracle(
-          this.erc20Address,
-          this.mockAggregatorAddress,
-          this.defaultOracleOptions.providerType,
-          this.defaultOracleOptions.timeoutSeconds,
-          this.defaultOracleOptions.isEthIndexed,
-          this.defaultOracleOptions.isFallback
-        );
+          .connect(this.owner)
+          .setOracle(
+            this.erc20Address,
+            this.mockAggregatorAddress,
+            this.defaultOracleOptions.providerType,
+            this.defaultOracleOptions.timeoutSeconds,
+            this.defaultOracleOptions.isEthIndexed,
+            this.defaultOracleOptions.isFallback
+          );
 
         await setPrimaryOracleTx.wait();
 

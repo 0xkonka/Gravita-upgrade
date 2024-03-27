@@ -18,13 +18,8 @@ export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
   context("when caller is not an owner", function () {
     it("reverts custom error", async function () {
       await expect(
-        this.contracts.feeCollector
-          .connect(this.notOwner)
-          .authorizeUpgrade(this.newImplementation)
-      ).to.be.revertedWithCustomError(
-        this.contracts.feeCollector,
-        "OwnableUnauthorizedAccount"
-      );
+        this.contracts.feeCollector.connect(this.notOwner).authorizeUpgrade(this.newImplementation)
+      ).to.be.revertedWithCustomError(this.contracts.feeCollector, "OwnableUnauthorizedAccount");
     });
   });
 }

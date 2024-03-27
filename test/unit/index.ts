@@ -5,22 +5,21 @@ import type {
   Contracts,
   GetAddressesForSetAddressesOverrides,
   GetAddressesForSetAddressesResult,
+  RedeployedContracts,
   Signers,
   TestUtils,
-  RedeployedContracts
 } from "../shared/types";
-
 import { setupUtils } from "../utils";
 import { testActivePool } from "./activePool/ActivePool";
 import { testAdminContract } from "./adminContract/AdminContract";
 import { testBorrowerOperations } from "./borrowerOperations/BorrowerOperations";
 import { testCollSurplusPool } from "./collSurplusPool/CollSurplusPool";
 import { testDebtToken } from "./debtToken/DebtToken";
-import { testPriceFeed } from "./priceFeed/PriceFeed";
 import { testDefaultPool } from "./defaultPool/DefaultPool";
-import { testFeeCollector } from "./feeCollector/FeeCollector";
 import { loadDeploymentFixture } from "./deployment.fixture";
+import { testFeeCollector } from "./feeCollector/FeeCollector";
 import { testLock } from "./lock/Lock";
+import { testPriceFeed } from "./priceFeed/PriceFeed";
 import { loadTestFixture } from "./testContracts.fixture";
 
 describe("Unit tests", function () {
