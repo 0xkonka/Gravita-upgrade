@@ -22,31 +22,24 @@ export default function shouldBehaveLikeCanMovePendingTrenBoxRewardsToActivePool
     this.redeployedContracts.defaultPool = defaultPool;
     this.redeployedContracts.activePool = activePool;
 
-    this.impostor = this.signers.accounts[1];
+    this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
   });
 
   context("when caller is trenBoxManagerOperations", function () {
     beforeEach(async function () {
-      const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        trenBoxManagerOperations: this.impostor,
+      await this.utils.connectRedeployedContracts({
+        trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
         defaultPool: this.redeployedContracts.defaultPool,
+        trenBoxManager: this.redeployedContracts.trenBoxManager,
         activePool: this.redeployedContracts.activePool,
       });
-
-      const addressesForSetAddresses2 = await this.utils.getAddressesForSetAddresses({
-        trenBoxManager: this.redeployedContracts.trenBoxManager,
-      });
-
-      await this.redeployedContracts.trenBoxManager.setAddresses(addressesForSetAddresses);
-      await this.redeployedContracts.defaultPool.setAddresses(addressesForSetAddresses2);
-      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses2);
     });
 
     it("executes movePendingTrenBoxRewardsToActivePool and returns zero", async function () {
       const { wETH } = this.collaterals.active;
 
       const res = await this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
+        .connect(this.trenBoxManagerOperationsImpostor)
         .movePendingTrenBoxRewardsToActivePool(wETH.address, 0, 0);
 
       expect(res).to.not.be.equal(0);
@@ -55,13 +48,17 @@ export default function shouldBehaveLikeCanMovePendingTrenBoxRewardsToActivePool
 
   context("when caller is not trenBoxManagerOperations", function () {
     it("reverts custom error", async function () {
+      const impostor = this.signers.accounts[2];
       const { wETH } = this.collaterals.active;
 
       await expect(
         this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
-        .movePendingTrenBoxRewardsToActivePool(wETH.address, 100n, 50n)
-      ).to.be.revertedWithCustomError(this.contracts.trenBoxManager, "TrenBoxManager__OnlyTrenBoxManagerOperations");
+          .connect(impostor)
+          .movePendingTrenBoxRewardsToActivePool(wETH.address, 100n, 50n)
+      ).to.be.revertedWithCustomError(
+        this.contracts.trenBoxManager,
+        "TrenBoxManager__OnlyTrenBoxManagerOperations"
+      );
     });
   });
 }

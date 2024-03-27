@@ -10,14 +10,16 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
 
     this.redeployedContracts.defaultPool = redeployedDefaultPool;
 
-    this.impostor = this.signers.accounts[1];
+    this.activePoolImpostor = this.signers.accounts[1];
   });
 
   context("when caller is Active Pool", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        activePool: this.impostor,
+        activePool: this.activePoolImpostor,
       });
+
+      this.impostor = this.activePoolImpostor;
 
       await this.redeployedContracts.defaultPool.setAddresses(addressesForSetAddresses);
     });
@@ -27,12 +29,12 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
 
   context("when caller is not Active pool", function () {
     it("reverts custom error", async function () {
-      this.impostor = this.signers.accounts[1];
+      const impostor = this.signers.accounts[2];
       const { wETH } = this.collaterals.active;
       const debtAmount = 50n;
 
       await expect(
-        this.contracts.defaultPool.connect(this.impostor).receivedERC20(wETH.address, debtAmount)
+        this.contracts.defaultPool.connect(impostor).receivedERC20(wETH.address, debtAmount)
       ).to.be.revertedWith("DefaultPool: Caller is not the ActivePool");
     });
   });

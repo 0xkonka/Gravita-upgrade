@@ -44,7 +44,7 @@ export default function shouldBehaveLikCanExecutePartialRedemption(): void {
     this.redeployedContracts.sortedTrenBoxes = sortedTrenBoxes;
     this.redeployedContracts.activePool = activePool;
 
-    this.impostor = this.signers.accounts[1];
+    this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
     this.user = this.signers.accounts[2];
 
     const { erc20 } = this.testContracts;
@@ -63,43 +63,15 @@ export default function shouldBehaveLikCanExecutePartialRedemption(): void {
       },
     });
 
-    const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-      trenBoxManagerOperations: this.impostor,
+    await this.utils.connectRedeployedContracts({
+      trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
       borrowerOperations: this.redeployedContracts.borrowerOperations,
       debtToken: this.redeployedContracts.debtToken,
       feeCollector: this.redeployedContracts.feeCollector,
       sortedTrenBoxes: this.redeployedContracts.sortedTrenBoxes,
       activePool: this.redeployedContracts.activePool,
-    });
-
-    const addressesForSetAddresses2 = await this.utils.getAddressesForSetAddresses({
       trenBoxManager: this.redeployedContracts.trenBoxManager,
-      debtToken: this.redeployedContracts.debtToken,
-      feeCollector: this.redeployedContracts.feeCollector,
-      sortedTrenBoxes: this.redeployedContracts.sortedTrenBoxes,
-      activePool: this.redeployedContracts.activePool,
     });
-
-    const addressesForSetAddresses3 = await this.utils.getAddressesForSetAddresses({
-      trenBoxManager: this.redeployedContracts.trenBoxManager,
-      debtToken: this.redeployedContracts.debtToken,
-      borrowerOperations: this.redeployedContracts.borrowerOperations,
-    });
-
-    const addressesForSetAddresses4 = await this.utils.getAddressesForSetAddresses({
-      trenBoxManager: this.redeployedContracts.trenBoxManager,
-      borrowerOperations: this.redeployedContracts.borrowerOperations,
-    });
-
-    await this.redeployedContracts.trenBoxManager.setAddresses(addressesForSetAddresses);
-    await this.redeployedContracts.borrowerOperations.setAddresses(addressesForSetAddresses2);
-    await this.redeployedContracts.feeCollector.setAddresses(addressesForSetAddresses3);
-
-    const contractsToSet = [
-      this.redeployedContracts.sortedTrenBoxes,
-      this.redeployedContracts.activePool,
-    ];
-    await Promise.all(contractsToSet.map(contract => contract.setAddresses(addressesForSetAddresses4)));
   });
 
   context("when caller is trenBoxManagerOperations", function () {
@@ -131,7 +103,7 @@ export default function shouldBehaveLikCanExecutePartialRedemption(): void {
       const lowerHint = ethers.ZeroAddress;
 
       const increaseDebtTx = await this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
+        .connect(this.trenBoxManagerOperationsImpostor)
         .executePartialRedemption(erc20, borrower, newDebt, newColl, newNICR, upperHint, lowerHint);
 
       await expect(increaseDebtTx)
@@ -142,8 +114,14 @@ export default function shouldBehaveLikCanExecutePartialRedemption(): void {
         .to.emit(this.redeployedContracts.trenBoxManager, "TotalStakesUpdated")
         .withArgs(erc20, newColl);
 
-      const debtAfter = await this.redeployedContracts.trenBoxManager.getTrenBoxDebt(erc20, borrower);
-      const collAfter = await this.redeployedContracts.trenBoxManager.getTrenBoxColl(erc20, borrower); 
+      const debtAfter = await this.redeployedContracts.trenBoxManager.getTrenBoxDebt(
+        erc20,
+        borrower
+      );
+      const collAfter = await this.redeployedContracts.trenBoxManager.getTrenBoxColl(
+        erc20,
+        borrower
+      );
 
       expect(debtAfter).to.be.equal(newDebt);
       expect(collAfter).to.be.equal(newColl);
@@ -152,6 +130,7 @@ export default function shouldBehaveLikCanExecutePartialRedemption(): void {
 
   context("when caller is not trenBoxManagerOperations", function () {
     it("reverts custom error", async function () {
+      const impostor = this.signers.accounts[1];
       const { wETH } = this.collaterals.active;
       const borrower = this.signers.accounts[3];
       const newDebt = 5n;
@@ -161,9 +140,21 @@ export default function shouldBehaveLikCanExecutePartialRedemption(): void {
       const lowerHint = ethers.ZeroAddress;
 
       await expect(
-        this.contracts.trenBoxManager.connect(this.impostor)
-        .executePartialRedemption(wETH.address, borrower, newDebt, newColl, newNICR, upperHint, lowerHint)
-      ).to.be.revertedWithCustomError(this.contracts.trenBoxManager, "TrenBoxManager__OnlyTrenBoxManagerOperations");
+        this.contracts.trenBoxManager
+          .connect(impostor)
+          .executePartialRedemption(
+            wETH.address,
+            borrower,
+            newDebt,
+            newColl,
+            newNICR,
+            upperHint,
+            lowerHint
+          )
+      ).to.be.revertedWithCustomError(
+        this.contracts.trenBoxManager,
+        "TrenBoxManager__OnlyTrenBoxManagerOperations"
+      );
     });
   });
 }

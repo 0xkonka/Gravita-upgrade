@@ -11,16 +11,20 @@ export default function shouldBehaveLikeCanApplyPendingRewards(): void {
     this.redeployedContracts.trenBoxManager = trenBoxManager;
 
     this.impostor = this.signers.accounts[1];
+    this.trenBoxManagerOperationsImpostor = this.signers.accounts[2];
+    this.borrowerOperationsImpostor = this.signers.accounts[3];
   });
 
   context("when caller is trenBoxManagerOperations", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        trenBoxManagerOperations: this.impostor,
-        borrowerOperations: this.impostor,
+        trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
+        borrowerOperations: this.borrowerOperationsImpostor,
       });
 
       await this.redeployedContracts.trenBoxManager.setAddresses(addressesForSetAddresses);
+
+      this.impostor = this.trenBoxManagerOperationsImpostor;
     });
 
     shouldBehaveLikeApplyPendingRewardsCorrectly();
@@ -29,10 +33,12 @@ export default function shouldBehaveLikeCanApplyPendingRewards(): void {
   context("when caller is borrowerOperations", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        borrowerOperations: this.impostor,
+        borrowerOperations: this.borrowerOperationsImpostor,
       });
 
       await this.redeployedContracts.trenBoxManager.setAddresses(addressesForSetAddresses);
+
+      this.impostor = this.borrowerOperationsImpostor;
     });
 
     shouldBehaveLikeApplyPendingRewardsCorrectly();
@@ -44,23 +50,29 @@ export default function shouldBehaveLikeCanApplyPendingRewards(): void {
       const borrower = this.signers.accounts[3];
 
       await expect(
-        this.contracts.trenBoxManager.connect(this.impostor)
-        .applyPendingRewards(wETH.address, borrower)
-      ).to.be.revertedWithCustomError(this.contracts.trenBoxManager, "TrenBoxManager__OnlyTrenBoxManagerOperationsOrBorrowerOperations");
+        this.contracts.trenBoxManager
+          .connect(this.impostor)
+          .applyPendingRewards(wETH.address, borrower)
+      ).to.be.revertedWithCustomError(
+        this.contracts.trenBoxManager,
+        "TrenBoxManager__OnlyTrenBoxManagerOperationsOrBorrowerOperations"
+      );
     });
   });
 
   function shouldBehaveLikeApplyPendingRewardsCorrectly() {
     it("should not be reverted", async function () {
       const { wETH } = this.collaterals.active;
-      const borrower = this.signers.accounts[2];
+      const borrower = this.signers.accounts[0];
 
-      await this.redeployedContracts.trenBoxManager.connect(this.impostor).setTrenBoxStatus(wETH.address, borrower, 1n);
-  
+      await this.redeployedContracts.trenBoxManager
+        .connect(this.borrowerOperationsImpostor)
+        .setTrenBoxStatus(wETH.address, borrower, 1n);
+
       const tx = await this.redeployedContracts.trenBoxManager
         .connect(this.impostor)
         .applyPendingRewards(wETH.address, borrower);
-  
+
       await expect(tx).to.not.be.reverted;
     });
   }

@@ -10,13 +10,13 @@ export default function shouldBehaveLikeCanUpdateBaseRateFromRedemption(): void 
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;
 
-    this.impostor = this.signers.accounts[1];
+    this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
   });
 
   context("when caller is trenBoxManagerOperations", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        trenBoxManagerOperations: this.impostor,
+        trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
       });
 
       await this.redeployedContracts.trenBoxManager.setAddresses(addressesForSetAddresses);
@@ -29,7 +29,7 @@ export default function shouldBehaveLikeCanUpdateBaseRateFromRedemption(): void 
       const totalDebtTokenSupply = 10000n;
 
       const res = await this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
+        .connect(this.trenBoxManagerOperationsImpostor)
         .updateBaseRateFromRedemption(wETH.address, assetDrawn, price, totalDebtTokenSupply);
 
       expect(res).to.not.be.equal(0);
@@ -45,9 +45,12 @@ export default function shouldBehaveLikeCanUpdateBaseRateFromRedemption(): void 
 
       await expect(
         this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
-        .updateBaseRateFromRedemption(wETH.address, assetDrawn, price, totalDebtTokenSupply)
-      ).to.be.revertedWithCustomError(this.contracts.trenBoxManager, "TrenBoxManager__OnlyTrenBoxManagerOperations");
+          .connect(this.trenBoxManagerOperationsImpostor)
+          .updateBaseRateFromRedemption(wETH.address, assetDrawn, price, totalDebtTokenSupply)
+      ).to.be.revertedWithCustomError(
+        this.contracts.trenBoxManager,
+        "TrenBoxManager__OnlyTrenBoxManagerOperations"
+      );
     });
   });
 }

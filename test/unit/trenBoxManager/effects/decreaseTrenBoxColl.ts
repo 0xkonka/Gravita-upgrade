@@ -10,13 +10,13 @@ export default function shouldBehaveLikeCanDecreaseTrenBoxColl(): void {
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;
 
-    this.impostor = this.signers.accounts[1];
+    this.borrowerOperationsImpostor = this.signers.accounts[1];
   });
 
   context("when caller is borrowerOperations", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        borrowerOperations: this.impostor,
+        borrowerOperations: this.borrowerOperationsImpostor,
       });
 
       await this.redeployedContracts.trenBoxManager.setAddresses(addressesForSetAddresses);
@@ -29,19 +29,23 @@ export default function shouldBehaveLikeCanDecreaseTrenBoxColl(): void {
       const amountToDecrease = 5n;
 
       await this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
-        .increaseTrenBoxColl(wETH.address, borrower, amountToIncrease); 
+        .connect(this.borrowerOperationsImpostor)
+        .increaseTrenBoxColl(wETH.address, borrower, amountToIncrease);
 
-      const amountBefore = await this.redeployedContracts.trenBoxManager
-        .getTrenBoxColl(wETH.address, borrower);
-  
+      const amountBefore = await this.redeployedContracts.trenBoxManager.getTrenBoxColl(
+        wETH.address,
+        borrower
+      );
+
       await this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
+        .connect(this.borrowerOperationsImpostor)
         .decreaseTrenBoxColl(wETH.address, borrower, amountToDecrease);
 
-      const amountAfter = await this.redeployedContracts.trenBoxManager
-        .getTrenBoxColl(wETH.address, borrower);
-  
+      const amountAfter = await this.redeployedContracts.trenBoxManager.getTrenBoxColl(
+        wETH.address,
+        borrower
+      );
+
       expect(amountAfter).to.be.equal(amountBefore - amountToDecrease);
     });
   });
@@ -54,9 +58,12 @@ export default function shouldBehaveLikeCanDecreaseTrenBoxColl(): void {
 
       await expect(
         this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
-        .decreaseTrenBoxColl(wETH.address, borrower, amountToIncrease)
-      ).to.be.revertedWithCustomError(this.contracts.trenBoxManager, "TrenBoxManager__OnlyBorrowerOperations");
+          .connect(this.borrowerOperationsImpostor)
+          .decreaseTrenBoxColl(wETH.address, borrower, amountToIncrease)
+      ).to.be.revertedWithCustomError(
+        this.contracts.trenBoxManager,
+        "TrenBoxManager__OnlyBorrowerOperations"
+      );
     });
   });
 }

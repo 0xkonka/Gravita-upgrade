@@ -10,13 +10,13 @@ export default function shouldBehaveLikeCanSetTrenBoxStatus(): void {
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;
 
-    this.impostor = this.signers.accounts[1];
+    this.borrowerOperationsImpostor = this.signers.accounts[1];
   });
 
   context("when caller is borrowerOperations", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        borrowerOperations: this.impostor,
+        borrowerOperations: this.borrowerOperationsImpostor,
       });
 
       await this.redeployedContracts.trenBoxManager.setAddresses(addressesForSetAddresses);
@@ -26,29 +26,35 @@ export default function shouldBehaveLikeCanSetTrenBoxStatus(): void {
       const { wETH } = this.collaterals.active;
       const borrower = this.signers.accounts[4];
       const status = 2n;
-  
+
       await this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
+        .connect(this.borrowerOperationsImpostor)
         .setTrenBoxStatus(wETH.address, borrower, status);
 
-      const statusAfter = await this.redeployedContracts.trenBoxManager
-        .getTrenBoxStatus(wETH.address, borrower);
-  
+      const statusAfter = await this.redeployedContracts.trenBoxManager.getTrenBoxStatus(
+        wETH.address,
+        borrower
+      );
+
       expect(statusAfter).to.be.equal(status);
     });
   });
 
   context("when caller is not borrowerOperations", function () {
     it("reverts custom error", async function () {
+      const impostor = this.signers.accounts[2];
       const { wETH } = this.collaterals.active;
       const borrower = this.signers.accounts[4];
       const status = 2n;
 
       await expect(
         this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
-        .setTrenBoxStatus(wETH.address, borrower, status)
-      ).to.be.revertedWithCustomError(this.contracts.trenBoxManager, "TrenBoxManager__OnlyBorrowerOperations");
+          .connect(impostor)
+          .setTrenBoxStatus(wETH.address, borrower, status)
+      ).to.be.revertedWithCustomError(
+        this.contracts.trenBoxManager,
+        "TrenBoxManager__OnlyBorrowerOperations"
+      );
     });
   });
 }

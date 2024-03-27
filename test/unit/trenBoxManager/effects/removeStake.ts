@@ -11,15 +11,19 @@ export default function shouldBehaveLikeCanRemoveStake(): void {
     this.redeployedContracts.trenBoxManager = trenBoxManager;
 
     this.impostor = this.signers.accounts[1];
+    this.borrowerOperationsImpostor = this.signers.accounts[2];
+    this.trenBoxManagerOperationsImpostor = this.signers.accounts[3];
   });
 
   context("when caller is borrowerOperations", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        borrowerOperations: this.impostor,
+        borrowerOperations: this.borrowerOperationsImpostor,
       });
 
       await this.redeployedContracts.trenBoxManager.setAddresses(addressesForSetAddresses);
+
+      this.impostor = this.borrowerOperationsImpostor;
     });
 
     shouldBehaveLikeRemoveStakeCorrectly();
@@ -28,10 +32,12 @@ export default function shouldBehaveLikeCanRemoveStake(): void {
   context("when caller is trenBoxManagerOperations", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        trenBoxManagerOperations: this.impostor,
+        trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
       });
 
       await this.redeployedContracts.trenBoxManager.setAddresses(addressesForSetAddresses);
+
+      this.impostor = this.trenBoxManagerOperationsImpostor;
     });
 
     shouldBehaveLikeRemoveStakeCorrectly();
@@ -44,9 +50,12 @@ export default function shouldBehaveLikeCanRemoveStake(): void {
 
       await expect(
         this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
-        .removeStake(wETH.address, borrower)
-      ).to.be.revertedWithCustomError(this.contracts.trenBoxManager, "TrenBoxManager__OnlyTrenBoxManagerOperationsOrBorrowerOperations");
+          .connect(this.impostor)
+          .removeStake(wETH.address, borrower)
+      ).to.be.revertedWithCustomError(
+        this.contracts.trenBoxManager,
+        "TrenBoxManager__OnlyTrenBoxManagerOperationsOrBorrowerOperations"
+      );
     });
   });
 
@@ -59,8 +68,9 @@ export default function shouldBehaveLikeCanRemoveStake(): void {
         .connect(this.impostor)
         .removeStake(wETH.address, borrower);
 
-      expect(await this.redeployedContracts.trenBoxManager.getTrenBoxStake(wETH.address, borrower))
-        .to.be.equal(0);
+      expect(
+        await this.redeployedContracts.trenBoxManager.getTrenBoxStake(wETH.address, borrower)
+      ).to.be.equal(0);
     });
   }
 }

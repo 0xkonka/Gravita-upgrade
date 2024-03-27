@@ -10,22 +10,26 @@ export default function shouldBehaveLikeGetTrenBoxFromTrenBoxOwnersArray(): void
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;
 
-    this.impostor = this.signers.accounts[1];
-    
+    this.borrowerOperationsImpostor = this.signers.accounts[1];
+
     const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-      borrowerOperations: this.impostor,
+      borrowerOperations: this.borrowerOperationsImpostor,
     });
 
     await this.redeployedContracts.trenBoxManager.setAddresses(addressesForSetAddresses);
 
     const { wETH } = this.collaterals.active;
     const borrower = this.signers.accounts[2];
-  
+
     await this.redeployedContracts.trenBoxManager
-      .connect(this.impostor)
+      .connect(this.borrowerOperationsImpostor)
       .addTrenBoxOwnerToArray(wETH.address, borrower);
 
-    expect(await this.redeployedContracts.trenBoxManager.getTrenBoxFromTrenBoxOwnersArray(wETH.address, 0))
-      .to.be.equal(borrower);
+    expect(
+      await this.redeployedContracts.trenBoxManager.getTrenBoxFromTrenBoxOwnersArray(
+        wETH.address,
+        0
+      )
+    ).to.be.equal(borrower);
   });
 }

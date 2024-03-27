@@ -10,13 +10,13 @@ export default function shouldBehaveLikeCanUpdateTrenBoxRewardSnapshots(): void 
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;
 
-    this.impostor = this.signers.accounts[1];
+    this.borrowerOperationsImpostor = this.signers.accounts[1];
   });
 
   context("when caller is borrowerOperations", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        borrowerOperations: this.impostor,
+        borrowerOperations: this.borrowerOperationsImpostor,
       });
 
       await this.redeployedContracts.trenBoxManager.setAddresses(addressesForSetAddresses);
@@ -27,7 +27,7 @@ export default function shouldBehaveLikeCanUpdateTrenBoxRewardSnapshots(): void 
       const borrower = this.signers.accounts[3];
 
       const tx = await this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
+        .connect(this.borrowerOperationsImpostor)
         .updateTrenBoxRewardSnapshots(wETH.address, borrower);
 
       await expect(tx)
@@ -38,14 +38,18 @@ export default function shouldBehaveLikeCanUpdateTrenBoxRewardSnapshots(): void 
 
   context("when caller is not borrowerOperations", function () {
     it("reverts custom error", async function () {
+      const impostor = this.signers.accounts[2];
       const { wETH } = this.collaterals.active;
       const borrower = this.signers.accounts[3];
 
       await expect(
         this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
-        .updateTrenBoxRewardSnapshots(wETH.address, borrower)
-      ).to.be.revertedWithCustomError(this.contracts.trenBoxManager, "TrenBoxManager__OnlyBorrowerOperations");
+          .connect(impostor)
+          .updateTrenBoxRewardSnapshots(wETH.address, borrower)
+      ).to.be.revertedWithCustomError(
+        this.contracts.trenBoxManager,
+        "TrenBoxManager__OnlyBorrowerOperations"
+      );
     });
   });
 }

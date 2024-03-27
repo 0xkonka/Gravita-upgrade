@@ -4,11 +4,8 @@ import { ethers } from "hardhat";
 export default function shouldBehaveLikeCanExecuteFullRedemption(): void {
   beforeEach(async function () {
     const owner = this.signers.deployer;
-    this.impostor = this.signers.accounts[1];
-    this.user = [
-      this.signers.accounts[2],
-      this.signers.accounts[3],
-    ];
+    this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
+    this.users = [this.signers.accounts[2], this.signers.accounts[3]];
 
     const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
     const activePool = await ActivePoolFactory.connect(owner).deploy();
@@ -64,57 +61,27 @@ export default function shouldBehaveLikeCanExecuteFullRedemption(): void {
         price: ethers.parseUnits("200", "ether"),
         mints: [
           {
-            to: this.user[0].address,
+            to: this.users[0].address,
             amount: ethers.parseUnits("100", 30),
           },
           {
-            to: this.user[1].address,
+            to: this.users[1].address,
             amount: ethers.parseUnits("100", 30),
           },
         ],
       },
     });
 
-    const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-      trenBoxManagerOperations: this.impostor,
+    await this.utils.connectRedeployedContracts({
+      trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
       borrowerOperations: this.redeployedContracts.borrowerOperations,
       debtToken: this.redeployedContracts.debtToken,
       feeCollector: this.redeployedContracts.feeCollector,
       sortedTrenBoxes: this.redeployedContracts.sortedTrenBoxes,
       activePool: this.redeployedContracts.activePool,
       collSurplusPool: this.redeployedContracts.collSurplusPool,
-    });
-
-    const addressesForSetAddresses2 = await this.utils.getAddressesForSetAddresses({
       trenBoxManager: this.redeployedContracts.trenBoxManager,
-      debtToken: this.redeployedContracts.debtToken,
-      feeCollector: this.redeployedContracts.feeCollector,
-      sortedTrenBoxes: this.redeployedContracts.sortedTrenBoxes,
-      activePool: this.redeployedContracts.activePool,
-      collSurplusPool: this.redeployedContracts.collSurplusPool,
     });
-
-    const addressesForSetAddresses3 = await this.utils.getAddressesForSetAddresses({
-      trenBoxManager: this.redeployedContracts.trenBoxManager,
-      debtToken: this.redeployedContracts.debtToken,
-      borrowerOperations: this.redeployedContracts.borrowerOperations,
-    });
-
-    const addressesForSetAddresses4 = await this.utils.getAddressesForSetAddresses({
-      trenBoxManager: this.redeployedContracts.trenBoxManager,
-      borrowerOperations: this.redeployedContracts.borrowerOperations,
-    });
-
-    await this.redeployedContracts.trenBoxManager.setAddresses(addressesForSetAddresses);
-    await this.redeployedContracts.borrowerOperations.setAddresses(addressesForSetAddresses2);
-    await this.redeployedContracts.feeCollector.setAddresses(addressesForSetAddresses3);
-
-    const contractsToSet = [
-      this.redeployedContracts.sortedTrenBoxes,
-      this.redeployedContracts.activePool,
-      this.redeployedContracts.collSurplusPool,
-    ];
-    await Promise.all(contractsToSet.map(contract => contract.setAddresses(addressesForSetAddresses4)));
   });
 
   context("when caller is trenBoxManagerOperations", function () {
@@ -128,7 +95,7 @@ export default function shouldBehaveLikeCanExecuteFullRedemption(): void {
       const { openTrenBoxTx } = await this.utils.openTrenBox({
         asset: erc20,
         assetAmount,
-        from: this.user[0],
+        from: this.users[0],
         overrideTrenBoxManager: this.redeployedContracts.trenBoxManager,
         overrideBorrowerOperations: this.redeployedContracts.borrowerOperations,
       });
@@ -138,58 +105,72 @@ export default function shouldBehaveLikeCanExecuteFullRedemption(): void {
 
     it("should revert with custom error", async function () {
       const { erc20 } = this.testContracts;
-      const borrower = this.user[0].address;
+      const borrower = this.users[0].address;
       const coll = 10n;
 
-      expect(await this.redeployedContracts.trenBoxManager.getTrenBoxStatus(erc20, borrower))
-        .to.be.equal(1n);
-    
-      await expect(this.redeployedContracts.trenBoxManager.connect(this.impostor)
-        .executeFullRedemption(erc20, borrower, coll))
-        .to.be.revertedWithCustomError(this.redeployedContracts.trenBoxManager, "TrenBoxManager__OnlyOneTrenBox");
+      expect(
+        await this.redeployedContracts.trenBoxManager.getTrenBoxStatus(erc20, borrower)
+      ).to.be.equal(1n);
+
+      await expect(
+        this.redeployedContracts.trenBoxManager
+          .connect(this.trenBoxManagerOperationsImpostor)
+          .executeFullRedemption(erc20, borrower, coll)
+      ).to.be.revertedWithCustomError(
+        this.redeployedContracts.trenBoxManager,
+        "TrenBoxManager__OnlyOneTrenBox"
+      );
     });
 
     it("should execute full redemption and emit TrenBoxUpdated", async function () {
       const { erc20 } = this.testContracts;
-      const borrower = this.user[0].address;
+      const borrower = this.users[0].address;
       const coll = 10n;
       const assetAmount = ethers.parseUnits("100", 30);
 
       const { openTrenBoxTx } = await this.utils.openTrenBox({
         asset: erc20,
         assetAmount,
-        from: this.user[1],
+        from: this.users[1],
         overrideTrenBoxManager: this.redeployedContracts.trenBoxManager,
         overrideBorrowerOperations: this.redeployedContracts.borrowerOperations,
       });
 
       await (await openTrenBoxTx).wait();
 
-      expect(await this.redeployedContracts.trenBoxManager.getTrenBoxStatus(erc20, borrower))
-        .to.be.equal(1n);
-    
+      expect(
+        await this.redeployedContracts.trenBoxManager.getTrenBoxStatus(erc20, borrower)
+      ).to.be.equal(1n);
+
       const increaseDebtTx = await this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
+        .connect(this.trenBoxManagerOperationsImpostor)
         .executeFullRedemption(erc20, borrower, coll);
 
       await expect(increaseDebtTx)
         .to.emit(this.redeployedContracts.trenBoxManager, "TrenBoxUpdated")
         .withArgs(erc20, borrower, 0n, 0n, 0n, 3n);
 
-      expect(await this.redeployedContracts.trenBoxManager.getTrenBoxStatus(erc20, borrower))
-        .to.be.equal(4n);
+      expect(
+        await this.redeployedContracts.trenBoxManager.getTrenBoxStatus(erc20, borrower)
+      ).to.be.equal(4n);
     });
   });
 
   context("when caller is not trenBoxManagerOperations", function () {
     it("reverts custom error", async function () {
+      const impostor = this.signers.accounts[4];
       const { wETH } = this.collaterals.active;
       const borrower = this.signers.accounts[2];
       const coll = 10n;
 
       await expect(
-        this.contracts.trenBoxManager.connect(this.impostor).executeFullRedemption(wETH.address, borrower, coll)
-      ).to.be.revertedWithCustomError(this.contracts.trenBoxManager, "TrenBoxManager__OnlyTrenBoxManagerOperations");
+        this.contracts.trenBoxManager
+          .connect(impostor)
+          .executeFullRedemption(wETH.address, borrower, coll)
+      ).to.be.revertedWithCustomError(
+        this.contracts.trenBoxManager,
+        "TrenBoxManager__OnlyTrenBoxManagerOperations"
+      );
     });
   });
 }

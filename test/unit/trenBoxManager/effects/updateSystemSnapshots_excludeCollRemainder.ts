@@ -16,26 +16,21 @@ export default function shouldBehaveLikeCanUpdateSystemSnapshots_excludeCollRema
     this.redeployedContracts.trenBoxManager = trenBoxManager;
     this.redeployedContracts.activePool = activePool;
 
-    this.impostor = this.signers.accounts[1];
+    this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
+    this.borrowerOperationsImpostor = this.signers.accounts[2];
   });
 
   context("when caller is trenBoxManagerOperations", function () {
     beforeEach(async function () {
-      const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        trenBoxManagerOperations: this.impostor,
+      await this.utils.connectRedeployedContracts({
+        trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
         activePool: this.redeployedContracts.activePool,
-      });
-
-      const addressesForSetAddresses2 = await this.utils.getAddressesForSetAddresses({
-        borrowerOperations: this.impostor,
+        borrowerOperations: this.borrowerOperationsImpostor,
         trenBoxManager: this.redeployedContracts.trenBoxManager,
       });
 
-      await this.redeployedContracts.trenBoxManager.setAddresses(addressesForSetAddresses);
-      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses2);
-
       await this.redeployedContracts.activePool
-        .connect(this.impostor)
+        .connect(this.borrowerOperationsImpostor)
         .receivedERC20(this.collaterals.active.wETH.address, 20n);
     });
 
@@ -44,7 +39,7 @@ export default function shouldBehaveLikeCanUpdateSystemSnapshots_excludeCollRema
       const collRemainder = 5n;
 
       const tx = await this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
+        .connect(this.trenBoxManagerOperationsImpostor)
         .updateSystemSnapshots_excludeCollRemainder(wETH.address, collRemainder);
 
       await expect(tx)
@@ -60,9 +55,12 @@ export default function shouldBehaveLikeCanUpdateSystemSnapshots_excludeCollRema
 
       await expect(
         this.redeployedContracts.trenBoxManager
-        .connect(this.impostor)
-        .updateSystemSnapshots_excludeCollRemainder(wETH.address, collRemainder)
-      ).to.be.revertedWithCustomError(this.contracts.trenBoxManager, "TrenBoxManager__OnlyTrenBoxManagerOperations");
+          .connect(this.borrowerOperationsImpostor)
+          .updateSystemSnapshots_excludeCollRemainder(wETH.address, collRemainder)
+      ).to.be.revertedWithCustomError(
+        this.contracts.trenBoxManager,
+        "TrenBoxManager__OnlyTrenBoxManagerOperations"
+      );
     });
   });
 }
