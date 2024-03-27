@@ -5,7 +5,8 @@ export default function shouldBehaveLikeGetPendingDebtTokenReward(): void {
     const { wETH } = this.collaterals.active;
     const borrower = this.signers.accounts[1];
 
-    expect(await this.contracts.trenBoxManager.getPendingDebtTokenReward(wETH.address, borrower))
-      .to.be.equal(0);
+    expect(
+      await this.contracts.trenBoxManager.getPendingDebtTokenReward(wETH.address, borrower)
+    ).to.be.equal(0);
   });
 }

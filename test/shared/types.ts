@@ -12,6 +12,7 @@ import type {
   CollSurplusPool,
   DebtToken,
   DefaultPool,
+  ERC20,
   FeeCollector,
   GasPool,
   IPriceFeed,
@@ -40,6 +41,7 @@ declare module "mocha" {
     utils: TestUtils;
     redeployedContracts: RedeployedContracts;
     testContracts: TestContracts;
+    users: HardhatEthersSigner[];
   }
 }
 
@@ -151,6 +153,7 @@ export type SetupCollateralForTestsArgs = {
     price: bigint;
     debtTokenGasCompensation?: bigint;
     setAsActive?: boolean;
+    mintCap?: bigint;
     setCollateralParams?: {
       borrowingFee: bigint;
       criticalCollateralRate: bigint;
@@ -165,6 +168,31 @@ export type SetupCollateralForTestsArgs = {
   overridePriceFeed?: PriceFeedTestnet;
 };
 
+export type SetupProtocolCommands =
+  | {
+      action: "openTrenBox";
+      args: OpenTrenBoxArgs;
+    }
+  | {
+      action: "approve";
+      args: {
+        from: HardhatEthersSigner;
+        spender: AddressLike;
+        amount: bigint;
+        asset: ERC20;
+      };
+    };
+
+export type SetupProtocolForTestsArgs = {
+  collaterals?: SetupCollateralForTestsArgs[];
+  commands?: SetupProtocolCommands[];
+  overrides?: RedeployedContracts;
+};
+
+export type SetupProtocolForTestsResult = void;
+
+export type SetUsersArgs = HardhatEthersSigner[];
+
 export interface TestUtils {
   revertToInitialSnapshot: () => Promise<void>;
   getAddressesForSetAddresses: (
@@ -177,6 +205,8 @@ export interface TestUtils {
   getActualDebtFromCompositeDebt: (args: GetActualDebtFromCompositeDebtArgs) => Promise<bigint>;
   setupCollateralForTests: (args: SetupCollateralForTestsArgs) => Promise<void>;
   connectRedeployedContracts: (args: ConnectRedeployedContractArgs) => Promise<void>;
+  setupProtocolForTests: (args: SetupProtocolForTestsArgs) => Promise<SetupProtocolForTestsResult>;
+  setUsers: (args: SetUsersArgs) => Promise<HardhatEthersSigner[]>;
 }
 
 export interface TestContracts {

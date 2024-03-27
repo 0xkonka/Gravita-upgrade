@@ -25,7 +25,7 @@ export default function shouldBehaveLikeCanAddTrenBoxOwnerToArray(): void {
     it("add trenBox owner to array", async function () {
       const { wETH } = this.collaterals.active;
       const borrower = this.signers.accounts[2];
-    
+
       await this.redeployedContracts.trenBoxManager
         .connect(this.impostor)
         .addTrenBoxOwnerToArray(wETH.address, borrower);
@@ -33,7 +33,7 @@ export default function shouldBehaveLikeCanAddTrenBoxOwnerToArray(): void {
       const ownerCount = await this.redeployedContracts.trenBoxManager.getTrenBoxOwnersCount(
         wETH.address
       );
-    
+
       expect(ownerCount).to.be.equal(1n);
     });
   });
@@ -44,8 +44,13 @@ export default function shouldBehaveLikeCanAddTrenBoxOwnerToArray(): void {
       const borrower = this.signers.accounts[2];
 
       await expect(
-        this.contracts.trenBoxManager.connect(this.impostor).addTrenBoxOwnerToArray(wETH.address, borrower)
-      ).to.be.revertedWithCustomError(this.contracts.trenBoxManager, "TrenBoxManager__OnlyBorrowerOperations");
+        this.contracts.trenBoxManager
+          .connect(this.impostor)
+          .addTrenBoxOwnerToArray(wETH.address, borrower)
+      ).to.be.revertedWithCustomError(
+        this.contracts.trenBoxManager,
+        "TrenBoxManager__OnlyBorrowerOperations"
+      );
     });
   });
 }

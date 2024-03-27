@@ -1,24 +1,24 @@
 import shouldBehaveLikeCanAddTrenBoxOwnerToArray from "./addTrenBoxOwnerToArray";
+import shouldBehaveLikeCanApplyPendingRewards from "./applyPendingRewards";
+import shouldBehaveLikeCanAuthorizeUpgrade from "./authorizeUpgrade";
+import shouldBehaveLikeCanCloseTrenBox from "./closeTrenBox";
+import shouldBehaveLikeCanCloseTrenBoxLiquidation from "./closeTrenBoxLiquidation";
+import shouldBehaveLikeCanDecreaseTrenBoxColl from "./decreaseTrenBoxColl";
+import shouldBehaveLikeCanDecreaseTrenBoxDebt from "./decreaseTrenBoxDebt";
 import shouldBehaveLikeCanExecuteFullRedemption from "./executeFullRedemption";
 import shouldBehaveLikCanExecutePartialRedemption from "./executePartialRedemption";
 import shouldBehaveLikeCanFinalizeRedemption from "./finalizeRedemption";
-import shouldBehaveLikeCanUpdateBaseRateFromRedemption from "./updateBaseRateFromRedemption";
-import shouldBehaveLikeCanApplyPendingRewards from "./applyPendingRewards";
+import shouldBehaveLikeCanIncreaseTrenBoxColl from "./increaseTrenBoxColl";
+import shouldBehaveLikeCanIncreaseTrenBoxDebt from "./increaseTrenBoxDebt";
 import shouldBehaveLikeCanMovePendingTrenBoxRewardsToActivePool from "./movePendingTrenBoxRewardsToActivePool";
-import shouldBehaveLikeCanUpdateTrenBoxRewardSnapshots from "./updateTrenBoxRewardSnapshots";
-import shouldBehaveLikeCanUpdateStakeAndTotalStakes from "./updateStakeAndTotalStakes";
-import shouldBehaveLikeCanRemoveStake from "./removeStake";
 import shouldBehaveLikeCanRedistributeDebtAndColl from "./redistributeDebtAndColl";
-import shouldBehaveLikeCanUpdateSystemSnapshots_excludeCollRemainder from "./updateSystemSnapshots_excludeCollRemainder";
-import shouldBehaveLikeCanCloseTrenBox from "./closeTrenBox";
-import shouldBehaveLikeCanCloseTrenBoxLiquidation from "./closeTrenBoxLiquidation";
+import shouldBehaveLikeCanRemoveStake from "./removeStake";
 import shouldBehaveLikeCanSendGasCompensation from "./sendGasCompensation";
 import shouldBehaveLikeCanSetTrenBoxStatus from "./setTrenBoxStatus";
-import shouldBehaveLikeCanIncreaseTrenBoxColl from "./increaseTrenBoxColl";
-import shouldBehaveLikeCanDecreaseTrenBoxColl from "./decreaseTrenBoxColl";
-import shouldBehaveLikeCanIncreaseTrenBoxDebt from "./increaseTrenBoxDebt";
-import shouldBehaveLikeCanDecreaseTrenBoxDebt from "./decreaseTrenBoxDebt";
-import shouldBehaveLikeCanAuthorizeUpgrade from "./authorizeUpgrade";
+import shouldBehaveLikeCanUpdateBaseRateFromRedemption from "./updateBaseRateFromRedemption";
+import shouldBehaveLikeCanUpdateStakeAndTotalStakes from "./updateStakeAndTotalStakes";
+import shouldBehaveLikeCanUpdateSystemSnapshots_excludeCollRemainder from "./updateSystemSnapshots_excludeCollRemainder";
+import shouldBehaveLikeCanUpdateTrenBoxRewardSnapshots from "./updateTrenBoxRewardSnapshots";
 
 export {
   shouldBehaveLikeCanAddTrenBoxOwnerToArray,
@@ -42,4 +42,4 @@ export {
   shouldBehaveLikeCanIncreaseTrenBoxDebt,
   shouldBehaveLikeCanDecreaseTrenBoxDebt,
   shouldBehaveLikeCanAuthorizeUpgrade,
-}
+};

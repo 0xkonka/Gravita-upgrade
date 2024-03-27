@@ -5,7 +5,8 @@ export default function shouldBehaveLikeGetNominalICR(): void {
     const { wETH } = this.collaterals.active;
     const borrower = this.signers.accounts[1];
 
-    expect(await this.contracts.trenBoxManager.getNominalICR(wETH.address, borrower))
-      .to.not.be.equal(0);
+    expect(
+      await this.contracts.trenBoxManager.getNominalICR(wETH.address, borrower)
+    ).to.not.be.equal(0);
   });
 }

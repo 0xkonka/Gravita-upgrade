@@ -7,8 +7,9 @@ export default function shouldBehaveLikeGetBorrowingRate(): void {
 
       const borrowingFeeRate = await this.contracts.adminContract.getBorrowingFee(wETH.address);
 
-      expect(await this.contracts.trenBoxManager.getBorrowingRate(wETH.address))
-        .to.be.equal(borrowingFeeRate);
+      expect(await this.contracts.trenBoxManager.getBorrowingRate(wETH.address)).to.be.equal(
+        borrowingFeeRate
+      );
     });
   });
 
@@ -27,8 +28,9 @@ export default function shouldBehaveLikeGetBorrowingRate(): void {
     it("should return ZERO", async function () {
       const { testCollateral } = this.collaterals.notAdded;
 
-      const borrowingFee =
-        await this.contracts.trenBoxManager.getBorrowingRate(testCollateral.address);
+      const borrowingFee = await this.contracts.trenBoxManager.getBorrowingRate(
+        testCollateral.address
+      );
 
       expect(borrowingFee).to.be.equal(0);
     });

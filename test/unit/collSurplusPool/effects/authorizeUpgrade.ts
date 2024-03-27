@@ -5,7 +5,9 @@ export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
     it("should emit CollSurplusPoolDebtUpdated", async function () {
       const { wETH } = this.collaterals.active;
 
-      await this.contracts.collSurplusPool.connect(this.signers.deployer).authorizeUpgrade(wETH.address);
+      await this.contracts.collSurplusPool
+        .connect(this.signers.deployer)
+        .authorizeUpgrade(wETH.address);
     });
   });
 
@@ -15,13 +17,8 @@ export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
       const { wETH } = this.collaterals.active;
 
       await expect(
-        this.contracts.collSurplusPool
-          .connect(this.impostor)
-          .authorizeUpgrade(wETH.address)
-      ).to.be.revertedWithCustomError(
-        this.contracts.collSurplusPool,
-        "OwnableUnauthorizedAccount"
-      );
+        this.contracts.collSurplusPool.connect(this.impostor).authorizeUpgrade(wETH.address)
+      ).to.be.revertedWithCustomError(this.contracts.collSurplusPool, "OwnableUnauthorizedAccount");
     });
   });
 }

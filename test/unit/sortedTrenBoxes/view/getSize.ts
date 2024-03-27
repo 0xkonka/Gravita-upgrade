@@ -2,50 +2,49 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 export default function shouldBehaveLikeContains(): void {
+  beforeEach(async function () {
+    const SortedTrenBoxesFactory = await ethers.getContractFactory("SortedTrenBoxes");
+    const sortedTrenBoxes = await SortedTrenBoxesFactory.connect(this.signers.deployer).deploy();
+    await sortedTrenBoxes.waitForDeployment();
+    await sortedTrenBoxes.initialize();
+
+    this.redeployedContracts.sortedTrenBoxes = sortedTrenBoxes;
+
+    this.borrowerOperationsImpostor = this.signers.accounts[1];
+  });
+
+  context("for active collateral", function () {
     beforeEach(async function () {
-        const SortedTrenBoxeslFactory = await ethers.getContractFactory("SortedTrenBoxes");
-        const sortedTrenBoxes = await SortedTrenBoxeslFactory.connect(this.signers.deployer).deploy();
-        await sortedTrenBoxes.waitForDeployment();
-        await sortedTrenBoxes.initialize();
+      const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
+        borrowerOperations: this.borrowerOperationsImpostor,
+      });
 
-        this.redeployedContracts.sortedTrenBoxes = sortedTrenBoxes;
+      await this.redeployedContracts.sortedTrenBoxes.setAddresses(addressesForSetAddresses);
+    });
+    it("size should be 0", async function () {
+      const { sortedTrenBoxes } = this.redeployedContracts;
+      const { wETH } = this.collaterals.active;
 
-        this.impostor = this.signers.accounts[1];
+      const size = await sortedTrenBoxes.getSize(wETH.address);
+
+      expect(size).to.be.equal(0);
     });
 
-    context("for active collateral", function () {
-        beforeEach(async function () {
-            const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-                borrowerOperations: this.impostor,
-            });
+    it("size should be 1", async function () {
+      const { sortedTrenBoxes } = this.redeployedContracts;
+      const { wETH } = this.collaterals.active;
 
-            await this.redeployedContracts.sortedTrenBoxes.setAddresses(addressesForSetAddresses);
-        });
-        it("size should be 0", async function () {
-            const { sortedTrenBoxes } = this.redeployedContracts;
-            const { wETH } = this.collaterals.active;
+      const userId = this.signers.accounts[1];
+      const prevId = ethers.ZeroAddress;
+      const nextId = ethers.ZeroAddress;
 
-            const size = await sortedTrenBoxes.getSize(wETH.address);
+      await this.redeployedContracts.sortedTrenBoxes
+        .connect(this.borrowerOperationsImpostor)
+        .insert(wETH.address, userId, 1n, prevId, nextId);
 
-            expect(size).to.be.equal(0);
-        });
+      const size = await sortedTrenBoxes.getSize(wETH.address);
 
-        it("size should be 1", async function () {
-            const { sortedTrenBoxes } = this.redeployedContracts;
-            const { wETH } = this.collaterals.active;
-
-            const user1 = this.signers.accounts[1];
-
-            const prevId = ethers.ZeroAddress;
-            const nextId = ethers.ZeroAddress;
-
-            await this.redeployedContracts.sortedTrenBoxes
-                .connect(this.impostor)
-                .insert(wETH.address, user1, 1n, prevId, nextId);
-
-            const size = await sortedTrenBoxes.getSize(wETH.address);
-
-            expect(size).to.be.equal(1);
-        });
+      expect(size).to.be.equal(1);
     });
+  });
 }

@@ -2,7 +2,7 @@ import { shouldBehaveLikeSortedTrenBoxesContract } from "./SortedTrenBoxes.behav
 
 export function testSortedTrenBoxes(): void {
   describe("SortedTrenBoxes", function () {
-    beforeEach(async function () { });
+    beforeEach(async function () {});
 
     shouldBehaveLikeSortedTrenBoxesContract();
   });

@@ -26,7 +26,8 @@ export default function shouldBehaveLikeGetDebtTokenBalance(): void {
     it("should return ZERO", async function () {
       const nonExistentCollateral = ethers.ZeroAddress;
 
-      const assetBalance = await this.contracts.activePool.getDebtTokenBalance(nonExistentCollateral);
+      const assetBalance =
+        await this.contracts.activePool.getDebtTokenBalance(nonExistentCollateral);
 
       expect(assetBalance).to.be.equal(0n);
     });

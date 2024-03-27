@@ -4,7 +4,7 @@ export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
   beforeEach(async function () {
     this.owner = this.signers.deployer;
     this.notOwner = this.signers.accounts[1];
-    this.newImplementation = await (this.testContracts.mockAggregator).getAddress();
+    this.newImplementation = await this.testContracts.mockAggregator.getAddress();
   });
 
   context("when caller is owner", function () {
@@ -18,13 +18,8 @@ export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
   context("when caller is not an owner", function () {
     it("reverts custom error", async function () {
       await expect(
-        this.contracts.activePool
-          .connect(this.notOwner)
-          .authorizeUpgrade(this.newImplementation)
-      ).to.be.revertedWithCustomError(
-        this.contracts.activePool,
-        "OwnableUnauthorizedAccount"
-      );
+        this.contracts.activePool.connect(this.notOwner).authorizeUpgrade(this.newImplementation)
+      ).to.be.revertedWithCustomError(this.contracts.activePool, "OwnableUnauthorizedAccount");
     });
   });
 }

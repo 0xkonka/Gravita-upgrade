@@ -2,85 +2,93 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 export default function shouldBehaveLikeContains(): void {
+  beforeEach(async function () {
+    const SortedTrenBoxesFactory = await ethers.getContractFactory("SortedTrenBoxes");
+    const sortedTrenBoxes = await SortedTrenBoxesFactory.connect(this.signers.deployer).deploy();
+    await sortedTrenBoxes.waitForDeployment();
+    await sortedTrenBoxes.initialize();
+
+    this.redeployedContracts.sortedTrenBoxes = sortedTrenBoxes;
+
+    this.borrowerOperationsImpostor = this.signers.accounts[1];
+  });
+
+  context("for active collateral", function () {
     beforeEach(async function () {
-        const SortedTrenBoxeslFactory = await ethers.getContractFactory("SortedTrenBoxes");
-        const sortedTrenBoxes = await SortedTrenBoxeslFactory.connect(this.signers.deployer).deploy();
-        await sortedTrenBoxes.waitForDeployment();
-        await sortedTrenBoxes.initialize();
+      const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
+        borrowerOperations: this.borrowerOperationsImpostor,
+      });
 
-        this.redeployedContracts.sortedTrenBoxes = sortedTrenBoxes;
+      await this.redeployedContracts.sortedTrenBoxes.setAddresses(addressesForSetAddresses);
 
-        this.impostor = this.signers.accounts[1];
+      const { sortedTrenBoxes } = this.redeployedContracts;
+      const { wETH } = this.collaterals.active;
+
+      const users = this.signers.accounts.slice(1, 5);
+
+      const prevId = ethers.ZeroAddress;
+      const nextId = ethers.ZeroAddress;
+
+      await sortedTrenBoxes
+        .connect(this.borrowerOperationsImpostor)
+        .insert(wETH.address, users[0], 1n, prevId, nextId);
+      await sortedTrenBoxes
+        .connect(this.borrowerOperationsImpostor)
+        .insert(wETH.address, users[1], 2n, prevId, nextId);
+      await sortedTrenBoxes
+        .connect(this.borrowerOperationsImpostor)
+        .insert(wETH.address, users[2], 3n, prevId, nextId);
+      await sortedTrenBoxes
+        .connect(this.borrowerOperationsImpostor)
+        .insert(wETH.address, users[3], 4n, prevId, nextId);
+
+      await this.utils.setUsers(users);
     });
 
-    context("for active collateral", function () {
-        beforeEach(async function () {
-            const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-                borrowerOperations: this.impostor,
-            });
+    it("get first node", async function () {
+      const { sortedTrenBoxes } = this.redeployedContracts;
+      const { wETH } = this.collaterals.active;
 
-            await this.redeployedContracts.sortedTrenBoxes.setAddresses(addressesForSetAddresses);
+      const firstUser = this.users[0];
 
-            const { sortedTrenBoxes } = this.redeployedContracts;
-            const { wETH } = this.collaterals.active;
+      const firstNode = await sortedTrenBoxes.getFirst(wETH.address);
 
-            const user1 = this.signers.accounts[1];
-            const user2 = this.signers.accounts[2];
-            const user3 = this.signers.accounts[3];
-            const user4 = this.signers.accounts[4];
-
-            const prevId = ethers.ZeroAddress;
-            const nextId = ethers.ZeroAddress;
-
-            await sortedTrenBoxes.connect(this.impostor).insert(wETH.address, user1, 1n, prevId, nextId);
-            await sortedTrenBoxes.connect(this.impostor).insert(wETH.address, user2, 2n, prevId, nextId);
-            await sortedTrenBoxes.connect(this.impostor).insert(wETH.address, user3, 3n, prevId, nextId);
-            await sortedTrenBoxes.connect(this.impostor).insert(wETH.address, user4, 4n, prevId, nextId);
-        });
-        it("get first node", async function () {
-            const { sortedTrenBoxes } = this.redeployedContracts;
-            const { wETH } = this.collaterals.active;
-
-            const user = this.signers.accounts[1];
-
-            const firstNode = await sortedTrenBoxes.getFirst(wETH.address);
-
-            expect(firstNode).to.be.equal(user);
-        });
-
-        it("get last node", async function () {
-            const { sortedTrenBoxes } = this.redeployedContracts;
-            const { wETH } = this.collaterals.active;
-
-            const user = this.signers.accounts[4];
-
-            const lastNode = await sortedTrenBoxes.getLast(wETH.address);
-
-            expect(lastNode).to.be.equal(user);
-        });
-
-        it("get next node", async function () {
-            const { sortedTrenBoxes } = this.redeployedContracts;
-            const { wETH } = this.collaterals.active;
-
-            const user1 = this.signers.accounts[1];
-            const user2 = this.signers.accounts[2];
-
-            const nextNode = await sortedTrenBoxes.getNext(wETH.address, user1);
-
-            expect(nextNode).to.be.equal(user2);
-        });
-
-        it("get prev node", async function () {
-            const { sortedTrenBoxes } = this.redeployedContracts;
-            const { wETH } = this.collaterals.active;
-
-            const user1 = this.signers.accounts[4];
-            const user2 = this.signers.accounts[3];
-
-            const prevNode = await sortedTrenBoxes.getPrev(wETH.address, user1);
-
-            expect(prevNode).to.be.equal(user2);
-        });
+      expect(firstNode).to.be.equal(firstUser);
     });
+
+    it("get last node", async function () {
+      const { sortedTrenBoxes } = this.redeployedContracts;
+      const { wETH } = this.collaterals.active;
+
+      const lastUsers = this.users.at(-1);
+
+      const lastNode = await sortedTrenBoxes.getLast(wETH.address);
+
+      expect(lastNode).to.be.equal(lastUsers);
+    });
+
+    it("get next node", async function () {
+      const { sortedTrenBoxes } = this.redeployedContracts;
+      const { wETH } = this.collaterals.active;
+
+      const currentUser = this.users[0];
+      const nextUsers = this.users[1];
+
+      const nextNode = await sortedTrenBoxes.getNext(wETH.address, currentUser);
+
+      expect(nextNode).to.be.equal(nextUsers);
+    });
+
+    it("get prev node", async function () {
+      const { sortedTrenBoxes } = this.redeployedContracts;
+      const { wETH } = this.collaterals.active;
+
+      const currentUser = this.users[this.users.length - 1];
+      const previousUser = this.users.at(-2);
+
+      const prevNode = await sortedTrenBoxes.getPrev(wETH.address, currentUser);
+
+      expect(prevNode).to.be.equal(previousUser);
+    });
+  });
 }

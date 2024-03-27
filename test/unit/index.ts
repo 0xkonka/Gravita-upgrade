@@ -35,6 +35,7 @@ describe("Unit tests", function () {
     this.signers.accounts = await Promise.all(
       unnamedAccounts.map((address) => ethers.getSigner(address))
     );
+    this.users = [];
 
     this.loadFixture = loadFixture;
     this.contracts = await this.loadFixture(loadDeploymentFixture);
@@ -49,6 +50,7 @@ describe("Unit tests", function () {
 
   beforeEach(async function () {
     this.snapshotId = await network.provider.send("evm_snapshot");
+    this.users = [];
   });
 
   afterEach(async function () {

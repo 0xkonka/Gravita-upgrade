@@ -4,9 +4,12 @@ import { deployments, ethers } from "hardhat";
 
 import { LOCAL_NETWORK_COLLATERALS } from "../../config/collaterals";
 import type {
-  ERC20Test, ERC20Test__factory,
-  MockAggregator, MockAggregator__factory,
-  MockApi3Proxy, MockApi3Proxy__factory
+  ERC20Test,
+  ERC20Test__factory,
+  MockAggregator,
+  MockAggregator__factory,
+  MockApi3Proxy,
+  MockApi3Proxy__factory,
 } from "../../types";
 import { Collaterals, TestContracts } from "../shared/types";
 
@@ -67,7 +70,9 @@ export async function loadTestFixture(): Promise<{
   type AggregatorDeployArgs = Parameters<typeof MockAggregatorFactory.deploy>;
   const aggregatorArgs: AggregatorDeployArgs = [];
 
-  const mockAggregator: MockAggregator = (await MockAggregatorFactory.connect(deployer).deploy(...aggregatorArgs)) as MockAggregator;
+  const mockAggregator: MockAggregator = (await MockAggregatorFactory.connect(deployer).deploy(
+    ...aggregatorArgs
+  )) as MockAggregator;
   await mockAggregator.waitForDeployment();
 
   const MockApi3Factory: MockApi3Proxy__factory = (await ethers.getContractFactory(
@@ -77,7 +82,9 @@ export async function loadTestFixture(): Promise<{
   type Api3DeployArgs = Parameters<typeof MockApi3Factory.deploy>;
   const api3Args: Api3DeployArgs = [];
 
-  const mockApi3: MockApi3Proxy = (await MockApi3Factory.connect(deployer).deploy(...api3Args)) as MockApi3Proxy;
+  const mockApi3: MockApi3Proxy = (await MockApi3Factory.connect(deployer).deploy(
+    ...api3Args
+  )) as MockApi3Proxy;
   await mockApi3.waitForDeployment();
 
   const priceFeedTestnet = await ethers.getContractAt(
