@@ -135,10 +135,8 @@ contract BorrowerOperations is
         }
 
         // Set the trenBox struct's properties
-        ITrenBoxManager(trenBoxManager).setTrenBoxStatus(vars.asset, msg.sender, 1); // TrenBox
-            // Status
-            // 1
-            // = Active
+        ITrenBoxManager(trenBoxManager).setTrenBoxStatus(vars.asset, msg.sender, 1);
+
         ITrenBoxManager(trenBoxManager).increaseTrenBoxColl(vars.asset, msg.sender, _assetAmount);
         ITrenBoxManager(trenBoxManager).increaseTrenBoxDebt(
             vars.asset, msg.sender, vars.compositeDebt

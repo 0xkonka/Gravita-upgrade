@@ -2,10 +2,10 @@ import { expect } from "chai";
 
 export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
   context("when caller is owner", function () {
-    it("should emit DefaultPoolDebtUpdated", async function () {
+    it("should execute authorizeUpgrade", async function () {
       const { wETH } = this.collaterals.active;
 
-      await this.contracts.defaultPool
+      await this.contracts.trenBoxManager
         .connect(this.signers.deployer)
         .authorizeUpgrade(wETH.address);
     });
@@ -17,8 +17,8 @@ export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
       const { wETH } = this.collaterals.active;
 
       await expect(
-        this.contracts.defaultPool.connect(impostor).authorizeUpgrade(wETH.address)
-      ).to.be.revertedWithCustomError(this.contracts.defaultPool, "OwnableUnauthorizedAccount");
+        this.contracts.trenBoxManager.connect(impostor).authorizeUpgrade(wETH.address)
+      ).to.be.revertedWithCustomError(this.contracts.activePool, "OwnableUnauthorizedAccount");
     });
   });
 }

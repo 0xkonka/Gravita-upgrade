@@ -16,21 +16,16 @@ import type {
   GasPool,
   IPriceFeed,
   Lock,
+  PriceFeed,
+  PriceFeedL2,
   PriceFeedTestnet,
   SortedTrenBoxes,
   StabilityPool,
   Timelock,
   TrenBoxManager,
   TrenBoxManagerOperations,
-  PriceFeed,
-  PriceFeedL2
 } from "../../types";
-
-import {
-  ERC20Test,
-  MockAggregator,
-  MockApi3Proxy
-} from "../../types/contracts/TestContracts";
+import { ERC20Test, MockAggregator, MockApi3Proxy } from "../../types/contracts/TestContracts";
 
 type Fixture<T> = () => Promise<T>;
 
@@ -137,6 +132,10 @@ export type GetActualDebtFromCompositeDebtArgs = {
   overrideTrenBoxManager?: TrenBoxManager;
 };
 
+export type ConnectRedeployedContractArgs = Partial<
+  Record<keyof Contracts | "treasury", BaseContract | HardhatEthersSigner>
+>;
+
 export type SetupCollateralForTestsArgs = {
   collateral: ERC20Test;
   collateralOptions: {
@@ -177,6 +176,7 @@ export interface TestUtils {
   getCompositeDebt: (args: GetCompositeDebtArgs) => Promise<bigint>;
   getActualDebtFromCompositeDebt: (args: GetActualDebtFromCompositeDebtArgs) => Promise<bigint>;
   setupCollateralForTests: (args: SetupCollateralForTestsArgs) => Promise<void>;
+  connectRedeployedContracts: (args: ConnectRedeployedContractArgs) => Promise<void>;
 }
 
 export interface TestContracts {
