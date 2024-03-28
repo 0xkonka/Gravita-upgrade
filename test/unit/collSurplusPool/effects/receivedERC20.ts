@@ -34,13 +34,7 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
       const debtAmount = 50n;
 
       await expect(
-<<<<<<< HEAD
-        this.contracts.collSurplusPool
-          .connect(this.impostor)
-          .receivedERC20(wETH.address, debtAmount)
-=======
         this.contracts.collSurplusPool.connect(impostor).receivedERC20(wETH.address, debtAmount)
->>>>>>> main
       ).to.be.revertedWith("CollSurplusPool: Caller is not Active Pool");
     });
   });
