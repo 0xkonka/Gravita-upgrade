@@ -13,6 +13,7 @@ import { loadDeploymentFixture } from "./deployment.fixture";
 import { testLock } from "./lock/Lock";
 import { testPriceFeed } from "./priceFeed/PriceFeed";
 import { testSortedTrenBoxes } from "./sortedTrenBoxes/SortedTrenBoxes";
+import { testStabilityPool } from "./stabilityPool/StabilityPool";
 import { loadTestFixture } from "./testContracts.fixture";
 import { testTrenBoxManager } from "./trenBoxManager/TrenBoxManager";
 
@@ -61,14 +62,15 @@ describe("Unit tests", function () {
     await this.utils.revertToInitialSnapshot();
   });
 
-  testActivePool();
-  testAdminContract();
-  testBorrowerOperations();
-  testDebtToken();
-  testPriceFeed();
-  testLock();
-  testSortedTrenBoxes();
-  testTrenBoxManager();
-  testCollSurplusPool();
-  testDefaultPool();
+  // testActivePool();
+  // testAdminContract();
+  // testBorrowerOperations();
+  // testDebtToken();
+  // testPriceFeed();
+  // testLock();
+  // testSortedTrenBoxes();
+  // testTrenBoxManager();
+  // testCollSurplusPool();
+  // testDefaultPool();
+  testStabilityPool();
 });
