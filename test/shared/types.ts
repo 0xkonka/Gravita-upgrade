@@ -174,6 +174,46 @@ export type SetupProtocolCommands =
       args: OpenTrenBoxArgs;
     }
   | {
+      action: "addCollateral";
+      args: AddCollateralArgs;
+    }
+  | {
+      action: "withdrawCollateral";
+      args: WithdrawCollateralArgs;
+    }
+  | {
+      action: "takeDebt";
+      args: TakeDebtArgs;
+    }
+  | {
+      action: "repayDebt";
+      args: RepayDebtArgs;
+    }
+  | {
+      action: "provideToStabilityPool";
+      args: ProvideToStabilityPoolArgs;
+    }
+  | {
+      action: "withdrawFromStabilityPool";
+      args: WithdrawFromStabilityPoolArgs;
+    }
+  | {
+      action: "redeemCollateral";
+      args: RedeemCollateralArgs;
+    }
+  | {
+      action: "liquidate";
+      args: LiquidateArgs;
+    }
+  | {
+      action: "liquidateTrenBoxes";
+      args: LiquidateTrenBoxesArgs;
+    }
+  | {
+      action: "batchLiquidateTrenBoxes";
+      args: BatchLiquidateTrenBoxesArgs;
+    }
+  | {
       action: "approve";
       args: {
         from: HardhatEthersSigner;
@@ -193,6 +233,106 @@ export type SetupProtocolForTestsResult = void;
 
 export type SetUsersArgs = HardhatEthersSigner[];
 
+export type AddCollateralArgs = {
+  from?: HardhatEthersSigner;
+  collateral: ERC20;
+  amount: bigint;
+  autoApprove?: boolean;
+  upperHint?: AddressLike;
+  lowerHint?: AddressLike;
+  overrideBorrowerOperations?: BorrowerOperations;
+};
+export type AddCollateralResult = ContractTransactionResponse;
+
+export type WithdrawCollateralArgs = {
+  from?: HardhatEthersSigner;
+  collateral: ERC20;
+  amount: bigint;
+  upperHint?: AddressLike;
+  lowerHint?: AddressLike;
+  overrideBorrowerOperations?: BorrowerOperations;
+};
+export type WithdrawCollateralResult = ContractTransactionResponse;
+
+export type TakeDebtArgs = {
+  from?: HardhatEthersSigner;
+  collateral: ERC20;
+  debtAmount: bigint;
+  upperHint?: AddressLike;
+  lowerHint?: AddressLike;
+  overrideBorrowerOperations?: BorrowerOperations;
+};
+export type TakeDebtResult = ContractTransactionResponse;
+
+export type RepayDebtArgs = {
+  from?: HardhatEthersSigner;
+  collateral: ERC20;
+  debtAmount: string;
+  upperHint?: AddressLike;
+  lowerHint?: AddressLike;
+  autoApprove?: boolean;
+  overrideBorrowerOperations?: BorrowerOperations;
+  overrideDebtToken?: DebtToken;
+};
+export type RepayDebtResult = ContractTransactionResponse;
+
+export type ProvideToStabilityPoolArgs = {
+  from?: HardhatEthersSigner;
+  amount: bigint;
+  assets: (ERC20 | AddressLike)[];
+  overrideStabilityPool?: StabilityPool;
+};
+export type ProvideToStabilityPoolResult = ContractTransactionResponse;
+
+export type WithdrawFromStabilityPoolArgs = {
+  from?: HardhatEthersSigner;
+  amount: bigint;
+  assets: (ERC20 | AddressLike)[];
+  overrideStabilityPool?: StabilityPool;
+};
+export type WithdrawFromStabilityPoolResult = ContractTransactionResponse;
+
+export type LiquidateArgs = {
+  from?: HardhatEthersSigner;
+  asset: ERC20 | AddressLike;
+  borrower: HardhatEthersSigner | AddressLike;
+  overrideTrenBoxManagerOperations?: TrenBoxManagerOperations;
+};
+export type LiquidateResult = ContractTransactionResponse;
+
+export type BatchLiquidateTrenBoxesArgs = {
+  from?: HardhatEthersSigner;
+  asset: ERC20 | AddressLike;
+  trenBoxes: AddressLike[];
+  overrideTrenBoxManagerOperations?: TrenBoxManagerOperations;
+};
+export type BatchLiquidateTrenBoxesResult = ContractTransactionResponse;
+
+export type LiquidateTrenBoxesArgs = {
+  from?: HardhatEthersSigner;
+  asset: ERC20 | AddressLike;
+  numberOfTrenBoxes: bigint;
+  overrideTrenBoxManagerOperations?: TrenBoxManagerOperations;
+};
+export type LiquidateTrenBoxesResult = ContractTransactionResponse;
+
+export type RedeemCollateralArgs = {
+  from?: HardhatEthersSigner;
+  asset: ERC20 | AddressLike;
+  debtTokenAmount: bigint;
+  numberOfTrials: bigint;
+  randomSeed: bigint;
+
+  maxFeePercentage?: bigint;
+  price?: bigint;
+  maxIterations?: bigint;
+
+  overridePriceFeed?: PriceFeed;
+  overrideTrenBoxManagerOperations?: TrenBoxManagerOperations;
+  overrideSortedTrenBoxes?: SortedTrenBoxes;
+};
+export type RedeemCollateralResult = ContractTransactionResponse;
+
 export interface TestUtils {
   revertToInitialSnapshot: () => Promise<void>;
   getAddressesForSetAddresses: (
@@ -207,6 +347,20 @@ export interface TestUtils {
   connectRedeployedContracts: (args: ConnectRedeployedContractArgs) => Promise<void>;
   setupProtocolForTests: (args: SetupProtocolForTestsArgs) => Promise<SetupProtocolForTestsResult>;
   setUsers: (args: SetUsersArgs) => Promise<HardhatEthersSigner[]>;
+  addCollateral(args: AddCollateralArgs): Promise<AddCollateralResult>;
+  withdrawCollateral(args: WithdrawCollateralArgs): Promise<WithdrawCollateralResult>;
+  takeDebt(args: TakeDebtArgs): Promise<TakeDebtResult>;
+  repayDebt(args: RepayDebtArgs): Promise<RepayDebtResult>;
+  provideToStabilityPool(args: ProvideToStabilityPoolArgs): Promise<ProvideToStabilityPoolResult>;
+  withdrawFromStabilityPool(
+    args: WithdrawFromStabilityPoolArgs
+  ): Promise<WithdrawFromStabilityPoolResult>;
+  liquidate: (args: LiquidateArgs) => Promise<LiquidateResult>;
+  liquidateTrenBoxes: (args: LiquidateTrenBoxesArgs) => Promise<LiquidateTrenBoxesResult>;
+  batchLiquidateTrenBoxes: (
+    args: BatchLiquidateTrenBoxesArgs
+  ) => Promise<BatchLiquidateTrenBoxesResult>;
+  redeemCollateral: (args: RedeemCollateralArgs) => Promise<RedeemCollateralResult>;
 }
 
 export interface TestContracts {
