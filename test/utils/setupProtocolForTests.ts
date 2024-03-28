@@ -24,6 +24,31 @@ export function setupProtocolForTests(context: Context) {
             overrideTrenBoxManager: overrides?.trenBoxManager,
           });
           break;
+        case "addCollateral":
+          await context.utils.addCollateral({
+            ...command.args,
+            overrideBorrowerOperations: overrides?.borrowerOperations,
+          });
+          break;
+        case "withdrawCollateral":
+          await context.utils.withdrawCollateral({
+            ...command.args,
+            overrideBorrowerOperations: overrides?.borrowerOperations,
+          });
+          break;
+        case "takeDebt":
+          await context.utils.takeDebt({
+            ...command.args,
+            overrideBorrowerOperations: overrides?.borrowerOperations,
+          });
+          break;
+        case "repayDebt":
+          await context.utils.repayDebt({
+            ...command.args,
+            overrideBorrowerOperations: overrides?.borrowerOperations,
+            overrideDebtToken: overrides?.debtToken,
+          });
+          break;
         case "approve":
           await command.args.asset
             .connect(command.args.from)
