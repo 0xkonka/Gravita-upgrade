@@ -190,6 +190,30 @@ export type SetupProtocolCommands =
       args: RepayDebtArgs;
     }
   | {
+      action: "provideToStabilityPool";
+      args: ProvideToStabilityPoolArgs;
+    }
+  | {
+      action: "withdrawFromStabilityPool";
+      args: WithdrawFromStabilityPoolArgs;
+    }
+  | {
+      action: "redeemCollateral";
+      args: RedeemCollateralArgs;
+    }
+  | {
+      action: "liquidate";
+      args: LiquidateArgs;
+    }
+  | {
+      action: "liquidateTrenBoxes";
+      args: LiquidateTrenBoxesArgs;
+    }
+  | {
+      action: "batchLiquidateTrenBoxes";
+      args: BatchLiquidateTrenBoxesArgs;
+    }
+  | {
       action: "approve";
       args: {
         from: HardhatEthersSigner;
@@ -250,8 +274,64 @@ export type RepayDebtArgs = {
   overrideBorrowerOperations?: BorrowerOperations;
   overrideDebtToken?: DebtToken;
 };
-
 export type RepayDebtResult = ContractTransactionResponse;
+
+export type ProvideToStabilityPoolArgs = {
+  from?: HardhatEthersSigner;
+  amount: bigint;
+  assets: (ERC20 | AddressLike)[];
+  overrideStabilityPool?: StabilityPool;
+};
+export type ProvideToStabilityPoolResult = ContractTransactionResponse;
+
+export type WithdrawFromStabilityPoolArgs = {
+  from?: HardhatEthersSigner;
+  amount: bigint;
+  assets: (ERC20 | AddressLike)[];
+  overrideStabilityPool?: StabilityPool;
+};
+export type WithdrawFromStabilityPoolResult = ContractTransactionResponse;
+
+export type LiquidateArgs = {
+  from?: HardhatEthersSigner;
+  asset: ERC20 | AddressLike;
+  borrower: HardhatEthersSigner | AddressLike;
+  overrideTrenBoxManagerOperations?: TrenBoxManagerOperations;
+};
+export type LiquidateResult = ContractTransactionResponse;
+
+export type BatchLiquidateTrenBoxesArgs = {
+  from?: HardhatEthersSigner;
+  asset: ERC20 | AddressLike;
+  trenBoxes: AddressLike[];
+  overrideTrenBoxManagerOperations?: TrenBoxManagerOperations;
+};
+export type BatchLiquidateTrenBoxesResult = ContractTransactionResponse;
+
+export type LiquidateTrenBoxesArgs = {
+  from?: HardhatEthersSigner;
+  asset: ERC20 | AddressLike;
+  numberOfTrenBoxes: bigint;
+  overrideTrenBoxManagerOperations?: TrenBoxManagerOperations;
+};
+export type LiquidateTrenBoxesResult = ContractTransactionResponse;
+
+export type RedeemCollateralArgs = {
+  from?: HardhatEthersSigner;
+  asset: ERC20 | AddressLike;
+  debtTokenAmount: bigint;
+  numberOfTrials: bigint;
+  randomSeed: bigint;
+
+  maxFeePercentage?: bigint;
+  price?: bigint;
+  maxIterations?: bigint;
+
+  overridePriceFeed?: PriceFeed;
+  overrideTrenBoxManagerOperations?: TrenBoxManagerOperations;
+  overrideSortedTrenBoxes?: SortedTrenBoxes;
+};
+export type RedeemCollateralResult = ContractTransactionResponse;
 
 export interface TestUtils {
   revertToInitialSnapshot: () => Promise<void>;
@@ -271,6 +351,16 @@ export interface TestUtils {
   withdrawCollateral(args: WithdrawCollateralArgs): Promise<WithdrawCollateralResult>;
   takeDebt(args: TakeDebtArgs): Promise<TakeDebtResult>;
   repayDebt(args: RepayDebtArgs): Promise<RepayDebtResult>;
+  provideToStabilityPool(args: ProvideToStabilityPoolArgs): Promise<ProvideToStabilityPoolResult>;
+  withdrawFromStabilityPool(
+    args: WithdrawFromStabilityPoolArgs
+  ): Promise<WithdrawFromStabilityPoolResult>;
+  liquidate: (args: LiquidateArgs) => Promise<LiquidateResult>;
+  liquidateTrenBoxes: (args: LiquidateTrenBoxesArgs) => Promise<LiquidateTrenBoxesResult>;
+  batchLiquidateTrenBoxes: (
+    args: BatchLiquidateTrenBoxesArgs
+  ) => Promise<BatchLiquidateTrenBoxesResult>;
+  redeemCollateral: (args: RedeemCollateralArgs) => Promise<RedeemCollateralResult>;
 }
 
 export interface TestContracts {

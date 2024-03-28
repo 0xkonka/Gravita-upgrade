@@ -49,13 +49,51 @@ export function setupProtocolForTests(context: Context) {
             overrideDebtToken: overrides?.debtToken,
           });
           break;
+        case "provideToStabilityPool":
+          await context.utils.provideToStabilityPool({
+            ...command.args,
+            overrideStabilityPool: overrides?.stabilityPool,
+          });
+          break;
+        case "withdrawFromStabilityPool":
+          await context.utils.withdrawFromStabilityPool({
+            ...command.args,
+            overrideStabilityPool: overrides?.stabilityPool,
+          });
+          break;
+        case "redeemCollateral":
+          await context.utils.redeemCollateral({
+            ...command.args,
+            overrideTrenBoxManagerOperations: overrides?.trenBoxManagerOperations,
+            overridePriceFeed: overrides?.priceFeed,
+            overrideSortedTrenBoxes: overrides?.sortedTrenBoxes,
+          });
+          break;
+        case "liquidate":
+          await context.utils.liquidate({
+            ...command.args,
+            overrideTrenBoxManagerOperations: overrides?.trenBoxManagerOperations,
+          });
+          break;
+        case "batchLiquidateTrenBoxes":
+          await context.utils.batchLiquidateTrenBoxes({
+            ...command.args,
+            overrideTrenBoxManagerOperations: overrides?.trenBoxManagerOperations,
+          });
+          break;
+        case "liquidateTrenBoxes":
+          await context.utils.liquidateTrenBoxes({
+            ...command.args,
+            overrideTrenBoxManagerOperations: overrides?.trenBoxManagerOperations,
+          });
+          break;
         case "approve":
           await command.args.asset
             .connect(command.args.from)
             .approve(command.args.spender, command.args.amount);
           break;
         default:
-          break;
+          throw new Error(`Unknown command: ${action}`);
       }
     }
   };
