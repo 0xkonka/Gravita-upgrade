@@ -21,12 +21,16 @@ export default function shouldBehaveLikeCanAddCollateralType(): void {
 
   context("when caller is Admin Contract", function () {
     it("should add Collateral", async function () {
-
       const { wETH } = this.collaterals.active;
 
       await this.redeployedContracts.stabilityPool
         .connect(this.adminContractImpostor)
         .addCollateralType(wETH.address);
+
+      const res = await this.redeployedContracts.stabilityPool.getAllCollateral();
+
+      expect(res[0]).to.be.an("array").that.includes(wETH.address);
+      expect(res[1]).to.be.an("array").that.includes(0n);
     });
   });
 
@@ -37,7 +41,10 @@ export default function shouldBehaveLikeCanAddCollateralType(): void {
 
       await expect(
         this.redeployedContracts.stabilityPool.connect(impostor).addCollateralType(wETH.address)
-      ).to.be.revertedWithCustomError(this.redeployedContracts.stabilityPool, "StabilityPool__AdminContractOnly");
+      ).to.be.revertedWithCustomError(
+        this.redeployedContracts.stabilityPool,
+        "StabilityPool__AdminContractOnly"
+      );
     });
   });
 }
