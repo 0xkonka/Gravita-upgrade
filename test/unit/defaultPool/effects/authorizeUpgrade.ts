@@ -13,11 +13,11 @@ export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
 
   context("when caller is not an owner", function () {
     it("reverts custom error", async function () {
-      this.impostor = this.signers.accounts[1];
+      const impostor = this.signers.accounts[1];
       const { wETH } = this.collaterals.active;
 
       await expect(
-        this.contracts.defaultPool.connect(this.impostor).authorizeUpgrade(wETH.address)
+        this.contracts.defaultPool.connect(impostor).authorizeUpgrade(wETH.address)
       ).to.be.revertedWithCustomError(this.contracts.defaultPool, "OwnableUnauthorizedAccount");
     });
   });

@@ -22,7 +22,9 @@ export default function shouldBehaveLikeCanClaimColl(): void {
     this.redeployedContracts.activePool = activePool;
     this.redeployedContracts.trenBoxManager = trenBoxManager;
 
-    this.impostor = this.signers.accounts[1];
+    this.borrowerOperationsImpostor = this.signers.accounts[1];
+    this.activePoolImpostor = this.signers.accounts[2];
+    this.trenBoxManagerImpostor = this.signers.accounts[3];
 
     const { erc20 } = this.testContracts;
     await erc20.mint(this.redeployedContracts.collSurplusPool, 1000n);
@@ -31,9 +33,9 @@ export default function shouldBehaveLikeCanClaimColl(): void {
   context("when caller is borrower operations", function () {
     beforeEach(async function () {
       const addressesForSetAddresses1 = await this.utils.getAddressesForSetAddresses({
-        borrowerOperations: this.impostor,
-        activePool: this.impostor,
-        trenBoxManager: this.impostor,
+        borrowerOperations: this.borrowerOperationsImpostor,
+        activePool: this.activePoolImpostor,
+        trenBoxManager: this.trenBoxManagerImpostor,
       });
 
       await this.redeployedContracts.collSurplusPool.setAddresses(addressesForSetAddresses1);
@@ -44,7 +46,9 @@ export default function shouldBehaveLikeCanClaimColl(): void {
       const user = this.signers.accounts[1];
 
       await expect(
-        this.redeployedContracts.collSurplusPool.connect(this.impostor).claimColl(erc20, user)
+        this.redeployedContracts.collSurplusPool
+          .connect(this.borrowerOperationsImpostor)
+          .claimColl(erc20, user)
       ).to.be.revertedWith("CollSurplusPool: No collateral available to claim");
     });
 
@@ -59,7 +63,7 @@ export default function shouldBehaveLikeCanClaimColl(): void {
       );
 
       const accountSurplusTx = await this.redeployedContracts.collSurplusPool
-        .connect(this.impostor)
+        .connect(this.trenBoxManagerImpostor)
         .accountSurplus(erc20, user.address, assetAmount);
 
       await expect(accountSurplusTx)
@@ -77,7 +81,7 @@ export default function shouldBehaveLikeCanClaimColl(): void {
         await this.redeployedContracts.collSurplusPool.getAssetBalance(erc20);
 
       await this.redeployedContracts.collSurplusPool
-        .connect(this.impostor)
+        .connect(this.activePoolImpostor)
         .receivedERC20(erc20, assetAmount);
 
       const assetBalanceAfter =
@@ -86,7 +90,7 @@ export default function shouldBehaveLikeCanClaimColl(): void {
       expect(assetAmount).to.be.equal(assetBalanceAfter - assetBalanceBefore);
 
       const claimCollTx = await this.redeployedContracts.collSurplusPool
-        .connect(this.impostor)
+        .connect(this.borrowerOperationsImpostor)
         .claimColl(erc20, user.address);
 
       await expect(claimCollTx)
@@ -97,13 +101,13 @@ export default function shouldBehaveLikeCanClaimColl(): void {
 
   context("when caller is not borrower operations", function () {
     it("reverts custom error", async function () {
-      this.impostor = this.signers.accounts[1];
+      const impostor = this.signers.accounts[1];
       const { erc20 } = this.testContracts;
 
       const user = this.signers.accounts[1];
 
       await expect(
-        this.contracts.collSurplusPool.connect(this.impostor).claimColl(erc20, user)
+        this.contracts.collSurplusPool.connect(impostor).claimColl(erc20, user)
       ).to.be.revertedWith("CollSurplusPool: Caller is not Borrower Operations");
     });
   });

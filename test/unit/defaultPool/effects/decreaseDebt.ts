@@ -16,7 +16,6 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
   context("when caller is tren box manager", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        // stabilityPool: this.impostor,
         trenBoxManager: this.impostor,
       });
 
@@ -28,12 +27,12 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
 
   context("when caller is not tren box manager", function () {
     it("reverts custom error", async function () {
-      this.impostor = this.signers.accounts[1];
+      const impostor = this.signers.accounts[1];
       const { wETH } = this.collaterals.active;
       const debtAmount = 50n;
 
       await expect(
-        this.contracts.defaultPool.connect(this.impostor).decreaseDebt(wETH.address, debtAmount)
+        this.contracts.defaultPool.connect(impostor).decreaseDebt(wETH.address, debtAmount)
       ).to.be.revertedWith("DefaultPool: Caller is not the TrenBoxManager");
     });
   });

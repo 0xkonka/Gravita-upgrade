@@ -16,8 +16,8 @@ export default function shouldBehaveLikeCanSendAsset(): void {
     this.redeployedContracts.defaultPool = defaultPool;
     this.redeployedContracts.activePool = activePool;
 
-    this.impostor = this.signers.accounts[1];
-    this.impostor2 = this.signers.accounts[2];
+    this.trenBoxManagerImpostor = this.signers.accounts[1];
+    this.borrowerOperationsImpostor = this.signers.accounts[2];
 
     const { erc20 } = this.testContracts;
     await erc20.mint(this.signers.deployer, 1000n);
@@ -27,19 +27,12 @@ export default function shouldBehaveLikeCanSendAsset(): void {
 
   context("when caller is tren box manager", function () {
     beforeEach(async function () {
-      const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        trenBoxManager: this.impostor,
+      await this.utils.connectRedeployedContracts({
+        trenBoxManager: this.trenBoxManagerImpostor,
+        borrowerOperations: this.borrowerOperationsImpostor,
         activePool: this.redeployedContracts.activePool,
-      });
-
-      const addressesForSetAddresses2 = await this.utils.getAddressesForSetAddresses({
-        trenBoxManager: this.impostor,
-        borrowerOperations: this.impostor2,
         defaultPool: this.redeployedContracts.defaultPool,
       });
-
-      await this.redeployedContracts.defaultPool.setAddresses(addressesForSetAddresses);
-      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses2);
     });
 
     it("should return because of zero amount's value", async function () {
@@ -47,11 +40,13 @@ export default function shouldBehaveLikeCanSendAsset(): void {
       const { erc20 } = this.testContracts;
 
       const assetAmount = 0n;
-      const balanceBefore = await erc20.balanceOf(this.impostor.address);
+      const balanceBefore = await erc20.balanceOf(this.trenBoxManagerImpostor.address);
       const defaultPoolBalanceBefore = await erc20.balanceOf(defaultPool);
 
-      await defaultPool.connect(this.impostor).sendAssetToActivePool(erc20, assetAmount);
-      const balanceAfter = await erc20.balanceOf(this.impostor.address);
+      await defaultPool
+        .connect(this.trenBoxManagerImpostor)
+        .sendAssetToActivePool(erc20, assetAmount);
+      const balanceAfter = await erc20.balanceOf(this.trenBoxManagerImpostor.address);
       const defaultPoolBalanceAfter = await erc20.balanceOf(defaultPool);
 
       expect(balanceAfter).to.be.equal(balanceBefore + assetAmount);
@@ -65,14 +60,14 @@ export default function shouldBehaveLikeCanSendAsset(): void {
       const assetAmount = 15n;
 
       await this.redeployedContracts.activePool
-        .connect(this.impostor2)
+        .connect(this.borrowerOperationsImpostor)
         .receivedERC20(erc20, sendAmount);
       await this.redeployedContracts.activePool
-        .connect(this.impostor2)
+        .connect(this.borrowerOperationsImpostor)
         .sendAsset(erc20, this.redeployedContracts.defaultPool, sendAmount);
 
       const sendAssetTx = await defaultPool
-        .connect(this.impostor)
+        .connect(this.trenBoxManagerImpostor)
         .sendAssetToActivePool(erc20, assetAmount);
 
       await expect(sendAssetTx)
@@ -92,7 +87,7 @@ export default function shouldBehaveLikeCanSendAsset(): void {
 
       await expect(
         this.contracts.defaultPool
-          .connect(this.impostor)
+          .connect(this.trenBoxManagerImpostor)
           .sendAssetToActivePool(wETH.address, assetAmount)
       ).to.be.revertedWith("DefaultPool: Caller is not the TrenBoxManager");
     });

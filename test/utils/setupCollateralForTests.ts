@@ -34,6 +34,10 @@ export function setupCollateralForTests(context: Context) {
       await adminContract.setIsActive(collateralAddress, true);
     }
 
+    if (collateralOptions.mintCap) {
+      await adminContract.setMintCap(collateralAddress, collateralOptions.mintCap);
+    }
+
     if (collateralOptions.mints) {
       for (const mint of collateralOptions.mints) {
         await collateral.mint(mint.to, mint.amount);

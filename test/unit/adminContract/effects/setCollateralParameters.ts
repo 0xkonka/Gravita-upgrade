@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import { ethers } from "ethers";
 
 export default function shouldBehaveLikeCanSetCollateralParameters(): void {
   context("when setting collateral parameters on active collateral", function () {
