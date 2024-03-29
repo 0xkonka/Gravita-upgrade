@@ -2,7 +2,7 @@ import { shouldBehaveLikeCollSurplusPoolPoolContract } from "./CollSurplusPool.b
 
 export function testCollSurplusPool(): void {
   describe("CollSurplusPoolPool", function () {
-    beforeEach(async function () { });
+    beforeEach(async function () {});
 
     shouldBehaveLikeCollSurplusPoolPoolContract();
   });

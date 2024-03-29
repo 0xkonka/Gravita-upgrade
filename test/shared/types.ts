@@ -12,11 +12,13 @@ import type {
   CollSurplusPool,
   DebtToken,
   DefaultPool,
-  ERC20Test,
+  ERC20,
   FeeCollector,
   GasPool,
   IPriceFeed,
   Lock,
+  PriceFeed,
+  PriceFeedL2,
   PriceFeedTestnet,
   SortedTrenBoxes,
   StabilityPool,
@@ -24,6 +26,7 @@ import type {
   TrenBoxManager,
   TrenBoxManagerOperations,
 } from "../../types";
+import { ERC20Test } from "../../types/contracts/TestContracts";
 
 type Fixture<T> = () => Promise<T>;
 
@@ -36,8 +39,9 @@ declare module "mocha" {
     snapshotId: string;
     collaterals: Collaterals;
     utils: TestUtils;
-    redeployedContracts: Contracts;
+    redeployedContracts: RedeployedContracts;
     testContracts: TestContracts;
+    users: HardhatEthersSigner[];
   }
 }
 
@@ -57,6 +61,11 @@ export interface Contracts {
   timelock: Timelock;
   trenBoxManager: TrenBoxManager;
   trenBoxManagerOperations: TrenBoxManagerOperations;
+}
+
+export interface RedeployedContracts extends Contracts {
+  priceFeed: PriceFeed;
+  priceFeedL2: PriceFeedL2;
 }
 
 export interface Signers {
@@ -125,6 +134,10 @@ export type GetActualDebtFromCompositeDebtArgs = {
   overrideTrenBoxManager?: TrenBoxManager;
 };
 
+export type ConnectRedeployedContractArgs = Partial<
+  Record<keyof Contracts | "treasury", BaseContract | HardhatEthersSigner>
+>;
+
 export type SetupCollateralForTestsArgs = {
   collateral: ERC20Test;
   collateralOptions: {
@@ -140,6 +153,7 @@ export type SetupCollateralForTestsArgs = {
     price: bigint;
     debtTokenGasCompensation?: bigint;
     setAsActive?: boolean;
+    mintCap?: bigint;
     setCollateralParams?: {
       borrowingFee: bigint;
       criticalCollateralRate: bigint;
@@ -154,6 +168,31 @@ export type SetupCollateralForTestsArgs = {
   overridePriceFeed?: PriceFeedTestnet;
 };
 
+export type SetupProtocolCommands =
+  | {
+      action: "openTrenBox";
+      args: OpenTrenBoxArgs;
+    }
+  | {
+      action: "approve";
+      args: {
+        from: HardhatEthersSigner;
+        spender: AddressLike;
+        amount: bigint;
+        asset: ERC20;
+      };
+    };
+
+export type SetupProtocolForTestsArgs = {
+  collaterals?: SetupCollateralForTestsArgs[];
+  commands?: SetupProtocolCommands[];
+  overrides?: RedeployedContracts;
+};
+
+export type SetupProtocolForTestsResult = void;
+
+export type SetUsersArgs = HardhatEthersSigner[];
+
 export interface TestUtils {
   revertToInitialSnapshot: () => Promise<void>;
   getAddressesForSetAddresses: (
@@ -165,6 +204,9 @@ export interface TestUtils {
   getCompositeDebt: (args: GetCompositeDebtArgs) => Promise<bigint>;
   getActualDebtFromCompositeDebt: (args: GetActualDebtFromCompositeDebtArgs) => Promise<bigint>;
   setupCollateralForTests: (args: SetupCollateralForTestsArgs) => Promise<void>;
+  connectRedeployedContracts: (args: ConnectRedeployedContractArgs) => Promise<void>;
+  setupProtocolForTests: (args: SetupProtocolForTestsArgs) => Promise<SetupProtocolForTestsResult>;
+  setUsers: (args: SetUsersArgs) => Promise<HardhatEthersSigner[]>;
 }
 
 export interface TestContracts {

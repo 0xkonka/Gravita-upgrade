@@ -32,7 +32,9 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
       const debtAmount = 50n;
 
       await expect(
-        this.redeployedContracts.defaultPool.connect(this.impostor).increaseDebt(wETH.address, debtAmount)
+        this.redeployedContracts.defaultPool
+          .connect(this.impostor)
+          .increaseDebt(wETH.address, debtAmount)
       ).to.be.revertedWith("DefaultPool: Caller is not the TrenBoxManager");
     });
   });

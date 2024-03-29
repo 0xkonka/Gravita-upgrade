@@ -12,6 +12,7 @@ import { testDefaultPool } from "./defaultPool/DefaultPool";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testLock } from "./lock/Lock";
 import { loadTestFixture } from "./testContracts.fixture";
+import { testTrenBoxManagerOperations } from "./trenBoxManagerOperations/TrenBoxManagerOperations";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -58,4 +59,5 @@ describe("Unit tests", function () {
   testLock();
   testCollSurplusPool();
   testDefaultPool();
+  testTrenBoxManagerOperations();
 });
