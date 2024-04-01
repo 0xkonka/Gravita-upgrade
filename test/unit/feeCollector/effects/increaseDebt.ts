@@ -159,8 +159,8 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
 
 async function calcFeeToCollect(feeAmount: bigint, recordAmount: bigint, from: bigint, to: bigint) {
   const MIN_FEE_FRACTION = ethers.parseEther("0.038461538");
-  const minFeeAmount = MIN_FEE_FRACTION * feeAmount / ethers.WeiPerEther;
-  const now = BigInt(await time.latest() + 1);
+  const minFeeAmount = (MIN_FEE_FRACTION * feeAmount) / ethers.WeiPerEther;
+  const now = BigInt((await time.latest()) + 1);
   if (recordAmount == BigInt(0)) return minFeeAmount;
   else if (to <= now) {
     return minFeeAmount + recordAmount;

@@ -1,9 +1,11 @@
 import shouldBehaveLikeCanAuthorizeUpgrade from "./effects/authorizeUpgrade";
 import shouldBehaveLikeCanDecreaseDebt from "./effects/decreaseDebt";
 import shouldBehaveLikeCanIncreaseDebt from "./effects/increaseDebt";
+import shouldBehaveLikeCanLiquidateDebt from "./effects/liquidateDebt";
 import shouldHavePublicConstant from "./view/constants";
 import shouldHaveGetProtocolRevenueDestination from "./view/getProtocolRevenueDestination";
 import shouldBehaveLikeOwner from "./view/owner";
+import shouldHaveSimulateRefund from "./view/simulateRefund";
 
 export function shouldBehaveLikeFeeCollectorContract(): void {
   describe("View Functions", function () {
@@ -15,6 +17,10 @@ export function shouldBehaveLikeFeeCollectorContract(): void {
 
     describe("#getProtocolRevenueDestination", function () {
       shouldHaveGetProtocolRevenueDestination();
+    });
+
+    describe("#simulateRefund", function () {
+      shouldHaveSimulateRefund();
     });
   });
 
@@ -29,6 +35,10 @@ export function shouldBehaveLikeFeeCollectorContract(): void {
 
     describe("#decreaseDebt", function () {
       shouldBehaveLikeCanDecreaseDebt();
+    });
+
+    describe("#liquidateDebt", function () {
+      shouldBehaveLikeCanLiquidateDebt();
     });
   });
 }
