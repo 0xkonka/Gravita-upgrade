@@ -1,4 +1,5 @@
 import shouldBehaveLikeCanAuthorizeUpgrade from "./effects/authorizeUpgrade";
+import shouldBehaveLikeCanDecreaseDebt from "./effects/decreaseDebt";
 import shouldBehaveLikeCanIncreaseDebt from "./effects/increaseDebt";
 import shouldHavePublicConstant from "./view/constants";
 import shouldHaveGetProtocolRevenueDestination from "./view/getProtocolRevenueDestination";
@@ -24,6 +25,10 @@ export function shouldBehaveLikeFeeCollectorContract(): void {
 
     describe("#increaseDebt", function () {
       shouldBehaveLikeCanIncreaseDebt();
+    });
+
+    describe("#decreaseDebt", function () {
+      shouldBehaveLikeCanDecreaseDebt();
     });
   });
 }
