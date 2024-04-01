@@ -13,8 +13,6 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
     await feeCollector.waitForDeployment();
     await feeCollector.initialize();
 
-    this.feeCollectorAddress = await feeCollector.getAddress();
-
     const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
     const debtToken = await DebtTokenFactory.deploy(this.owner);
     await debtToken.waitForDeployment();
@@ -41,46 +39,43 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
 
   context("when caller is borrower operations", function () {
     beforeEach(async function () {
+      const feeCollectorAddress = await this.redeployedContracts.feeCollector.getAddress();
       // assume that enough feeAmount has already been minted
       await this.redeployedContracts.debtToken
         .connect(this.borrowerOperationsImpostor)
-        .mint(this.debtAsset.address, this.feeCollectorAddress, ethers.parseEther("10"));
+        .mint(this.debtAsset.address, feeCollectorAddress, ethers.parseEther("10"));
     });
 
     it("should create fee record", async function () {
-      const feeAmountInEther = ethers.WeiPerEther;
-      const feeAmount = 1;
-      const feeToCollect = await calcFeeToCollect(feeAmount, 0, 0, 0);
-
-      const feeToCollectInEther = ethers.parseEther(feeToCollect.toString());
+      const feeAmount = ethers.WeiPerEther;
+      const feeToCollect = await calcFeeToCollect(feeAmount, BigInt(0), BigInt(0), BigInt(0));
 
       const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
         this.revenueDestination
       );
       await this.redeployedContracts.feeCollector
         .connect(this.borrowerOperationsImpostor)
-        .increaseDebt(this.borrower, this.debtAsset.address, feeAmountInEther);
+        .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
 
       const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
         this.revenueDestination
       );
 
-      expect(debtBalanceAfter).to.equal(debtBalanceBefore + feeToCollectInEther);
+      expect(debtBalanceAfter).to.equal(debtBalanceBefore + feeToCollect);
     });
 
     it("should update fee record", async function () {
-      const feeAmountInEther = ethers.WeiPerEther;
-      const feeAmount = 1;
+      const feeAmount = ethers.WeiPerEther;
       // create first fee record
       await this.redeployedContracts.feeCollector
         .connect(this.borrowerOperationsImpostor)
-        .increaseDebt(this.borrower, this.debtAsset.address, feeAmountInEther);
+        .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
 
       const feeRecordBefore = await this.redeployedContracts.feeCollector.feeRecords(
         this.borrower,
         this.debtAsset.address
       );
-      const recordAmount = Number(ethers.formatEther(feeRecordBefore.amount));
+
       const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
         this.revenueDestination
       );
@@ -89,45 +84,41 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
 
       const feeToCollect = await calcFeeToCollect(
         feeAmount,
-        recordAmount,
-        Number(feeRecordBefore.from),
-        Number(feeRecordBefore.to)
+        feeRecordBefore.amount,
+        feeRecordBefore.from,
+        feeRecordBefore.to
       );
-      const feeToCollectInEther = ethers.parseEther(feeToCollect.toString());
 
       await this.redeployedContracts.feeCollector
         .connect(this.borrowerOperationsImpostor)
-        .increaseDebt(this.borrower, this.debtAsset.address, feeAmountInEther);
+        .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
 
       const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
         this.revenueDestination
       );
-      expect(debtBalanceAfter).to.closeTo(debtBalanceBefore + feeToCollectInEther, 1e12);
+      expect(debtBalanceAfter).to.equal(debtBalanceBefore + feeToCollect);
     });
 
     it("should create fee record after expiration", async function () {
-      const feeAmountInEther = ethers.WeiPerEther;
-      const feeAmount = 1;
+      const feeAmount = ethers.WeiPerEther;
 
       await this.redeployedContracts.feeCollector
         .connect(this.borrowerOperationsImpostor)
-        .increaseDebt(this.borrower, this.debtAsset.address, feeAmountInEther);
+        .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
 
       const feeRecordBefore = await this.redeployedContracts.feeCollector.feeRecords(
         this.borrower,
         this.debtAsset.address
       );
-      const recordAmount = Number(ethers.formatEther(feeRecordBefore.amount));
 
       await time.increase(time.duration.years(1)); // after 1 year
 
       const feeToCollect = await calcFeeToCollect(
         feeAmount,
-        recordAmount,
-        Number(feeRecordBefore.from),
-        Number(feeRecordBefore.to)
+        feeRecordBefore.amount,
+        feeRecordBefore.from,
+        feeRecordBefore.to
       );
-      const feeToCollectInEther = ethers.parseEther(feeToCollect.toString());
 
       const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
         this.revenueDestination
@@ -135,13 +126,13 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
 
       await this.redeployedContracts.feeCollector
         .connect(this.borrowerOperationsImpostor)
-        .increaseDebt(this.borrower, this.debtAsset.address, feeAmountInEther);
+        .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
 
       const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
         this.revenueDestination
       );
 
-      expect(debtBalanceAfter).to.equal(debtBalanceBefore + feeToCollectInEther);
+      expect(debtBalanceAfter).to.equal(debtBalanceBefore + feeToCollect);
     });
   });
 
@@ -166,11 +157,11 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
   });
 }
 
-async function calcFeeToCollect(feeAmount: number, recordAmount: number, from: number, to: number) {
-  const MIN_FEE_FRACTION = 0.038461538;
-  const minFeeAmount = MIN_FEE_FRACTION * feeAmount;
-  const now = await time.latest();
-  if (recordAmount == 0) return minFeeAmount;
+async function calcFeeToCollect(feeAmount: bigint, recordAmount: bigint, from: bigint, to: bigint) {
+  const MIN_FEE_FRACTION = ethers.parseEther("0.038461538");
+  const minFeeAmount = MIN_FEE_FRACTION * feeAmount / ethers.WeiPerEther;
+  const now = BigInt(await time.latest() + 1);
+  if (recordAmount == BigInt(0)) return minFeeAmount;
   else if (to <= now) {
     return minFeeAmount + recordAmount;
   } else {
@@ -179,10 +170,10 @@ async function calcFeeToCollect(feeAmount: number, recordAmount: number, from: n
   }
 }
 
-function calcExpiredAmount(now: number, from: number, to: number, amount: number) {
-  if (from > now) return 0;
+function calcExpiredAmount(now: bigint, from: bigint, to: bigint, amount: bigint) {
+  if (from > now) return BigInt(0);
   if (now >= to) return amount;
-  const PRECISION = 10 ** 9;
+  const PRECISION = BigInt(1e9);
   const lifeTime = to - from;
   const elapsedTime = now - from;
   const decayRate = (amount * PRECISION) / lifeTime;
