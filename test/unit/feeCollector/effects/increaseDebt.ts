@@ -139,14 +139,10 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
   context("when caller is not borrower operations", function () {
     it("should revert", async function () {
       const { wETH } = this.collaterals.active;
-      const feeAmountInEther = ethers.parseEther("0.1");
+      const feeAmount = ethers.parseEther("0.1");
 
       await expect(
-        this.redeployedContracts.feeCollector.increaseDebt(
-          this.borrower,
-          wETH.address,
-          feeAmountInEther
-        )
+        this.redeployedContracts.feeCollector.increaseDebt(this.borrower, wETH.address, feeAmount)
       )
         .to.be.revertedWithCustomError(
           this.redeployedContracts.feeCollector,

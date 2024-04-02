@@ -90,11 +90,11 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
       });
 
       it("should close fee record if expired", async function () {
-        const feeAmountInEther = ethers.WeiPerEther;
+        const feeAmount = ethers.WeiPerEther;
         // first create fee record
         await this.redeployedContracts.feeCollector
           .connect(this.borrowerOperationsImpostor)
-          .increaseDebt(this.borrower, this.debtAsset.address, feeAmountInEther);
+          .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
 
         // after 1 year
         await time.increase(time.duration.years(1));
@@ -113,11 +113,11 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
       });
 
       it("should be no refund on a full payback", async function () {
-        const feeAmountInEther = ethers.WeiPerEther;
+        const feeAmount = ethers.WeiPerEther;
         // first create fee record
         await this.redeployedContracts.feeCollector
           .connect(this.borrowerOperationsImpostor)
-          .increaseDebt(this.borrower, this.debtAsset.address, feeAmountInEther);
+          .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
 
         // after 1 month
         await time.increase(time.duration.days(30));
@@ -134,11 +134,11 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
       });
 
       it("should refund amount proportional to the payment", async function () {
-        const feeAmountInEther = ethers.WeiPerEther;
+        const feeAmount = ethers.WeiPerEther;
         // first create fee record
         await this.redeployedContracts.feeCollector
           .connect(this.borrowerOperationsImpostor)
-          .increaseDebt(this.borrower, this.debtAsset.address, feeAmountInEther);
+          .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
 
         const feeRecordBefore = await this.redeployedContracts.feeCollector.feeRecords(
           this.borrower,
@@ -174,14 +174,10 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
   context("when caller is not borrower operations or tren box manager", function () {
     it("should revert", async function () {
       const { wETH } = this.collaterals.active;
-      const feeAmountInEther = ethers.parseEther("0.1");
+      const feeAmount = ethers.parseEther("0.1");
 
       await expect(
-        this.redeployedContracts.feeCollector.decreaseDebt(
-          this.borrower,
-          wETH.address,
-          feeAmountInEther
-        )
+        this.redeployedContracts.feeCollector.decreaseDebt(this.borrower, wETH.address, feeAmount)
       )
         .to.be.revertedWithCustomError(
           this.redeployedContracts.feeCollector,
