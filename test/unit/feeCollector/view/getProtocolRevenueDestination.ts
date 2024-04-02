@@ -13,11 +13,11 @@ export default function shouldHaveGetProtocolRevenueDestination(): void {
     this.treasuryImposter = this.signers.accounts[1];
     this.trenStakingImposter = this.signers.accounts[2];
 
-    const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
+    await this.utils.connectRedeployedContracts({
       treasury: this.treasuryImposter,
+      feeCollector: this.redeployedContracts.feeCollector,
     });
 
-    await this.redeployedContracts.feeCollector.setAddresses(addressesForSetAddresses);
     await this.redeployedContracts.feeCollector.setTRENStaking(this.trenStakingImposter);
   });
 
