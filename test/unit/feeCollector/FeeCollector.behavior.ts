@@ -1,4 +1,5 @@
 import shouldBehaveLikeCanAuthorizeUpgrade from "./effects/authorizeUpgrade";
+import shouldBehaveLikeCanCollectFees from "./effects/collectFees";
 import shouldBehaveLikeCanDecreaseDebt from "./effects/decreaseDebt";
 import shouldBehaveLikeCanHandleRedemptionFee from "./effects/handleRedemptionFee";
 import shouldBehaveLikeCanIncreaseDebt from "./effects/increaseDebt";
@@ -44,6 +45,10 @@ export function shouldBehaveLikeFeeCollectorContract(): void {
 
     describe("#handleRedemptionFee", function () {
       shouldBehaveLikeCanHandleRedemptionFee();
+    });
+
+    describe("#collectFees", function () {
+      shouldBehaveLikeCanCollectFees();
     });
   });
 }
