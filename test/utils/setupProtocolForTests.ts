@@ -16,14 +16,16 @@ export function setupProtocolForTests(context: Context) {
       const { action } = command;
 
       switch (action) {
-        case "openTrenBox":
-          await context.utils.openTrenBox({
+        case "openTrenBox": {
+          const { openTrenBoxTx } = await context.utils.openTrenBox({
             ...command.args,
             overrideAdminContract: overrides?.adminContract,
             overrideBorrowerOperations: overrides?.borrowerOperations,
             overrideTrenBoxManager: overrides?.trenBoxManager,
           });
+          await (await openTrenBoxTx).wait();
           break;
+        }
         case "addCollateral":
           await context.utils.addCollateral({
             ...command.args,
@@ -91,6 +93,12 @@ export function setupProtocolForTests(context: Context) {
           await command.args.asset
             .connect(command.args.from)
             .approve(command.args.spender, command.args.amount);
+          break;
+        case "closeTrenBox":
+          await context.utils.closeTrenBox({
+            ...command.args,
+            overrideBorrowerOperations: overrides?.borrowerOperations,
+          });
           break;
         default:
           throw new Error(`Unknown command: ${action}`);
