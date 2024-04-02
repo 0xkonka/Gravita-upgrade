@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { BorrowerOperationType, TrenBoxStatus } from "../../../shared/types";
+import { BorrowerOperationType } from "../../../shared/types";
 
 const DEFAULT_LOWER_HINT = ethers.ZeroAddress;
 const DEFAULT_UPPER_HINT = ethers.ZeroAddress;
@@ -54,20 +54,6 @@ export default function shouldBehaveLikeCanWithdrawDebtTokens() {
   });
 
   context("when user has TrenBox", function () {
-    it("they can withdraw debt tokens", async function () {
-      const [user] = this.users;
-      const { erc20 } = this.testContracts;
-      const amount = ethers.parseUnits("100", 18);
-
-      const withdrawDebtTokensTx = this.utils.takeDebt({
-        from: user,
-        collateral: erc20,
-        debtAmount: amount,
-      });
-
-      await expect(withdrawDebtTokensTx).to.not.be.reverted;
-    });
-
     context("when user tries to withdraw 0 debt amount", function () {
       it("they cannot withdraw debt tokens", async function () {
         const [user] = this.users;

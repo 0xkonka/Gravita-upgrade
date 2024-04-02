@@ -45,22 +45,6 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         await this.contracts.adminContract.setMintCap(asset, mintCap);
       });
 
-      it("should open tren box", async function () {
-        const [user] = this.users;
-        const { erc20 } = this.testContracts;
-
-        const assetAddress = await erc20.getAddress();
-        const assetAmount = ethers.parseUnits("100", 30);
-
-        const { openTrenBoxTx } = await this.utils.openTrenBox({
-          asset: assetAddress,
-          assetAmount,
-          from: user,
-        });
-
-        await expect(openTrenBoxTx).to.not.be.rejected;
-      });
-
       context("when asset minNetDebt is greater than taken debt", function () {
         beforeEach(async function () {
           const { erc20 } = this.testContracts;

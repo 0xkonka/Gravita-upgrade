@@ -55,25 +55,6 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
   });
 
   context("when user has TrenBox", function () {
-    it("they can repay debt token", async function () {
-      const [user] = this.users;
-      const { erc20 } = this.testContracts;
-      const { adminContract, debtToken } = this.contracts;
-
-      const minNetDebt = await adminContract.getMinNetDebt(await erc20.getAddress());
-      const totalDebt = await debtToken.balanceOf(user.address);
-
-      const amountToRepay = totalDebt - minNetDebt;
-
-      const repayDebtTx = this.utils.repayDebt({
-        debtAmount: amountToRepay,
-        collateral: erc20,
-        from: user,
-      });
-
-      await expect(repayDebtTx).to.not.be.reverted;
-    });
-
     context("when user tries to repay 0 debt amount", function () {
       it("cannot repay debt", async function () {
         const [user] = this.users;

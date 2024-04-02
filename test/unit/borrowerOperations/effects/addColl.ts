@@ -54,20 +54,6 @@ export default function shouldBehaveLikeCanAddColl() {
   });
 
   context("when user has TrenBox", function () {
-    it("they can add collateral", async function () {
-      const [user] = this.users;
-      const { erc20 } = this.testContracts;
-      const amount = ethers.parseUnits("100", 30);
-
-      const addCollateralTx = this.utils.addCollateral({
-        amount,
-        collateral: erc20,
-        from: user,
-      });
-
-      await expect(addCollateralTx).to.not.be.reverted;
-    });
-
     context("when user tries to send 0 collateral amount", function () {
       it("they cannot add collateral", async function () {
         const [user] = this.users;

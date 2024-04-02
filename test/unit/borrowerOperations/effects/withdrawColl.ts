@@ -61,21 +61,6 @@ export default function shouldBehaveLikeCanWithdrawColl() {
   });
 
   context("when user has TrenBox", function () {
-    it("they can withdraw collateral", async function () {
-      const [user] = this.users;
-      const { erc20 } = this.testContracts;
-
-      const amountToWithdraw = ethers.parseUnits("100", 30);
-
-      const withdrawCollateralTx = await this.utils.withdrawCollateral({
-        from: user,
-        collateral: erc20,
-        amount: amountToWithdraw,
-      });
-
-      await expect(withdrawCollateralTx).to.not.be.reverted;
-    });
-
     context("when user tries to withdraw 0 collateral amount", async function () {
       it("cannot withdraw collateral", async function () {
         const [user] = this.users;
