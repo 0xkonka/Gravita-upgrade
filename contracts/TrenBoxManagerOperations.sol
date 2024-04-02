@@ -20,8 +20,6 @@ import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
 import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 import { ITrenBoxManagerOperations } from "./Interfaces/ITrenBoxManagerOperations.sol";
 
-import "hardhat/console.sol";
-
 contract TrenBoxManagerOperations is
     ITrenBoxManagerOperations,
     UUPSUpgradeable,
@@ -389,8 +387,6 @@ contract TrenBoxManagerOperations is
             );
 
             if (currentTrenBoxNetDebt <= remainingDebt) {
-                console.log(currentTrenBoxNetDebt);
-                console.log(remainingDebt);
                 remainingDebt = remainingDebt - currentTrenBoxNetDebt;
             } else {
                 if (currentTrenBoxNetDebt > IAdminContract(adminContract).getMinNetDebt(vars.asset))
@@ -400,8 +396,6 @@ contract TrenBoxManagerOperations is
                         currentTrenBoxNetDebt
                             - IAdminContract(adminContract).getMinNetDebt(vars.asset)
                     );
-                    console.log(currentTrenBoxNetDebt);
-                    console.log(IAdminContract(adminContract).getMinNetDebt(vars.asset));
                     uint256 currentTrenBoxColl = ITrenBoxManager(trenBoxManager).getTrenBoxColl(
                         vars.asset, currentTrenBoxBorrower
                     )
