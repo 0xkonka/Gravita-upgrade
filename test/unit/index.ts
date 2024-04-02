@@ -62,15 +62,15 @@ describe("Unit tests", function () {
     await this.utils.revertToInitialSnapshot();
   });
 
-  // testActivePool();
-  // testAdminContract();
-  // testBorrowerOperations();
-  // testDebtToken();
-  // testPriceFeed();
-  // testLock();
-  // testSortedTrenBoxes();
-  // testTrenBoxManager();
-  // testCollSurplusPool();
-  // testDefaultPool();
+  testActivePool();
+  testAdminContract();
+  testBorrowerOperations();
+  testDebtToken();
+  testPriceFeed();
+  testLock();
+  testSortedTrenBoxes();
+  testTrenBoxManager();
+  testCollSurplusPool();
+  testDefaultPool();
   testStabilityPool();
 });

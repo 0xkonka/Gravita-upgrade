@@ -70,12 +70,28 @@ export default function shouldBehaveLikeCanProvideToSP(): void {
                     }),
                 });
 
+                const depositorTrenGain = await this.contracts.stabilityPool.getDepositorTRENGain(this.users[0]);
+                expect(depositorTrenGain).to.be.equal(0);
+
                 const totalDebtTokenDepositsAfter =
                     await this.contracts.stabilityPool.getTotalDebtTokenDeposits();
 
                 expect(totalDebtTokenDepositsAfter).to.be.equal(
                     totalDebtTokenDepositsBefore + BigInt(this.users.length) * 100n
                 );
+
+                await this.utils.setupProtocolForTests({
+                    commands: this.users.map((user: HardhatEthersSigner) => {
+                        return {
+                            action: "provideToStabilityPool",
+                            args: {
+                                from: user,
+                                assets: [assetAddress],
+                                amount: 200n,
+                            },
+                        };
+                    }),
+                });
             });
 
             it("should emit StabilityPoolDebtTokenBalanceUpdated and UserDepositChanged", async function () {
