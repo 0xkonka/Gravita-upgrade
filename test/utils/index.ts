@@ -2,16 +2,27 @@ import { network } from "hardhat";
 import { Context } from "mocha";
 
 import { TestUtils } from "../shared/types";
+import { addCollateral } from "./addCollateral";
+import { batchLiquidateTrenBoxes } from "./batchLiquidateTrenBoxes";
+import { closeTrenBox } from "./closeTrenBox";
 import { connectRedeployedContracts } from "./connectRedeployedContracts";
 import { getActualDebtFromCompositeDebt } from "./getActualDebtFromCompositeDebt";
 import { getAddressesForSetAddresses } from "./getAddressesForSetAddresses";
 import { getCompositeDebt } from "./getCompositeDebt";
 import { getNetBorrowingAmount } from "./getNetBorrowingAmount";
 import { getOpenTrenBoxTotalDebt } from "./getOpenTrenBoxTotalDebt";
+import { liquidate } from "./liquidate";
+import { liquidateTrenBoxes } from "./liquidateTrenBoxes";
 import { openTrenBox } from "./openTrenBox";
+import { provideToStabilityPool } from "./provideToStabilityPool";
+import { redeemCollateral } from "./redeemCollateral";
+import { repayDebt } from "./repayDebt";
 import { setUsers } from "./setUsers";
 import { setupCollateralForTests } from "./setupCollateralForTests";
 import { setupProtocolForTests } from "./setupProtocolForTests";
+import { takeDebt } from "./takeDebt";
+import { withdrawCollateral } from "./withdrawCollateral";
+import { withdrawFromStabilityPool } from "./withdrawFromStabilityPool";
 
 export function setupUtils(context: Context): TestUtils {
   return {
@@ -28,5 +39,16 @@ export function setupUtils(context: Context): TestUtils {
     connectRedeployedContracts: connectRedeployedContracts(context),
     setupProtocolForTests: setupProtocolForTests(context),
     setUsers: setUsers(context),
+    addCollateral: addCollateral(context),
+    withdrawCollateral: withdrawCollateral(context),
+    takeDebt: takeDebt(context),
+    repayDebt: repayDebt(context),
+    provideToStabilityPool: provideToStabilityPool(context),
+    withdrawFromStabilityPool: withdrawFromStabilityPool(context),
+    liquidate: liquidate(context),
+    batchLiquidateTrenBoxes: batchLiquidateTrenBoxes(context),
+    liquidateTrenBoxes: liquidateTrenBoxes(context),
+    redeemCollateral: redeemCollateral(context),
+    closeTrenBox: closeTrenBox(context),
   };
 }
