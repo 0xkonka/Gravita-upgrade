@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { IActivePool } from "./IActivePool.sol";
@@ -26,6 +25,12 @@ interface IAdminContract {
         uint256 redemptionBlockTimestamp;
     }
 
+    struct FlashLoanParams {
+        uint256 flashLoanFee; // 10 = 0,1%, 100 = 10% => 10 out of $1000 = $10
+        uint256 flashLoanMinDebt; // min amount of trenUSD to mint for Flash Loan
+        uint256 flashLoanMaxDebt; // max amount of trenUSD to mint for Flash Loan
+    }
+
     // Custom Errors
     // ----------------------------------------------------------------------------------------------------
 
@@ -46,6 +51,9 @@ interface IAdminContract {
     event RedemptionFeeFloorChanged(uint256 oldRedemptionFeeFloor, uint256 newRedemptionFeeFloor);
     event MintCapChanged(uint256 oldMintCap, uint256 newMintCap);
     event RedemptionBlockTimestampChanged(address _collateral, uint256 _blockTimestamp);
+    event FlashLoanFeeChanged(uint256 oldFee, uint256 newFee);
+    event FlashLoanMinDebtChanged(uint256 oldMinDebt, uint256 newMinDebt);
+    event FlashLoanMaxDebtChanged(uint256 oldMaxDebt, uint256 newMaxDebt);
 
     // Functions
     // --------------------------------------------------------------------------------------------------------
@@ -114,4 +122,10 @@ interface IAdminContract {
     function getMintCap(address _collateral) external view returns (uint256);
 
     function getTotalAssetDebt(address _asset) external view returns (uint256);
+
+    function getFlashLoanFee() external view returns (uint256);
+
+    function getFlashLoanMinNetDebt() external view returns (uint256);
+
+    function getFlashLoanMaxNetDebt() external view returns (uint256);
 }

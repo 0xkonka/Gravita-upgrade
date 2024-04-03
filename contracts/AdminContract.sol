@@ -10,6 +10,7 @@ import { OwnableUpgradeable } from
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
 import { IActivePool } from "./Interfaces/IActivePool.sol";
+import { IFlashLoan } from "./Interfaces/IFlashLoan.sol";
 import { IDefaultPool } from "./Interfaces/IDefaultPool.sol";
 import { Addresses } from "./Addresses.sol";
 
@@ -40,6 +41,8 @@ contract AdminContract is IAdminContract, UUPSUpgradeable, OwnableUpgradeable, A
      * 		@dev Create special view structs/getters instead.
      */
     mapping(address => CollateralParams) internal collateralParams;
+
+    FlashLoanParams public flashLoanParams;
 
     // list of all collateral types in collateralParams (active and deprecated)
     // Addresses for easy access
@@ -285,6 +288,29 @@ contract AdminContract is IAdminContract, UUPSUpgradeable, OwnableUpgradeable, A
         emit RedemptionBlockTimestampChanged(_collateral, _blockTimestamp);
     }
 
+    function setFeeForFlashLoan(uint256 _flashLoanFee) external onlyTimelock {
+        uint256 oldFlashLoanFee = flashLoanParams.flashLoanFee;
+        flashLoanParams.flashLoanFee = _flashLoanFee;
+
+        emit FlashLoanFeeChanged(oldFlashLoanFee, _flashLoanFee);
+    }
+
+    // TODO: Maybe add later onlyTimelock, do we need it here?
+    function setMinDebtForFlashLoan(uint256 _flashLoanMinDebt) external onlyTimelock {
+        uint256 oldFlashLoanMinDebt = flashLoanParams.flashLoanMinDebt;
+        flashLoanParams.flashLoanMinDebt = _flashLoanMinDebt;
+
+        emit FlashLoanMinDebtChanged(oldFlashLoanMinDebt, _flashLoanMinDebt);
+    }
+
+    // TODO: Maybe add later onlyTimelock, do we need it here?
+    function setMaxDebtForFlashLoan(uint256 _flashLoanMaxDebt) external onlyTimelock {
+        uint256 oldFlashLoanMaxDebt = flashLoanParams.flashLoanMaxDebt;
+        flashLoanParams.flashLoanMaxDebt = _flashLoanMaxDebt;
+
+        emit FlashLoanMaxDebtChanged(oldFlashLoanMaxDebt, _flashLoanMaxDebt);
+    }
+
     // View functions
     // ---------------------------------------------------------------------------------------------------
 
@@ -378,6 +404,18 @@ contract AdminContract is IAdminContract, UUPSUpgradeable, OwnableUpgradeable, A
     function getTotalAssetDebt(address _asset) external view override returns (uint256) {
         return IActivePool(activePool).getDebtTokenBalance(_asset)
             + IDefaultPool(defaultPool).getDebtTokenBalance(_asset);
+    }
+
+    function getFlashLoanFee() external view override returns (uint256) {
+        return flashLoanParams.flashLoanFee;
+    }
+
+    function getFlashLoanMinNetDebt() external view override returns (uint256) {
+        return flashLoanParams.flashLoanMinDebt;
+    }
+
+    function getFlashLoanMaxNetDebt() external view override returns (uint256) {
+        return flashLoanParams.flashLoanMaxDebt;
     }
 
     // Internal Functions
