@@ -10,13 +10,15 @@ import { testCollSurplusPool } from "./collSurplusPool/CollSurplusPool";
 import { testDebtToken } from "./debtToken/DebtToken";
 import { testDefaultPool } from "./defaultPool/DefaultPool";
 import { loadDeploymentFixture } from "./deployment.fixture";
+import { testFeeCollector } from "./feeCollector/FeeCollector";
 import { testLock } from "./lock/Lock";
 import { testPriceFeed } from "./priceFeed/PriceFeed";
 import { testSortedTrenBoxes } from "./sortedTrenBoxes/SortedTrenBoxes";
+import { testStabilityPool } from "./stabilityPool/StabilityPool";
 import { loadTestFixture } from "./testContracts.fixture";
-import { testTrenBoxManagerOperations } from "./trenBoxManagerOperations/TrenBoxManagerOperations";
 import { testTrenBoxManager } from "./trenBoxManager/TrenBoxManager";
 import { testTimelock } from "./timelock/Timelock";
+import { testTrenBoxManagerOperations } from "./trenBoxManagerOperations/TrenBoxManagerOperations";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -73,6 +75,8 @@ describe("Unit tests", function () {
   testTrenBoxManager();
   testCollSurplusPool();
   testDefaultPool();
+  testFeeCollector();
+  testStabilityPool();
   testTrenBoxManagerOperations();
   testTimelock();
 });
