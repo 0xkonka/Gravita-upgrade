@@ -17,12 +17,6 @@ export default function shouldBehaveLikeCanLiquidateDebt(): void {
     const debtToken = await DebtTokenFactory.deploy(this.owner);
     await debtToken.waitForDeployment();
 
-    await debtToken.setAddresses(
-      this.borrowerOperationsImpostor,
-      this.signers.accounts[3],
-      this.signers.accounts[4]
-    );
-
     this.redeployedContracts.feeCollector = feeCollector;
     this.redeployedContracts.debtToken = debtToken;
     this.debtAsset = this.collaterals.active.wETH;
@@ -41,29 +35,26 @@ export default function shouldBehaveLikeCanLiquidateDebt(): void {
   context("when caller is tren box manager", function () {
     beforeEach(async function () {
       const feeCollectorAddress = await this.redeployedContracts.feeCollector.getAddress();
-      // assume that enough feeAmount has already been minted
-      await this.redeployedContracts.debtToken
+
+      const mintFeeAmountTx = await this.redeployedContracts.debtToken
         .connect(this.borrowerOperationsImpostor)
         .mint(this.debtAsset.address, feeCollectorAddress, ethers.WeiPerEther);
+
+      await mintFeeAmountTx.wait();
     });
 
     it("should not collect any fee if no fee record", async function () {
-      const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
-        this.revenueDestination
-      );
+      const { debtToken } = this.redeployedContracts;
 
-      await this.redeployedContracts.feeCollector
+      const liquidateDebtTx = await this.redeployedContracts.feeCollector
         .connect(this.trenBoxManagerImpostor)
         .liquidateDebt(this.borrower, this.debtAsset.address);
 
-      const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
-        this.revenueDestination
-      );
-
-      expect(debtBalanceAfter).to.equal(debtBalanceBefore);
+      await expect(liquidateDebtTx).to.changeTokenBalance(debtToken, this.revenueDestination, 0);
     });
 
     it("should collect all remaining fees", async function () {
+      const { debtToken } = this.redeployedContracts;
       await this.redeployedContracts.feeCollector
         .connect(this.borrowerOperationsImpostor)
         .increaseDebt(this.borrower, this.debtAsset.address, ethers.WeiPerEther);
@@ -73,19 +64,15 @@ export default function shouldBehaveLikeCanLiquidateDebt(): void {
         this.debtAsset.address
       );
 
-      const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
-        this.revenueDestination
-      );
-
-      await this.redeployedContracts.feeCollector
+      const liquidateDebtTx = await this.redeployedContracts.feeCollector
         .connect(this.trenBoxManagerImpostor)
         .liquidateDebt(this.borrower, this.debtAsset.address);
 
-      const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
-        this.revenueDestination
+      await expect(liquidateDebtTx).to.changeTokenBalance(
+        debtToken,
+        this.revenueDestination,
+        feeRecord.amount
       );
-
-      expect(debtBalanceAfter).to.equal(debtBalanceBefore + feeRecord.amount);
     });
   });
 

@@ -40,33 +40,33 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
   context("when caller is borrower operations", function () {
     beforeEach(async function () {
       const feeCollectorAddress = await this.redeployedContracts.feeCollector.getAddress();
-      // assume that enough feeAmount has already been minted
-      await this.redeployedContracts.debtToken
+
+      const mintFeeAmountTx = await this.redeployedContracts.debtToken
         .connect(this.borrowerOperationsImpostor)
         .mint(this.debtAsset.address, feeCollectorAddress, ethers.parseEther("10"));
+      await mintFeeAmountTx.wait();
     });
 
     it("should create fee record", async function () {
+      const { debtToken } = this.redeployedContracts;
       const feeAmount = ethers.WeiPerEther;
-      const feeToCollect = await calcFeeToCollect(feeAmount, BigInt(0), BigInt(0), BigInt(0));
+      const feeToCollect = await calculateFeeToCollect(feeAmount, BigInt(0), BigInt(0), BigInt(0));
 
-      const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
-        this.revenueDestination
-      );
-      await this.redeployedContracts.feeCollector
+      const increaseDebtTx = await this.redeployedContracts.feeCollector
         .connect(this.borrowerOperationsImpostor)
         .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
 
-      const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
-        this.revenueDestination
+      await expect(increaseDebtTx).to.changeTokenBalance(
+        debtToken,
+        this.revenueDestination,
+        feeToCollect
       );
-
-      expect(debtBalanceAfter).to.equal(debtBalanceBefore + feeToCollect);
     });
 
     it("should update fee record", async function () {
+      const { debtToken } = this.redeployedContracts;
       const feeAmount = ethers.WeiPerEther;
-      // create first fee record
+
       await this.redeployedContracts.feeCollector
         .connect(this.borrowerOperationsImpostor)
         .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
@@ -76,30 +76,29 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
         this.debtAsset.address
       );
 
-      const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
-        this.revenueDestination
-      );
+      const oneMonth = time.duration.days(30);
+      await time.increase(oneMonth);
 
-      await time.increase(30 * 24 * 3600); // 1 month later
-
-      const feeToCollect = await calcFeeToCollect(
+      const feeToCollect = await calculateFeeToCollect(
         feeAmount,
         feeRecordBefore.amount,
         feeRecordBefore.from,
         feeRecordBefore.to
       );
 
-      await this.redeployedContracts.feeCollector
+      const increaseDebtTx = await this.redeployedContracts.feeCollector
         .connect(this.borrowerOperationsImpostor)
         .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
 
-      const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
-        this.revenueDestination
+      await expect(increaseDebtTx).to.changeTokenBalance(
+        debtToken,
+        this.revenueDestination,
+        feeToCollect
       );
-      expect(debtBalanceAfter).to.equal(debtBalanceBefore + feeToCollect);
     });
 
     it("should create fee record after expiration", async function () {
+      const { debtToken } = this.redeployedContracts;
       const feeAmount = ethers.WeiPerEther;
 
       await this.redeployedContracts.feeCollector
@@ -111,28 +110,25 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
         this.debtAsset.address
       );
 
-      await time.increase(time.duration.years(1)); // after 1 year
+      const oneYear = time.duration.years(1);
+      await time.increase(oneYear);
 
-      const feeToCollect = await calcFeeToCollect(
+      const feeToCollect = await calculateFeeToCollect(
         feeAmount,
         feeRecordBefore.amount,
         feeRecordBefore.from,
         feeRecordBefore.to
       );
 
-      const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
-        this.revenueDestination
-      );
-
-      await this.redeployedContracts.feeCollector
+      const increaseDebtTx = await this.redeployedContracts.feeCollector
         .connect(this.borrowerOperationsImpostor)
         .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
 
-      const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
-        this.revenueDestination
+      await expect(increaseDebtTx).to.changeTokenBalance(
+        debtToken,
+        this.revenueDestination,
+        feeToCollect
       );
-
-      expect(debtBalanceAfter).to.equal(debtBalanceBefore + feeToCollect);
     });
   });
 
@@ -153,7 +149,12 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
   });
 }
 
-async function calcFeeToCollect(feeAmount: bigint, recordAmount: bigint, from: bigint, to: bigint) {
+async function calculateFeeToCollect(
+  feeAmount: bigint,
+  recordAmount: bigint,
+  from: bigint,
+  to: bigint
+): Promise<bigint> {
   const MIN_FEE_FRACTION = ethers.parseEther("0.038461538");
   const minFeeAmount = (MIN_FEE_FRACTION * feeAmount) / ethers.WeiPerEther;
   const now = BigInt((await time.latest()) + 1);
@@ -161,14 +162,18 @@ async function calcFeeToCollect(feeAmount: bigint, recordAmount: bigint, from: b
   else if (to <= now) {
     return minFeeAmount + recordAmount;
   } else {
-    const expiredAmount = calcExpiredAmount(now, from, to, recordAmount);
+    const expiredAmount = calculateExpiredAmount(now, from, to, recordAmount);
     return minFeeAmount + expiredAmount;
   }
 }
 
-function calcExpiredAmount(now: bigint, from: bigint, to: bigint, amount: bigint) {
-  if (from > now) return BigInt(0);
-  if (now >= to) return amount;
+function calculateExpiredAmount(now: bigint, from: bigint, to: bigint, amount: bigint): bigint {
+  if (from > now) {
+    return BigInt(0);
+  }
+  if (now >= to) {
+    return amount;
+  }
   const PRECISION = BigInt(1e9);
   const lifeTime = to - from;
   const elapsedTime = now - from;

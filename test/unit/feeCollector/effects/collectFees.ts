@@ -31,15 +31,15 @@ export default function shouldBehaveLikeCanCollectFees(): void {
 
     this.asset = this.collaterals.active.wETH;
 
-    // assume that 1 ether feeAmount has already been minted
-    await this.redeployedContracts.debtToken
+    const mintFeeAmountTx = await this.redeployedContracts.debtToken
       .connect(this.borrowerOperationsImpostor)
       .mint(this.asset.address, await feeCollector.getAddress(), ethers.WeiPerEther);
+    await mintFeeAmountTx.wait();
 
-    // create fee record
-    await this.redeployedContracts.feeCollector
+    const createFeeRecordTx = await this.redeployedContracts.feeCollector
       .connect(this.borrowerOperationsImpostor)
       .increaseDebt(this.borrower, this.asset.address, ethers.WeiPerEther);
+    await createFeeRecordTx.wait();
   });
 
   it("should revert if borrowers length is 0", async function () {
@@ -67,23 +67,20 @@ export default function shouldBehaveLikeCanCollectFees(): void {
   });
 
   it("should not collect any fee if not past MIN_FEE_DAYS", async function () {
+    const { debtToken } = this.redeployedContracts;
     const borrowers = [this.borrower];
     const assets = [this.asset.address];
 
-    const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
-      this.revenueDestination
+    const collectFeesTx = await this.redeployedContracts.feeCollector.collectFees(
+      borrowers,
+      assets
     );
 
-    await this.redeployedContracts.feeCollector.collectFees(borrowers, assets);
-
-    const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
-      this.revenueDestination
-    );
-
-    expect(debtBalanceAfter).to.equal(debtBalanceBefore);
+    await expect(collectFeesTx).to.changeTokenBalance(debtToken, this.revenueDestination, 0);
   });
 
   it("should collect full record amount if expired", async function () {
+    const { debtToken } = this.redeployedContracts;
     const borrowers = [this.borrower];
     const assets = [this.asset.address];
 
@@ -92,19 +89,19 @@ export default function shouldBehaveLikeCanCollectFees(): void {
       assets[0]
     );
 
-    await time.increase(time.duration.years(1)); // 1 year later
+    const oneYear = time.duration.years(1);
+    await time.increase(oneYear);
 
-    const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
-      this.revenueDestination
+    const collectFeesTx = await this.redeployedContracts.feeCollector.collectFees(
+      borrowers,
+      assets
     );
 
-    await this.redeployedContracts.feeCollector.collectFees(borrowers, assets);
-
-    const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
-      this.revenueDestination
+    await expect(collectFeesTx).to.changeTokenBalance(
+      debtToken,
+      this.revenueDestination,
+      feeRecord.amount
     );
-
-    expect(debtBalanceAfter).to.equal(debtBalanceBefore + feeRecord.amount);
   });
 
   it("should collect pro rata fee if past MIN_FEE_DAYS", async function () {
@@ -116,28 +113,32 @@ export default function shouldBehaveLikeCanCollectFees(): void {
       assets[0]
     );
 
-    await time.increase(14 * 24 * 3600); // 2 weeks later
+    const twoWeeks = 14 * 24 * 3600;
+    await time.increase(twoWeeks);
 
     const now = BigInt((await time.latest()) + 1);
     const expiredAmount = calcExpiredAmount(now, feeRecord.from, feeRecord.to, feeRecord.amount);
 
-    const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
-      this.revenueDestination
+    const collectFeesTx = await this.redeployedContracts.feeCollector.collectFees(
+      borrowers,
+      assets
     );
 
-    await this.redeployedContracts.feeCollector.collectFees(borrowers, assets);
-
-    const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
-      this.revenueDestination
+    await expect(collectFeesTx).to.changeTokenBalance(
+      this.redeployedContracts.debtToken,
+      this.revenueDestination,
+      expiredAmount
     );
-
-    expect(debtBalanceAfter).to.equal(debtBalanceBefore + expiredAmount);
   });
 }
 
-function calcExpiredAmount(now: bigint, from: bigint, to: bigint, amount: bigint) {
-  if (from > now) return BigInt(0);
-  if (now >= to) return amount;
+function calcExpiredAmount(now: bigint, from: bigint, to: bigint, amount: bigint): bigint {
+  if (from > now) {
+    return BigInt(0);
+  }
+  if (now >= to) {
+    return amount;
+  }
   const PRECISION = BigInt(1e9);
   const lifeTime = to - from;
   const elapsedTime = now - from;

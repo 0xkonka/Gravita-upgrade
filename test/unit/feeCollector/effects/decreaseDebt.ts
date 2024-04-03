@@ -65,39 +65,32 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
     context("Should decrease debt", function () {
       beforeEach(async function () {
         const feeCollectorAddress = await this.redeployedContracts.feeCollector.getAddress();
-        // assume that enough feeAmount has already been minted
-        await this.redeployedContracts.debtToken
+
+        const mintFeeAmountTx = await this.redeployedContracts.debtToken
           .connect(this.borrowerOperationsImpostor)
           .mint(this.debtAsset.address, feeCollectorAddress, ethers.parseEther("10"));
+        await mintFeeAmountTx.wait();
       });
 
       it("should be no change in debtToken balance if no fee record", async function () {
+        const { debtToken } = this.redeployedContracts;
         const paybackFraction = ethers.WeiPerEther;
 
-        const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
-          this.revenueDestination
-        );
-
-        await this.redeployedContracts.feeCollector
+        const decreaseDebtTx = await this.redeployedContracts.feeCollector
           .connect(this.borrowerOperationsImpostor)
           .decreaseDebt(this.borrower, this.debtAsset.address, paybackFraction);
 
-        const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
-          this.revenueDestination
-        );
-
-        expect(debtBalanceAfter).to.equal(debtBalanceBefore);
+        await expect(decreaseDebtTx).to.changeTokenBalance(debtToken, this.revenueDestination, 0);
       });
 
       it("should close fee record if expired", async function () {
         const feeAmount = ethers.WeiPerEther;
-        // first create fee record
         await this.redeployedContracts.feeCollector
           .connect(this.borrowerOperationsImpostor)
           .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
 
-        // after 1 year
-        await time.increase(time.duration.years(1));
+        const oneYear = time.duration.years(1);
+        await time.increase(oneYear);
 
         const paybackFraction = ethers.parseEther("0.5");
         await this.redeployedContracts.feeCollector
@@ -113,29 +106,26 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
       });
 
       it("should be no refund on a full payback", async function () {
+        const { debtToken } = this.redeployedContracts;
         const feeAmount = ethers.WeiPerEther;
-        // first create fee record
         await this.redeployedContracts.feeCollector
           .connect(this.borrowerOperationsImpostor)
           .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
 
-        // after 1 month
-        await time.increase(time.duration.days(30));
-
-        const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(this.borrower);
+        const oneMonth = time.duration.days(30);
+        await time.increase(oneMonth);
 
         const paybackFraction = ethers.WeiPerEther;
-        await this.redeployedContracts.feeCollector
+        const decreaseDebtTx = await this.redeployedContracts.feeCollector
           .connect(this.borrowerOperationsImpostor)
           .decreaseDebt(this.borrower, this.debtAsset.address, paybackFraction);
 
-        const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(this.borrower);
-        expect(debtBalanceAfter).to.equal(debtBalanceBefore);
+        await expect(decreaseDebtTx).to.changeTokenBalance(debtToken, this.borrower, 0);
       });
 
       it("should refund amount proportional to the payment", async function () {
+        const { debtToken } = this.redeployedContracts;
         const feeAmount = ethers.WeiPerEther;
-        // first create fee record
         await this.redeployedContracts.feeCollector
           .connect(this.borrowerOperationsImpostor)
           .increaseDebt(this.borrower, this.debtAsset.address, feeAmount);
@@ -145,8 +135,8 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
           this.debtAsset.address
         );
 
-        // after 1 month
-        await time.increase(time.duration.days(30));
+        const oneMonth = time.duration.days(30);
+        await time.increase(oneMonth);
 
         const paybackFraction = ethers.parseEther("0.5");
 
@@ -159,14 +149,11 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
 
         const refundAmount = (feeRecordBefore.amount - expiredAmount) / 2n;
 
-        const debtBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(this.borrower);
-
-        await this.redeployedContracts.feeCollector
+        const decreaseDebtTx = await this.redeployedContracts.feeCollector
           .connect(this.borrowerOperationsImpostor)
           .decreaseDebt(this.borrower, this.debtAsset.address, paybackFraction);
 
-        const debtBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(this.borrower);
-        expect(debtBalanceAfter).to.equal(debtBalanceBefore + refundAmount);
+        await expect(decreaseDebtTx).to.changeTokenBalance(debtToken, this.borrower, refundAmount);
       });
     });
   });

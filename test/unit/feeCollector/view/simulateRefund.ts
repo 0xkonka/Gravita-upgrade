@@ -18,12 +18,6 @@ export default function shouldHaveSimulateRefund(): void {
     const debtToken = await DebtTokenFactory.deploy(this.owner);
     await debtToken.waitForDeployment();
 
-    await debtToken.setAddresses(
-      this.borrowerOperationsImpostor,
-      this.signers.accounts[3],
-      this.signers.accounts[4]
-    );
-
     this.redeployedContracts.feeCollector = feeCollector;
     this.redeployedContracts.debtToken = debtToken;
     this.debtAsset = this.collaterals.active.wETH;
@@ -35,76 +29,81 @@ export default function shouldHaveSimulateRefund(): void {
       debtToken: this.redeployedContracts.debtToken,
     });
 
-    // assume that feeAmount has already been minted
-    await this.redeployedContracts.debtToken
+    const feeCollectorAddress = await feeCollector.getAddress();
+
+    const mintFeeAmountTx = await this.redeployedContracts.debtToken
       .connect(this.borrowerOperationsImpostor)
-      .mint(this.debtAsset.address, await feeCollector.getAddress(), ethers.WeiPerEther);
+      .mint(this.debtAsset.address, feeCollectorAddress, ethers.WeiPerEther);
+    await mintFeeAmountTx.wait();
   });
 
   it("should revert if payback fraction is zero", async function () {
-    const paybackFraction = 0n;
+    const paybackFraction_100percent = 0n;
+
     await expect(
       this.redeployedContracts.feeCollector.simulateRefund(
         this.borrower,
         this.debtAsset.address,
-        paybackFraction
+        paybackFraction_100percent
       )
     ).to.be.revertedWith("Payback fraction cannot be zero");
   });
 
   it("should revert if payback fraction is higher than 1 ether", async function () {
-    const paybackFraction = ethers.parseEther("2");
+    const paybackFraction_200percent = ethers.parseEther("2");
+
     await expect(
       this.redeployedContracts.feeCollector.simulateRefund(
         this.borrower,
         this.debtAsset.address,
-        paybackFraction
+        paybackFraction_200percent
       )
     ).to.be.revertedWith("Payback fraction cannot be higher than 1 (@ 10**18)");
   });
 
   it("should return zero if no fee record", async function () {
-    const paybackFraction = ethers.parseEther("0.5");
+    const paybackFraction_0percent = ethers.parseEther("0.5");
     const refundAmount = await this.redeployedContracts.feeCollector.simulateRefund(
       this.borrower,
       this.debtAsset.address,
-      paybackFraction
+      paybackFraction_0percent
     );
     expect(refundAmount).to.equal(0n);
   });
 
   it("should return zero if expired", async function () {
-    // create fee record
-    await this.redeployedContracts.feeCollector
+    const createFeeRecordTx = await this.redeployedContracts.feeCollector
       .connect(this.borrowerOperationsImpostor)
       .increaseDebt(this.borrower, this.debtAsset.address, ethers.WeiPerEther);
+    await createFeeRecordTx.wait();
 
-    // after 1 year
-    await time.increase(time.duration.years(1));
+    const oneYear = time.duration.years(1);
+    await time.increase(oneYear);
 
-    const paybackFraction = ethers.parseEther("0.5");
+    const paybackFraction_50percent = ethers.parseEther("0.5");
     const refundAmount = await this.redeployedContracts.feeCollector.simulateRefund(
       this.borrower,
       this.debtAsset.address,
-      paybackFraction
+      paybackFraction_50percent
     );
     expect(refundAmount).to.equal(0n);
   });
 
   it("should return full refund amount", async function () {
-    // create fee record
-    await this.redeployedContracts.feeCollector
+    const createFeeRecordTx = await this.redeployedContracts.feeCollector
       .connect(this.borrowerOperationsImpostor)
       .increaseDebt(this.borrower, this.debtAsset.address, ethers.WeiPerEther);
+    await createFeeRecordTx.wait();
 
     const feeRecord = await this.redeployedContracts.feeCollector.feeRecords(
       this.borrower,
       this.debtAsset.address
     );
-    // after 1 year
-    await time.increase(time.duration.days(30));
 
-    const expiredAmount = calcExpiredAmount(
+    const oneMonth = time.duration.days(30);
+    await time.increase(oneMonth);
+
+    const expiredAmount = calculateExpiredAmount(
       BigInt(await time.latest()),
       feeRecord.from,
       feeRecord.to,
@@ -121,19 +120,20 @@ export default function shouldHaveSimulateRefund(): void {
   });
 
   it("should return proportional refund amount", async function () {
-    // create fee record
-    await this.redeployedContracts.feeCollector
+    const createFeeRecordTx = await this.redeployedContracts.feeCollector
       .connect(this.borrowerOperationsImpostor)
       .increaseDebt(this.borrower, this.debtAsset.address, ethers.WeiPerEther);
+    await createFeeRecordTx.wait();
 
     const feeRecord = await this.redeployedContracts.feeCollector.feeRecords(
       this.borrower,
       this.debtAsset.address
     );
-    // after 1 year
-    await time.increase(time.duration.days(30));
 
-    const expiredAmount = calcExpiredAmount(
+    const oneMonth = time.duration.days(30);
+    await time.increase(oneMonth);
+
+    const expiredAmount = calculateExpiredAmount(
       BigInt(await time.latest()),
       feeRecord.from,
       feeRecord.to,
@@ -150,12 +150,17 @@ export default function shouldHaveSimulateRefund(): void {
   });
 }
 
-function calcExpiredAmount(now: bigint, from: bigint, to: bigint, amount: bigint) {
-  if (from > now) return BigInt(0);
-  if (now >= to) return amount;
+function calculateExpiredAmount(now: bigint, from: bigint, to: bigint, amount: bigint): bigint {
+  if (from > now) {
+    return BigInt(0);
+  }
+  if (now >= to) {
+    return amount;
+  }
   const PRECISION = BigInt(1e9);
   const lifeTime = to - from;
   const elapsedTime = now - from;
   const decayRate = (amount * PRECISION) / lifeTime;
+
   return (elapsedTime * decayRate) / PRECISION;
 }

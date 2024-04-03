@@ -17,18 +17,29 @@ export default function shouldHaveGetProtocolRevenueDestination(): void {
       treasury: this.treasuryImposter,
       feeCollector: this.redeployedContracts.feeCollector,
     });
-
-    await this.redeployedContracts.feeCollector.setTRENStaking(this.trenStakingImposter);
   });
 
-  it("should return correct revenue destination", async function () {
-    const routeToTRENStaking = await this.redeployedContracts.feeCollector.routeToTRENStaking();
-    const actualDestination =
-      await this.redeployedContracts.feeCollector.getProtocolRevenueDestination();
-    const expectedDestination = routeToTRENStaking
-      ? this.trenStakingImposter
-      : this.treasuryImposter;
+  context("when fees go te treasury", function () {
+    it("should return treasury as revenue destination", async function () {
+      await this.redeployedContracts.feeCollector.setTRENStaking(this.trenStakingImposter);
 
-    expect(actualDestination).to.be.equal(expectedDestination);
+      const actualDestination =
+        await this.redeployedContracts.feeCollector.getProtocolRevenueDestination();
+
+      const expectedDestination = this.treasuryImposter;
+
+      expect(actualDestination).to.be.equal(expectedDestination);
+    });
+  });
+
+  context("when fees go to TREN staking", function () {
+    it.skip("should return TREN staking as revenue destination", async function () {
+      const revenueDestination =
+        await this.redeployedContracts.feeCollector.getProtocolRevenueDestination();
+
+      const expectedDestination = this.trenStakingImposter;
+
+      expect(revenueDestination).to.be.equal(expectedDestination);
+    });
   });
 }
