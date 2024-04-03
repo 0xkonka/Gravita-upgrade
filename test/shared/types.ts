@@ -230,7 +230,7 @@ export type SetupProtocolCommands =
 export type SetupProtocolForTestsArgs = {
   collaterals?: SetupCollateralForTestsArgs[];
   commands?: SetupProtocolCommands[];
-  overrides?: RedeployedContracts;
+  overrides?: Partial<RedeployedContracts>;
 };
 
 export type SetupProtocolForTestsResult = void;
