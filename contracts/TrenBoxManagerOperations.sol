@@ -42,16 +42,6 @@ contract TrenBoxManagerOperations is
         uint256 maxIterations;
     }
 
-    // Modifiers
-    // --------------------------------------------------------------------------------------------------------
-
-    modifier onlyTrenBoxManager() {
-        if (msg.sender != trenBoxManager) {
-            revert TrenBoxManagerOperations__OnlyTrenBoxManager();
-        }
-        _;
-    }
-
     // Initializer
     // ------------------------------------------------------------------------------------------------------
 
@@ -406,7 +396,6 @@ contract TrenBoxManagerOperations is
                         currentTrenBoxNetDebt
                             - IAdminContract(adminContract).getMinNetDebt(vars.asset)
                     );
-
                     uint256 currentTrenBoxColl = ITrenBoxManager(trenBoxManager).getTrenBoxColl(
                         vars.asset, currentTrenBoxBorrower
                     )

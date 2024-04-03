@@ -16,6 +16,7 @@ import { testSortedTrenBoxes } from "./sortedTrenBoxes/SortedTrenBoxes";
 import { testStabilityPool } from "./stabilityPool/StabilityPool";
 import { loadTestFixture } from "./testContracts.fixture";
 import { testTrenBoxManager } from "./trenBoxManager/TrenBoxManager";
+import { testTrenBoxManagerOperations } from "./trenBoxManagerOperations/TrenBoxManagerOperations";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -73,4 +74,5 @@ describe("Unit tests", function () {
   testCollSurplusPool();
   testDefaultPool();
   testStabilityPool();
+  testTrenBoxManagerOperations();
 });

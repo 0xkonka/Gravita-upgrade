@@ -214,6 +214,10 @@ export type SetupProtocolCommands =
       args: BatchLiquidateTrenBoxesArgs;
     }
   | {
+      action: "closeTrenBox";
+      args: CloseTrenBoxArgs;
+    }
+  | {
       action: "approve";
       args: {
         from: HardhatEthersSigner;
@@ -267,7 +271,7 @@ export type TakeDebtResult = ContractTransactionResponse;
 export type RepayDebtArgs = {
   from?: HardhatEthersSigner;
   collateral: ERC20;
-  debtAmount: string;
+  debtAmount: bigint;
   upperHint?: AddressLike;
   lowerHint?: AddressLike;
   autoApprove?: boolean;
@@ -333,6 +337,14 @@ export type RedeemCollateralArgs = {
 };
 export type RedeemCollateralResult = ContractTransactionResponse;
 
+export type CloseTrenBoxArgs = {
+  from?: HardhatEthersSigner;
+  asset: ERC20 | AddressLike;
+  overrideBorrowerOperations?: BorrowerOperations;
+};
+
+export type CloseTrenBoxResult = ContractTransactionResponse;
+
 export interface TestUtils {
   revertToInitialSnapshot: () => Promise<void>;
   getAddressesForSetAddresses: (
@@ -361,6 +373,7 @@ export interface TestUtils {
     args: BatchLiquidateTrenBoxesArgs
   ) => Promise<BatchLiquidateTrenBoxesResult>;
   redeemCollateral: (args: RedeemCollateralArgs) => Promise<RedeemCollateralResult>;
+  closeTrenBox: (args: CloseTrenBoxArgs) => Promise<CloseTrenBoxResult>;
 }
 
 export interface TestContracts {
@@ -368,4 +381,18 @@ export interface TestContracts {
   mockAggregator: MockAggregator;
   mockApi3: MockApi3Proxy;
   priceFeedTestnet: PriceFeedTestnet;
+}
+
+export enum TrenBoxStatus {
+  nonExistent = 0,
+  active = 1,
+  closedByOwner = 2,
+  closedByLiquidation = 3,
+  closedByRedemption = 4,
+}
+
+export enum BorrowerOperationType {
+  openTrenBox = 0,
+  closeTrenBox = 1,
+  adjustTrenBox = 2,
 }
