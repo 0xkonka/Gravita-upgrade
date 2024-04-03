@@ -16,6 +16,7 @@ import { testSortedTrenBoxes } from "./sortedTrenBoxes/SortedTrenBoxes";
 import { loadTestFixture } from "./testContracts.fixture";
 import { testTrenBoxManagerOperations } from "./trenBoxManagerOperations/TrenBoxManagerOperations";
 import { testTrenBoxManager } from "./trenBoxManager/TrenBoxManager";
+import { testTimelock } from "./timelock/Timelock";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -73,4 +74,5 @@ describe("Unit tests", function () {
   testCollSurplusPool();
   testDefaultPool();
   testTrenBoxManagerOperations();
+  testTimelock();
 });
