@@ -16,8 +16,8 @@ import { testPriceFeed } from "./priceFeed/PriceFeed";
 import { testSortedTrenBoxes } from "./sortedTrenBoxes/SortedTrenBoxes";
 import { testStabilityPool } from "./stabilityPool/StabilityPool";
 import { loadTestFixture } from "./testContracts.fixture";
-import { testTrenBoxManager } from "./trenBoxManager/TrenBoxManager";
 import { testTimelock } from "./timelock/Timelock";
+import { testTrenBoxManager } from "./trenBoxManager/TrenBoxManager";
 import { testTrenBoxManagerOperations } from "./trenBoxManagerOperations/TrenBoxManagerOperations";
 
 describe("Unit tests", function () {

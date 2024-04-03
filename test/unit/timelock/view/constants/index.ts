@@ -1,7 +1,7 @@
-import shouldHaveName from "./name";
 import shouldHaveGracePeriod from "./gracePeriod";
-import shouldHaveMinimumDelay from "./minimumDelay";
 import shouldHaveMaximumDelay from "./maximumDelay";
+import shouldHaveMinimumDelay from "./minimumDelay";
+import shouldHaveName from "./name";
 
 export default function shouldHavePublicConstant(): void {
   describe("Constants", function () {
