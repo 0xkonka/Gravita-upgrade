@@ -1,18 +1,17 @@
+import shouldBehaveLikeCanAddCollateralType from "./effects/addCollateralType";
+import shouldBehaveLikeCanAuthorizeUpgrade from "./effects/authorizeUpgrade";
+import shouldBehaveLikeOffset from "./effects/offset";
+import shouldBehaveLikeCanProvideToSP from "./effects/provideToSP";
+import shouldBehaveLikeCanReceivedERC20 from "./effects/receivedERC20";
+import shouldBehaveLikeCanWithdrawFromSP from "./effects/withdrawFromSP";
 import shouldHaveName from "./view/constants/name";
-import shouldBehaveLikeOwner from "./view/owner";
-import shouldBehaveLikeGetCollateral from "./view/getCollateral";
 import shouldBehaveLikeGetAllCollateral from "./view/getAllCollateral";
-import shouldBehaveLikeGetTotalDebtTokenDeposits from "./view/getTotalDebtTokenDeposits";
+import shouldBehaveLikeGetCollateral from "./view/getCollateral";
+import shouldBehaveLikeGetCompoundedDebtTokenDeposits from "./view/getCompoundedDebtTokenDeposits";
 import shouldBehaveLikeGetDepositorTRENGain from "./view/getDepositorTRENGain";
 import shouldBehaveLikeGetSnapshot from "./view/getSnapShot";
-import shouldBehaveLikeGetCompoundedDebtTokenDeposits from "./view/getCompoundedDebtTokenDeposits";
-
-import shouldBehaveLikeCanAddCollateralType from "./effects/addCollateralType";
-import shouldBehaveLikeCanProvideToSP from "./effects/provideToSP";
-import shouldBehaveLikeCanWithdrawFromSP from "./effects/withdrawFromSP";
-import shouldBehaveLikeCanReceivedERC20 from "./effects/receivedERC20";
-import shouldBehaveLikeOffset from "./effects/offset";
-import shouldBehaveLikeCanAuthorizeUpgrade from "./effects/authorizeUpgrade";
+import shouldBehaveLikeGetTotalDebtTokenDeposits from "./view/getTotalDebtTokenDeposits";
+import shouldBehaveLikeOwner from "./view/owner";
 
 export function shouldBehaveLikeStabilityPoolContract(): void {
   describe("View functions", function () {
@@ -40,7 +39,6 @@ export function shouldBehaveLikeStabilityPoolContract(): void {
     describe("#getCompoundedDebtTokenDeposits", function () {
       shouldBehaveLikeGetCompoundedDebtTokenDeposits();
     });
-
   });
 
   describe("Effects Functions", function () {
@@ -64,5 +62,3 @@ export function shouldBehaveLikeStabilityPoolContract(): void {
     });
   });
 }
-
-
