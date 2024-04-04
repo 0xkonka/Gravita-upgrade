@@ -3,12 +3,11 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 export default function shouldBehaveLikeCanQueueTransaction(): void {
-  before(async function () {
+  beforeEach(async function () {
     this.admin = this.signers.deployer;
     this.user = this.signers.accounts[1];
 
     this.delay = Number(await this.contracts.timelock.delay());
-    this.gracePeriod = Number(await this.contracts.timelock.GRACE_PERIOD());
 
     // Timelock contract
     this.target = await this.contracts.timelock.getAddress();
@@ -19,32 +18,39 @@ export default function shouldBehaveLikeCanQueueTransaction(): void {
 
   context("when caller is admin", function () {
     it("should revert if eta is earlier than delay", async function () {
+      const { timelock } = this.contracts;
+      const twoHours = time.duration.hours(2);
+
       // 2 hrs before delay
-      const eta = (await time.latest()) + this.delay - 2 * 3600;
+      const eta = (await time.latest()) + this.delay - twoHours;
 
       await expect(
-        this.contracts.timelock
+        timelock
           .connect(this.admin)
           .queueTransaction(this.target, this.value, this.signature, this.data, eta)
-      ).to.be.revertedWithCustomError(this.contracts.timelock, "Timelock__ETAMustSatisfyDelay");
+      ).to.be.revertedWithCustomError(timelock, "Timelock__ETAMustSatisfyDelay");
     });
 
     it("should revert if eta is later than grace period", async function () {
+      const { timelock } = this.contracts;
+      const gracePeriod = Number(await timelock.GRACE_PERIOD());
+      const twoHours = time.duration.hours(2);
+
       // 2 hrs after grace period
-      const eta = (await time.latest()) + this.delay + this.gracePeriod + 2 * 3600;
+      const eta = (await time.latest()) + this.delay + gracePeriod + twoHours;
 
       await expect(
-        this.contracts.timelock
+        timelock
           .connect(this.admin)
           .queueTransaction(this.target, this.value, this.signature, this.data, eta)
-      ).to.be.revertedWithCustomError(this.contracts.timelock, "Timelock__ETAMustSatisfyDelay");
+      ).to.be.revertedWithCustomError(timelock, "Timelock__ETAMustSatisfyDelay");
     });
 
     it("should emit QueueTransaction event", async function () {
       const { timelock } = this.contracts;
-
+      const twoHours = time.duration.hours(2);
       // 2 hrs after delay
-      const eta = (await time.latest()) + this.delay + 2 * 3600;
+      const eta = (await time.latest()) + this.delay + twoHours;
 
       const txHash = calcTxHash(this.target, this.value, this.signature, this.data, eta);
 
@@ -59,9 +65,9 @@ export default function shouldBehaveLikeCanQueueTransaction(): void {
 
     it("should revert if tx is already queued", async function () {
       const { timelock } = this.contracts;
-
+      const twoHours = time.duration.hours(2);
       // 2 hrs after delay
-      const eta = (await time.latest()) + this.delay + 2 * 3600;
+      const eta = (await time.latest()) + this.delay + twoHours;
 
       const firstTx = await timelock
         .connect(this.admin)
@@ -80,15 +86,15 @@ export default function shouldBehaveLikeCanQueueTransaction(): void {
   context("when caller is not admin", function () {
     it("should revert", async function () {
       const { timelock } = this.contracts;
-
-      // 12 hrs after delay
-      const eta = (await time.latest()) + this.delay + 12 * 3600;
+      const twoHours = time.duration.hours(2);
+      // 2 hrs after delay
+      const eta = (await time.latest()) + this.delay + twoHours;
 
       await expect(
         timelock
           .connect(this.user)
           .queueTransaction(this.target, this.value, this.signature, this.data, eta)
-      ).to.be.revertedWithCustomError(this.contracts.timelock, "Timelock__AdminOnly");
+      ).to.be.revertedWithCustomError(timelock, "Timelock__AdminOnly");
     });
   });
 }
