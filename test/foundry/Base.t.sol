@@ -3,8 +3,6 @@ pragma solidity >=0.8.23 <0.9.0;
 
 import { Test } from "forge-std/src/Test.sol";
 
-import { Lock } from "contracts/Lock.sol";
-
 import { Users } from "./utils/Types.sol";
 
 /// @notice Common contract members needed across test contracts.
@@ -18,8 +16,6 @@ abstract contract Base_Test is Test {
     /*//////////////////////////////////////////////////////////////
                              TEST CONTRACTS
     //////////////////////////////////////////////////////////////*/
-
-    Lock internal lock;
 
     /*//////////////////////////////////////////////////////////////
                             SET-UP FUNCTION

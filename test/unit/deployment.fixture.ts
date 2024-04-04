@@ -63,10 +63,7 @@ export async function loadDeploymentFixture(): Promise<Contracts> {
     deploymentSummary.TrenBoxManagerOperations.address
   );
 
-  const lock = await ethers.getContractAt("Lock", deploymentSummary.Lock.address);
-
   return {
-    lock,
     activePool,
     adminContract,
     borrowerOperations,

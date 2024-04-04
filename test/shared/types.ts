@@ -16,7 +16,6 @@ import type {
   FeeCollector,
   GasPool,
   IPriceFeed,
-  Lock,
   PriceFeed,
   PriceFeedL2,
   PriceFeedTestnet,
@@ -46,7 +45,6 @@ declare module "mocha" {
 }
 
 export interface Contracts {
-  lock: Lock;
   activePool: ActivePool;
   adminContract: AdminContract;
   borrowerOperations: BorrowerOperations;
