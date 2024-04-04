@@ -39,4 +39,21 @@ export const LOCAL_NETWORK_COLLATERALS: Collateral[] = [
   },
 ];
 
-export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {} as const;
+export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
+  sepolia: [
+    {
+      name: "wETH",
+      address: "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
+      decimals: 18,
+      borrowingFee: parseEther("0.01"),
+      oracleAddress: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+      oracleTimeoutMinutes: 1440,
+      oracleIsEthIndexed: false,
+      MCR: parseEther("1.25"),
+      CCR: parseEther("1.5"),
+      minNetDebt: parseEther("1800"),
+      gasCompensation: parseEther("300"),
+      mintCap: parseEther("1500000"),
+    },
+  ],
+} as const;
