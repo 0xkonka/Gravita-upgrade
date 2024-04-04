@@ -7,16 +7,15 @@ export default function shouldBehaveLikeCanReceiveEth(): void {
     const amountToSend = ethers.WeiPerEther;
     const timelockAddress = await this.contracts.timelock.getAddress();
 
-    const ethBalanceBefore = await ethers.provider.getBalance(timelockAddress);
-
-    // send 1 eth to the Timelock contract
-    await user.sendTransaction({
+    const topUpTimelockWithEthTx = await user.sendTransaction({
       to: timelockAddress,
       value: amountToSend,
     });
+    await topUpTimelockWithEthTx.wait();
 
-    const ethBalanceAfter = await ethers.provider.getBalance(timelockAddress);
-
-    expect(ethBalanceAfter).to.equal(ethBalanceBefore + amountToSend);
+    await expect(topUpTimelockWithEthTx).to.changeEtherBalances(
+      [user, this.contracts.timelock],
+      [-amountToSend, amountToSend]
+    );
   });
 }

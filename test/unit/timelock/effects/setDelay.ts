@@ -25,20 +25,31 @@ export default function shouldBehaveLikeCanSetDelay(): void {
       const abi = new ethers.AbiCoder();
       const encodedData = abi.encode(["uint256"], [newDelay]);
 
-      // 1 day after delay
-      const eta = (await time.latest()) + Number(this.delay) + oneDay;
+      const eta_OneDayAfterDelay = (await time.latest()) + Number(this.delay) + oneDay;
 
       const queueTx = await timelock
         .connect(this.admin)
-        .queueTransaction(this.target, this.value, this.signature, encodedData, eta);
+        .queueTransaction(
+          this.target,
+          this.value,
+          this.signature,
+          encodedData,
+          eta_OneDayAfterDelay
+        );
       await queueTx.wait();
 
-      await time.increaseTo(eta);
+      await time.increaseTo(eta_OneDayAfterDelay);
 
       await expect(
         timelock
           .connect(this.admin)
-          .executeTransaction(this.target, this.value, this.signature, encodedData, eta)
+          .executeTransaction(
+            this.target,
+            this.value,
+            this.signature,
+            encodedData,
+            eta_OneDayAfterDelay
+          )
       ).to.be.revertedWithCustomError(timelock, "Timelock__TxReverted");
     });
 
@@ -52,20 +63,31 @@ export default function shouldBehaveLikeCanSetDelay(): void {
       const abi = new ethers.AbiCoder();
       const encodedData = abi.encode(["uint256"], [newDelay]);
 
-      // 1 day after delay
-      const eta = (await time.latest()) + Number(this.delay) + oneDay;
+      const eta_OneDayAfterDelay = (await time.latest()) + Number(this.delay) + oneDay;
 
       const queueTx = await timelock
         .connect(this.admin)
-        .queueTransaction(this.target, this.value, this.signature, encodedData, eta);
+        .queueTransaction(
+          this.target,
+          this.value,
+          this.signature,
+          encodedData,
+          eta_OneDayAfterDelay
+        );
       await queueTx.wait();
 
-      await time.increaseTo(eta);
+      await time.increaseTo(eta_OneDayAfterDelay);
 
       await expect(
         timelock
           .connect(this.admin)
-          .executeTransaction(this.target, this.value, this.signature, encodedData, eta)
+          .executeTransaction(
+            this.target,
+            this.value,
+            this.signature,
+            encodedData,
+            eta_OneDayAfterDelay
+          )
       ).to.be.revertedWithCustomError(timelock, "Timelock__TxReverted");
     });
 
@@ -78,19 +100,30 @@ export default function shouldBehaveLikeCanSetDelay(): void {
       const abi = new ethers.AbiCoder();
       const encodedData = abi.encode(["uint256"], [newDelay]);
 
-      // 1 day after delay
-      const eta = (await time.latest()) + Number(this.delay) + oneWeek;
+      const eta_OneWeekAfterDelay = (await time.latest()) + Number(this.delay) + oneWeek;
 
       const queueTx = await timelock
         .connect(this.admin)
-        .queueTransaction(this.target, this.value, this.signature, encodedData, eta);
+        .queueTransaction(
+          this.target,
+          this.value,
+          this.signature,
+          encodedData,
+          eta_OneWeekAfterDelay
+        );
       await queueTx.wait();
 
-      await time.increaseTo(eta);
+      await time.increaseTo(eta_OneWeekAfterDelay);
 
       const setDelayTx = await timelock
         .connect(this.admin)
-        .executeTransaction(this.target, this.value, this.signature, encodedData, eta);
+        .executeTransaction(
+          this.target,
+          this.value,
+          this.signature,
+          encodedData,
+          eta_OneWeekAfterDelay
+        );
 
       await expect(setDelayTx).to.emit(timelock, "NewDelay").withArgs(newDelay);
     });

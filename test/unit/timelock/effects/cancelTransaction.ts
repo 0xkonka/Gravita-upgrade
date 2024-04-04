@@ -1,72 +1,79 @@
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { AddressLike } from "ethers";
 import { ethers } from "hardhat";
+
+import { Timelock } from "../../../../types";
+
+const TWO_HOURS = BigInt(time.duration.hours(2));
 
 export default function shouldBehaveLikeCanCancelTransaction(): void {
   beforeEach(async function () {
     this.admin = this.signers.deployer;
     this.user = this.signers.accounts[1];
-
-    this.delay = Number(await this.contracts.timelock.delay());
-
-    // Timelock contract
-    this.target = await this.contracts.timelock.getAddress();
-    this.value = 0;
-    this.signature = "setPendingAdmin(address)";
-    this.data = encodeParameters(["address"], [this.user.address]);
   });
 
   context("when caller is admin", function () {
     it("should revert if tx is not queued", async function () {
       const { timelock } = this.contracts;
-      const twoHours = time.duration.hours(2);
-      // 2 hrs after delay
-      const eta = (await time.latest()) + this.delay + twoHours;
+
+      const { value, data, target, signature, delay, now } = await getTransactionData(
+        timelock,
+        this.admin
+      );
+
+      const eta_TwoHoursAfterDelay = now + delay + TWO_HOURS;
 
       await expect(
         timelock
           .connect(this.admin)
-          .cancelTransaction(this.target, this.value, this.signature, this.data, eta)
+          .cancelTransaction(target, value, signature, data, eta_TwoHoursAfterDelay)
       ).to.be.revertedWithCustomError(timelock, "Timelock__TxNoQueued");
     });
 
     it("should emit CancelTransaction", async function () {
       const { timelock } = this.contracts;
-      const twoHours = time.duration.hours(2);
+      const { value, data, target, signature, delay, now } = await getTransactionData(
+        timelock,
+        this.admin
+      );
 
-      // 2 hrs after delay
-      const eta = (await time.latest()) + this.delay + twoHours;
+      const eta_TwoHoursAfterDelay = now + delay + TWO_HOURS;
 
       const queueTx = await timelock
         .connect(this.admin)
-        .queueTransaction(this.target, this.value, this.signature, this.data, eta);
+        .queueTransaction(target, value, signature, data, eta_TwoHoursAfterDelay);
       await queueTx.wait();
 
-      await time.increaseTo(eta);
+      await time.increaseTo(eta_TwoHoursAfterDelay);
 
       const cancelTx = await timelock
         .connect(this.admin)
-        .cancelTransaction(this.target, this.value, this.signature, this.data, eta);
+        .cancelTransaction(target, value, signature, data, eta_TwoHoursAfterDelay);
 
-      const txHash = calcTxHash(this.target, this.value, this.signature, this.data, eta);
+      const txHash = calcTxHash(target, value, signature, data, eta_TwoHoursAfterDelay);
 
       await expect(cancelTx)
         .to.emit(timelock, "CancelTransaction")
-        .withArgs(txHash, this.target, this.value, this.signature, this.data, eta);
+        .withArgs(txHash, target, value, signature, data, eta_TwoHoursAfterDelay);
     });
   });
 
   context("when caller is not admin", function () {
     it("should revert", async function () {
       const { timelock } = this.contracts;
-      const twoHours = time.duration.hours(2);
-      // 2 hrs after delay
-      const eta = (await time.latest()) + this.delay + twoHours;
+      const { value, data, target, signature, delay, now } = await getTransactionData(
+        timelock,
+        this.admin
+      );
+
+      const eta_TwoHoursAfterDelay = now + delay + TWO_HOURS;
 
       await expect(
         timelock
           .connect(this.user)
-          .cancelTransaction(this.target, this.value, this.signature, this.data, eta)
+          .cancelTransaction(target, value, signature, data, eta_TwoHoursAfterDelay)
       ).to.be.revertedWithCustomError(timelock, "Timelock__AdminOnly");
     });
   });
@@ -78,16 +85,41 @@ function encodeParameters(types: string[], values: string[]) {
 }
 
 function calcTxHash(
-  targetAddress: string,
-  value: number,
+  targetAddress: AddressLike,
+  value: bigint,
   signature: string,
   data: string,
-  eta: number
+  eta: bigint
 ) {
   return ethers.keccak256(
     encodeParameters(
       ["address", "uint256", "string", "bytes", "uint256"],
-      [targetAddress, value.toString(), signature, data, eta.toString()]
+      [targetAddress.toString(), value.toString(), signature, data, eta.toString()]
     )
   );
+}
+
+async function getTransactionData(
+  timelock: Timelock,
+  admin: HardhatEthersSigner
+): Promise<{
+  value: bigint;
+  signature: string;
+  data: string;
+  target: AddressLike;
+  delay: bigint;
+  now: bigint;
+}> {
+  const target = await timelock.getAddress();
+  const delay = await timelock.delay();
+  const now = BigInt(await time.latest());
+
+  return {
+    value: 0n,
+    signature: "setPendingAdmin(address)",
+    data: encodeParameters(["address"], [admin.address]),
+    target,
+    delay,
+    now,
+  };
 }

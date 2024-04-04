@@ -1,159 +1,175 @@
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { AddressLike } from "ethers";
 import { ethers } from "hardhat";
+
+import { Timelock } from "../../../../types";
 
 export default function shouldBehaveLikeCanExecuteTransaction(): void {
   beforeEach(async function () {
     this.admin = this.signers.deployer;
     this.user = this.signers.accounts[1];
-
-    this.delay = Number(await this.contracts.timelock.delay());
-
-    // Timelock contract
-    this.target = await this.contracts.timelock.getAddress();
-    this.value = 0;
-    this.signature = "setPendingAdmin(address)";
-    this.data = encodeParameters(["address"], [this.user.address]);
   });
 
   context("when caller is admin", function () {
     it("should revert if tx is not queued", async function () {
       const { timelock } = this.contracts;
-      const twoHours = time.duration.hours(2);
-      // 2 hrs after delay
-      const eta = (await time.latest()) + this.delay + twoHours;
+      const { value, signature, data, target, delay, now } = await getTransactionData(
+        timelock,
+        this.admin
+      );
+
+      const twoHours = BigInt(time.duration.hours(2));
+      const eta_TwoHoursAfterDelay = now + delay + twoHours;
 
       await expect(
         timelock
           .connect(this.admin)
-          .executeTransaction(this.target, this.value, this.signature, this.data, eta)
+          .executeTransaction(target, value, signature, data, eta_TwoHoursAfterDelay)
       ).to.be.revertedWithCustomError(timelock, "Timelock__TxNoQueued");
     });
 
     it("should revert if tx is still locked", async function () {
       const { timelock } = this.contracts;
-      const twoHours = time.duration.hours(2);
+      const { value, signature, data, target, delay, now } = await getTransactionData(
+        timelock,
+        this.admin
+      );
 
-      // 2 hrs after delay
-      const eta = (await time.latest()) + this.delay + twoHours;
+      const twoHours = BigInt(time.duration.hours(2));
+      const eta_TwoHoursAfterDelay = now + delay + twoHours;
 
       const queueTx = await timelock
         .connect(this.admin)
-        .queueTransaction(this.target, this.value, this.signature, this.data, eta);
+        .queueTransaction(target, value, signature, data, eta_TwoHoursAfterDelay);
       await queueTx.wait();
 
       await expect(
         timelock
           .connect(this.admin)
-          .executeTransaction(this.target, this.value, this.signature, this.data, eta)
+          .executeTransaction(target, value, signature, data, eta_TwoHoursAfterDelay)
       ).to.be.revertedWithCustomError(timelock, "Timelock__TxStillLocked");
     });
 
     it("should revert if tx is expired", async function () {
       const { timelock } = this.contracts;
-      const gracePeriod = Number(await timelock.GRACE_PERIOD());
+      const gracePeriod = await timelock.GRACE_PERIOD();
 
-      const twoHours = time.duration.hours(2);
+      const { value, signature, data, target, delay, now } = await getTransactionData(
+        timelock,
+        this.admin
+      );
 
-      // 2 hrs after delay
-      const eta = (await time.latest()) + this.delay + twoHours;
+      const twoHours = BigInt(time.duration.hours(2));
+      const eta_TwoHoursAfterDelay = now + delay + twoHours;
 
       const queueTx = await timelock
         .connect(this.admin)
-        .queueTransaction(this.target, this.value, this.signature, this.data, eta);
+        .queueTransaction(target, value, signature, data, eta_TwoHoursAfterDelay);
       await queueTx.wait();
 
-      const expiredTime = eta + gracePeriod;
+      const expiredTime = eta_TwoHoursAfterDelay + gracePeriod;
       await time.increaseTo(expiredTime);
 
       await expect(
         timelock
           .connect(this.admin)
-          .executeTransaction(this.target, this.value, this.signature, this.data, eta)
+          .executeTransaction(target, value, signature, data, eta_TwoHoursAfterDelay)
       ).to.be.revertedWithCustomError(timelock, "Timelock__TxExpired");
     });
 
     it("should revert if signature is empty string", async function () {
       const { timelock } = this.contracts;
-      const twoHours = time.duration.hours(2);
+      const twoHours = BigInt(time.duration.hours(2));
       const emptySignature = "";
 
-      // 2 hrs after delay
-      const eta = (await time.latest()) + this.delay + twoHours;
+      const { value, data, target, delay, now } = await getTransactionData(timelock, this.admin);
+
+      const eta_TwoHoursAfterDelay = now + delay + twoHours;
 
       const queueTx = await timelock
         .connect(this.admin)
-        .queueTransaction(this.target, this.value, emptySignature, this.data, eta);
+        .queueTransaction(target, value, emptySignature, data, eta_TwoHoursAfterDelay);
       await queueTx.wait();
 
-      await time.increaseTo(eta);
+      await time.increaseTo(eta_TwoHoursAfterDelay);
 
       await expect(
         timelock
           .connect(this.admin)
-          .executeTransaction(this.target, this.value, emptySignature, this.data, eta)
+          .executeTransaction(target, value, emptySignature, data, eta_TwoHoursAfterDelay)
       ).to.be.revertedWithCustomError(timelock, "Timelock__TxReverted");
     });
 
     it("should revert if signature is invalid", async function () {
       const { timelock } = this.contracts;
-      const twoHours = time.duration.hours(2);
+      const twoHours = BigInt(time.duration.hours(2));
       const invalidSignature = "setPendingAdmin()";
 
-      // 2 hrs after delay
-      const eta = (await time.latest()) + this.delay + twoHours;
+      const { value, data, target, delay, now } = await getTransactionData(timelock, this.admin);
+
+      const eta_TwoHoursAfterDelay = now + delay + twoHours;
 
       const queueTx = await timelock
         .connect(this.admin)
-        .queueTransaction(this.target, this.value, invalidSignature, this.data, eta);
+        .queueTransaction(target, value, invalidSignature, data, eta_TwoHoursAfterDelay);
+      await queueTx.wait();
       await queueTx.wait();
 
-      await time.increaseTo(eta);
+      await time.increaseTo(eta_TwoHoursAfterDelay);
 
       await expect(
         timelock
           .connect(this.admin)
-          .executeTransaction(this.target, this.value, invalidSignature, this.data, eta)
+          .executeTransaction(target, value, invalidSignature, data, eta_TwoHoursAfterDelay)
       ).to.be.revertedWithCustomError(timelock, "Timelock__TxReverted");
     });
 
     it("should emit ExecuteTransaction", async function () {
       const { timelock } = this.contracts;
-      const twoHours = time.duration.hours(2);
+      const twoHours = BigInt(time.duration.hours(2));
+      const { value, data, target, signature, delay, now } = await getTransactionData(
+        timelock,
+        this.admin
+      );
 
-      // 2 hrs after delay
-      const eta = (await time.latest()) + this.delay + twoHours;
+      const eta_TwoHoursAfterDelay = now + delay + twoHours;
 
       const queueTx = await timelock
         .connect(this.admin)
-        .queueTransaction(this.target, this.value, this.signature, this.data, eta);
+        .queueTransaction(target, value, signature, data, eta_TwoHoursAfterDelay);
       await queueTx.wait();
 
-      await time.increaseTo(eta);
+      await time.increaseTo(eta_TwoHoursAfterDelay);
 
       const executeTx = await timelock
         .connect(this.admin)
-        .executeTransaction(this.target, this.value, this.signature, this.data, eta);
+        .executeTransaction(target, value, signature, data, eta_TwoHoursAfterDelay);
 
-      const txHash = calcTxHash(this.target, this.value, this.signature, this.data, eta);
+      const txHash = calcTxHash(target, value, signature, data, eta_TwoHoursAfterDelay);
 
       await expect(executeTx)
         .to.emit(timelock, "ExecuteTransaction")
-        .withArgs(txHash, this.target, this.value, this.signature, this.data, eta);
+        .withArgs(txHash, target, value, signature, data, eta_TwoHoursAfterDelay);
     });
   });
 
   context("when caller is not admin", function () {
     it("should revert", async function () {
       const { timelock } = this.contracts;
-      const twoHours = time.duration.hours(2);
-      // 12 hrs after delay
-      const eta = (await time.latest()) + this.delay + twoHours;
+      const twelveHours = BigInt(time.duration.hours(2));
+      const { value, data, target, signature, delay, now } = await getTransactionData(
+        timelock,
+        this.admin
+      );
+
+      const eta_TwelveHoursAfterDelay = now + delay + twelveHours;
 
       await expect(
         timelock
           .connect(this.user)
-          .executeTransaction(this.target, this.value, this.signature, this.data, eta)
+          .executeTransaction(target, value, signature, data, eta_TwelveHoursAfterDelay)
       ).to.be.revertedWithCustomError(timelock, "Timelock__AdminOnly");
     });
   });
@@ -165,16 +181,41 @@ function encodeParameters(types: string[], values: string[]) {
 }
 
 function calcTxHash(
-  targetAddress: string,
-  value: number,
+  targetAddress: AddressLike,
+  value: bigint,
   signature: string,
   data: string,
-  eta: number
+  eta: bigint
 ) {
   return ethers.keccak256(
     encodeParameters(
       ["address", "uint256", "string", "bytes", "uint256"],
-      [targetAddress, value.toString(), signature, data, eta.toString()]
+      [targetAddress.toString(), value.toString(), signature, data, eta.toString()]
     )
   );
+}
+
+async function getTransactionData(
+  timelock: Timelock,
+  admin: HardhatEthersSigner
+): Promise<{
+  value: bigint;
+  signature: string;
+  data: string;
+  target: AddressLike;
+  delay: bigint;
+  now: bigint;
+}> {
+  const target = await timelock.getAddress();
+  const delay = await timelock.delay();
+  const now = BigInt(await time.latest());
+
+  return {
+    value: 0n,
+    signature: "setPendingAdmin(address)",
+    data: encodeParameters(["address"], [admin.address]),
+    target,
+    delay,
+    now,
+  };
 }

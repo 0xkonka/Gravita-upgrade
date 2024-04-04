@@ -22,19 +22,18 @@ export default function shouldBehaveLikeCanSetPendingAdmin(): void {
       const abi = new ethers.AbiCoder();
       const encodedData = abi.encode(["address"], [this.pendingAdmin.address]);
 
-      // 2 hrs after delay
-      const eta = (await time.latest()) + delay + twoHours;
+      const eta_TwoHoursAfterDelay = (await time.latest()) + delay + twoHours;
 
       const queueTx = await timelock
         .connect(this.admin)
-        .queueTransaction(target, value, signature, encodedData, eta);
+        .queueTransaction(target, value, signature, encodedData, eta_TwoHoursAfterDelay);
       await queueTx.wait();
 
-      await time.increaseTo(eta);
+      await time.increaseTo(eta_TwoHoursAfterDelay);
 
       const setPendingAdminTx = await timelock
         .connect(this.admin)
-        .executeTransaction(target, value, signature, encodedData, eta);
+        .executeTransaction(target, value, signature, encodedData, eta_TwoHoursAfterDelay);
 
       await expect(setPendingAdminTx)
         .to.emit(timelock, "NewPendingAdmin")

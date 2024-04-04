@@ -9,9 +9,7 @@ export default function shouldBehaveLikeCanAcceptAdmin(): void {
 
     const { timelock } = this.contracts;
 
-    // set pendingAdmin
     const twoHours = time.duration.hours(2);
-
     const delay = await timelock.delay();
 
     const target = await timelock.getAddress();
