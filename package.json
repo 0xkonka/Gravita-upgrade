@@ -36,6 +36,7 @@
     "@nomicfoundation/hardhat-verify": "^2.0.4",
     "@openzeppelin/contracts": "^5.0.2",
     "@openzeppelin/contracts-upgradeable": "^5.0.2",
+    "@openzeppelin/hardhat-upgrades": "^1.25.0",
     "@primitivefi/hardhat-dodoc": "^0.2.3",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@typechain/ethers-v6": "^0.5.1",
