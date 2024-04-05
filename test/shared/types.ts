@@ -25,7 +25,12 @@ import type {
   TrenBoxManager,
   TrenBoxManagerOperations,
 } from "../../types";
-import { ERC20Test, MockAggregator, MockApi3Proxy } from "../../types/contracts/TestContracts";
+import {
+  ERC20Test,
+  MockAggregator,
+  MockApi3Proxy,
+  TrenMathTester,
+} from "../../types/contracts/TestContracts";
 
 type Fixture<T> = () => Promise<T>;
 
@@ -379,6 +384,7 @@ export interface TestContracts {
   mockAggregator: MockAggregator;
   mockApi3: MockApi3Proxy;
   priceFeedTestnet: PriceFeedTestnet;
+  trenMathTester: TrenMathTester;
 }
 
 export enum TrenBoxStatus {

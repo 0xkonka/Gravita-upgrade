@@ -10,6 +10,8 @@ import type {
   MockAggregator__factory,
   MockApi3Proxy,
   MockApi3Proxy__factory,
+  TrenMathTester,
+  TrenMathTester__factory,
 } from "../../types";
 import { Collaterals, TestContracts } from "../shared/types";
 
@@ -87,6 +89,18 @@ export async function loadTestFixture(): Promise<{
   )) as MockApi3Proxy;
   await mockApi3.waitForDeployment();
 
+  const TrenMathTesterFactory: TrenMathTester__factory = (await ethers.getContractFactory(
+    "TrenMathTester"
+  )) as TrenMathTester__factory;
+
+  type TrenMathTesterDeployArgs = Parameters<typeof TrenMathTesterFactory.deploy>;
+  const trenMathTesterArgs: TrenMathTesterDeployArgs = [];
+
+  const trenMathTester: TrenMathTester = (await TrenMathTesterFactory.connect(deployer).deploy(
+    ...trenMathTesterArgs
+  )) as TrenMathTester;
+  await trenMathTester.waitForDeployment();
+
   const priceFeedTestnet = await ethers.getContractAt(
     "PriceFeedTestnet",
     deploymentSummary.PriceFeedTestnet.address
@@ -98,6 +112,7 @@ export async function loadTestFixture(): Promise<{
       mockAggregator,
       mockApi3,
       priceFeedTestnet,
+      trenMathTester,
     },
     collaterals: {
       active: {
