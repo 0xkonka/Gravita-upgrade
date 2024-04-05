@@ -39,7 +39,7 @@ async function deployAndVerifyOnLayer2(
     contractPath: contractPath,
     contractAddress: deployResult.address,
     args: deployResult.args || [],
-    isUpgradeable: true
+    isUpgradeable: true,
   });
 }
 
@@ -69,7 +69,7 @@ async function deployAndVerifyOnLayer1(
     contractPath: contractPath,
     contractAddress: deployResult.address,
     args: deployResult.args || [],
-    isUpgradeable: true
+    isUpgradeable: true,
   });
 }
 
