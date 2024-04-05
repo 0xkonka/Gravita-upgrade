@@ -32,7 +32,8 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
     // State
     // ------------------------------------------------------------------------------------------------------------
 
-    mapping(address => mapping(address => FeeRecord)) public feeRecords; // borrower -> asset ->
+    mapping(address borrower => mapping(address asset => FeeRecord feeParams)) public feeRecords; // borrower
+        // -> asset ->
         // fees
 
     bool public constant routeToTRENStaking = false; // if true, collected fees go to stakers; if

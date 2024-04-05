@@ -1,16 +1,22 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 interface ITRENStaking {
-    // Events
-    // -----------------------------------------------------------------------------------------------------------
+    struct Snapshot {
+        mapping(address => uint256) FEE_ASSETS_Snapshot;
+        uint256 FEE_DEBT_TOKENS_Snapshot;
+    }
+
+    error TRENStaking__SetupAlreadyInitialized();
+    error TRENStaking__InvalidAmount(uint256 zeroValue);
+    error TRENStaking__OnlyTrenBoxManager(address caller, address expected);
+    error TRENStaking__OnlyFeeCollector(address caller, address expected);
+    error TRENStaking__InvalidStakeAmount(uint256 zeroValue);
 
     event TreasuryAddressChanged(address _treausury);
     event SentToTreasury(address indexed _asset, uint256 _amount);
-
     event StakeChanged(address indexed staker, uint256 newStake);
     event StakingGainsAssetWithdrawn(
         address indexed staker, address indexed asset, uint256 AssetGain
@@ -21,9 +27,6 @@ interface ITRENStaking {
     event TotalTRENStakedUpdated(uint256 _totalTRENStaked);
     event AssetSent(address indexed _asset, address indexed _account, uint256 _amount);
     event StakerSnapshotsUpdated(address _staker, uint256 _F_Asset, uint256 _F_DebtToken);
-
-    // Functions
-    // --------------------------------------------------------------------------------------------------------
 
     function trenToken() external view returns (IERC20);
 
