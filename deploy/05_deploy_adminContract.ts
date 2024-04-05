@@ -34,6 +34,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       contractPath: contractPath,
       contractAddress: deployResult.address,
       args: deployResult.args || [],
+      isUpgradeable: true
     });
   }
 };
