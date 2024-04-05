@@ -18,7 +18,6 @@ export function isLocalhostNetwork(chainId: string): boolean {
  * @returns A boolean indicating whether the network is a layer 2 network.
  */
 export function isLayer2Network(chainId: string): boolean {
-
   for (const networkConfig of Object.values(NETWORKS)) {
     if (networkConfig.chainId === Number(chainId) && networkConfig.isLayer2) {
       return true;
@@ -35,13 +34,11 @@ export function isLayer2Network(chainId: string): boolean {
  * @returns A boolean indicating whether the network is a supported network.
  */
 export function isSupportedNetwork(chainId: string) {
-
   for (const networkConfig of Object.values(NETWORKS)) {
     if (networkConfig.chainId === Number(chainId)) {
       return true;
     }
   }
-
 
   return isLocalhostNetwork(chainId);
 }
