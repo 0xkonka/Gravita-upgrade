@@ -55,5 +55,19 @@ export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
       gasCompensation: parseEther("300"),
       mintCap: parseEther("1500000"),
     },
+    {
+      name: "TNT",
+      address: "0x028F128035133265Af06ef860e8c9B7684dB87CE",
+      decimals: 18,
+      borrowingFee: parseEther("0.01"),
+      oracleAddress: "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
+      oracleTimeoutMinutes: 1440,
+      oracleIsEthIndexed: false,
+      MCR: parseEther("1.25"),
+      CCR: parseEther("1.5"),
+      minNetDebt: parseEther("1800"),
+      gasCompensation: parseEther("300"),
+      mintCap: parseEther("2000000"),
+    }
   ],
 } as const;
