@@ -13,8 +13,8 @@ import { API3ProxyInterface } from "./Pricing/API3ProxyInterface.sol";
 
 /**
  * @title The PriceFeed contract contains a directory of oracles for fetching prices for assets
- * based on their
- *     addresses; optionally fallback oracles can also be registered in case the primary source
+ * based on their addresses;
+ * optionally fallback oracles can also be registered in case the primary source
  * fails or is stale.
  */
 contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses {
@@ -88,7 +88,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
     // -------------------------------------------------------------------------------------------------
 
     /**
-     * @notice Fetches the price for an asset from a previosly configured oracle.
+     * @notice Fetches the price for an asset from a previously configured oracle.
      * @dev Callers:
      *     - BorrowerOperations.openTrenBox()
      *     - BorrowerOperations.adjustTrenBox()
@@ -175,6 +175,8 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
             }
         } catch {
             // If call to Chainlink aggregator reverts, return a zero response
+            price = 0;
+            timestamp = 0;
         }
     }
 
@@ -193,8 +195,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
 
     /**
      * @dev Fetches the ETH:USD price (using the zero address as being the ETH asset), then
-     * multiplies it by the
-     *     indexed price. Assumes an oracle has been set for that purpose.
+     * multiplies it by the indexed price. Assumes an oracle has been set for that purpose.
      */
     function _calcEthIndexedPrice(uint256 _ethAmount) internal view returns (uint256) {
         uint256 ethPrice = fetchPrice(address(0));
@@ -203,8 +204,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
 
     /**
      * @dev Scales oracle's response up/down to Gravita's target precision; returns unaltered price
-     * if already on
-     *     target digits.
+     * if already on target digits.
      */
     function _scalePriceByDigits(
         uint256 _price,
@@ -229,8 +229,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
 
     /**
      * @dev Requires msg.sender to be the contract owner when the oracle is first set. Subsequent
-     * updates need to come
-     *     through the timelock contract.
+     * updates need to come through the timelock contract.
      */
     function _requireOwnerOrTimelock(address _token, bool _isFallback) internal view {
         OracleRecordV2 storage record = _isFallback ? fallbacks[_token] : oracles[_token];
