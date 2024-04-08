@@ -22,18 +22,19 @@ contract TRENStaking is
     BaseMath,
     ReentrancyGuardUpgradeable
 {
+    // ------------------------------------------- State ------------------------------------------
+
     string public constant NAME = "TRENStaking";
 
     address public debtToken;
     address public feeCollector;
     address public treasury;
-    address public trenBoxManager;
     IERC20 public trenToken;
 
-    address[] public assetsList;
+    address[] private assetsList;
 
-    uint256 private totalTRENStaked;
-    uint256 private totalDebtTokenFee;
+    uint256 public totalTRENStaked;
+    uint256 public totalDebtTokenFee;
 
     mapping(address user => Snapshot) private snapshots;
     mapping(address user => uint256 amount) private stakes;
@@ -72,6 +73,7 @@ contract TRENStaking is
     }
 
     // ------------------------------------------ External Functions ------------------------------
+
     function setAddresses(
         address _debtToken,
         address _feeCollector,
@@ -95,26 +97,30 @@ contract TRENStaking is
         isSetupInitialized = true;
     }
 
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
     function stake(uint256 _TRENamount) external nonReentrant whenNotPaused {
         if (_TRENamount == 0) revert TRENStaking__InvalidAmount(0);
 
         uint256 currentStake = stakes[msg.sender];
         uint256 assetLength = assetsList.length;
-        uint256 assetGain;
         address asset;
 
         for (uint256 i = 0; i < assetLength; i++) {
             asset = assetsList[i];
 
             if (currentStake != 0) {
-                assetGain = _getPendingAssetGain(asset, msg.sender);
-
                 if (i == 0) {
                     checkDebtTokenGain();
                 }
 
-                _sendAssetGainToUser(asset, assetGain);
-                emit StakingAssetGainWithdrawn(msg.sender, asset, assetGain);
+                checkAssetGain(asset);
             }
 
             _updateUserSnapshots(asset, msg.sender);
@@ -136,23 +142,18 @@ contract TRENStaking is
         if (currentStake == 0) revert TRENStaking__InvalidStakeAmount(0);
 
         uint256 assetLength = assetsList.length;
-        uint256 assetGain;
         address asset;
 
         for (uint256 i = 0; i < assetLength; i++) {
             asset = assetsList[i];
 
-            assetGain = _getPendingAssetGain(asset, msg.sender);
-
             if (i == 0) {
                 checkDebtTokenGain();
             }
 
+            checkAssetGain(asset);
+
             _updateUserSnapshots(asset, msg.sender);
-
-            emit StakingAssetGainWithdrawn(msg.sender, asset, assetGain);
-
-            _sendAssetGainToUser(asset, assetGain);
         }
 
         if (_TRENamount > 0) {
@@ -160,7 +161,7 @@ contract TRENStaking is
             uint256 newStake = currentStake - trenToWithdraw;
 
             stakes[msg.sender] = newStake;
-            totalTRENStaked = totalTRENStaked - trenToWithdraw;
+            totalTRENStaked -= trenToWithdraw;
 
             emit TotalTRENStakedUpdated(totalTRENStaked);
 
@@ -170,22 +171,11 @@ contract TRENStaking is
         }
     }
 
-    function pause() external onlyOwner {
-        _pause();
-    }
-
-    function unpause() external onlyOwner {
-        _unpause();
-    }
-
-    // --- Reward-per-unit-staked increase functions, which called by Tren core contracts ---------
-
     function increaseFeeAsset(
         address _asset,
         uint256 _assetFee
     )
         external
-        override
         onlyFeeCollector
         isPaused(_asset, _assetFee)
     {
@@ -194,11 +184,7 @@ contract TRENStaking is
             assetsList.push(_asset);
         }
 
-        uint256 assetFeePerTRENStaked;
-        if (totalTRENStaked > 0) {
-            assetFeePerTRENStaked = (_assetFee * DECIMAL_PRECISION) / totalTRENStaked;
-        }
-
+        uint256 assetFeePerTRENStaked = calculateFeePerTRENStaked(_assetFee);
         assetsFee[_asset] += assetFeePerTRENStaked;
 
         emit AssetFeeUpdated(_asset, assetsFee[_asset]);
@@ -206,50 +192,40 @@ contract TRENStaking is
 
     function increaseFeeDebtToken(uint256 _debtTokenFee)
         external
-        override
         onlyFeeCollector
         isPaused(debtToken, _debtTokenFee)
     {
-        uint256 feePerTRENStaked;
-        if (totalTRENStaked > 0) {
-            feePerTRENStaked = (_debtTokenFee * DECIMAL_PRECISION) / totalTRENStaked;
-        }
-
-        totalDebtTokenFee += feePerTRENStaked;
+        uint256 debtTokenFeePerTRENStaked = calculateFeePerTRENStaked(_debtTokenFee);
+        totalDebtTokenFee += debtTokenFeePerTRENStaked;
 
         emit TotalDebtTokenFeeUpdated(totalDebtTokenFee);
     }
 
-    function sendToTreasury(address _asset, uint256 _amount) internal {
-        _sendAsset(treasury, _asset, _amount);
-        sentAssetFeeToTreasury[_asset] += _amount;
-
-        emit SentAssetFeeToTreasury(_asset, _amount);
-    }
-
-    // ------------------------------------------ Pending reward functions ------------------------
-
     function getPendingAssetGain(address _asset, address _user) external view returns (uint256) {
         return _getPendingAssetGain(_asset, _user);
-    }
-
-    function _getPendingAssetGain(address _asset, address _user) internal view returns (uint256) {
-        uint256 assetFeeSnapshot = snapshots[_user].assetsFeeSnapshot[_asset];
-        uint256 assetGain =
-            (stakes[_user] * (assetsFee[_asset] - assetFeeSnapshot)) / DECIMAL_PRECISION;
-        return assetGain;
     }
 
     function getPendingDebtTokenGain(address _user) external view returns (uint256) {
         return _getPendingDebtTokenGain(_user);
     }
 
-    function _getPendingDebtTokenGain(address _user) internal view returns (uint256) {
-        uint256 debtTokenFeeSnapshot = snapshots[_user].debtTokenFeeSnapshot;
-        return (stakes[_user] * (totalDebtTokenFee - debtTokenFeeSnapshot)) / DECIMAL_PRECISION;
+    function getAssetsList() external view returns (address[] memory) {
+        return assetsList;
     }
 
     // ------------------------------------------ Private functions ------------------------------
+
+    function _getPendingAssetGain(address _asset, address _user) private view returns (uint256) {
+        uint256 assetFeeSnapshot = snapshots[_user].assetsFeeSnapshot[_asset];
+        uint256 assetGain =
+            (stakes[_user] * (assetsFee[_asset] - assetFeeSnapshot)) / DECIMAL_PRECISION;
+        return assetGain;
+    }
+
+    function _getPendingDebtTokenGain(address _user) private view returns (uint256) {
+        uint256 debtTokenFeeSnapshot = snapshots[_user].debtTokenFeeSnapshot;
+        return (stakes[_user] * (totalDebtTokenFee - debtTokenFeeSnapshot)) / DECIMAL_PRECISION;
+    }
 
     function _updateUserSnapshots(address _asset, address _user) private {
         snapshots[_user].assetsFeeSnapshot[_asset] = assetsFee[_asset];
@@ -265,15 +241,38 @@ contract TRENStaking is
         emit SentAsset(_asset, msg.sender, _assetGain);
     }
 
-    function _sendAsset(address _receiver, address _asset, uint256 _amount) private {
-        IERC20(_asset).transfer(_receiver, _amount);
+    function sendToTreasury(address _asset, uint256 _amount) private {
+        _sendAsset(treasury, _asset, _amount);
+        sentAssetFeeToTreasury[_asset] += _amount;
+
+        emit SentAssetFeeToTreasury(_asset, _amount);
     }
 
     function checkDebtTokenGain() private {
         uint256 debtTokenGain = _getPendingDebtTokenGain(msg.sender);
         if (debtTokenGain != 0) {
-            IERC20(debtToken).transfer(msg.sender, debtTokenGain);
+            _sendAsset(msg.sender, debtToken, debtTokenGain);
             emit StakingDebtTokenGainWithdrawn(msg.sender, debtTokenGain);
+        }
+    }
+
+    function _sendAsset(address _receiver, address _asset, uint256 _amount) private {
+        IERC20(_asset).transfer(_receiver, _amount);
+    }
+
+    function checkAssetGain(address _asset) private {
+        uint256 assetGain = _getPendingDebtTokenGain(msg.sender);
+        if (assetGain != 0) {
+            _sendAssetGainToUser(_asset, assetGain);
+            emit StakingAssetGainWithdrawn(msg.sender, _asset, assetGain);
+        }
+    }
+
+    function calculateFeePerTRENStaked(uint256 _feeAmount) private view returns (uint256) {
+        if (totalTRENStaked > 0) {
+            return _feeAmount = (_feeAmount * DECIMAL_PRECISION) / totalTRENStaked;
+        } else {
+            return 0;
         }
     }
 }
