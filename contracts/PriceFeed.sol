@@ -59,11 +59,11 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
         _requireOwnerOrTimelock(_token, _isFallback);
         if (_isFallback && oracles[_token].oracleAddress == address(0)) {
             // fallback setup requires an existing primary oracle for the asset
-            revert PriceFeed__ExistingOracleRequired();
+            revert PriceFeedExistingOracleRequired();
         }
         uint256 decimals = _fetchDecimals(_oracle, _type);
         if (decimals == 0) {
-            revert PriceFeed__InvalidDecimalsError();
+            revert PriceFeedInvalidDecimalsError();
         }
         OracleRecordV2 memory newOracle = OracleRecordV2({
             oracleAddress: _oracle,
@@ -74,7 +74,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
         });
         uint256 price = _fetchOracleScaledPrice(newOracle);
         if (price == 0) {
-            revert PriceFeed__InvalidOracleResponseError(_token);
+            revert PriceFeedInvalidOracleResponseError(_token);
         }
         if (_isFallback) {
             fallbacks[_token] = newOracle;
@@ -110,7 +110,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
         if (price != 0) {
             return oracle.isEthIndexed ? _calcEthIndexedPrice(price) : price;
         }
-        revert PriceFeed__InvalidOracleResponseError(_token);
+        revert PriceFeedInvalidOracleResponseError(_token);
     }
 
     // Internal functions
@@ -133,7 +133,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
         uint256 oraclePrice;
         uint256 priceTimestamp;
         if (oracle.oracleAddress == address(0)) {
-            revert PriceFeed__UnknownAssetError();
+            revert PriceFeedUnknownAssetError();
         }
         if (ProviderType.Chainlink == oracle.providerType) {
             (oraclePrice, priceTimestamp) = _fetchChainlinkOracleResponse(oracle.oracleAddress);
@@ -236,7 +236,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
         if (record.oracleAddress == address(0)) {
             _checkOwner();
         } else if (msg.sender != timelockAddress) {
-            revert PriceFeed__TimelockOnlyError();
+            revert PriceFeedTimelockOnlyError();
         }
     }
 
