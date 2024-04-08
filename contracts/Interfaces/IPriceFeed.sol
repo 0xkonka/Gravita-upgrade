@@ -33,7 +33,7 @@ interface IPriceFeed {
     // Structs
     // --------------------------------------------------------------------------------------------------------
 
-    struct OracleRecordV2 {
+    struct OracleRecord {
         address oracleAddress;
         ProviderType providerType;
         uint256 timeoutSeconds;

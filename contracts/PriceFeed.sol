@@ -29,8 +29,8 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
     // State
     // ------------------------------------------------------------------------------------------------------------
 
-    mapping(address token => OracleRecordV2 oracleRecord) public oracles;
-    mapping(address token => OracleRecordV2 oracleRecord) public fallbacks;
+    mapping(address token => OracleRecord oracleRecord) public oracles;
+    mapping(address token => OracleRecord oracleRecord) public fallbacks;
 
     // Initializer
     // ------------------------------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
         if (decimals == 0) {
             revert PriceFeedInvalidDecimalsError();
         }
-        OracleRecordV2 memory newOracle = OracleRecordV2({
+        OracleRecord memory newOracle = OracleRecord({
             oracleAddress: _oracle,
             providerType: _type,
             timeoutSeconds: _timeoutSeconds,
@@ -99,7 +99,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
      */
     function fetchPrice(address _token) public view virtual returns (uint256) {
         // Tries fetching the price from the oracle
-        OracleRecordV2 memory oracle = oracles[_token];
+        OracleRecord memory oracle = oracles[_token];
         uint256 price = _fetchOracleScaledPrice(oracle);
         if (price != 0) {
             return oracle.isEthIndexed ? _calcEthIndexedPrice(price) : price;
@@ -125,7 +125,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
         return 0;
     }
 
-    function _fetchOracleScaledPrice(OracleRecordV2 memory oracle)
+    function _fetchOracleScaledPrice(OracleRecord memory oracle)
         internal
         view
         returns (uint256)
@@ -232,7 +232,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
      * updates need to come through the timelock contract.
      */
     function _requireOwnerOrTimelock(address _token, bool _isFallback) internal view {
-        OracleRecordV2 storage record = _isFallback ? fallbacks[_token] : oracles[_token];
+        OracleRecord storage record = _isFallback ? fallbacks[_token] : oracles[_token];
         if (record.oracleAddress == address(0)) {
             _checkOwner();
         } else if (msg.sender != timelockAddress) {
