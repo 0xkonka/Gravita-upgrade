@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
@@ -15,6 +14,10 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
     address public borrowerOperationsAddress;
     address public stabilityPoolAddress;
     address public trenBoxManagerAddress;
+
+    mapping(address asset => bool blocked) public emergencyStopMintingCollateral;
+
+    mapping(address smartContract => bool whitelisted) public whitelistedContracts;
 
     constructor(address initialOwner) ERC20(NAME, SYMBOL) ERC20Permit(NAME) Ownable(initialOwner) { }
 
@@ -36,13 +39,9 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         trenBoxManagerAddress = _trenBoxManagerAddress;
     }
 
-    mapping(address => bool) public emergencyStopMintingCollateral;
-
-    // stores SC addresses that are allowed to mint/burn the token (AMO strategies, L2 suppliers)
-    mapping(address => bool) public whitelistedContracts;
-
     function emergencyStopMinting(address _asset, bool status) external override onlyOwner {
         emergencyStopMintingCollateral[_asset] = status;
+
         emit EmergencyStopMintingCollateral(_asset, status);
     }
 
