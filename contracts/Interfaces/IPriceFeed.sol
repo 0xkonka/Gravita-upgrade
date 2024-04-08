@@ -41,30 +41,6 @@ interface IPriceFeed {
         bool isEthIndexed;
     }
 
-    /// @dev Deprecated, but retained for upgradeability
-    struct OracleRecord {
-        address chainLinkOracle;
-        uint256 maxDeviationBetweenRounds;
-        bool exists;
-        bool isFeedWorking;
-        bool isEthIndexed;
-    }
-
-    /// @dev Deprecated, but retained for upgradeability
-    struct PriceRecord {
-        uint256 scaledPrice;
-        uint256 timestamp;
-    }
-
-    /// @dev Deprecated, but retained for upgradeability
-    struct FeedResponse {
-        uint80 roundId;
-        int256 answer;
-        uint256 timestamp;
-        bool success;
-        uint8 decimals;
-    }
-
     // Custom Errors
     // --------------------------------------------------------------------------------------------------
 

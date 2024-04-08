@@ -26,20 +26,11 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
     /// @dev Used to convert an oracle price answer to an 18-digit precision uint
     uint256 public constant TARGET_DIGITS = 18;
 
-    /// @dev Deprecated, but retained for upgradeability
-    uint256 private constant RESPONSE_TIMEOUT = 25 hours;
-    uint256 private constant MAX_PRICE_DEVIATION_BETWEEN_ROUNDS_LOWER_LIMIT = 0.2 ether;
-    uint256 private constant MAX_PRICE_DEVIATION_BETWEEN_ROUNDS_UPPER_LIMIT = 0.5 ether;
-
     // State
     // ------------------------------------------------------------------------------------------------------------
 
-    /// @dev Deprecated, but retained for upgradeability
-    mapping(address => OracleRecord) private oracleRecords;
-    mapping(address => PriceRecord) private priceRecords;
-
-    mapping(address => OracleRecordV2) public oracles;
-    mapping(address => OracleRecordV2) public fallbacks;
+    mapping(address token => OracleRecordV2 oracleRecord) public oracles;
+    mapping(address token => OracleRecordV2 oracleRecord) public fallbacks;
 
     // Initializer
     // ------------------------------------------------------------------------------------------------------
