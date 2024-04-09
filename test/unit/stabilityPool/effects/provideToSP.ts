@@ -154,7 +154,10 @@ export default function shouldBehaveLikeCanProvideToSP(): void {
           assets: [assetAddress],
           amount: 0n,
         })
-      ).to.be.rejectedWith("StabilityPool: Amount must be non-zero");
+      ).to.be.revertedWithCustomError(
+        this.contracts.stabilityPool,
+        "StabilityPool__AmountMustBeNonZero"
+      );
     });
 
     it("when user has insufficient debtToken balance", async function () {
