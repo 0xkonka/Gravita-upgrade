@@ -91,5 +91,4 @@ export default function shouldBehaveLikeCanSetAddresses(): void {
         .withArgs(notOwner.address);
     });
   });
-  8;
 }

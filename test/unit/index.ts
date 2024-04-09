@@ -11,6 +11,7 @@ import { testDebtToken } from "./debtToken/DebtToken";
 import { testDefaultPool } from "./defaultPool/DefaultPool";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testFeeCollector } from "./feeCollector/FeeCollector";
+import { testFlashLoan } from "./flashLoan/FlashLoan";
 import { testPriceFeed } from "./priceFeed/PriceFeed";
 import { testSortedTrenBoxes } from "./sortedTrenBoxes/SortedTrenBoxes";
 import { testStabilityPool } from "./stabilityPool/StabilityPool";
@@ -77,6 +78,7 @@ describe("Unit tests", function () {
   testFeeCollector();
   testStabilityPool();
   testTrenBoxManagerOperations();
+  testFlashLoan();
   testTimelock();
   testTrenMathTester();
 });

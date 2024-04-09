@@ -14,6 +14,7 @@ import type {
   DefaultPool,
   ERC20,
   FeeCollector,
+  FlashLoan,
   GasPool,
   IPriceFeed,
   PriceFeed,
@@ -27,8 +28,10 @@ import type {
 } from "../../types";
 import {
   ERC20Test,
+  FlashLoanTester,
   MockAggregator,
   MockApi3Proxy,
+  MockUniswapRouterV3,
   TrenMathTester,
 } from "../../types/contracts/TestContracts";
 
@@ -57,6 +60,7 @@ export interface Contracts {
   debtToken: DebtToken;
   defaultPool: DefaultPool;
   feeCollector: FeeCollector;
+  flashLoan: FlashLoan;
   gasPool: GasPool;
   priceFeed: IPriceFeed;
   sortedTrenBoxes: SortedTrenBoxes;
@@ -384,6 +388,8 @@ export interface TestContracts {
   mockAggregator: MockAggregator;
   mockApi3: MockApi3Proxy;
   priceFeedTestnet: PriceFeedTestnet;
+  flashLoanTester: FlashLoanTester;
+  mockRouter: MockUniswapRouterV3;
   trenMathTester: TrenMathTester;
 }
 
