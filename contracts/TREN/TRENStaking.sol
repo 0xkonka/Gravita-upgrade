@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { PausableUpgradeable } from
@@ -22,6 +22,7 @@ contract TRENStaking is
     BaseMath,
     ReentrancyGuardUpgradeable
 {
+    using SafeERC20 for IERC20;
     // ------------------------------------------- State ------------------------------------------
 
     string public constant NAME = "TRENStaking";
@@ -132,7 +133,7 @@ contract TRENStaking is
 
         emit TotalTRENStakedUpdated(totalTRENStaked);
 
-        trenToken.transferFrom(msg.sender, address(this), _TRENamount);
+        trenToken.safeTransferFrom(msg.sender, address(this), _TRENamount);
 
         emit StakeUpdated(msg.sender, newStake);
     }
@@ -165,7 +166,7 @@ contract TRENStaking is
 
             emit TotalTRENStakedUpdated(totalTRENStaked);
 
-            trenToken.transfer(msg.sender, trenToWithdraw);
+            trenToken.safeTransfer(msg.sender, trenToWithdraw);
 
             emit StakeUpdated(msg.sender, newStake);
         }
@@ -257,7 +258,7 @@ contract TRENStaking is
     }
 
     function _sendAsset(address _receiver, address _asset, uint256 _amount) private {
-        IERC20(_asset).transfer(_receiver, _amount);
+        IERC20(_asset).safeTransfer(_receiver, _amount);
     }
 
     function checkAssetGain(address _asset) private {
