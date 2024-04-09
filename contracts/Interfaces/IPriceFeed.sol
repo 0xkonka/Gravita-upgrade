@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.23;
 
-/*
-* @dev from
-https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol
+/**
+ * @dev from
+ * https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol
  */
 interface ChainlinkAggregatorV3Interface {
     function decimals() external view returns (uint8);
@@ -33,7 +33,7 @@ interface IPriceFeed {
     // Structs
     // --------------------------------------------------------------------------------------------------------
 
-    struct OracleRecordV2 {
+    struct OracleRecord {
         address oracleAddress;
         ProviderType providerType;
         uint256 timeoutSeconds;
@@ -41,38 +41,14 @@ interface IPriceFeed {
         bool isEthIndexed;
     }
 
-    /// @dev Deprecated, but retained for upgradeability
-    struct OracleRecord {
-        address chainLinkOracle;
-        uint256 maxDeviationBetweenRounds;
-        bool exists;
-        bool isFeedWorking;
-        bool isEthIndexed;
-    }
-
-    /// @dev Deprecated, but retained for upgradeability
-    struct PriceRecord {
-        uint256 scaledPrice;
-        uint256 timestamp;
-    }
-
-    /// @dev Deprecated, but retained for upgradeability
-    struct FeedResponse {
-        uint80 roundId;
-        int256 answer;
-        uint256 timestamp;
-        bool success;
-        uint8 decimals;
-    }
-
     // Custom Errors
     // --------------------------------------------------------------------------------------------------
 
-    error PriceFeed__ExistingOracleRequired();
-    error PriceFeed__InvalidDecimalsError();
-    error PriceFeed__InvalidOracleResponseError(address token);
-    error PriceFeed__TimelockOnlyError();
-    error PriceFeed__UnknownAssetError();
+    error PriceFeedExistingOracleRequired();
+    error PriceFeedInvalidDecimalsError();
+    error PriceFeedInvalidOracleResponseError(address token);
+    error PriceFeedTimelockOnlyError();
+    error PriceFeedUnknownAssetError();
 
     // Events
     // ---------------------------------------------------------------------------------------------------------

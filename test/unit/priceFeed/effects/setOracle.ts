@@ -65,7 +65,7 @@ export default function shouldBehaveLikeCanSetOracle(): void {
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
-        "PriceFeed__ExistingOracleRequired"
+        "PriceFeedExistingOracleRequired"
       );
     });
 
@@ -86,7 +86,7 @@ export default function shouldBehaveLikeCanSetOracle(): void {
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
-        "PriceFeed__InvalidDecimalsError"
+        "PriceFeedInvalidDecimalsError"
       );
     });
 
@@ -107,7 +107,7 @@ export default function shouldBehaveLikeCanSetOracle(): void {
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
-        "PriceFeed__InvalidOracleResponseError"
+        "PriceFeedInvalidOracleResponseError"
       );
     });
 
@@ -128,7 +128,7 @@ export default function shouldBehaveLikeCanSetOracle(): void {
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
-        "PriceFeed__InvalidOracleResponseError"
+        "PriceFeedInvalidOracleResponseError"
       );
     });
 
@@ -225,7 +225,7 @@ export default function shouldBehaveLikeCanSetOracle(): void {
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
-        "PriceFeed__TimelockOnlyError"
+        "PriceFeedTimelockOnlyError"
       );
     });
 
@@ -244,7 +244,7 @@ export default function shouldBehaveLikeCanSetOracle(): void {
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
-        "PriceFeed__TimelockOnlyError"
+        "PriceFeedTimelockOnlyError"
       );
     });
 
