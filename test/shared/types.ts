@@ -377,7 +377,7 @@ export interface TestUtils {
 
 export interface TestContracts {
   erc20: ERC20Test;
-  usdc: ERC20Test;
+  erc20_with_6_decimals: ERC20Test;
   mockAggregator: MockAggregator;
   mockApi3: MockApi3Proxy;
   priceFeedTestnet: PriceFeedTestnet;
