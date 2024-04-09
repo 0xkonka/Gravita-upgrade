@@ -21,7 +21,6 @@ contract AdminContract is IAdminContract, UUPSUpgradeable, OwnableUpgradeable, A
 
     uint256 public constant DECIMAL_PRECISION = 1 ether;
     uint256 public constant _100pct = 1 ether; // 1e18 == 100%
-    
     uint256 public constant BORROWING_FEE_DEFAULT = 0.005 ether; // 0.5%
     uint256 public constant CCR_DEFAULT = 1.5 ether; // 150%
     uint256 public constant MCR_DEFAULT = 1.1 ether; // 110%

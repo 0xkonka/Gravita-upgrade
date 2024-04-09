@@ -512,9 +512,7 @@ contract BorrowerOperations is
     // Send asset to Active Pool and increase its recorded asset balance
     function _activePoolAddColl(address _asset, uint256 _amount) internal {
         IActivePool(activePool).receivedERC20(_asset, _amount);
-        IERC20(_asset).safeTransferFrom(
-            msg.sender, activePool, _amount
-        );
+        IERC20(_asset).safeTransferFrom(msg.sender, activePool, _amount);
     }
 
     // Issue the specified amount of debt tokens to _account and increases the total active debt

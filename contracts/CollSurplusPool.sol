@@ -66,9 +66,7 @@ contract CollSurplusPool is UUPSUpgradeable, OwnableUpgradeable, ICollSurplusPoo
         mapping(address => uint256) storage userBalance = userBalances[_account];
         uint256 claimableCollEther = userBalance[_asset];
 
-        require(
-            claimableCollEther != 0, "CollSurplusPool: No collateral available to claim"
-        );
+        require(claimableCollEther != 0, "CollSurplusPool: No collateral available to claim");
 
         userBalance[_asset] = 0;
         emit CollBalanceUpdated(_account, 0);
