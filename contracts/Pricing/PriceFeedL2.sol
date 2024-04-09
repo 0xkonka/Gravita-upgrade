@@ -36,7 +36,7 @@ contract PriceFeedL2 is IPriceFeedL2, PriceFeed {
         if (sequencerUptimeFeedAddress == address(0)) {
             _checkOwner();
         } else if (msg.sender != timelockAddress) {
-            revert PriceFeedTimelockOnlyError();
+            revert PriceFeed__TimelockOnlyError();
         }
 
         sequencerUptimeFeedAddress = _sequencerUptimeFeedAddress;
