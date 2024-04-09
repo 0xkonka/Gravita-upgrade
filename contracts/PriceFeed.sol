@@ -126,8 +126,8 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
     }
 
     function _fetchOracleScaledPrice(OracleRecord memory oracle) internal view returns (uint256) {
-        uint256 oraclePrice;
-        uint256 priceTimestamp;
+        uint256 oraclePrice = 0;
+        uint256 priceTimestamp = 0;
         if (oracle.oracleAddress == address(0)) {
             revert PriceFeedUnknownAssetError();
         }
