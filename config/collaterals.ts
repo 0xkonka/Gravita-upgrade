@@ -68,6 +68,6 @@ export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
       minNetDebt: parseEther("1800"),
       gasCompensation: parseEther("300"),
       mintCap: parseEther("2000000"),
-    }
+    },
   ],
 } as const;

@@ -12,7 +12,8 @@ if (typeof INFURA_KEY === "undefined") {
 const ALCHEMY_KEY = process.env.ALCHEMY_API_KEY;
 
 const infuraUrl = (network: string): string => `https://${network}.infura.io/v3/${INFURA_KEY}`;
-const alchemyUrl = (network: string): string => `https://eth-${network}.g.alchemy.com/v2/${ALCHEMY_KEY}`;
+const alchemyUrl = (network: string): string =>
+  `https://eth-${network}.g.alchemy.com/v2/${ALCHEMY_KEY}`;
 
 /**
  * All supported network names

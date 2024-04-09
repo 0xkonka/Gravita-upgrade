@@ -18,6 +18,7 @@ import { loadTestFixture } from "./testContracts.fixture";
 import { testTimelock } from "./timelock/Timelock";
 import { testTrenBoxManager } from "./trenBoxManager/TrenBoxManager";
 import { testTrenBoxManagerOperations } from "./trenBoxManagerOperations/TrenBoxManagerOperations";
+import { testTrenMathTester } from "./trenMathTester/TrenMathTester";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -77,4 +78,5 @@ describe("Unit tests", function () {
   testStabilityPool();
   testTrenBoxManagerOperations();
   testTimelock();
+  testTrenMathTester();
 });
