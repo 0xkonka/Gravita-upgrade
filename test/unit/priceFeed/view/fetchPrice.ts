@@ -38,7 +38,7 @@ export default function shouldHaveFetchPrice(): void {
         this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address)
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
-        "PriceFeed__UnknownAssetError"
+        "PriceFeedUnknownAssetError"
       );
     });
   });
@@ -169,7 +169,7 @@ export default function shouldHaveFetchPrice(): void {
           this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address)
         ).to.be.revertedWithCustomError(
           this.redeployedContracts.priceFeed,
-          "PriceFeed__InvalidOracleResponseError"
+          "PriceFeedInvalidOracleResponseError"
         );
       });
     });
@@ -245,7 +245,7 @@ export default function shouldHaveFetchPrice(): void {
           this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address)
         ).to.be.revertedWithCustomError(
           this.redeployedContracts.priceFeed,
-          "PriceFeed__InvalidOracleResponseError"
+          "PriceFeedInvalidOracleResponseError"
         );
       });
     });

@@ -9,7 +9,11 @@ if (typeof INFURA_KEY === "undefined") {
   console.log(`INFURA_API_KEY must be a defined environment variable`);
 }
 
+const ALCHEMY_KEY = process.env.ALCHEMY_API_KEY;
+
 const infuraUrl = (network: string): string => `https://${network}.infura.io/v3/${INFURA_KEY}`;
+const alchemyUrl = (network: string): string =>
+  `https://eth-${network}.g.alchemy.com/v2/${ALCHEMY_KEY}`;
 
 /**
  * All supported network names
@@ -63,16 +67,16 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   // ETHEREUM
   [NetworkName.MAINNET]: {
     chainId: 1,
-    url: infuraUrl("mainnet"),
+    url: alchemyUrl("mainnet"),
   },
   [NetworkName.GOERLI]: {
     chainId: 5,
-    url: infuraUrl("goerli"),
+    url: alchemyUrl("goerli"),
     isTestnet: true,
   },
   [NetworkName.SEPOLIA]: {
-    chainId: 11_155_111,
-    url: infuraUrl("sepolia"),
+    chainId: 11155111,
+    url: alchemyUrl("sepolia"),
     isTestnet: true,
   },
 

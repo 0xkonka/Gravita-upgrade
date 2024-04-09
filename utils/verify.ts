@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { getImplementationAddress } from "@openzeppelin/upgrades-core";
 import type { TransactionResponse } from "ethers";
-import { run } from "hardhat";
+import { ethers, run } from "hardhat";
 
 import { delayLog } from "./misc";
 
@@ -29,6 +30,7 @@ interface VerifyContractParams {
   contractAddress: string;
   args?: any[];
   contractPath?: string;
+  isUpgradeable?: boolean;
   delay?: number;
 }
 
@@ -42,7 +44,8 @@ export async function verifyContract({
   contractAddress,
   args = [],
   contractPath,
-  delay = 60_000,
+  isUpgradeable = false,
+  delay = 20_000,
 }: VerifyContractParams): Promise<void> {
   await delayLog(delay);
 
@@ -57,6 +60,21 @@ export async function verifyContract({
       console.log("Already verified!");
     } else {
       console.log(error);
+    }
+  }
+
+  if (isUpgradeable) {
+    const implAddress = await getImplementationAddress(ethers.provider, contractAddress);
+    try {
+      await run("verify:verify", {
+        address: implAddress,
+      });
+    } catch (error: any) {
+      if (error.message.toLowerCase().includes("already verified")) {
+        console.log("Already verified!");
+      } else {
+        console.log(error);
+      }
     }
   }
 }

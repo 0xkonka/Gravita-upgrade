@@ -23,7 +23,8 @@
     "test:trace": "hardhat test --trace",
     "test:fulltrace": "hardhat test --fulltrace",
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain",
-    "verify": "hardhat run scripts/verify.ts --network"
+    "verify": "hardhat run scripts/verify.ts --network",
+    "slither:checklist": "slither . --checklist --show-ignored-findings > SLITHER_CHECKLIST.md"
   },
   "devDependencies": {
     "@ethersproject/bignumber": "^5.7.0",
@@ -35,6 +36,7 @@
     "@nomicfoundation/hardhat-verify": "^2.0.4",
     "@openzeppelin/contracts": "^5.0.2",
     "@openzeppelin/contracts-upgradeable": "^5.0.2",
+    "@openzeppelin/hardhat-upgrades": "^1.25.0",
     "@primitivefi/hardhat-dodoc": "^0.2.3",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@typechain/ethers-v6": "^0.5.1",

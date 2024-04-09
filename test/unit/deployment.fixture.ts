@@ -34,6 +34,8 @@ export async function loadDeploymentFixture(): Promise<Contracts> {
     deploymentSummary.FeeCollector.address
   );
 
+  const flashLoan = await ethers.getContractAt("FlashLoan", deploymentSummary.FlashLoan.address);
+
   const gasPool = await ethers.getContractAt("GasPool", deploymentSummary.GasPool.address);
 
   const priceFeed = await ethers.getContractAt(
@@ -63,10 +65,7 @@ export async function loadDeploymentFixture(): Promise<Contracts> {
     deploymentSummary.TrenBoxManagerOperations.address
   );
 
-  const lock = await ethers.getContractAt("Lock", deploymentSummary.Lock.address);
-
   return {
-    lock,
     activePool,
     adminContract,
     borrowerOperations,
@@ -74,6 +73,7 @@ export async function loadDeploymentFixture(): Promise<Contracts> {
     debtToken,
     defaultPool,
     feeCollector,
+    flashLoan,
     gasPool,
     priceFeed,
     sortedTrenBoxes,

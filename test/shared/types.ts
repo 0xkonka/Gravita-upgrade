@@ -14,9 +14,9 @@ import type {
   DefaultPool,
   ERC20,
   FeeCollector,
+  FlashLoan,
   GasPool,
   IPriceFeed,
-  Lock,
   PriceFeed,
   PriceFeedL2,
   PriceFeedTestnet,
@@ -26,7 +26,14 @@ import type {
   TrenBoxManager,
   TrenBoxManagerOperations,
 } from "../../types";
-import { ERC20Test, MockAggregator, MockApi3Proxy } from "../../types/contracts/TestContracts";
+import {
+  ERC20Test,
+  FlashLoanTester,
+  MockAggregator,
+  MockApi3Proxy,
+  MockUniswapRouterV3,
+  TrenMathTester,
+} from "../../types/contracts/TestContracts";
 
 type Fixture<T> = () => Promise<T>;
 
@@ -46,7 +53,6 @@ declare module "mocha" {
 }
 
 export interface Contracts {
-  lock: Lock;
   activePool: ActivePool;
   adminContract: AdminContract;
   borrowerOperations: BorrowerOperations;
@@ -54,6 +60,7 @@ export interface Contracts {
   debtToken: DebtToken;
   defaultPool: DefaultPool;
   feeCollector: FeeCollector;
+  flashLoan: FlashLoan;
   gasPool: GasPool;
   priceFeed: IPriceFeed;
   sortedTrenBoxes: SortedTrenBoxes;
@@ -381,6 +388,9 @@ export interface TestContracts {
   mockAggregator: MockAggregator;
   mockApi3: MockApi3Proxy;
   priceFeedTestnet: PriceFeedTestnet;
+  flashLoanTester: FlashLoanTester;
+  mockRouter: MockUniswapRouterV3;
+  trenMathTester: TrenMathTester;
 }
 
 export enum TrenBoxStatus {

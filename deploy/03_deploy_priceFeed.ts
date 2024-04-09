@@ -39,6 +39,7 @@ async function deployAndVerifyOnLayer2(
     contractPath: contractPath,
     contractAddress: deployResult.address,
     args: deployResult.args || [],
+    isUpgradeable: true,
   });
 }
 
@@ -46,24 +47,29 @@ async function deployAndVerifyOnLayer1(
   deployer: string,
   deploy: DeploymentsExtension["deploy"]
 ): Promise<void> {
-  const initialOwner = deployer;
-
-  type ConstructorParams = [AddressLike];
-  const args: ConstructorParams = [initialOwner];
-
   await preDeploy(deployer, "PriceFeed");
+
   const deployResult: DeployResult = await deploy("PriceFeed", {
     from: deployer,
-    args: args,
+    proxy: {
+      execute: {
+        init: {
+          methodName: "initialize",
+          args: [],
+        },
+      },
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
     log: true,
-    proxy: true,
+    autoMine: true,
   });
 
-  const contractPath = `contracts/Pricing/PriceFeed.sol:PriceFeed`;
+  const contractPath = `contracts/PriceFeed.sol:PriceFeed`;
   await verifyContract({
     contractPath: contractPath,
     contractAddress: deployResult.address,
     args: deployResult.args || [],
+    isUpgradeable: true,
   });
 }
 

@@ -14,6 +14,7 @@ abstract contract AddressesConfigurable is OwnableUpgradeable {
     address public debtToken;
     address public defaultPool;
     address public feeCollector;
+    address public flashLoanAddress;
     address public gasPoolAddress;
     address public trenStaking;
     address public priceFeed;
@@ -23,7 +24,6 @@ abstract contract AddressesConfigurable is OwnableUpgradeable {
     address public treasuryAddress;
     address public trenBoxManager;
     address public trenBoxManagerOperations;
-    address public flashLoanAddress;
 
     bool public isAddressSetupInitialized;
 
@@ -50,15 +50,15 @@ abstract contract AddressesConfigurable is OwnableUpgradeable {
         debtToken = _addresses[4];
         defaultPool = _addresses[5];
         feeCollector = _addresses[6];
-        gasPoolAddress = _addresses[7];
-        priceFeed = _addresses[8];
-        sortedTrenBoxes = _addresses[9];
-        stabilityPool = _addresses[10];
-        timelockAddress = _addresses[11];
-        treasuryAddress = _addresses[12];
-        trenBoxManager = _addresses[13];
-        trenBoxManagerOperations = _addresses[14];
-        flashLoanAddress = _addresses[15];
+        flashLoanAddress = _addresses[7];
+        gasPoolAddress = _addresses[8];
+        priceFeed = _addresses[9];
+        sortedTrenBoxes = _addresses[10];
+        stabilityPool = _addresses[11];
+        timelockAddress = _addresses[12];
+        treasuryAddress = _addresses[13];
+        trenBoxManager = _addresses[14];
+        trenBoxManagerOperations = _addresses[15];
 
         isAddressSetupInitialized = true;
     }

@@ -9,7 +9,7 @@ import "../Interfaces/IFlashLoanReceiver.sol";
 contract FlashLoanTester is IFlashLoanReceiver {
     address public flashLoan;
 
-    constructor(address _flashLoan) {
+    function setFlashLoanAddress(address _flashLoan) external {
         flashLoan = _flashLoan;
     }
 

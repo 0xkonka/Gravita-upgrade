@@ -34,7 +34,6 @@ contract FlashLoan is
 
     bool public isSetupInitialized;
 
-    // TODO: fix here
     function initialize() public initializer {
         address initialOwner = _msgSender();
 
@@ -44,8 +43,11 @@ contract FlashLoan is
 
     // ------------------------------------------ Set functions -----------------------------------
 
-    function setAddresses(address _stableCoin, address _swapRouter) external onlyOwner {
-        require(!isSetupInitialized, "Setup is already initialized");
+    function setInternalAddresses(address _stableCoin, address _swapRouter) external onlyOwner {
+        if (isSetupInitialized) revert FlashLoan__SetupIsInitialized();
+        if (_stableCoin == address(0) || _swapRouter == address(0)) {
+            revert FlashLoan__ZeroAddresses();
+        }
         stableCoin = _stableCoin;
         swapRouter = IUniswapRouterV3(_swapRouter);
 
@@ -65,36 +67,28 @@ contract FlashLoan is
             revert FlashLoan__AmountBeyondMax();
         }
 
-        // Mint exact amount of trenUSD
         mintTokens(_amount);
-        // Store the balance before transfering to borrower
         uint256 balanceBefore = IDebtToken(debtToken).balanceOf(address(this));
-
-        // Calculate a fee
         uint256 fee = calculateFee(_amount);
 
-        // Do the transfering of exact amount of trenUSD to borrower
         IDebtToken(debtToken).transfer(msg.sender, _amount);
 
-        // Execute function from user's contract
         IFlashLoanReceiver(msg.sender).executeOperation(_amount, fee, address(debtToken));
 
-        // Check that exact amount of trenUSD returned + fee amount
         if (IDebtToken(debtToken).balanceOf(address(this)) < balanceBefore + fee) {
             revert FlashLoan__LoanIsNotRepayable();
         }
 
-        // Burn exact amount of trenUSD
         burnTokens(_amount);
-
-        // Send fee amount to our collector
         sendFeeToCollector();
 
         emit FlashLoanExecuted(msg.sender, _amount, fee);
     }
 
-    function flashLoanBorrowRepay(address _asset) external nonReentrant {
-        // TODO: Rethink how to get calculation only only in one place
+    function flashLoanForRepay(address _asset) external nonReentrant {
+        if (!IAdminContract(adminContract).getIsActive(_asset)) {
+            revert FlashLoan__CollateralIsNotActive();
+        }
         uint256 debt = ITrenBoxManager(trenBoxManager).getTrenBoxDebt(_asset, msg.sender);
         uint256 gasCompensation = IAdminContract(adminContract).getDebtTokenGasCompensation(_asset);
         uint256 refund = IFeeCollector(feeCollector).simulateRefund(msg.sender, _asset, 1 ether);
@@ -106,7 +100,7 @@ contract FlashLoan is
 
         uint256 fee = calculateFee(netDebt);
 
-        IBorrowerOperations(borrowerOperations).closeTrenBox(_asset);
+        IBorrowerOperations(borrowerOperations).closeTrenBox(_asset); // TODO: push borr address
 
         uint256 collAmountIn = IERC20(_asset).balanceOf(address(this));
         uint256 debtTokensToGet = netDebt + fee;
@@ -122,6 +116,10 @@ contract FlashLoan is
         sendFeeToCollector();
 
         emit FlashLoanExecuted(msg.sender, netDebt, fee);
+    }
+
+    function getFlashLoanRate() external view returns (uint256) {
+        return IAdminContract(adminContract).getFlashLoanFee();
     }
 
     function authorizeUpgrade(address newImplementation) public {

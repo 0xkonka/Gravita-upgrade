@@ -295,7 +295,6 @@ contract AdminContract is IAdminContract, UUPSUpgradeable, OwnableUpgradeable, A
         emit FlashLoanFeeChanged(oldFlashLoanFee, _flashLoanFee);
     }
 
-    // TODO: Maybe add later onlyTimelock, do we need it here?
     function setMinDebtForFlashLoan(uint256 _flashLoanMinDebt) external onlyTimelock {
         uint256 oldFlashLoanMinDebt = flashLoanParams.flashLoanMinDebt;
         flashLoanParams.flashLoanMinDebt = _flashLoanMinDebt;
@@ -303,7 +302,6 @@ contract AdminContract is IAdminContract, UUPSUpgradeable, OwnableUpgradeable, A
         emit FlashLoanMinDebtChanged(oldFlashLoanMinDebt, _flashLoanMinDebt);
     }
 
-    // TODO: Maybe add later onlyTimelock, do we need it here?
     function setMaxDebtForFlashLoan(uint256 _flashLoanMaxDebt) external onlyTimelock {
         uint256 oldFlashLoanMaxDebt = flashLoanParams.flashLoanMaxDebt;
         flashLoanParams.flashLoanMaxDebt = _flashLoanMaxDebt;
