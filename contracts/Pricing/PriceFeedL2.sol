@@ -2,21 +2,10 @@
 pragma solidity ^0.8.23;
 
 import { ChainlinkAggregatorV3Interface } from "../Interfaces/IPriceFeed.sol";
+import { IPriceFeedL2 } from "../Interfaces/IPriceFeedL2.sol";
 import { PriceFeed } from "../PriceFeed.sol";
 
-contract PriceFeedL2 is PriceFeed {
-    // Custom Errors
-    // ----------------------------------------------------------------------------------------------------
-
-    error PriceFeedSequencerDown();
-    error PriceFeedSequencerGracePeriodNotOver();
-    error PriceFeedSequencerZeroAddress();
-
-    // Events
-    // -----------------------------------------------------------------------------------------------------------
-
-    event SequencerUptimeFeedUpdated(address _sequencerUptimeFeed);
-
+contract PriceFeedL2 is IPriceFeedL2, PriceFeed {
     // Constants
     // --------------------------------------------------------------------------------------------------------
 
@@ -41,7 +30,7 @@ contract PriceFeedL2 is PriceFeed {
      */
     function setSequencerUptimeFeedAddress(address _sequencerUptimeFeedAddress) external {
         if (_sequencerUptimeFeedAddress == address(0)) {
-            revert PriceFeedSequencerZeroAddress();
+            revert PriceFeedL2__SequencerZeroAddress();
         }
 
         if (sequencerUptimeFeedAddress == address(0)) {
@@ -49,6 +38,7 @@ contract PriceFeedL2 is PriceFeed {
         } else if (msg.sender != timelockAddress) {
             revert PriceFeedTimelockOnlyError();
         }
+
         sequencerUptimeFeedAddress = _sequencerUptimeFeedAddress;
         emit SequencerUptimeFeedUpdated(_sequencerUptimeFeedAddress);
     }
@@ -65,7 +55,12 @@ contract PriceFeedL2 is PriceFeed {
      *   - TrenBoxManagerOperations.batchLiquidateTrenBoxes()
      *   - TrenBoxManagerOperations.redeemCollateral()
      */
-    function fetchPrice(address _token) public view override returns (uint256) {
+    function fetchPrice(address _token)
+        public
+        view
+        override(IPriceFeedL2, PriceFeed)
+        returns (uint256)
+    {
         _checkSequencerUptimeFeed();
         return super.fetchPrice(_token);
     }
@@ -90,7 +85,7 @@ contract PriceFeedL2 is PriceFeed {
             // answer == 1 -> sequencer is down
             bool isSequencerUp = answer == 0;
             if (!isSequencerUp) {
-                revert PriceFeedSequencerDown();
+                revert PriceFeedL2__SequencerDown();
             }
 
             uint256 delay;
@@ -102,7 +97,7 @@ contract PriceFeedL2 is PriceFeed {
             }
             uint256 timeSinceSequencerUp = block.timestamp - updatedAt;
             if (timeSinceSequencerUp <= delay) {
-                revert PriceFeedSequencerGracePeriodNotOver();
+                revert PriceFeedL2__SequencerGracePeriodNotOver();
             }
         }
     }
