@@ -88,8 +88,9 @@ export default function shouldBehaveLikeCanTransfer(): void {
           this.contracts.debtToken
             .connect(this.aliceTokenHolder)
             .transfer(ethers.ZeroAddress, amountToSend)
-        ).to.be.revertedWith(
-          "DebtToken: Cannot transfer tokens directly to the token contract or the zero address"
+        ).to.be.revertedWithCustomError(
+          this.contracts.debtToken,
+          "DebtToken__CannotTransferTokensToZeroAddress"
         );
       });
     });
@@ -104,8 +105,9 @@ export default function shouldBehaveLikeCanTransfer(): void {
           this.contracts.debtToken
             .connect(this.aliceTokenHolder)
             .transfer(debtTokenAddress, amountToSend)
-        ).to.be.revertedWith(
-          "DebtToken: Cannot transfer tokens directly to the token contract or the zero address"
+        ).to.be.revertedWithCustomError(
+          this.contracts.debtToken,
+          "DebtToken__CannotTransferTokensToTokenContract"
         );
       });
     });

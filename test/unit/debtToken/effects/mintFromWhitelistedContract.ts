@@ -61,7 +61,12 @@ export default function shouldBehaveLikeCanMintFromWhitelistedContract(): void {
         this.contracts.debtToken
           .connect(notWhitelistedContract)
           .mintFromWhitelistedContract(amountToMint)
-      ).to.be.revertedWith("DebtToken: Caller is not a whitelisted SC");
+      )
+        .to.be.revertedWithCustomError(
+          this.contracts.debtToken,
+          "DebtToken__NotWhitelistedContract"
+        )
+        .withArgs(notWhitelistedContract.address);
     });
   });
 }
