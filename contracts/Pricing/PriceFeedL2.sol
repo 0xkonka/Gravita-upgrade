@@ -21,8 +21,7 @@ contract PriceFeedL2 is PriceFeed {
     // --------------------------------------------------------------------------------------------------------
 
     /// @dev after sequencer comes back up, wait for up to X seconds for openTrenBox, adjustTrenBox
-    /// &
-    /// closeTrenBox
+    /// & closeTrenBox
     uint256 public constant SEQUENCER_BORROWING_DELAY_SECONDS = 3600;
 
     /// @dev after sequencer comes back up, wait for up to X seconds for redemptions & liquidations
@@ -38,8 +37,7 @@ contract PriceFeedL2 is PriceFeed {
 
     /**
      * @dev Requires msg.sender to be the contract owner when the sequencer is first set. Subsequent
-     * updates need to come
-     *     through the timelock contract.
+     * updates need to come through the timelock contract.
      */
     function setSequencerUptimeFeedAddress(address _sequencerUptimeFeedAddress) external {
         if (sequencerUptimeFeedAddress == address(0)) {
@@ -56,12 +54,12 @@ contract PriceFeedL2 is PriceFeed {
 
     /**
      * @dev Callers:
-     *     - BorrowerOperations.openTrenBox()
-     *     - BorrowerOperations.adjustTrenBox()
-     *     - BorrowerOperations.closeTrenBox()
-     *     - TrenBoxManagerOperations.liquidateTrenBoxes()
-     *     - TrenBoxManagerOperations.batchLiquidateTrenBoxes()
-     *     - TrenBoxManagerOperations.redeemCollateral()
+     *   - BorrowerOperations.openTrenBox()
+     *   - BorrowerOperations.adjustTrenBox()
+     *   - BorrowerOperations.closeTrenBox()
+     *   - TrenBoxManagerOperations.liquidateTrenBoxes()
+     *   - TrenBoxManagerOperations.batchLiquidateTrenBoxes()
+     *   - TrenBoxManagerOperations.redeemCollateral()
      */
     function fetchPrice(address _token) public view override returns (uint256) {
         _checkSequencerUptimeFeed();
