@@ -62,6 +62,11 @@ export async function loadTestFixture(): Promise<{
 
   const erc20: ERC20Test = (await ERC20Factory.connect(deployer).deploy(...args)) as ERC20Test;
   await erc20.waitForDeployment();
+  await erc20.setDecimals(6);
+
+  const usdc: ERC20Test = (await ERC20Factory.connect(deployer).deploy(...args)) as ERC20Test;
+  await usdc.waitForDeployment();
+  await usdc.setDecimals(6);
 
   const MockAggregatorFactory: MockAggregator__factory = (await ethers.getContractFactory(
     "MockAggregator"
@@ -95,6 +100,7 @@ export async function loadTestFixture(): Promise<{
   return {
     testContracts: {
       erc20,
+      usdc,
       mockAggregator,
       mockApi3,
       priceFeedTestnet,
