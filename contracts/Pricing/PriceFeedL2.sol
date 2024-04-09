@@ -9,8 +9,8 @@ contract PriceFeedL2 is PriceFeed {
     // Custom Errors
     // ----------------------------------------------------------------------------------------------------
 
-    error PriceFeed__SequencerDown();
-    error PriceFeed__SequencerGracePeriodNotOver();
+    error PriceFeedSequencerDown();
+    error PriceFeedSequencerGracePeriodNotOver();
 
     // Events
     // -----------------------------------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ contract PriceFeedL2 is PriceFeed {
             // answer == 1 -> sequencer is down
             bool isSequencerUp = answer == 0;
             if (!isSequencerUp) {
-                revert PriceFeed__SequencerDown();
+                revert PriceFeedSequencerDown();
             }
 
             uint256 delay;
@@ -100,7 +100,7 @@ contract PriceFeedL2 is PriceFeed {
             }
             uint256 timeSinceSequencerUp = block.timestamp - updatedAt;
             if (timeSinceSequencerUp <= delay) {
-                revert PriceFeed__SequencerGracePeriodNotOver();
+                revert PriceFeedSequencerGracePeriodNotOver();
             }
         }
     }
