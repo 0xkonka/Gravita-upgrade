@@ -185,7 +185,8 @@ contract TRENStaking is
             assetsList.push(_asset);
         }
 
-        uint256 assetFeePerTRENStaked = calculateFeePerTRENStaked(_assetFee);
+        uint256 assetFeePerTRENStaked;
+        if (totalTRENStaked > 0) assetFeePerTRENStaked = calculateFeePerTRENStaked(_assetFee);
         assetsFee[_asset] += assetFeePerTRENStaked;
 
         emit AssetFeeUpdated(_asset, assetsFee[_asset]);
@@ -196,7 +197,10 @@ contract TRENStaking is
         onlyFeeCollector
         isPaused(debtToken, _debtTokenFee)
     {
-        uint256 debtTokenFeePerTRENStaked = calculateFeePerTRENStaked(_debtTokenFee);
+        uint256 debtTokenFeePerTRENStaked;
+        if (totalTRENStaked > 0) {
+            debtTokenFeePerTRENStaked = calculateFeePerTRENStaked(_debtTokenFee);
+        }
         totalDebtTokenFee += debtTokenFeePerTRENStaked;
 
         emit TotalDebtTokenFeeUpdated(totalDebtTokenFee);
@@ -215,18 +219,6 @@ contract TRENStaking is
     }
 
     // ------------------------------------------ Private functions ------------------------------
-
-    function _getPendingAssetGain(address _asset, address _user) private view returns (uint256) {
-        uint256 assetFeeSnapshot = snapshots[_user].assetsFeeSnapshot[_asset];
-        uint256 assetGain =
-            (stakes[_user] * (assetsFee[_asset] - assetFeeSnapshot)) / DECIMAL_PRECISION;
-        return assetGain;
-    }
-
-    function _getPendingDebtTokenGain(address _user) private view returns (uint256) {
-        uint256 debtTokenFeeSnapshot = snapshots[_user].debtTokenFeeSnapshot;
-        return (stakes[_user] * (totalDebtTokenFee - debtTokenFeeSnapshot)) / DECIMAL_PRECISION;
-    }
 
     function _updateUserSnapshots(address _asset, address _user) private {
         snapshots[_user].assetsFeeSnapshot[_asset] = assetsFee[_asset];
@@ -270,10 +262,16 @@ contract TRENStaking is
     }
 
     function calculateFeePerTRENStaked(uint256 _feeAmount) private view returns (uint256) {
-        if (totalTRENStaked > 0) {
-            return _feeAmount = (_feeAmount * DECIMAL_PRECISION) / totalTRENStaked;
-        } else {
-            return 0;
-        }
+        return (_feeAmount * DECIMAL_PRECISION) / totalTRENStaked;
+    }
+
+    function _getPendingAssetGain(address _asset, address _user) private view returns (uint256) {
+        uint256 assetFeeSnapshot = snapshots[_user].assetsFeeSnapshot[_asset];
+        return (stakes[_user] * (assetsFee[_asset] - assetFeeSnapshot)) / DECIMAL_PRECISION;
+    }
+
+    function _getPendingDebtTokenGain(address _user) private view returns (uint256) {
+        uint256 debtTokenFeeSnapshot = snapshots[_user].debtTokenFeeSnapshot;
+        return (stakes[_user] * (totalDebtTokenFee - debtTokenFeeSnapshot)) / DECIMAL_PRECISION;
     }
 }
