@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { ChainlinkAggregatorV3Interface } from "../Interfaces/IPriceFeed.sol";
@@ -11,6 +10,7 @@ contract PriceFeedL2 is PriceFeed {
 
     error PriceFeedSequencerDown();
     error PriceFeedSequencerGracePeriodNotOver();
+    error PriceFeedSequencerZeroAddress();
 
     // Events
     // -----------------------------------------------------------------------------------------------------------
@@ -40,6 +40,10 @@ contract PriceFeedL2 is PriceFeed {
      * updates need to come through the timelock contract.
      */
     function setSequencerUptimeFeedAddress(address _sequencerUptimeFeedAddress) external {
+        if (_sequencerUptimeFeedAddress == address(0)) {
+            revert PriceFeedSequencerZeroAddress();
+        }
+
         if (sequencerUptimeFeedAddress == address(0)) {
             _checkOwner();
         } else if (msg.sender != timelockAddress) {
