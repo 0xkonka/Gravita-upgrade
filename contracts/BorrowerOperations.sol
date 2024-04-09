@@ -12,7 +12,6 @@ import { ReentrancyGuardUpgradeable } from
 
 import { TrenMath } from "./Dependencies/TrenMath.sol";
 import { TrenBase } from "./Dependencies/TrenBase.sol";
-import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
 
 import { IDefaultPool } from "./Interfaces/IDefaultPool.sol";
 import { IPriceFeed } from "./Interfaces/IPriceFeed.sol";
@@ -514,7 +513,7 @@ contract BorrowerOperations is
     function _activePoolAddColl(address _asset, uint256 _amount) internal {
         IActivePool(activePool).receivedERC20(_asset, _amount);
         IERC20(_asset).safeTransferFrom(
-            msg.sender, activePool, SafetyTransfer.decimalsCorrection(_asset, _amount)
+            msg.sender, activePool, _amount
         );
     }
 

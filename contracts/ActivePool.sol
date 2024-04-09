@@ -13,7 +13,6 @@ import { UUPSUpgradeable } from
 import { ReentrancyGuardUpgradeable } from
     "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
 import { Addresses } from "./Addresses.sol";
 import { IActivePool } from "./Interfaces/IActivePool.sol";
 import { IDeposit } from "./Interfaces/IDeposit.sol";
@@ -135,20 +134,19 @@ contract ActivePool is
         nonReentrant
         callerIsBorrowerOpsOrStabilityPoolOrTrenBoxMgrOrTrenBoxMgrOps
     {
-        uint256 safetyTransferAmount = SafetyTransfer.decimalsCorrection(_asset, _amount);
-        if (safetyTransferAmount == 0) return;
+        if (_amount == 0) return;
 
         uint256 newBalance = assetsBalances[_asset] - _amount;
         assetsBalances[_asset] = newBalance;
 
-        IERC20(_asset).safeTransfer(_account, safetyTransferAmount);
+        IERC20(_asset).safeTransfer(_account, _amount);
 
         if (isERC20DepositContract(_account)) {
             IDeposit(_account).receivedERC20(_asset, _amount);
         }
 
         emit ActivePoolAssetBalanceUpdated(_asset, newBalance);
-        emit AssetSent(_account, _asset, safetyTransferAmount);
+        emit AssetSent(_account, _asset, _amount);
     }
 
     function isERC20DepositContract(address _account) private view returns (bool) {

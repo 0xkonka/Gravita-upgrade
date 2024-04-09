@@ -8,7 +8,6 @@ import { OwnableUpgradeable } from
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
 import { IDefaultPool } from "./Interfaces/IDefaultPool.sol";
 import { IDeposit } from "./Interfaces/IDeposit.sol";
 
@@ -86,19 +85,18 @@ contract DefaultPool is OwnableUpgradeable, UUPSUpgradeable, IDefaultPool, Addre
         override
         callerIsTrenBoxManager
     {
-        uint256 safetyTransferAmount = SafetyTransfer.decimalsCorrection(_asset, _amount);
-        if (safetyTransferAmount == 0) {
+        if (_amount == 0) {
             return;
         }
 
         uint256 newBalance = assetsBalances[_asset] - _amount;
         assetsBalances[_asset] = newBalance;
 
-        IERC20(_asset).safeTransfer(activePool, safetyTransferAmount);
+        IERC20(_asset).safeTransfer(activePool, _amount);
         IDeposit(activePool).receivedERC20(_asset, _amount);
 
         emit DefaultPoolAssetBalanceUpdated(_asset, newBalance);
-        emit AssetSent(activePool, _asset, safetyTransferAmount);
+        emit AssetSent(activePool, _asset, _amount);
     }
 
     // --- 'require' functions ---

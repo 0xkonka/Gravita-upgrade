@@ -13,7 +13,6 @@ import { ReentrancyGuardUpgradeable } from
 
 import { BaseMath } from "../Dependencies/BaseMath.sol";
 import { TrenMath } from "../Dependencies/TrenMath.sol";
-import { SafetyTransfer } from "../Dependencies/SafetyTransfer.sol";
 
 import { IDeposit } from "../Interfaces/IDeposit.sol";
 import { ITRENStaking } from "../Interfaces/ITRENStaking.sol";
@@ -276,7 +275,6 @@ contract TRENStaking is
     }
 
     function _sendAssetGainToUser(address _asset, uint256 _assetGain) internal {
-        _assetGain = SafetyTransfer.decimalsCorrection(_asset, _assetGain);
         _sendAsset(msg.sender, _asset, _assetGain);
         emit AssetSent(_asset, msg.sender, _assetGain);
     }
