@@ -25,8 +25,6 @@ import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
 
-import { Addresses } from "./Addresses.sol";
-
 contract BorrowerOperations is
     TrenBase,
     ReentrancyGuardUpgradeable,

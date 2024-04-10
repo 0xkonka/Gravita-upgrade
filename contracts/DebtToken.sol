@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
@@ -53,6 +52,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
 
     function emergencyStopMinting(address _asset, bool status) external override onlyOwner {
         emergencyStopMintingCollateral[_asset] = status;
+
         emit EmergencyStopMintingCollateral(_asset, status);
     }
 

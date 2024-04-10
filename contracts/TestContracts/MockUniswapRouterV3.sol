@@ -30,8 +30,7 @@ contract MockUniswapRouterV3 is IUniswapRouterV3 {
         payable
         returns (uint256 amountIn)
     {
-        (address debtToken, address stableCoin, address assetToken, uint24 fee1, uint24 fee2) =
-            decodePath(params.path);
+        (address debtToken,, address assetToken, uint24 fee1, uint24 fee2) = decodePath(params.path);
 
         uint256 stableCoinsNeeded = params.amountOut * ratioStableToDebt;
         uint256 fee_1 = (stableCoinsNeeded * fee1) / FEE_DENOMINATOR;

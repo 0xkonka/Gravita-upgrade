@@ -5,7 +5,7 @@ pragma solidity ^0.8.23;
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-abstract contract AddressesConfigurable is OwnableUpgradeable {
+abstract contract ConfigurableAddresses is OwnableUpgradeable {
     address public activePool;
     address public adminContract;
     address public borrowerOperations;
@@ -34,14 +34,25 @@ abstract contract AddressesConfigurable is OwnableUpgradeable {
      */
     uint256[33] private __gap; // Goerli uses 47; Arbitrum uses 33
 
+    error ConfigurableAddresses__SetupIsInitialized();
+    error ConfigurableAddresses__ZeroAddresses(uint256 postition, address address_);
+    error ConfigurableAddresses__LengthMismatch();
+
     // Dependency setters
     // -----------------------------------------------------------------------------------------------
 
     function setAddresses(address[] calldata _addresses) external onlyOwner {
-        require(!isAddressSetupInitialized, "Setup is already initialized");
-        require(_addresses.length == 16, "Expected 16 addresses at setup");
+        if (isAddressSetupInitialized) {
+            revert ConfigurableAddresses__SetupIsInitialized();
+        }
+        if (_addresses.length != 16) {
+            revert ConfigurableAddresses__LengthMismatch();
+        }
+
         for (uint256 i = 0; i < 16; i++) {
-            require(_addresses[i] != address(0), "Invalid address");
+            if (_addresses[i] == address(0)) {
+                revert ConfigurableAddresses__ZeroAddresses(i, _addresses[i]);
+            }
         }
         activePool = _addresses[0];
         adminContract = _addresses[1];

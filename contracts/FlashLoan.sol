@@ -17,13 +17,13 @@ import { IFlashLoanReceiver } from "./Interfaces/IFlashLoanReceiver.sol";
 import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 import { IUniswapRouterV3 } from "./Interfaces/IUniswapRouterV3.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
-import { Addresses } from "./Addresses.sol";
+import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 
 contract FlashLoan is
     IFlashLoan,
     ReentrancyGuardUpgradeable,
     OwnableUpgradeable,
-    Addresses,
+    ConfigurableAddresses,
     UUPSUpgradeable
 {
     string public constant NAME = "FlashLoan";

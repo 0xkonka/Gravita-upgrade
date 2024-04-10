@@ -1,21 +1,23 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ITRENStaking } from "./Interfaces/ITRENStaking.sol";
 
-import "./Addresses.sol";
-
-contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Addresses {
+contract FeeCollector is
+    IFeeCollector,
+    UUPSUpgradeable,
+    OwnableUpgradeable,
+    ConfigurableAddresses
+{
     using SafeERC20 for IERC20;
 
     // Constants
@@ -32,8 +34,7 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
     // State
     // ------------------------------------------------------------------------------------------------------------
 
-    mapping(address => mapping(address => FeeRecord)) public feeRecords; // borrower -> asset ->
-        // fees
+    mapping(address borrower => mapping(address asset => FeeRecord feeParams)) public feeRecords;
 
     bool public constant routeToTRENStaking = false; // if true, collected fees go to stakers; if
         // false, to the treasury
@@ -195,7 +196,7 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
      */
     function handleRedemptionFee(address _asset, uint256 _amount) external onlyTrenBoxManager {
         if (_routeToTRENStaking()) {
-            ITRENStaking(trenStaking).increaseFee_Asset(_asset, _amount);
+            ITRENStaking(trenStaking).increaseFeeAsset(_asset, _amount);
         }
         emit RedemptionFeeCollected(_asset, _amount);
     }
@@ -361,12 +362,12 @@ contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Add
      */
     function _collectFee(address _borrower, address _asset, uint256 _feeAmount) internal {
         if (_feeAmount != 0) {
-            address collector = getProtocolRevenueDestination();
-            IERC20(debtToken).safeTransfer(collector, _feeAmount);
+            address destination = getProtocolRevenueDestination();
+            IERC20(debtToken).safeTransfer(destination, _feeAmount);
             if (_routeToTRENStaking()) {
-                ITRENStaking(trenStaking).increaseFee_DebtToken(_feeAmount);
+                ITRENStaking(trenStaking).increaseFeeDebtToken(_feeAmount);
             }
-            emit FeeCollected(_borrower, _asset, collector, _feeAmount);
+            emit FeeCollected(_borrower, _asset, destination, _feeAmount);
         }
     }
 

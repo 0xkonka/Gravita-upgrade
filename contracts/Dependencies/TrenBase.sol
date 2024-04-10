@@ -5,11 +5,13 @@ pragma solidity ^0.8.23;
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
+import { ConfigurableAddresses } from "./ConfigurableAddresses.sol";
+import { BaseMath } from "./BaseMath.sol";
+import { TrenMath } from "./TrenMath.sol";
 import { IActivePool } from "../Interfaces/IActivePool.sol";
 import { IDefaultPool } from "../Interfaces/IDefaultPool.sol";
 import { IAdminContract } from "../Interfaces/IAdminContract.sol";
 import { IDefaultPool } from "../Interfaces/IDefaultPool.sol";
-import { Addresses } from "../Addresses.sol";
 
 import { BaseMath } from "./BaseMath.sol";
 import { TrenMath } from "./TrenMath.sol";
@@ -19,7 +21,7 @@ import { TrenMath } from "./TrenMath.sol";
 constants and
  * common functions.
  */
-abstract contract TrenBase is BaseMath, OwnableUpgradeable, Addresses {
+abstract contract TrenBase is BaseMath, OwnableUpgradeable, ConfigurableAddresses {
     struct Colls {
         address[] tokens;
         uint256[] amounts;

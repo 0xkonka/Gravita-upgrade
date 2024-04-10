@@ -7,14 +7,19 @@ import { UUPSUpgradeable } from
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
+import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
 import { IActivePool } from "./Interfaces/IActivePool.sol";
 import { IFlashLoan } from "./Interfaces/IFlashLoan.sol";
 import { IDefaultPool } from "./Interfaces/IDefaultPool.sol";
-import { Addresses } from "./Addresses.sol";
 
-contract AdminContract is IAdminContract, UUPSUpgradeable, OwnableUpgradeable, Addresses {
+contract AdminContract is
+    IAdminContract,
+    UUPSUpgradeable,
+    OwnableUpgradeable,
+    ConfigurableAddresses
+{
     // Constants
     // --------------------------------------------------------------------------------------------------------
 

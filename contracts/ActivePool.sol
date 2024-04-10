@@ -14,7 +14,8 @@ import { ReentrancyGuardUpgradeable } from
     "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
-import { Addresses } from "./Addresses.sol";
+import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
+
 import { IActivePool } from "./Interfaces/IActivePool.sol";
 import { IDeposit } from "./Interfaces/IDeposit.sol";
 
@@ -32,7 +33,7 @@ contract ActivePool is
     UUPSUpgradeable,
     ReentrancyGuardUpgradeable,
     IActivePool,
-    Addresses
+    ConfigurableAddresses
 {
     using SafeERC20 for IERC20;
 
