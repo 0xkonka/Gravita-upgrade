@@ -9,13 +9,17 @@ import { OwnableUpgradeable } from
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ITRENStaking } from "./Interfaces/ITRENStaking.sol";
 
-import "./Addresses.sol";
-
-contract FeeCollector is IFeeCollector, UUPSUpgradeable, OwnableUpgradeable, Addresses {
+contract FeeCollector is
+    IFeeCollector,
+    UUPSUpgradeable,
+    OwnableUpgradeable,
+    ConfigurableAddresses
+{
     using SafeERC20 for IERC20;
 
     // Constants

@@ -7,7 +7,8 @@ import { OwnableUpgradeable } from
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import { Addresses } from "./Addresses.sol";
+import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
+
 import { ISortedTrenBoxes } from "./Interfaces/ISortedTrenBoxes.sol";
 import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 
@@ -52,7 +53,12 @@ calculated at runtime.
 * - Public functions with parameters have been made internal to save gas, and given an external
 wrapper function for external access
  */
-contract SortedTrenBoxes is OwnableUpgradeable, UUPSUpgradeable, ISortedTrenBoxes, Addresses {
+contract SortedTrenBoxes is
+    OwnableUpgradeable,
+    UUPSUpgradeable,
+    ISortedTrenBoxes,
+    ConfigurableAddresses
+{
     string public constant NAME = "SortedTrenBoxes";
 
     // Information for a node in the list
