@@ -6,13 +6,12 @@ import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/Saf
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import { BaseMath } from "../Dependencies/BaseMath.sol";
 import { TrenMath } from "../Dependencies/TrenMath.sol";
 
 import { ICommunityIssuance } from "../Interfaces/ICommunityIssuance.sol";
 import { IStabilityPool } from "../Interfaces/IStabilityPool.sol";
 
-contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable, BaseMath {
+contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable {
     using SafeERC20 for IERC20;
 
     string public constant NAME = "CommunityIssuance";
