@@ -81,9 +81,7 @@ export default function shouldBehaveLikeCanBurn(): void {
           this.contracts.debtToken
             .connect(this.impostor)
             .burn(this.tokenRecipient.address, amountToBurn)
-        ).to.be.revertedWith(
-          "DebtToken: Caller is neither BorrowerOperations nor TrenBoxManager nor StabilityPool"
-        );
+        ).to.be.revertedWithCustomError(this.contracts.debtToken, "DebtToken__CannotBurnTokens");
       });
     }
   );

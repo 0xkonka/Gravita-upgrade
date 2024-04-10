@@ -91,18 +91,22 @@ export default function shouldBehaveLikeCanBurnFromWhitelistedContract(): void {
   context("when caller is not whitelisted contract", function () {
     beforeEach(async function () {
       await this.contracts.debtToken.removeWhitelist(this.whitelistedContract.address);
-
-      this.previouslyWhitelistedContract = this.whitelistedContract;
     });
 
     it("reverts", async function () {
       const amountToBurn = 100n;
+      const previouslyWhitelistedContract = this.whitelistedContract;
 
       await expect(
         this.contracts.debtToken
-          .connect(this.previouslyWhitelistedContract)
+          .connect(previouslyWhitelistedContract)
           .burnFromWhitelistedContract(amountToBurn)
-      ).to.be.revertedWith("DebtToken: Caller is not a whitelisted SC");
+      )
+        .to.be.revertedWithCustomError(
+          this.contracts.debtToken,
+          "DebtToken__NotWhitelistedContract"
+        )
+        .withArgs(previouslyWhitelistedContract.address);
     });
   });
 }

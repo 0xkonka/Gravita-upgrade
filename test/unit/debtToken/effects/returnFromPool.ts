@@ -61,7 +61,7 @@ export default function shouldBehaveLikeCanReturnFromPool(): void {
         this.contracts.debtToken
           .connect(impostorCaller)
           .returnFromPool(this.pool, this.tokenHolder, 100n)
-      ).to.be.revertedWith("DebtToken: Caller is neither TrenBoxManager nor StabilityPool");
+      ).to.be.revertedWithCustomError(this.contracts.debtToken, "DebtToken__CannotReturnFromPool");
     });
   });
 
@@ -106,8 +106,9 @@ export default function shouldBehaveLikeCanReturnFromPool(): void {
             this.contracts.debtToken
               .connect(this.caller)
               .returnFromPool(this.pool, ethers.ZeroAddress, amountToReturn)
-          ).to.be.revertedWith(
-            "DebtToken: Cannot transfer tokens directly to the token contract or the zero address"
+          ).to.be.revertedWithCustomError(
+            this.contracts.debtToken,
+            "DebtToken__CannotTransferTokensToZeroAddress"
           );
         });
       });
