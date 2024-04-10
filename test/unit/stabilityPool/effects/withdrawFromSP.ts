@@ -132,7 +132,10 @@ export default function shouldBehaveLikeCanWithdrawFromSP(): void {
             },
           ],
         })
-      ).to.be.rejectedWith("StabilityPool: User must have a non-zero deposit");
+      ).to.be.revertedWithCustomError(
+        this.contracts.stabilityPool,
+        "StabilityPool__UserHasNoDeposit"
+      );
     });
   });
 }

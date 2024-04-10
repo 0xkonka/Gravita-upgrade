@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { getImplementationAddress } from "@openzeppelin/upgrades-core";
 import type { TransactionResponse } from "ethers";
-import { getImplementationAddress } from '@openzeppelin/upgrades-core'
 import { ethers, run } from "hardhat";
 
 import { delayLog } from "./misc";
@@ -64,7 +64,7 @@ export async function verifyContract({
   }
 
   if (isUpgradeable) {
-    const implAddress = await getImplementationAddress(ethers.provider, contractAddress)
+    const implAddress = await getImplementationAddress(ethers.provider, contractAddress);
     try {
       await run("verify:verify", {
         address: implAddress,

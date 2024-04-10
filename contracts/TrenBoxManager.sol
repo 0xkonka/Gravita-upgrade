@@ -57,22 +57,21 @@ contract TrenBoxManager is
     // State
     // ----------------------------------------------------------------------------------------------------------
 
-    mapping(address => uint256) public baseRate;
+    mapping(address collateral => uint256 rate) public baseRate;
 
     // The timestamp of the latest fee operation (redemption or new debt token issuance)
-    mapping(address => uint256) public lastFeeOperationTime;
+    mapping(address collateral => uint256 feeOpeartionTimestamp) public lastFeeOperationTime;
 
-    // TrenBoxes[borrower address][Collateral address]
-    mapping(address => mapping(address => TrenBox)) public TrenBoxes;
+    mapping(address borrower => mapping(address collateral => TrenBox)) public TrenBoxes;
 
-    mapping(address => uint256) public totalStakes;
+    mapping(address collateral => uint256 totalStake) public totalStakes;
 
     // Snapshot of the value of totalStakes, taken immediately after the latest liquidation
-    mapping(address => uint256) public totalStakesSnapshot;
+    mapping(address collateral => uint256 totalStake) public totalStakesSnapshot;
 
     // Snapshot of the total collateral across the ActivePool and DefaultPool, immediately after the
     // latest liquidation.
-    mapping(address => uint256) public totalCollateralSnapshot;
+    mapping(address collateral => uint256 totalCollateral) public totalCollateralSnapshot;
 
     /*
     * L_Colls and L_Debts track the sums of accumulated liquidation rewards per unit staked. During
@@ -84,19 +83,20 @@ contract TrenBoxManager is
     * Where L_Colls(0) and L_Debts(0) are snapshots of L_Colls and L_Debts for the active TrenBox
     taken at the instant the stake was made
      */
-    mapping(address => uint256) public L_Colls;
-    mapping(address => uint256) public L_Debts;
+    mapping(address collateral => uint256 accumulatedRewards) public L_Colls;
+    mapping(address collateral => uint256 accumulatedRewards) public L_Debts;
 
     // Map addresses with active trenBoxes to their RewardSnapshot
-    mapping(address => mapping(address => RewardSnapshot)) public rewardSnapshots;
+    mapping(address borrower => mapping(address collateral => RewardSnapshot)) public
+        rewardSnapshots;
 
     // Array of all active trenBox addresses - used to to compute an approximate hint off-chain, for
     // the sorted list insertion
-    mapping(address => address[]) public TrenBoxOwners;
+    mapping(address collateral => address[] owners) public TrenBoxOwners;
 
     // Error trackers for the trenBox redistribution calculation
-    mapping(address => uint256) public lastCollError_Redistribution;
-    mapping(address => uint256) public lastDebtError_Redistribution;
+    mapping(address collateral => uint256 collateralError) public lastCollError_Redistribution;
+    mapping(address collateral => uint256 debtError) public lastDebtError_Redistribution;
 
     bool public isSetupInitialized;
 

@@ -6,10 +6,16 @@ import { LOCAL_NETWORK_COLLATERALS } from "../../config/collaterals";
 import type {
   ERC20Test,
   ERC20Test__factory,
+  FlashLoanTester,
+  FlashLoanTester__factory,
   MockAggregator,
   MockAggregator__factory,
   MockApi3Proxy,
   MockApi3Proxy__factory,
+  MockUniswapRouterV3,
+  MockUniswapRouterV3__factory,
+  TrenMathTester,
+  TrenMathTester__factory,
 } from "../../types";
 import { Collaterals, TestContracts } from "../shared/types";
 
@@ -63,6 +69,30 @@ export async function loadTestFixture(): Promise<{
   const erc20: ERC20Test = (await ERC20Factory.connect(deployer).deploy(...args)) as ERC20Test;
   await erc20.waitForDeployment();
 
+  const FlashLoanTesterFactory: FlashLoanTester__factory = (await ethers.getContractFactory(
+    "FlashLoanTester"
+  )) as FlashLoanTester__factory;
+
+  type FlashLoanTesterDeployArgs = Parameters<typeof FlashLoanTesterFactory.deploy>;
+  const flashLoanTesterArgs: FlashLoanTesterDeployArgs = [];
+
+  const flashLoanTester: FlashLoanTester = (await FlashLoanTesterFactory.connect(deployer).deploy(
+    ...flashLoanTesterArgs
+  )) as FlashLoanTester;
+  await flashLoanTester.waitForDeployment();
+
+  const MockRouterFactory: MockUniswapRouterV3__factory = (await ethers.getContractFactory(
+    "MockUniswapRouterV3"
+  )) as MockUniswapRouterV3__factory;
+
+  type MockRouterDeployArgs = Parameters<typeof MockRouterFactory.deploy>;
+  const mockRouterArgs: MockRouterDeployArgs = [];
+
+  const mockRouter: MockUniswapRouterV3 = (await MockRouterFactory.connect(deployer).deploy(
+    ...mockRouterArgs
+  )) as MockUniswapRouterV3;
+  await mockRouter.waitForDeployment();
+
   const MockAggregatorFactory: MockAggregator__factory = (await ethers.getContractFactory(
     "MockAggregator"
   )) as MockAggregator__factory;
@@ -87,6 +117,18 @@ export async function loadTestFixture(): Promise<{
   )) as MockApi3Proxy;
   await mockApi3.waitForDeployment();
 
+  const TrenMathTesterFactory: TrenMathTester__factory = (await ethers.getContractFactory(
+    "TrenMathTester"
+  )) as TrenMathTester__factory;
+
+  type TrenMathTesterDeployArgs = Parameters<typeof TrenMathTesterFactory.deploy>;
+  const trenMathTesterArgs: TrenMathTesterDeployArgs = [];
+
+  const trenMathTester: TrenMathTester = (await TrenMathTesterFactory.connect(deployer).deploy(
+    ...trenMathTesterArgs
+  )) as TrenMathTester;
+  await trenMathTester.waitForDeployment();
+
   const priceFeedTestnet = await ethers.getContractAt(
     "PriceFeedTestnet",
     deploymentSummary.PriceFeedTestnet.address
@@ -98,6 +140,9 @@ export async function loadTestFixture(): Promise<{
       mockAggregator,
       mockApi3,
       priceFeedTestnet,
+      flashLoanTester,
+      mockRouter,
+      trenMathTester,
     },
     collaterals: {
       active: {

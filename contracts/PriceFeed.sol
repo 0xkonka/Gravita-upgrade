@@ -13,8 +13,8 @@ import { API3ProxyInterface } from "./Pricing/API3ProxyInterface.sol";
 
 /**
  * @title The PriceFeed contract contains a directory of oracles for fetching prices for assets
- * based on their
- *     addresses; optionally fallback oracles can also be registered in case the primary source
+ * based on their addresses;
+ * optionally fallback oracles can also be registered in case the primary source
  * fails or is stale.
  */
 contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses {
@@ -26,20 +26,11 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
     /// @dev Used to convert an oracle price answer to an 18-digit precision uint
     uint256 public constant TARGET_DIGITS = 18;
 
-    /// @dev Deprecated, but retained for upgradeability
-    uint256 private constant RESPONSE_TIMEOUT = 25 hours;
-    uint256 private constant MAX_PRICE_DEVIATION_BETWEEN_ROUNDS_LOWER_LIMIT = 0.2 ether;
-    uint256 private constant MAX_PRICE_DEVIATION_BETWEEN_ROUNDS_UPPER_LIMIT = 0.5 ether;
-
     // State
     // ------------------------------------------------------------------------------------------------------------
 
-    /// @dev Deprecated, but retained for upgradeability
-    mapping(address => OracleRecord) private oracleRecords;
-    mapping(address => PriceRecord) private priceRecords;
-
-    mapping(address => OracleRecordV2) public oracles;
-    mapping(address => OracleRecordV2) public fallbacks;
+    mapping(address token => OracleRecord oracleRecord) public oracles;
+    mapping(address token => OracleRecord oracleRecord) public fallbacks;
 
     // Initializer
     // ------------------------------------------------------------------------------------------------------
@@ -74,7 +65,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
         if (decimals == 0) {
             revert PriceFeed__InvalidDecimalsError();
         }
-        OracleRecordV2 memory newOracle = OracleRecordV2({
+        OracleRecord memory newOracle = OracleRecord({
             oracleAddress: _oracle,
             providerType: _type,
             timeoutSeconds: _timeoutSeconds,
@@ -97,7 +88,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
     // -------------------------------------------------------------------------------------------------
 
     /**
-     * @notice Fetches the price for an asset from a previosly configured oracle.
+     * @notice Fetches the price for an asset from a previously configured oracle.
      * @dev Callers:
      *     - BorrowerOperations.openTrenBox()
      *     - BorrowerOperations.adjustTrenBox()
@@ -108,7 +99,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
      */
     function fetchPrice(address _token) public view virtual returns (uint256) {
         // Tries fetching the price from the oracle
-        OracleRecordV2 memory oracle = oracles[_token];
+        OracleRecord memory oracle = oracles[_token];
         uint256 price = _fetchOracleScaledPrice(oracle);
         if (price != 0) {
             return oracle.isEthIndexed ? _calcEthIndexedPrice(price) : price;
@@ -134,13 +125,9 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
         return 0;
     }
 
-    function _fetchOracleScaledPrice(OracleRecordV2 memory oracle)
-        internal
-        view
-        returns (uint256)
-    {
-        uint256 oraclePrice;
-        uint256 priceTimestamp;
+    function _fetchOracleScaledPrice(OracleRecord memory oracle) internal view returns (uint256) {
+        uint256 oraclePrice = 0;
+        uint256 priceTimestamp = 0;
         if (oracle.oracleAddress == address(0)) {
             revert PriceFeed__UnknownAssetError();
         }
@@ -184,6 +171,8 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
             }
         } catch {
             // If call to Chainlink aggregator reverts, return a zero response
+            price = 0;
+            timestamp = 0;
         }
     }
 
@@ -202,8 +191,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
 
     /**
      * @dev Fetches the ETH:USD price (using the zero address as being the ETH asset), then
-     * multiplies it by the
-     *     indexed price. Assumes an oracle has been set for that purpose.
+     * multiplies it by the indexed price. Assumes an oracle has been set for that purpose.
      */
     function _calcEthIndexedPrice(uint256 _ethAmount) internal view returns (uint256) {
         uint256 ethPrice = fetchPrice(address(0));
@@ -212,8 +200,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
 
     /**
      * @dev Scales oracle's response up/down to Gravita's target precision; returns unaltered price
-     * if already on
-     *     target digits.
+     * if already on target digits.
      */
     function _scalePriceByDigits(
         uint256 _price,
@@ -238,11 +225,10 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
 
     /**
      * @dev Requires msg.sender to be the contract owner when the oracle is first set. Subsequent
-     * updates need to come
-     *     through the timelock contract.
+     * updates need to come through the timelock contract.
      */
     function _requireOwnerOrTimelock(address _token, bool _isFallback) internal view {
-        OracleRecordV2 storage record = _isFallback ? fallbacks[_token] : oracles[_token];
+        OracleRecord storage record = _isFallback ? fallbacks[_token] : oracles[_token];
         if (record.oracleAddress == address(0)) {
             _checkOwner();
         } else if (msg.sender != timelockAddress) {

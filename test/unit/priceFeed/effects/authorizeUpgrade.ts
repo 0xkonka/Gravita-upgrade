@@ -17,9 +17,11 @@ export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
 
   context("when caller is not an owner", function () {
     it("reverts custom error", async function () {
+      const { priceFeed } = this.redeployedContracts;
+
       await expect(
-        this.contracts.activePool.connect(this.notOwner).authorizeUpgrade(this.newImplementation)
-      ).to.be.revertedWithCustomError(this.contracts.activePool, "OwnableUnauthorizedAccount");
+        priceFeed.connect(this.notOwner).authorizeUpgrade(this.newImplementation)
+      ).to.be.revertedWithCustomError(priceFeed, "OwnableUnauthorizedAccount");
     });
   });
 }

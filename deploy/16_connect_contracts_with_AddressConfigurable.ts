@@ -15,6 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await callSetAddresses("CollSurplusPool", hre);
   await callSetAddresses("DefaultPool", hre);
   await callSetAddresses("FeeCollector", hre);
+  await callSetAddresses("FlashLoan", hre);
   await callSetAddresses("SortedTrenBoxes", hre);
   await callSetAddresses("StabilityPool", hre);
   await callSetAddresses("TrenBoxManager", hre);
@@ -31,7 +32,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.id = "connect_contracts_with_AddressesConfigurable";
-func.tags = ["ActivePool"];
+func.tags = ["AddressesConfigurable"];
 
 async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnvironment) {
   const { deployments, ethers, getChainId, getNamedAccounts } = hre;
@@ -52,6 +53,7 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
   const debtTokenDeployment = await deployments.get("DebtToken");
   const defaultPoolDeployment = await deployments.get("DefaultPool");
   const feeCollectorDeployment = await deployments.get("FeeCollector");
+  const flashLoanDeployment = await deployments.get("FlashLoan");
   const gasPoolDeployment = await deployments.get("GasPool");
 
   let priceFeedDeployment: Deployment;
@@ -87,6 +89,7 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
       debtTokenDeployment.address,
       defaultPoolDeployment.address,
       feeCollectorDeployment.address,
+      flashLoanDeployment.address,
       gasPoolDeployment.address,
       priceFeedDeployment.address,
       sortedTrenBoxesDeployment.address,
@@ -106,6 +109,7 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
   console.log(`   - DebtToken: ${chalk.grey(await contract.debtToken())}`);
   console.log(`   - DefaultPool: ${chalk.grey(await contract.defaultPool())}`);
   console.log(`   - FeeCollector: ${chalk.grey(await contract.feeCollector())}`);
+  console.log(`   - FlashLoan: ${chalk.grey(await contract.flashLoanAddress())}`);
   console.log(`   - GasPool: ${chalk.grey(await contract.gasPoolAddress())}`);
   console.log(`   - PriceFeed: ${chalk.grey(await contract.priceFeed())}`);
   console.log(`   - SortedTrenBoxes: ${chalk.grey(await contract.sortedTrenBoxes())}`);

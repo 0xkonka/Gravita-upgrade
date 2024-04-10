@@ -15,29 +15,40 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
     address public stabilityPoolAddress;
     address public trenBoxManagerAddress;
 
-    mapping(address asset => bool blocked) public emergencyStopMintingCollateral;
+    mapping(address collateral => bool isStopped) public emergencyStopMintingCollateral;
+    mapping(address whitelistedContract => bool isWhitelisted) public whitelistedContracts;
 
-    mapping(address smartContract => bool whitelisted) public whitelistedContracts;
+    modifier onlyWhitelistedContract() {
+        if (!whitelistedContracts[msg.sender]) {
+            revert DebtToken__NotWhitelistedContract(msg.sender);
+        }
+        _;
+    }
+
+    modifier shouldTransferToValidRecipent(address _recipient) {
+        if (_recipient == address(0)) {
+            revert DebtToken__CannotTransferTokensToZeroAddress();
+        } else if (_recipient == address(this)) {
+            revert DebtToken__CannotTransferTokensToTokenContract();
+        }
+        _;
+    }
+
+    modifier onlyBorrowerOperations() {
+        if (msg.sender != borrowerOperationsAddress) {
+            revert DebtToken__CallerIsNotBorrowerOperations(msg.sender);
+        }
+        _;
+    }
+
+    modifier onlyStabilityPool() {
+        if (msg.sender != stabilityPoolAddress) {
+            revert DebtToken__CallerIsNotStabilityPool(msg.sender);
+        }
+        _;
+    }
 
     constructor(address initialOwner) ERC20(NAME, SYMBOL) ERC20Permit(NAME) Ownable(initialOwner) { }
-
-    function setAddresses(
-        address _borrowerOperationsAddress,
-        address _stabilityPoolAddress,
-        address _trenBoxManagerAddress
-    )
-        public
-        onlyOwner
-    {
-        require(
-            _borrowerOperationsAddress != address(0) && _stabilityPoolAddress != address(0)
-                && _trenBoxManagerAddress != address(0),
-            "Invalid address"
-        );
-        borrowerOperationsAddress = _borrowerOperationsAddress;
-        stabilityPoolAddress = _stabilityPoolAddress;
-        trenBoxManagerAddress = _trenBoxManagerAddress;
-    }
 
     function emergencyStopMinting(address _asset, bool status) external override onlyOwner {
         emergencyStopMintingCollateral[_asset] = status;
@@ -45,25 +56,69 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         emit EmergencyStopMintingCollateral(_asset, status);
     }
 
-    function mintFromWhitelistedContract(uint256 _amount) external override {
-        _requireCallerIsWhitelistedContract();
+    function setAddresses(
+        address _borrowerOperationsAddress,
+        address _stabilityPoolAddress,
+        address _trenBoxManagerAddress
+    )
+        external
+        onlyOwner
+    {
+        if (
+            _borrowerOperationsAddress == address(0) || _stabilityPoolAddress == address(0)
+                || _trenBoxManagerAddress == address(0)
+        ) {
+            revert DebtToken__InvalidAddressToConnect();
+        }
+
+        borrowerOperationsAddress = _borrowerOperationsAddress;
+        stabilityPoolAddress = _stabilityPoolAddress;
+        trenBoxManagerAddress = _trenBoxManagerAddress;
+
+        emit ProtocolContractsAddressesSet(
+            _borrowerOperationsAddress, _stabilityPoolAddress, _trenBoxManagerAddress
+        );
+    }
+
+    function mintFromWhitelistedContract(uint256 _amount)
+        external
+        override
+        onlyWhitelistedContract
+    {
         _mint(msg.sender, _amount);
     }
 
-    function burnFromWhitelistedContract(uint256 _amount) external override {
-        _requireCallerIsWhitelistedContract();
+    function burnFromWhitelistedContract(uint256 _amount)
+        external
+        override
+        onlyWhitelistedContract
+    {
         _burn(msg.sender, _amount);
     }
 
-    function mint(address _asset, address _account, uint256 _amount) external override {
-        _requireCallerIsBorrowerOperations();
-        require(!emergencyStopMintingCollateral[_asset], "Mint is blocked on this collateral");
+    function mint(
+        address _asset,
+        address _account,
+        uint256 _amount
+    )
+        external
+        override
+        onlyBorrowerOperations
+    {
+        if (emergencyStopMintingCollateral[_asset]) {
+            revert DebtToken__MintBlockedForCollateral(_asset);
+        }
 
         _mint(_account, _amount);
     }
 
     function burn(address _account, uint256 _amount) external override {
-        _requireCallerIsBOorTrenBoxMorSP();
+        if (
+            msg.sender != borrowerOperationsAddress && msg.sender != trenBoxManagerAddress
+                && msg.sender != stabilityPoolAddress
+        ) {
+            revert DebtToken__CannotBurnTokens();
+        }
         _burn(_account, _amount);
     }
 
@@ -79,8 +134,15 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         emit WhitelistChanged(_address, false);
     }
 
-    function sendToPool(address _sender, address _poolAddress, uint256 _amount) external override {
-        _requireCallerIsStabilityPool();
+    function sendToPool(
+        address _sender,
+        address _poolAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyStabilityPool
+    {
         _transfer(_sender, _poolAddress, _amount);
     }
 
@@ -92,11 +154,11 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         external
         override
     {
-        _requireCallerIsTrenBoxMorSP();
+        if (msg.sender != stabilityPoolAddress && msg.sender != trenBoxManagerAddress) {
+            revert DebtToken__CannotReturnFromPool();
+        }
         _transfer(_poolAddress, _receiver, _amount);
     }
-
-    // --- External functions ---
 
     function transfer(
         address recipient,
@@ -104,9 +166,9 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
     )
         public
         override(IERC20, ERC20)
+        shouldTransferToValidRecipent(recipient)
         returns (bool)
     {
-        _requireValidRecipient(recipient);
         return super.transfer(recipient, amount);
     }
 
@@ -117,47 +179,9 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
     )
         public
         override(IERC20, ERC20)
+        shouldTransferToValidRecipent(recipient)
         returns (bool)
     {
-        _requireValidRecipient(recipient);
         return super.transferFrom(sender, recipient, amount);
-    }
-
-    // --- 'require' functions ---
-
-    function _requireValidRecipient(address _recipient) internal view {
-        require(
-            _recipient != address(0) && _recipient != address(this),
-            "DebtToken: Cannot transfer tokens directly to the token contract or the zero address"
-        );
-    }
-
-    function _requireCallerIsWhitelistedContract() internal view {
-        require(whitelistedContracts[msg.sender], "DebtToken: Caller is not a whitelisted SC");
-    }
-
-    function _requireCallerIsBorrowerOperations() internal view {
-        require(
-            msg.sender == borrowerOperationsAddress, "DebtToken: Caller is not BorrowerOperations"
-        );
-    }
-
-    function _requireCallerIsBOorTrenBoxMorSP() internal view {
-        require(
-            msg.sender == borrowerOperationsAddress || msg.sender == trenBoxManagerAddress
-                || msg.sender == stabilityPoolAddress,
-            "DebtToken: Caller is neither BorrowerOperations nor TrenBoxManager nor StabilityPool"
-        );
-    }
-
-    function _requireCallerIsStabilityPool() internal view {
-        require(msg.sender == stabilityPoolAddress, "DebtToken: Caller is not the StabilityPool");
-    }
-
-    function _requireCallerIsTrenBoxMorSP() internal view {
-        require(
-            msg.sender == trenBoxManagerAddress || msg.sender == stabilityPoolAddress,
-            "DebtToken: Caller is neither TrenBoxManager nor StabilityPool"
-        );
     }
 }

@@ -41,6 +41,7 @@ contract Timelock {
     error Timelock__TxStillLocked();
     error Timelock__TxExpired();
     error Timelock__TxReverted();
+    error Timelock__AdminZeroAddress();
 
     string public constant NAME = "Timelock";
 
@@ -52,7 +53,7 @@ contract Timelock {
     address public pendingAdmin;
     uint256 public delay;
 
-    mapping(bytes32 => bool) public queuedTransactions;
+    mapping(bytes32 txHash => bool isQueued) public queuedTransactions;
 
     modifier isValidDelay(uint256 _delay) virtual {
         if (_delay < MINIMUM_DELAY) {
@@ -72,7 +73,10 @@ contract Timelock {
     }
 
     constructor(uint256 _delay, address _adminAddress) isValidDelay(_delay) {
-        require(_adminAddress != address(0));
+        if (_adminAddress == address(0)) {
+            revert Timelock__AdminZeroAddress();
+        }
+
         admin = _adminAddress;
         delay = _delay;
     }

@@ -14,6 +14,7 @@ abstract contract AddressesConfigurable is OwnableUpgradeable {
     address public debtToken;
     address public defaultPool;
     address public feeCollector;
+    address public flashLoanAddress;
     address public gasPoolAddress;
     address public trenStaking;
     address public priceFeed;
@@ -38,8 +39,8 @@ abstract contract AddressesConfigurable is OwnableUpgradeable {
 
     function setAddresses(address[] calldata _addresses) external onlyOwner {
         require(!isAddressSetupInitialized, "Setup is already initialized");
-        require(_addresses.length == 15, "Expected 15 addresses at setup");
-        for (uint256 i = 0; i < 15; i++) {
+        require(_addresses.length == 16, "Expected 16 addresses at setup");
+        for (uint256 i = 0; i < 16; i++) {
             require(_addresses[i] != address(0), "Invalid address");
         }
         activePool = _addresses[0];
@@ -49,14 +50,15 @@ abstract contract AddressesConfigurable is OwnableUpgradeable {
         debtToken = _addresses[4];
         defaultPool = _addresses[5];
         feeCollector = _addresses[6];
-        gasPoolAddress = _addresses[7];
-        priceFeed = _addresses[8];
-        sortedTrenBoxes = _addresses[9];
-        stabilityPool = _addresses[10];
-        timelockAddress = _addresses[11];
-        treasuryAddress = _addresses[12];
-        trenBoxManager = _addresses[13];
-        trenBoxManagerOperations = _addresses[14];
+        flashLoanAddress = _addresses[7];
+        gasPoolAddress = _addresses[8];
+        priceFeed = _addresses[9];
+        sortedTrenBoxes = _addresses[10];
+        stabilityPool = _addresses[11];
+        timelockAddress = _addresses[12];
+        treasuryAddress = _addresses[13];
+        trenBoxManager = _addresses[14];
+        trenBoxManagerOperations = _addresses[15];
 
         isAddressSetupInitialized = true;
     }

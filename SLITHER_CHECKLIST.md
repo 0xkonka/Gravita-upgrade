@@ -13,9 +13,9 @@ Summary
  - [reentrancy-benign](#reentrancy-benign) (8 results) (Low)
  - [reentrancy-events](#reentrancy-events) (24 results) (Low)
  - [timestamp](#timestamp) (26 results) (Low)
- - [dead-code](#dead-code) (2 results) (Informational)
+ - [dead-code](#dead-code) (1 results) (Informational)
  - [low-level-calls](#low-level-calls) (1 results) (Informational)
- - [similar-names](#similar-names) (6 results) (Informational)
+ - [similar-names](#similar-names) (5 results) (Informational)
  - [constable-states](#constable-states) (2 results) (Optimization)
 ## unchecked-transfer
 Impact: High
@@ -52,6 +52,22 @@ contracts/FeeCollector.sol#L319-L341
 
 
  - [ ] ID-3
+[StabilityPool._computeRewardsPerUnitStaked(address,uint256,uint256,uint256)](contracts/StabilityPool.sol#L523-L556) performs a multiplication on the result of a division:
+	- [collGainPerUnitStaked = collateralNumerator / _totalDeposits](contracts/StabilityPool.sol#L553)
+	- [lastAssetError_Offset[assetIndex] = collateralNumerator - (collGainPerUnitStaked * _totalDeposits)](contracts/StabilityPool.sol#L554-L555)
+
+contracts/StabilityPool.sol#L523-L556
+
+
+ - [ ] ID-4
+[StabilityPool._computeTRENPerUnitStaked(uint256,uint256)](contracts/StabilityPool.sol#L441-L466) performs a multiplication on the result of a division:
+	- [TRENPerUnitStaked = TRENNumerator / _totalDeposits](contracts/StabilityPool.sol#L463)
+	- [lastTRENError = TRENNumerator - (TRENPerUnitStaked * _totalDeposits)](contracts/StabilityPool.sol#L464)
+
+contracts/StabilityPool.sol#L441-L466
+
+
+ - [ ] ID-5
 [TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L337-L425) performs a multiplication on the result of a division:
 	- [collLot = (maxRedeemableDebt * DECIMAL_PRECISION) / vars.price](contracts/TrenBoxManagerOperations.sol#L406)
 	- [collLot = (collLot * redemptionSofteningParam) / PERCENTAGE_PRECISION](contracts/TrenBoxManagerOperations.sol#L408)
@@ -59,15 +75,7 @@ contracts/FeeCollector.sol#L319-L341
 contracts/TrenBoxManagerOperations.sol#L337-L425
 
 
- - [ ] ID-4
-[StabilityPool._computeRewardsPerUnitStaked(address,uint256,uint256,uint256)](contracts/StabilityPool.sol#L522-L552) performs a multiplication on the result of a division:
-	- [collGainPerUnitStaked = collateralNumerator / _totalDeposits](contracts/StabilityPool.sol#L549)
-	- [lastAssetError_Offset[assetIndex] = collateralNumerator - (collGainPerUnitStaked * _totalDeposits)](contracts/StabilityPool.sol#L550-L551)
-
-contracts/StabilityPool.sol#L522-L552
-
-
- - [ ] ID-5
+ - [ ] ID-6
 [TrenBoxManager.redistributeDebtAndColl(address,uint256,uint256,uint256,uint256)](contracts/TrenBoxManager.sol#L525-L581) performs a multiplication on the result of a division:
 	- [debtRewardPerUnitStaked = debtNumerator / assetStakes](contracts/TrenBoxManager.sol#L564)
 	- [lastDebtError_Redistribution[_asset] = debtNumerator - (debtRewardPerUnitStaked * assetStakes)](contracts/TrenBoxManager.sol#L568-L569)
@@ -75,7 +83,7 @@ contracts/StabilityPool.sol#L522-L552
 contracts/TrenBoxManager.sol#L525-L581
 
 
- - [ ] ID-6
+ - [ ] ID-7
 [CommunityIssuance._getLastUpdateTokenDistribution()](contracts/TREN/CommunityIssuance.sol#L133-L139) performs a multiplication on the result of a division:
 	- [timePassed = (block.timestamp - lastUpdateTime) / SECONDS_IN_ONE_MINUTE](contracts/TREN/CommunityIssuance.sol#L135)
 	- [totalDistribuedSinceBeginning = trenDistribution * timePassed](contracts/TREN/CommunityIssuance.sol#L136)
@@ -83,27 +91,19 @@ contracts/TrenBoxManager.sol#L525-L581
 contracts/TREN/CommunityIssuance.sol#L133-L139
 
 
- - [ ] ID-7
+ - [ ] ID-8
 [LockedTREN.getClaimableTREN(address)](contracts/TREN/LockedTREN.sol#L112-L127) performs a multiplication on the result of a division:
 	- [claimable = ((entityRule.totalSupply / TWO_YEARS) * (block.timestamp - entityRule.createdDate)) - entityRule.claimed](contracts/TREN/LockedTREN.sol#L121-L123)
 
 contracts/TREN/LockedTREN.sol#L112-L127
 
 
- - [ ] ID-8
+ - [ ] ID-9
 [TrenBoxManager.redistributeDebtAndColl(address,uint256,uint256,uint256,uint256)](contracts/TrenBoxManager.sol#L525-L581) performs a multiplication on the result of a division:
 	- [collRewardPerUnitStaked = collNumerator / assetStakes](contracts/TrenBoxManager.sol#L563)
 	- [lastCollError_Redistribution[_asset] = collNumerator - (collRewardPerUnitStaked * assetStakes)](contracts/TrenBoxManager.sol#L566-L567)
 
 contracts/TrenBoxManager.sol#L525-L581
-
-
- - [ ] ID-9
-[StabilityPool._computeTRENPerUnitStaked(uint256,uint256)](contracts/StabilityPool.sol#L440-L465) performs a multiplication on the result of a division:
-	- [TRENPerUnitStaked = TRENNumerator / _totalDeposits](contracts/StabilityPool.sol#L462)
-	- [lastTRENError = TRENNumerator - (TRENPerUnitStaked * _totalDeposits)](contracts/StabilityPool.sol#L463)
-
-contracts/StabilityPool.sol#L440-L465
 
 
 ## incorrect-equality
@@ -141,131 +141,50 @@ contracts/TREN/LockedTREN.sol#L104-L110
 Impact: Medium
 Confidence: Medium
  - [ ] ID-14
-Reentrancy in [StabilityPool._withdrawFromSP(uint256,address[])](contracts/StabilityPool.sol#L379-L408):
+Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L480-L501):
 	External calls:
-	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L389)
-		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L414)
-	- [_payOutTRENGains(msg.sender)](contracts/StabilityPool.sol#L399)
-		- [ICommunityIssuance(communityIssuance).sendTREN(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L987)
-	- [_sendToDepositor(msg.sender,debtTokensToWithdraw)](contracts/StabilityPool.sol#L400)
-		- [IDebtToken(debtToken).returnFromPool(address(this),_depositor,debtTokenWithdrawal)](contracts/StabilityPool.sol#L924)
+	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L492)
+		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L415)
 	State variables written after the call(s):
-	- [_updateDepositAndSnapshots(msg.sender,newDeposit)](contracts/StabilityPool.sol#L404)
-		- [depositSnapshots[_depositor].S[colls[i]] = 0](contracts/StabilityPool.sol#L946)
-		- [depositorSnapshots.P = 0](contracts/StabilityPool.sol#L951)
-		- [depositorSnapshots.G = 0](contracts/StabilityPool.sol#L952)
-		- [depositorSnapshots.epoch = 0](contracts/StabilityPool.sol#L953)
-		- [depositorSnapshots.scale = 0](contracts/StabilityPool.sol#L954)
-		- [depositSnapshots[_depositor].S[asset] = currentS](contracts/StabilityPool.sol#L965)
-		- [depositorSnapshots.P = currentP](contracts/StabilityPool.sol#L972)
-		- [depositorSnapshots.G = currentG](contracts/StabilityPool.sol#L973)
-		- [depositorSnapshots.scale = currentScaleCached](contracts/StabilityPool.sol#L974)
-		- [depositorSnapshots.epoch = currentEpochCached](contracts/StabilityPool.sol#L975)
-	[StabilityPool.depositSnapshots](contracts/StabilityPool.sol#L209) can be used in cross function reentrancies:
-	- [StabilityPool.S(address,address)](contracts/StabilityPool.sol#L980-L982)
-	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L938-L978)
-	- [StabilityPool.depositSnapshots](contracts/StabilityPool.sol#L209)
-	- [StabilityPool.getCompoundedDebtTokenDeposits(address)](contracts/StabilityPool.sol#L804-L816)
-	- [StabilityPool.getDepositorGains(address,address[])](contracts/StabilityPool.sol#L660-L681)
-	- [StabilityPool.getDepositorTRENGain(address)](contracts/StabilityPool.sol#L759-L767)
-	- [_updateDepositAndSnapshots(msg.sender,newDeposit)](contracts/StabilityPool.sol#L404)
-		- [deposits[_depositor] = _newValue](contracts/StabilityPool.sol#L939)
-	[StabilityPool.deposits](contracts/StabilityPool.sol#L199) can be used in cross function reentrancies:
-	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L938-L978)
-	- [StabilityPool._withdrawFromSP(uint256,address[])](contracts/StabilityPool.sol#L379-L408)
-	- [StabilityPool.deposits](contracts/StabilityPool.sol#L199)
-	- [StabilityPool.getCompoundedDebtTokenDeposits(address)](contracts/StabilityPool.sol#L804-L816)
-	- [StabilityPool.getDepositorGains(address,address[])](contracts/StabilityPool.sol#L660-L681)
-	- [StabilityPool.getDepositorTRENGain(address)](contracts/StabilityPool.sol#L759-L767)
-	- [_sendToDepositor(msg.sender,debtTokensToWithdraw)](contracts/StabilityPool.sol#L400)
-		- [totalDebtTokenDeposits = newTotalDeposits](contracts/StabilityPool.sol#L644)
-	[StabilityPool.totalDebtTokenDeposits](contracts/StabilityPool.sol#L192) can be used in cross function reentrancies:
-	- [StabilityPool._decreaseDebtTokens(uint256)](contracts/StabilityPool.sol#L642-L646)
-	- [StabilityPool._updateG(uint256)](contracts/StabilityPool.sol#L419-L438)
-	- [StabilityPool.getTotalDebtTokenDeposits()](contracts/StabilityPool.sol#L311-L313)
-	- [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L479-L500)
+	- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L498)
+		- [P = newP](contracts/StabilityPool.sol#L626)
+	[StabilityPool.P](contracts/StabilityPool.sol#L217) can be used in cross function reentrancies:
+	- [StabilityPool.P](contracts/StabilityPool.sol#L217)
+	- [StabilityPool._getCompoundedStakeFromSnapshots(uint256,IStabilityPool.Snapshots)](contracts/StabilityPool.sol#L829-L880)
+	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L952-L992)
+	- [StabilityPool._updateG(uint256)](contracts/StabilityPool.sol#L420-L439)
+	- [StabilityPool._updateRewardSumAndProduct(address,uint256,uint256)](contracts/StabilityPool.sol#L558-L628)
+	- [StabilityPool.initialize()](contracts/StabilityPool.sol#L263-L270)
+	- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L498)
+		- [currentEpoch = currentEpochCached](contracts/StabilityPool.sol#L600)
+	[StabilityPool.currentEpoch](contracts/StabilityPool.sol#L225) can be used in cross function reentrancies:
+	- [StabilityPool._getCompoundedStakeFromSnapshots(uint256,IStabilityPool.Snapshots)](contracts/StabilityPool.sol#L829-L880)
+	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L952-L992)
+	- [StabilityPool._updateG(uint256)](contracts/StabilityPool.sol#L420-L439)
+	- [StabilityPool._updateRewardSumAndProduct(address,uint256,uint256)](contracts/StabilityPool.sol#L558-L628)
+	- [StabilityPool.currentEpoch](contracts/StabilityPool.sol#L225)
+	- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L498)
+		- [currentScale = 0](contracts/StabilityPool.sol#L602)
+		- [currentScale = currentScaleCached](contracts/StabilityPool.sol#L615)
+	[StabilityPool.currentScale](contracts/StabilityPool.sol#L222) can be used in cross function reentrancies:
+	- [StabilityPool._getCompoundedStakeFromSnapshots(uint256,IStabilityPool.Snapshots)](contracts/StabilityPool.sol#L829-L880)
+	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L952-L992)
+	- [StabilityPool._updateG(uint256)](contracts/StabilityPool.sol#L420-L439)
+	- [StabilityPool._updateRewardSumAndProduct(address,uint256,uint256)](contracts/StabilityPool.sol#L558-L628)
+	- [StabilityPool.currentScale](contracts/StabilityPool.sol#L222)
 
-contracts/StabilityPool.sol#L379-L408
+contracts/StabilityPool.sol#L480-L501
 
 
  - [ ] ID-15
-Reentrancy in [StabilityPool.provideToSP(uint256,address[])](contracts/StabilityPool.sol#L327-L362):
-	External calls:
-	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L339)
-		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L414)
-	- [_payOutTRENGains(msg.sender)](contracts/StabilityPool.sol#L347)
-		- [ICommunityIssuance(communityIssuance).sendTREN(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L987)
-	- [_sendToStabilityPool(msg.sender,_amount)](contracts/StabilityPool.sol#L351)
-		- [IDebtToken(debtToken).sendToPool(_address,address(this),_amount)](contracts/StabilityPool.sol#L877)
-	State variables written after the call(s):
-	- [_updateDepositAndSnapshots(msg.sender,newDeposit)](contracts/StabilityPool.sol#L354)
-		- [depositSnapshots[_depositor].S[colls[i]] = 0](contracts/StabilityPool.sol#L946)
-		- [depositorSnapshots.P = 0](contracts/StabilityPool.sol#L951)
-		- [depositorSnapshots.G = 0](contracts/StabilityPool.sol#L952)
-		- [depositorSnapshots.epoch = 0](contracts/StabilityPool.sol#L953)
-		- [depositorSnapshots.scale = 0](contracts/StabilityPool.sol#L954)
-		- [depositSnapshots[_depositor].S[asset] = currentS](contracts/StabilityPool.sol#L965)
-		- [depositorSnapshots.P = currentP](contracts/StabilityPool.sol#L972)
-		- [depositorSnapshots.G = currentG](contracts/StabilityPool.sol#L973)
-		- [depositorSnapshots.scale = currentScaleCached](contracts/StabilityPool.sol#L974)
-		- [depositorSnapshots.epoch = currentEpochCached](contracts/StabilityPool.sol#L975)
-	[StabilityPool.depositSnapshots](contracts/StabilityPool.sol#L209) can be used in cross function reentrancies:
-	- [StabilityPool.S(address,address)](contracts/StabilityPool.sol#L980-L982)
-	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L938-L978)
-	- [StabilityPool.depositSnapshots](contracts/StabilityPool.sol#L209)
-	- [StabilityPool.getCompoundedDebtTokenDeposits(address)](contracts/StabilityPool.sol#L804-L816)
-	- [StabilityPool.getDepositorGains(address,address[])](contracts/StabilityPool.sol#L660-L681)
-	- [StabilityPool.getDepositorTRENGain(address)](contracts/StabilityPool.sol#L759-L767)
-	- [_updateDepositAndSnapshots(msg.sender,newDeposit)](contracts/StabilityPool.sol#L354)
-		- [deposits[_depositor] = _newValue](contracts/StabilityPool.sol#L939)
-	[StabilityPool.deposits](contracts/StabilityPool.sol#L199) can be used in cross function reentrancies:
-	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L938-L978)
-	- [StabilityPool._withdrawFromSP(uint256,address[])](contracts/StabilityPool.sol#L379-L408)
-	- [StabilityPool.deposits](contracts/StabilityPool.sol#L199)
-	- [StabilityPool.getCompoundedDebtTokenDeposits(address)](contracts/StabilityPool.sol#L804-L816)
-	- [StabilityPool.getDepositorGains(address,address[])](contracts/StabilityPool.sol#L660-L681)
-	- [StabilityPool.getDepositorTRENGain(address)](contracts/StabilityPool.sol#L759-L767)
-	- [_sendToStabilityPool(msg.sender,_amount)](contracts/StabilityPool.sol#L351)
-		- [totalDebtTokenDeposits = newTotalDeposits](contracts/StabilityPool.sol#L879)
-	[StabilityPool.totalDebtTokenDeposits](contracts/StabilityPool.sol#L192) can be used in cross function reentrancies:
-	- [StabilityPool._decreaseDebtTokens(uint256)](contracts/StabilityPool.sol#L642-L646)
-	- [StabilityPool._updateG(uint256)](contracts/StabilityPool.sol#L419-L438)
-	- [StabilityPool.getTotalDebtTokenDeposits()](contracts/StabilityPool.sol#L311-L313)
-	- [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L479-L500)
-
-contracts/StabilityPool.sol#L327-L362
-
-
- - [ ] ID-16
-Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L479-L500):
-	External calls:
-	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L491)
-		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L414)
-	- [_moveOffsetCollAndDebt(_asset,_amountAdded,_debtToOffset)](contracts/StabilityPool.sol#L499)
-		- [IActivePool(activePool).decreaseDebt(_asset,_debtToOffset)](contracts/StabilityPool.sol#L636)
-		- [IDebtToken(debtToken).burn(address(this),_debtToOffset)](contracts/StabilityPool.sol#L638)
-		- [IActivePool(activePool).sendAsset(_asset,address(this),_amount)](contracts/StabilityPool.sol#L639)
-	State variables written after the call(s):
-	- [_moveOffsetCollAndDebt(_asset,_amountAdded,_debtToOffset)](contracts/StabilityPool.sol#L499)
-		- [totalDebtTokenDeposits = newTotalDeposits](contracts/StabilityPool.sol#L644)
-	[StabilityPool.totalDebtTokenDeposits](contracts/StabilityPool.sol#L192) can be used in cross function reentrancies:
-	- [StabilityPool._decreaseDebtTokens(uint256)](contracts/StabilityPool.sol#L642-L646)
-	- [StabilityPool._updateG(uint256)](contracts/StabilityPool.sol#L419-L438)
-	- [StabilityPool.getTotalDebtTokenDeposits()](contracts/StabilityPool.sol#L311-L313)
-	- [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L479-L500)
-
-contracts/StabilityPool.sol#L479-L500
-
-
- - [ ] ID-17
 Reentrancy in [TrenBoxManager.executePartialRedemption(address,address,uint256,uint256,uint256,address,address)](contracts/TrenBoxManager.sol#L378-L413):
 	External calls:
 	- [ISortedTrenBoxes(sortedTrenBoxes).reInsert(_asset,_borrower,_newNICR,_upperPartialRedemptionHint,_lowerPartialRedemptionHint)](contracts/TrenBoxManager.sol#L391-L393)
 	- [IFeeCollector(feeCollector).decreaseDebt(_borrower,_asset,paybackFraction)](contracts/TrenBoxManager.sol#L398)
 	State variables written after the call(s):
 	- [trenBox.debt = _newDebt](contracts/TrenBoxManager.sol#L401)
-	[TrenBoxManager.TrenBoxes](contracts/TrenBoxManager.sol#L66) can be used in cross function reentrancies:
-	- [TrenBoxManager.TrenBoxes](contracts/TrenBoxManager.sol#L66)
+	[TrenBoxManager.TrenBoxes](contracts/TrenBoxManager.sol#L65) can be used in cross function reentrancies:
+	- [TrenBoxManager.TrenBoxes](contracts/TrenBoxManager.sol#L65)
 	- [TrenBoxManager._closeTrenBox(address,address,ITrenBoxManager.Status)](contracts/TrenBoxManager.sol#L779-L799)
 	- [TrenBoxManager._getCurrentTrenBoxAmounts(address,address)](contracts/TrenBoxManager.sol#L674-L687)
 	- [TrenBoxManager._removeStake(address,address)](contracts/TrenBoxManager.sol#L728-L732)
@@ -286,8 +205,8 @@ Reentrancy in [TrenBoxManager.executePartialRedemption(address,address,uint256,u
 	- [TrenBoxManager.increaseTrenBoxDebt(address,address,uint256)](contracts/TrenBoxManager.sol#L992-L1005)
 	- [TrenBoxManager.setTrenBoxStatus(address,address,uint256)](contracts/TrenBoxManager.sol#L950-L960)
 	- [trenBox.coll = _newColl](contracts/TrenBoxManager.sol#L402)
-	[TrenBoxManager.TrenBoxes](contracts/TrenBoxManager.sol#L66) can be used in cross function reentrancies:
-	- [TrenBoxManager.TrenBoxes](contracts/TrenBoxManager.sol#L66)
+	[TrenBoxManager.TrenBoxes](contracts/TrenBoxManager.sol#L65) can be used in cross function reentrancies:
+	- [TrenBoxManager.TrenBoxes](contracts/TrenBoxManager.sol#L65)
 	- [TrenBoxManager._closeTrenBox(address,address,ITrenBoxManager.Status)](contracts/TrenBoxManager.sol#L779-L799)
 	- [TrenBoxManager._getCurrentTrenBoxAmounts(address,address)](contracts/TrenBoxManager.sol#L674-L687)
 	- [TrenBoxManager._removeStake(address,address)](contracts/TrenBoxManager.sol#L728-L732)
@@ -309,8 +228,8 @@ Reentrancy in [TrenBoxManager.executePartialRedemption(address,address,uint256,u
 	- [TrenBoxManager.setTrenBoxStatus(address,address,uint256)](contracts/TrenBoxManager.sol#L950-L960)
 	- [_updateStakeAndTotalStakes(_asset,_borrower)](contracts/TrenBoxManager.sol#L403)
 		- [trenBox.stake = newStake](contracts/TrenBoxManager.sol#L745)
-	[TrenBoxManager.TrenBoxes](contracts/TrenBoxManager.sol#L66) can be used in cross function reentrancies:
-	- [TrenBoxManager.TrenBoxes](contracts/TrenBoxManager.sol#L66)
+	[TrenBoxManager.TrenBoxes](contracts/TrenBoxManager.sol#L65) can be used in cross function reentrancies:
+	- [TrenBoxManager.TrenBoxes](contracts/TrenBoxManager.sol#L65)
 	- [TrenBoxManager._closeTrenBox(address,address,ITrenBoxManager.Status)](contracts/TrenBoxManager.sol#L779-L799)
 	- [TrenBoxManager._getCurrentTrenBoxAmounts(address,address)](contracts/TrenBoxManager.sol#L674-L687)
 	- [TrenBoxManager._removeStake(address,address)](contracts/TrenBoxManager.sol#L728-L732)
@@ -334,67 +253,148 @@ Reentrancy in [TrenBoxManager.executePartialRedemption(address,address,uint256,u
 contracts/TrenBoxManager.sol#L378-L413
 
 
- - [ ] ID-18
-Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L479-L500):
+ - [ ] ID-16
+Reentrancy in [StabilityPool._withdrawFromSP(uint256,address[])](contracts/StabilityPool.sol#L380-L409):
 	External calls:
-	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L491)
-		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L414)
+	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L390)
+		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L415)
+	- [_payOutTRENGains(msg.sender)](contracts/StabilityPool.sol#L400)
+		- [ICommunityIssuance(communityIssuance).sendTREN(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L1001)
+	- [_sendToDepositor(msg.sender,debtTokensToWithdraw)](contracts/StabilityPool.sol#L401)
+		- [IDebtToken(debtToken).returnFromPool(address(this),_depositor,debtTokenWithdrawal)](contracts/StabilityPool.sol#L938)
 	State variables written after the call(s):
-	- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L497)
-		- [P = newP](contracts/StabilityPool.sol#L616)
-	[StabilityPool.P](contracts/StabilityPool.sol#L219) can be used in cross function reentrancies:
-	- [StabilityPool.P](contracts/StabilityPool.sol#L219)
-	- [StabilityPool._getCompoundedStakeFromSnapshots(uint256,IStabilityPool.Snapshots)](contracts/StabilityPool.sol#L819-L870)
-	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L938-L978)
-	- [StabilityPool._updateG(uint256)](contracts/StabilityPool.sol#L419-L438)
-	- [StabilityPool._updateRewardSumAndProduct(address,uint256,uint256)](contracts/StabilityPool.sol#L554-L618)
-	- [StabilityPool.initialize()](contracts/StabilityPool.sol#L262-L269)
-	- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L497)
-		- [currentEpoch = currentEpochCached](contracts/StabilityPool.sol#L593)
-	[StabilityPool.currentEpoch](contracts/StabilityPool.sol#L227) can be used in cross function reentrancies:
-	- [StabilityPool._getCompoundedStakeFromSnapshots(uint256,IStabilityPool.Snapshots)](contracts/StabilityPool.sol#L819-L870)
-	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L938-L978)
-	- [StabilityPool._updateG(uint256)](contracts/StabilityPool.sol#L419-L438)
-	- [StabilityPool._updateRewardSumAndProduct(address,uint256,uint256)](contracts/StabilityPool.sol#L554-L618)
-	- [StabilityPool.currentEpoch](contracts/StabilityPool.sol#L227)
-	- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L497)
-		- [currentScale = 0](contracts/StabilityPool.sol#L595)
-		- [currentScale = currentScaleCached](contracts/StabilityPool.sol#L608)
-	[StabilityPool.currentScale](contracts/StabilityPool.sol#L224) can be used in cross function reentrancies:
-	- [StabilityPool._getCompoundedStakeFromSnapshots(uint256,IStabilityPool.Snapshots)](contracts/StabilityPool.sol#L819-L870)
-	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L938-L978)
-	- [StabilityPool._updateG(uint256)](contracts/StabilityPool.sol#L419-L438)
-	- [StabilityPool._updateRewardSumAndProduct(address,uint256,uint256)](contracts/StabilityPool.sol#L554-L618)
-	- [StabilityPool.currentScale](contracts/StabilityPool.sol#L224)
+	- [_updateDepositAndSnapshots(msg.sender,newDeposit)](contracts/StabilityPool.sol#L405)
+		- [depositSnapshots[_depositor].S[colls[i]] = 0](contracts/StabilityPool.sol#L960)
+		- [depositorSnapshots.P = 0](contracts/StabilityPool.sol#L965)
+		- [depositorSnapshots.G = 0](contracts/StabilityPool.sol#L966)
+		- [depositorSnapshots.epoch = 0](contracts/StabilityPool.sol#L967)
+		- [depositorSnapshots.scale = 0](contracts/StabilityPool.sol#L968)
+		- [depositSnapshots[_depositor].S[asset] = currentS](contracts/StabilityPool.sol#L979)
+		- [depositorSnapshots.P = currentP](contracts/StabilityPool.sol#L986)
+		- [depositorSnapshots.G = currentG](contracts/StabilityPool.sol#L987)
+		- [depositorSnapshots.scale = currentScaleCached](contracts/StabilityPool.sol#L988)
+		- [depositorSnapshots.epoch = currentEpochCached](contracts/StabilityPool.sol#L989)
+	[StabilityPool.depositSnapshots](contracts/StabilityPool.sol#L207) can be used in cross function reentrancies:
+	- [StabilityPool.S(address,address)](contracts/StabilityPool.sol#L994-L996)
+	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L952-L992)
+	- [StabilityPool.depositSnapshots](contracts/StabilityPool.sol#L207)
+	- [StabilityPool.getCompoundedDebtTokenDeposits(address)](contracts/StabilityPool.sol#L814-L826)
+	- [StabilityPool.getDepositorGains(address,address[])](contracts/StabilityPool.sol#L670-L691)
+	- [StabilityPool.getDepositorTRENGain(address)](contracts/StabilityPool.sol#L769-L777)
+	- [_updateDepositAndSnapshots(msg.sender,newDeposit)](contracts/StabilityPool.sol#L405)
+		- [deposits[_depositor] = _newValue](contracts/StabilityPool.sol#L953)
+	[StabilityPool.deposits](contracts/StabilityPool.sol#L197) can be used in cross function reentrancies:
+	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L952-L992)
+	- [StabilityPool._withdrawFromSP(uint256,address[])](contracts/StabilityPool.sol#L380-L409)
+	- [StabilityPool.deposits](contracts/StabilityPool.sol#L197)
+	- [StabilityPool.getCompoundedDebtTokenDeposits(address)](contracts/StabilityPool.sol#L814-L826)
+	- [StabilityPool.getDepositorGains(address,address[])](contracts/StabilityPool.sol#L670-L691)
+	- [StabilityPool.getDepositorTRENGain(address)](contracts/StabilityPool.sol#L769-L777)
+	- [_sendToDepositor(msg.sender,debtTokensToWithdraw)](contracts/StabilityPool.sol#L401)
+		- [totalDebtTokenDeposits = newTotalDeposits](contracts/StabilityPool.sol#L654)
+	[StabilityPool.totalDebtTokenDeposits](contracts/StabilityPool.sol#L190) can be used in cross function reentrancies:
+	- [StabilityPool._decreaseDebtTokens(uint256)](contracts/StabilityPool.sol#L652-L656)
+	- [StabilityPool._updateG(uint256)](contracts/StabilityPool.sol#L420-L439)
+	- [StabilityPool.getTotalDebtTokenDeposits()](contracts/StabilityPool.sol#L312-L314)
+	- [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L480-L501)
 
-contracts/StabilityPool.sol#L479-L500
+contracts/StabilityPool.sol#L380-L409
+
+
+ - [ ] ID-17
+Reentrancy in [StabilityPool.provideToSP(uint256,address[])](contracts/StabilityPool.sol#L328-L363):
+	External calls:
+	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L340)
+		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L415)
+	- [_payOutTRENGains(msg.sender)](contracts/StabilityPool.sol#L348)
+		- [ICommunityIssuance(communityIssuance).sendTREN(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L1001)
+	- [_sendToStabilityPool(msg.sender,_amount)](contracts/StabilityPool.sol#L352)
+		- [IDebtToken(debtToken).sendToPool(_address,address(this),_amount)](contracts/StabilityPool.sol#L887)
+	State variables written after the call(s):
+	- [_updateDepositAndSnapshots(msg.sender,newDeposit)](contracts/StabilityPool.sol#L355)
+		- [depositSnapshots[_depositor].S[colls[i]] = 0](contracts/StabilityPool.sol#L960)
+		- [depositorSnapshots.P = 0](contracts/StabilityPool.sol#L965)
+		- [depositorSnapshots.G = 0](contracts/StabilityPool.sol#L966)
+		- [depositorSnapshots.epoch = 0](contracts/StabilityPool.sol#L967)
+		- [depositorSnapshots.scale = 0](contracts/StabilityPool.sol#L968)
+		- [depositSnapshots[_depositor].S[asset] = currentS](contracts/StabilityPool.sol#L979)
+		- [depositorSnapshots.P = currentP](contracts/StabilityPool.sol#L986)
+		- [depositorSnapshots.G = currentG](contracts/StabilityPool.sol#L987)
+		- [depositorSnapshots.scale = currentScaleCached](contracts/StabilityPool.sol#L988)
+		- [depositorSnapshots.epoch = currentEpochCached](contracts/StabilityPool.sol#L989)
+	[StabilityPool.depositSnapshots](contracts/StabilityPool.sol#L207) can be used in cross function reentrancies:
+	- [StabilityPool.S(address,address)](contracts/StabilityPool.sol#L994-L996)
+	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L952-L992)
+	- [StabilityPool.depositSnapshots](contracts/StabilityPool.sol#L207)
+	- [StabilityPool.getCompoundedDebtTokenDeposits(address)](contracts/StabilityPool.sol#L814-L826)
+	- [StabilityPool.getDepositorGains(address,address[])](contracts/StabilityPool.sol#L670-L691)
+	- [StabilityPool.getDepositorTRENGain(address)](contracts/StabilityPool.sol#L769-L777)
+	- [_updateDepositAndSnapshots(msg.sender,newDeposit)](contracts/StabilityPool.sol#L355)
+		- [deposits[_depositor] = _newValue](contracts/StabilityPool.sol#L953)
+	[StabilityPool.deposits](contracts/StabilityPool.sol#L197) can be used in cross function reentrancies:
+	- [StabilityPool._updateDepositAndSnapshots(address,uint256)](contracts/StabilityPool.sol#L952-L992)
+	- [StabilityPool._withdrawFromSP(uint256,address[])](contracts/StabilityPool.sol#L380-L409)
+	- [StabilityPool.deposits](contracts/StabilityPool.sol#L197)
+	- [StabilityPool.getCompoundedDebtTokenDeposits(address)](contracts/StabilityPool.sol#L814-L826)
+	- [StabilityPool.getDepositorGains(address,address[])](contracts/StabilityPool.sol#L670-L691)
+	- [StabilityPool.getDepositorTRENGain(address)](contracts/StabilityPool.sol#L769-L777)
+	- [_sendToStabilityPool(msg.sender,_amount)](contracts/StabilityPool.sol#L352)
+		- [totalDebtTokenDeposits = newTotalDeposits](contracts/StabilityPool.sol#L889)
+	[StabilityPool.totalDebtTokenDeposits](contracts/StabilityPool.sol#L190) can be used in cross function reentrancies:
+	- [StabilityPool._decreaseDebtTokens(uint256)](contracts/StabilityPool.sol#L652-L656)
+	- [StabilityPool._updateG(uint256)](contracts/StabilityPool.sol#L420-L439)
+	- [StabilityPool.getTotalDebtTokenDeposits()](contracts/StabilityPool.sol#L312-L314)
+	- [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L480-L501)
+
+contracts/StabilityPool.sol#L328-L363
+
+
+ - [ ] ID-18
+Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L480-L501):
+	External calls:
+	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L492)
+		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L415)
+	- [_moveOffsetCollAndDebt(_asset,_amountAdded,_debtToOffset)](contracts/StabilityPool.sol#L500)
+		- [IActivePool(activePool).decreaseDebt(_asset,_debtToOffset)](contracts/StabilityPool.sol#L646)
+		- [IDebtToken(debtToken).burn(address(this),_debtToOffset)](contracts/StabilityPool.sol#L648)
+		- [IActivePool(activePool).sendAsset(_asset,address(this),_amount)](contracts/StabilityPool.sol#L649)
+	State variables written after the call(s):
+	- [_moveOffsetCollAndDebt(_asset,_amountAdded,_debtToOffset)](contracts/StabilityPool.sol#L500)
+		- [totalDebtTokenDeposits = newTotalDeposits](contracts/StabilityPool.sol#L654)
+	[StabilityPool.totalDebtTokenDeposits](contracts/StabilityPool.sol#L190) can be used in cross function reentrancies:
+	- [StabilityPool._decreaseDebtTokens(uint256)](contracts/StabilityPool.sol#L652-L656)
+	- [StabilityPool._updateG(uint256)](contracts/StabilityPool.sol#L420-L439)
+	- [StabilityPool.getTotalDebtTokenDeposits()](contracts/StabilityPool.sol#L312-L314)
+	- [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L480-L501)
+
+contracts/StabilityPool.sol#L480-L501
 
 
 ## uninitialized-local
 Impact: Medium
 Confidence: Medium
  - [ ] ID-19
+[PriceFeed._fetchOracleScaledPrice(IPriceFeed.OracleRecord).oraclePrice](contracts/PriceFeed.sol#L129) is a local variable never initialized
+
+contracts/PriceFeed.sol#L129
+
+
+ - [ ] ID-20
 [TrenBoxManagerOperations._liquidateNormalMode(address,address,uint256).vars](contracts/TrenBoxManagerOperations.sol#L689) is a local variable never initialized
 
 contracts/TrenBoxManagerOperations.sol#L689
 
 
- - [ ] ID-20
+ - [ ] ID-21
 [TrenBoxManagerOperations._getTotalsFromBatchLiquidate_NormalMode(address,uint256,uint256,address[]).vars](contracts/TrenBoxManagerOperations.sol#L593) is a local variable never initialized
 
 contracts/TrenBoxManagerOperations.sol#L593
 
 
- - [ ] ID-21
+ - [ ] ID-22
 [TrenBoxManagerOperations._getTotalsFromLiquidateTrenBoxesSequence_RecoveryMode(address,uint256,uint256,uint256).vars](contracts/TrenBoxManagerOperations.sol#L870) is a local variable never initialized
 
 contracts/TrenBoxManagerOperations.sol#L870
-
-
- - [ ] ID-22
-[PriceFeed._fetchOracleScaledPrice(IPriceFeed.OracleRecordV2).priceTimestamp](contracts/PriceFeed.sol#L143) is a local variable never initialized
-
-contracts/PriceFeed.sol#L143
 
 
  - [ ] ID-23
@@ -446,15 +446,15 @@ contracts/TrenBoxManagerOperations.sol#L220
 
 
  - [ ] ID-31
-[PriceFeed._fetchOracleScaledPrice(IPriceFeed.OracleRecordV2).oraclePrice](contracts/PriceFeed.sol#L142) is a local variable never initialized
-
-contracts/PriceFeed.sol#L142
-
-
- - [ ] ID-32
 [TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256).zeroVals](contracts/TrenBoxManagerOperations.sol#L847) is a local variable never initialized
 
 contracts/TrenBoxManagerOperations.sol#L847
+
+
+ - [ ] ID-32
+[PriceFeed._fetchOracleScaledPrice(IPriceFeed.OracleRecord).priceTimestamp](contracts/PriceFeed.sol#L130) is a local variable never initialized
+
+contracts/PriceFeed.sol#L130
 
 
  - [ ] ID-33
@@ -485,21 +485,21 @@ contracts/BorrowerOperations.sol#L87-L173
 
 
  - [ ] ID-37
+[PriceFeed._fetchChainlinkOracleResponse(address)](contracts/PriceFeed.sol#L156-L177) ignores return value by [(roundId,answer,updatedAt) = ChainlinkAggregatorV3Interface(_oracleAddress).latestRoundData()](contracts/PriceFeed.sol#L161-L176)
+
+contracts/PriceFeed.sol#L156-L177
+
+
+ - [ ] ID-38
 [TrenBoxManagerOperations.redeemCollateral(address,uint256,address,address,address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L207-L307) ignores return value by [ITrenBoxManager(trenBoxManager).updateBaseRateFromRedemption(_asset,totals.totalCollDrawn,totals.price,totals.totalDebtTokenSupplyAtStart)](contracts/TrenBoxManagerOperations.sol#L286-L288)
 
 contracts/TrenBoxManagerOperations.sol#L207-L307
 
 
- - [ ] ID-38
+ - [ ] ID-39
 [PriceFeedL2._checkSequencerUptimeFeed()](contracts/Pricing/PriceFeedL2.sol#L74-L106) ignores return value by [(answer,updatedAt) = ChainlinkAggregatorV3Interface(sequencerUptimeFeedAddress).latestRoundData()](contracts/Pricing/PriceFeedL2.sol#L77-L85)
 
 contracts/Pricing/PriceFeedL2.sol#L74-L106
-
-
- - [ ] ID-39
-[PriceFeed._fetchChainlinkOracleResponse(address)](contracts/PriceFeed.sol#L169-L188) ignores return value by [(roundId,answer,updatedAt) = ChainlinkAggregatorV3Interface(_oracleAddress).latestRoundData()](contracts/PriceFeed.sol#L174-L187)
-
-contracts/PriceFeed.sol#L169-L188
 
 
 ## events-access
@@ -630,52 +630,52 @@ contracts/Pricing/PriceFeedL2.sol#L44
 
 
  - [ ] ID-54
+[Timelock.setPendingAdmin(address)._pendingAdmin](contracts/Timelock.sol#L105) lacks a zero-check on :
+		- [pendingAdmin = _pendingAdmin](contracts/Timelock.sol#L109)
+
+contracts/Timelock.sol#L105
+
+
+ - [ ] ID-55
 [TRENStaking.setAddresses(address,address,address,address,address)._debtTokenAddress](contracts/TREN/TRENStaking.sol#L75) lacks a zero-check on :
 		- [debtTokenAddress = _debtTokenAddress](contracts/TREN/TRENStaking.sol#L86)
 
 contracts/TREN/TRENStaking.sol#L75
 
 
- - [ ] ID-55
+ - [ ] ID-56
 [TRENStaking.setAddresses(address,address,address,address,address)._trenBoxManagerAddress](contracts/TREN/TRENStaking.sol#L79) lacks a zero-check on :
 		- [trenBoxManagerAddress = _trenBoxManagerAddress](contracts/TREN/TRENStaking.sol#L90)
 
 contracts/TREN/TRENStaking.sol#L79
 
 
- - [ ] ID-56
+ - [ ] ID-57
 [TRENStaking.setAddresses(address,address,address,address,address)._treasuryAddress](contracts/TREN/TRENStaking.sol#L78) lacks a zero-check on :
 		- [treasuryAddress = _treasuryAddress](contracts/TREN/TRENStaking.sol#L89)
 
 contracts/TREN/TRENStaking.sol#L78
 
 
- - [ ] ID-57
-[Timelock.setPendingAdmin(address)._pendingAdmin](contracts/Timelock.sol#L101) lacks a zero-check on :
-		- [pendingAdmin = _pendingAdmin](contracts/Timelock.sol#L105)
-
-contracts/Timelock.sol#L101
-
-
  - [ ] ID-58
+[Timelock.executeTransaction(address,uint256,string,bytes,uint256).target](contracts/Timelock.sol#L159) lacks a zero-check on :
+		- [(success,returnData) = target.call{value: value}(callData)](contracts/Timelock.sol#L192)
+
+contracts/Timelock.sol#L159
+
+
+ - [ ] ID-59
 [AddressesConfigurable.setCommunityIssuance(address)._communityIssuance](contracts/Dependencies/AddressesConfigurable.sol#L64) lacks a zero-check on :
 		- [communityIssuance = _communityIssuance](contracts/Dependencies/AddressesConfigurable.sol#L65)
 
 contracts/Dependencies/AddressesConfigurable.sol#L64
 
 
- - [ ] ID-59
+ - [ ] ID-60
 [AddressesConfigurable.setTRENStaking(address)._trenStaking](contracts/Dependencies/AddressesConfigurable.sol#L68) lacks a zero-check on :
 		- [trenStaking = _trenStaking](contracts/Dependencies/AddressesConfigurable.sol#L69)
 
 contracts/Dependencies/AddressesConfigurable.sol#L68
-
-
- - [ ] ID-60
-[Timelock.executeTransaction(address,uint256,string,bytes,uint256).target](contracts/Timelock.sol#L155) lacks a zero-check on :
-		- [(success,returnData) = target.call{value: value}(callData)](contracts/Timelock.sol#L188)
-
-contracts/Timelock.sol#L155
 
 
  - [ ] ID-61
@@ -836,6 +836,16 @@ contracts/TrenBoxManagerOperations.sol#L439-L483
 Impact: Low
 Confidence: Medium
  - [ ] ID-86
+Reentrancy in [StabilityPool._sendToStabilityPool(address,uint256)](contracts/StabilityPool.sol#L886-L891):
+	External calls:
+	- [IDebtToken(debtToken).sendToPool(_address,address(this),_amount)](contracts/StabilityPool.sol#L887)
+	State variables written after the call(s):
+	- [totalDebtTokenDeposits = newTotalDeposits](contracts/StabilityPool.sol#L889)
+
+contracts/StabilityPool.sol#L886-L891
+
+
+ - [ ] ID-87
 Reentrancy in [TrenBoxManager.redistributeDebtAndColl(address,uint256,uint256,uint256,uint256)](contracts/TrenBoxManager.sol#L525-L581):
 	External calls:
 	- [IStabilityPool(stabilityPool).offset(_debtToOffset,_asset,_collToSendToStabilityPool)](contracts/TrenBoxManager.sol#L537)
@@ -848,7 +858,28 @@ Reentrancy in [TrenBoxManager.redistributeDebtAndColl(address,uint256,uint256,ui
 contracts/TrenBoxManager.sol#L525-L581
 
 
- - [ ] ID-87
+ - [ ] ID-88
+Reentrancy in [StabilityPool._sendToDepositor(address,uint256)](contracts/StabilityPool.sol#L934-L940):
+	External calls:
+	- [IDebtToken(debtToken).returnFromPool(address(this),_depositor,debtTokenWithdrawal)](contracts/StabilityPool.sol#L938)
+	State variables written after the call(s):
+	- [_decreaseDebtTokens(debtTokenWithdrawal)](contracts/StabilityPool.sol#L939)
+		- [totalDebtTokenDeposits = newTotalDeposits](contracts/StabilityPool.sol#L654)
+
+contracts/StabilityPool.sol#L934-L940
+
+
+ - [ ] ID-89
+Reentrancy in [StabilityPool._sendGainsToDepositor(address,address[],uint256[])](contracts/StabilityPool.sol#L902-L931):
+	External calls:
+	- [IERC20(asset).safeTransfer(_to,amount)](contracts/StabilityPool.sol#L925)
+	State variables written after the call(s):
+	- [totalColl.amounts = _leftSubColls(totalColl,assets,amounts)](contracts/StabilityPool.sol#L930)
+
+contracts/StabilityPool.sol#L902-L931
+
+
+ - [ ] ID-90
 Reentrancy in [TrenBoxManager.executePartialRedemption(address,address,uint256,uint256,uint256,address,address)](contracts/TrenBoxManager.sol#L378-L413):
 	External calls:
 	- [ISortedTrenBoxes(sortedTrenBoxes).reInsert(_asset,_borrower,_newNICR,_upperPartialRedemptionHint,_lowerPartialRedemptionHint)](contracts/TrenBoxManager.sol#L391-L393)
@@ -860,96 +891,51 @@ Reentrancy in [TrenBoxManager.executePartialRedemption(address,address,uint256,u
 contracts/TrenBoxManager.sol#L378-L413
 
 
- - [ ] ID-88
-Reentrancy in [StabilityPool._moveOffsetCollAndDebt(address,uint256,uint256)](contracts/StabilityPool.sol#L629-L640):
-	External calls:
-	- [IActivePool(activePool).decreaseDebt(_asset,_debtToOffset)](contracts/StabilityPool.sol#L636)
-	State variables written after the call(s):
-	- [_decreaseDebtTokens(_debtToOffset)](contracts/StabilityPool.sol#L637)
-		- [totalDebtTokenDeposits = newTotalDeposits](contracts/StabilityPool.sol#L644)
-
-contracts/StabilityPool.sol#L629-L640
-
-
- - [ ] ID-89
-Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L479-L500):
-	External calls:
-	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L491)
-		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L414)
-	State variables written after the call(s):
-	- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L497)
-		- [epochToScaleToSum[_asset][currentEpochCached][currentScaleCached] = newS](contracts/StabilityPool.sol#L587)
-	- [(collGainPerUnitStaked,debtLossPerUnitStaked) = _computeRewardsPerUnitStaked(_asset,_amountAdded,_debtToOffset,cachedTotalDebtTokenDeposits)](contracts/StabilityPool.sol#L492-L495)
-		- [lastAssetError_Offset[assetIndex] = collateralNumerator - (collGainPerUnitStaked * _totalDeposits)](contracts/StabilityPool.sol#L550-L551)
-	- [(collGainPerUnitStaked,debtLossPerUnitStaked) = _computeRewardsPerUnitStaked(_asset,_amountAdded,_debtToOffset,cachedTotalDebtTokenDeposits)](contracts/StabilityPool.sol#L492-L495)
-		- [lastDebtTokenLossError_Offset = 0](contracts/StabilityPool.sol#L538)
-		- [lastDebtTokenLossError_Offset = (debtLossPerUnitStaked * _totalDeposits) - lossNumerator](contracts/StabilityPool.sol#L547)
-
-contracts/StabilityPool.sol#L479-L500
-
-
- - [ ] ID-90
-Reentrancy in [StabilityPool._sendToDepositor(address,uint256)](contracts/StabilityPool.sol#L920-L926):
-	External calls:
-	- [IDebtToken(debtToken).returnFromPool(address(this),_depositor,debtTokenWithdrawal)](contracts/StabilityPool.sol#L924)
-	State variables written after the call(s):
-	- [_decreaseDebtTokens(debtTokenWithdrawal)](contracts/StabilityPool.sol#L925)
-		- [totalDebtTokenDeposits = newTotalDeposits](contracts/StabilityPool.sol#L644)
-
-contracts/StabilityPool.sol#L920-L926
-
-
  - [ ] ID-91
-Reentrancy in [StabilityPool._sendToStabilityPool(address,uint256)](contracts/StabilityPool.sol#L876-L881):
+Reentrancy in [StabilityPool._triggerTRENIssuance()](contracts/StabilityPool.sol#L413-L418):
 	External calls:
-	- [IDebtToken(debtToken).sendToPool(_address,address(this),_amount)](contracts/StabilityPool.sol#L877)
+	- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L415)
 	State variables written after the call(s):
-	- [totalDebtTokenDeposits = newTotalDeposits](contracts/StabilityPool.sol#L879)
+	- [_updateG(TRENIssuance)](contracts/StabilityPool.sol#L416)
+		- [epochToScaleToG[currentEpoch][currentScale] = newEpochToScaleToG](contracts/StabilityPool.sol#L437)
+	- [_updateG(TRENIssuance)](contracts/StabilityPool.sol#L416)
+		- [lastTRENError = TRENNumerator - (TRENPerUnitStaked * _totalDeposits)](contracts/StabilityPool.sol#L464)
 
-contracts/StabilityPool.sol#L876-L881
+contracts/StabilityPool.sol#L413-L418
 
 
  - [ ] ID-92
-Reentrancy in [StabilityPool._sendGainsToDepositor(address,address[],uint256[])](contracts/StabilityPool.sol#L892-L917):
+Reentrancy in [StabilityPool._moveOffsetCollAndDebt(address,uint256,uint256)](contracts/StabilityPool.sol#L639-L650):
 	External calls:
-	- [IERC20(asset).safeTransfer(_to,amount)](contracts/StabilityPool.sol#L911)
+	- [IActivePool(activePool).decreaseDebt(_asset,_debtToOffset)](contracts/StabilityPool.sol#L646)
 	State variables written after the call(s):
-	- [totalColl.amounts = _leftSubColls(totalColl,assets,amounts)](contracts/StabilityPool.sol#L916)
+	- [_decreaseDebtTokens(_debtToOffset)](contracts/StabilityPool.sol#L647)
+		- [totalDebtTokenDeposits = newTotalDeposits](contracts/StabilityPool.sol#L654)
 
-contracts/StabilityPool.sol#L892-L917
+contracts/StabilityPool.sol#L639-L650
 
 
  - [ ] ID-93
-Reentrancy in [StabilityPool._triggerTRENIssuance()](contracts/StabilityPool.sol#L412-L417):
+Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L480-L501):
 	External calls:
-	- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L414)
+	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L492)
+		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L415)
 	State variables written after the call(s):
-	- [_updateG(TRENIssuance)](contracts/StabilityPool.sol#L415)
-		- [epochToScaleToG[currentEpoch][currentScale] = newEpochToScaleToG](contracts/StabilityPool.sol#L436)
-	- [_updateG(TRENIssuance)](contracts/StabilityPool.sol#L415)
-		- [lastTRENError = TRENNumerator - (TRENPerUnitStaked * _totalDeposits)](contracts/StabilityPool.sol#L463)
+	- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L498)
+		- [epochToScaleToSum[_asset][currentEpochCached][currentScaleCached] = newS](contracts/StabilityPool.sol#L594)
+	- [(collGainPerUnitStaked,debtLossPerUnitStaked) = _computeRewardsPerUnitStaked(_asset,_amountAdded,_debtToOffset,cachedTotalDebtTokenDeposits)](contracts/StabilityPool.sol#L493-L496)
+		- [lastAssetError_Offset[assetIndex] = collateralNumerator - (collGainPerUnitStaked * _totalDeposits)](contracts/StabilityPool.sol#L554-L555)
+	- [(collGainPerUnitStaked,debtLossPerUnitStaked) = _computeRewardsPerUnitStaked(_asset,_amountAdded,_debtToOffset,cachedTotalDebtTokenDeposits)](contracts/StabilityPool.sol#L493-L496)
+		- [lastDebtTokenLossError_Offset = 0](contracts/StabilityPool.sol#L542)
+		- [lastDebtTokenLossError_Offset = (debtLossPerUnitStaked * _totalDeposits) - lossNumerator](contracts/StabilityPool.sol#L551)
 
-contracts/StabilityPool.sol#L412-L417
+contracts/StabilityPool.sol#L480-L501
 
 
 ## reentrancy-events
 Impact: Low
 Confidence: Medium
  - [ ] ID-94
-Reentrancy in [StabilityPool._withdrawFromSP(uint256,address[])](contracts/StabilityPool.sol#L379-L408):
-	External calls:
-	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L389)
-		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L414)
-	- [_payOutTRENGains(msg.sender)](contracts/StabilityPool.sol#L399)
-		- [ICommunityIssuance(communityIssuance).sendTREN(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L987)
-	Event emitted after the call(s):
-	- [TRENPaidToDepositor(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L988)
-		- [_payOutTRENGains(msg.sender)](contracts/StabilityPool.sol#L399)
-
-contracts/StabilityPool.sol#L379-L408
-
-
- - [ ] ID-95
 Reentrancy in [TrenBoxManager.closeTrenBoxLiquidation(address,address)](contracts/TrenBoxManager.sol#L610-L623):
 	External calls:
 	- [_closeTrenBox(_asset,_borrower,Status.closedByLiquidation)](contracts/TrenBoxManager.sol#L618)
@@ -961,7 +947,7 @@ Reentrancy in [TrenBoxManager.closeTrenBoxLiquidation(address,address)](contract
 contracts/TrenBoxManager.sol#L610-L623
 
 
- - [ ] ID-96
+ - [ ] ID-95
 Reentrancy in [AdminContract.addNewCollateral(address,uint256,uint256)](contracts/AdminContract.sol#L115-L147):
 	External calls:
 	- [IStabilityPool(stabilityPool).addCollateralType(_collateral)](contracts/AdminContract.sol#L143)
@@ -971,7 +957,7 @@ Reentrancy in [AdminContract.addNewCollateral(address,uint256,uint256)](contract
 contracts/AdminContract.sol#L115-L147
 
 
- - [ ] ID-97
+ - [ ] ID-96
 Reentrancy in [TrenBoxManagerOperations._liquidateNormalMode(address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L681-L727):
 	External calls:
 	- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L697-L699)
@@ -983,7 +969,7 @@ Reentrancy in [TrenBoxManagerOperations._liquidateNormalMode(address,address,uin
 contracts/TrenBoxManagerOperations.sol#L681-L727
 
 
- - [ ] ID-98
+ - [ ] ID-97
 Reentrancy in [TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L729-L852):
 	External calls:
 	- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L784-L786)
@@ -995,7 +981,7 @@ Reentrancy in [TrenBoxManagerOperations._liquidateRecoveryMode(address,address,u
 contracts/TrenBoxManagerOperations.sol#L729-L852
 
 
- - [ ] ID-99
+ - [ ] ID-98
 Reentrancy in [TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L729-L852):
 	External calls:
 	- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L760-L762)
@@ -1007,7 +993,7 @@ Reentrancy in [TrenBoxManagerOperations._liquidateRecoveryMode(address,address,u
 contracts/TrenBoxManagerOperations.sol#L729-L852
 
 
- - [ ] ID-100
+ - [ ] ID-99
 Reentrancy in [TrenBoxManager.executePartialRedemption(address,address,uint256,uint256,uint256,address,address)](contracts/TrenBoxManager.sol#L378-L413):
 	External calls:
 	- [ISortedTrenBoxes(sortedTrenBoxes).reInsert(_asset,_borrower,_newNICR,_upperPartialRedemptionHint,_lowerPartialRedemptionHint)](contracts/TrenBoxManager.sol#L391-L393)
@@ -1020,34 +1006,62 @@ Reentrancy in [TrenBoxManager.executePartialRedemption(address,address,uint256,u
 contracts/TrenBoxManager.sol#L378-L413
 
 
- - [ ] ID-101
-Reentrancy in [StabilityPool._sendToDepositor(address,uint256)](contracts/StabilityPool.sol#L920-L926):
+ - [ ] ID-100
+Reentrancy in [StabilityPool._triggerTRENIssuance()](contracts/StabilityPool.sol#L413-L418):
 	External calls:
-	- [IDebtToken(debtToken).returnFromPool(address(this),_depositor,debtTokenWithdrawal)](contracts/StabilityPool.sol#L924)
+	- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L415)
 	Event emitted after the call(s):
-	- [StabilityPoolDebtTokenBalanceUpdated(newTotalDeposits)](contracts/StabilityPool.sol#L645)
-		- [_decreaseDebtTokens(debtTokenWithdrawal)](contracts/StabilityPool.sol#L925)
+	- [GainsUpdated(newEpochToScaleToG,currentEpoch,currentScale)](contracts/StabilityPool.sol#L438)
+		- [_updateG(TRENIssuance)](contracts/StabilityPool.sol#L416)
 
-contracts/StabilityPool.sol#L920-L926
+contracts/StabilityPool.sol#L413-L418
+
+
+ - [ ] ID-101
+Reentrancy in [StabilityPool._payOutTRENGains(address)](contracts/StabilityPool.sol#L998-L1004):
+	External calls:
+	- [ICommunityIssuance(communityIssuance).sendTREN(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L1001)
+	Event emitted after the call(s):
+	- [TRENPaidToDepositor(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L1002)
+
+contracts/StabilityPool.sol#L998-L1004
 
 
  - [ ] ID-102
-Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L479-L500):
+Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L480-L501):
 	External calls:
-	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L491)
-		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L414)
-	- [_moveOffsetCollAndDebt(_asset,_amountAdded,_debtToOffset)](contracts/StabilityPool.sol#L499)
-		- [IActivePool(activePool).decreaseDebt(_asset,_debtToOffset)](contracts/StabilityPool.sol#L636)
-		- [IDebtToken(debtToken).burn(address(this),_debtToOffset)](contracts/StabilityPool.sol#L638)
-		- [IActivePool(activePool).sendAsset(_asset,address(this),_amount)](contracts/StabilityPool.sol#L639)
+	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L492)
+		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L415)
 	Event emitted after the call(s):
-	- [StabilityPoolDebtTokenBalanceUpdated(newTotalDeposits)](contracts/StabilityPool.sol#L645)
-		- [_moveOffsetCollAndDebt(_asset,_amountAdded,_debtToOffset)](contracts/StabilityPool.sol#L499)
+	- [EpochUpdated(currentEpochCached)](contracts/StabilityPool.sol#L601)
+		- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L498)
+	- [ProductUpdated(newP)](contracts/StabilityPool.sol#L627)
+		- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L498)
+	- [ScaleUpdated(0)](contracts/StabilityPool.sol#L603)
+		- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L498)
+	- [ScaleUpdated(currentScaleCached)](contracts/StabilityPool.sol#L616)
+		- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L498)
+	- [SumUpdated(_asset,newS,currentEpochCached,currentScaleCached)](contracts/StabilityPool.sol#L595)
+		- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L498)
 
-contracts/StabilityPool.sol#L479-L500
+contracts/StabilityPool.sol#L480-L501
 
 
  - [ ] ID-103
+Reentrancy in [StabilityPool._withdrawFromSP(uint256,address[])](contracts/StabilityPool.sol#L380-L409):
+	External calls:
+	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L390)
+		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L415)
+	- [_payOutTRENGains(msg.sender)](contracts/StabilityPool.sol#L400)
+		- [ICommunityIssuance(communityIssuance).sendTREN(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L1001)
+	Event emitted after the call(s):
+	- [TRENPaidToDepositor(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L1002)
+		- [_payOutTRENGains(msg.sender)](contracts/StabilityPool.sol#L400)
+
+contracts/StabilityPool.sol#L380-L409
+
+
+ - [ ] ID-104
 Reentrancy in [TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L729-L852):
 	External calls:
 	- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L818-L820)
@@ -1060,40 +1074,7 @@ Reentrancy in [TrenBoxManagerOperations._liquidateRecoveryMode(address,address,u
 contracts/TrenBoxManagerOperations.sol#L729-L852
 
 
- - [ ] ID-104
-Reentrancy in [StabilityPool._moveOffsetCollAndDebt(address,uint256,uint256)](contracts/StabilityPool.sol#L629-L640):
-	External calls:
-	- [IActivePool(activePool).decreaseDebt(_asset,_debtToOffset)](contracts/StabilityPool.sol#L636)
-	Event emitted after the call(s):
-	- [StabilityPoolDebtTokenBalanceUpdated(newTotalDeposits)](contracts/StabilityPool.sol#L645)
-		- [_decreaseDebtTokens(_debtToOffset)](contracts/StabilityPool.sol#L637)
-
-contracts/StabilityPool.sol#L629-L640
-
-
  - [ ] ID-105
-Reentrancy in [StabilityPool._withdrawFromSP(uint256,address[])](contracts/StabilityPool.sol#L379-L408):
-	External calls:
-	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L389)
-		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L414)
-	- [_payOutTRENGains(msg.sender)](contracts/StabilityPool.sol#L399)
-		- [ICommunityIssuance(communityIssuance).sendTREN(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L987)
-	- [_sendToDepositor(msg.sender,debtTokensToWithdraw)](contracts/StabilityPool.sol#L400)
-		- [IDebtToken(debtToken).returnFromPool(address(this),_depositor,debtTokenWithdrawal)](contracts/StabilityPool.sol#L924)
-	Event emitted after the call(s):
-	- [DepositSnapshotUpdated(_depositor,0,0)](contracts/StabilityPool.sol#L955)
-		- [_updateDepositAndSnapshots(msg.sender,newDeposit)](contracts/StabilityPool.sol#L404)
-	- [DepositSnapshotUpdated(_depositor,currentP,currentG)](contracts/StabilityPool.sol#L977)
-		- [_updateDepositAndSnapshots(msg.sender,newDeposit)](contracts/StabilityPool.sol#L404)
-	- [GainsWithdrawn(msg.sender,assets,amounts,loss)](contracts/StabilityPool.sol#L407)
-	- [StabilityPoolDebtTokenBalanceUpdated(newTotalDeposits)](contracts/StabilityPool.sol#L645)
-		- [_sendToDepositor(msg.sender,debtTokensToWithdraw)](contracts/StabilityPool.sol#L400)
-	- [UserDepositChanged(msg.sender,newDeposit)](contracts/StabilityPool.sol#L405)
-
-contracts/StabilityPool.sol#L379-L408
-
-
- - [ ] ID-106
 Reentrancy in [BorrowerOperations.openTrenBox(address,uint256,uint256,address,address)](contracts/BorrowerOperations.sol#L87-L173):
 	External calls:
 	- [vars.debtTokenFee = _triggerBorrowingFee(vars.asset,_debtTokenAmount)](contracts/BorrowerOperations.sol#L112)
@@ -1110,6 +1091,22 @@ Reentrancy in [BorrowerOperations.openTrenBox(address,uint256,uint256,address,ad
 	- [TrenBoxCreated(vars.asset,msg.sender,vars.arrayIndex)](contracts/BorrowerOperations.sol#L154)
 
 contracts/BorrowerOperations.sol#L87-L173
+
+
+ - [ ] ID-106
+Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L480-L501):
+	External calls:
+	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L492)
+		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L415)
+	- [_moveOffsetCollAndDebt(_asset,_amountAdded,_debtToOffset)](contracts/StabilityPool.sol#L500)
+		- [IActivePool(activePool).decreaseDebt(_asset,_debtToOffset)](contracts/StabilityPool.sol#L646)
+		- [IDebtToken(debtToken).burn(address(this),_debtToOffset)](contracts/StabilityPool.sol#L648)
+		- [IActivePool(activePool).sendAsset(_asset,address(this),_amount)](contracts/StabilityPool.sol#L649)
+	Event emitted after the call(s):
+	- [StabilityPoolDebtTokenBalanceUpdated(newTotalDeposits)](contracts/StabilityPool.sol#L655)
+		- [_moveOffsetCollAndDebt(_asset,_amountAdded,_debtToOffset)](contracts/StabilityPool.sol#L500)
+
+contracts/StabilityPool.sol#L480-L501
 
 
  - [ ] ID-107
@@ -1154,26 +1151,27 @@ contracts/FeeCollector.sol#L373-L378
 
 
  - [ ] ID-109
-Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L479-L500):
+Reentrancy in [Timelock.executeTransaction(address,uint256,string,bytes,uint256)](contracts/Timelock.sol#L158-L200):
 	External calls:
-	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L491)
-		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L414)
+	- [(success,returnData) = target.call{value: value}(callData)](contracts/Timelock.sol#L192)
 	Event emitted after the call(s):
-	- [EpochUpdated(currentEpochCached)](contracts/StabilityPool.sol#L594)
-		- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L497)
-	- [P_Updated(newP)](contracts/StabilityPool.sol#L617)
-		- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L497)
-	- [S_Updated(_asset,newS,currentEpochCached,currentScaleCached)](contracts/StabilityPool.sol#L588)
-		- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L497)
-	- [ScaleUpdated(0)](contracts/StabilityPool.sol#L596)
-		- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L497)
-	- [ScaleUpdated(currentScaleCached)](contracts/StabilityPool.sol#L609)
-		- [_updateRewardSumAndProduct(_asset,collGainPerUnitStaked,debtLossPerUnitStaked)](contracts/StabilityPool.sol#L497)
+	- [ExecuteTransaction(txHash,target,value,signature,data,eta)](contracts/Timelock.sol#L197)
 
-contracts/StabilityPool.sol#L479-L500
+contracts/Timelock.sol#L158-L200
 
 
  - [ ] ID-110
+Reentrancy in [StabilityPool._moveOffsetCollAndDebt(address,uint256,uint256)](contracts/StabilityPool.sol#L639-L650):
+	External calls:
+	- [IActivePool(activePool).decreaseDebt(_asset,_debtToOffset)](contracts/StabilityPool.sol#L646)
+	Event emitted after the call(s):
+	- [StabilityPoolDebtTokenBalanceUpdated(newTotalDeposits)](contracts/StabilityPool.sol#L655)
+		- [_decreaseDebtTokens(_debtToOffset)](contracts/StabilityPool.sol#L647)
+
+contracts/StabilityPool.sol#L639-L650
+
+
+ - [ ] ID-111
 Reentrancy in [BorrowerOperations.closeTrenBox(address)](contracts/BorrowerOperations.sol#L387-L423):
 	External calls:
 	- [ITrenBoxManager(trenBoxManager).applyPendingRewards(_asset,msg.sender)](contracts/BorrowerOperations.sol#L392)
@@ -1186,7 +1184,7 @@ Reentrancy in [BorrowerOperations.closeTrenBox(address)](contracts/BorrowerOpera
 contracts/BorrowerOperations.sol#L387-L423
 
 
- - [ ] ID-111
+ - [ ] ID-112
 Reentrancy in [TrenBoxManagerOperations.redeemCollateral(address,uint256,address,address,address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L207-L307):
 	External calls:
 	- [ITrenBoxManager(trenBoxManager).isValidFirstRedemptionHint(_asset,_firstRedemptionHint,totals.price)](contracts/TrenBoxManagerOperations.sol#L227-L229)
@@ -1202,18 +1200,18 @@ Reentrancy in [TrenBoxManagerOperations.redeemCollateral(address,uint256,address
 contracts/TrenBoxManagerOperations.sol#L207-L307
 
 
- - [ ] ID-112
-Reentrancy in [StabilityPool._triggerTRENIssuance()](contracts/StabilityPool.sol#L412-L417):
-	External calls:
-	- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L414)
-	Event emitted after the call(s):
-	- [G_Updated(newEpochToScaleToG,currentEpoch,currentScale)](contracts/StabilityPool.sol#L437)
-		- [_updateG(TRENIssuance)](contracts/StabilityPool.sol#L415)
-
-contracts/StabilityPool.sol#L412-L417
-
-
  - [ ] ID-113
+Reentrancy in [StabilityPool._sendToDepositor(address,uint256)](contracts/StabilityPool.sol#L934-L940):
+	External calls:
+	- [IDebtToken(debtToken).returnFromPool(address(this),_depositor,debtTokenWithdrawal)](contracts/StabilityPool.sol#L938)
+	Event emitted after the call(s):
+	- [StabilityPoolDebtTokenBalanceUpdated(newTotalDeposits)](contracts/StabilityPool.sol#L655)
+		- [_decreaseDebtTokens(debtTokenWithdrawal)](contracts/StabilityPool.sol#L939)
+
+contracts/StabilityPool.sol#L934-L940
+
+
+ - [ ] ID-114
 Reentrancy in [FeeCollector._collectFee(address,address,uint256)](contracts/FeeCollector.sol#L362-L371):
 	External calls:
 	- [IERC20(debtToken).safeTransfer(collector,_feeAmount)](contracts/FeeCollector.sol#L365)
@@ -1224,27 +1222,7 @@ Reentrancy in [FeeCollector._collectFee(address,address,uint256)](contracts/FeeC
 contracts/FeeCollector.sol#L362-L371
 
 
- - [ ] ID-114
-Reentrancy in [Timelock.executeTransaction(address,uint256,string,bytes,uint256)](contracts/Timelock.sol#L154-L196):
-	External calls:
-	- [(success,returnData) = target.call{value: value}(callData)](contracts/Timelock.sol#L188)
-	Event emitted after the call(s):
-	- [ExecuteTransaction(txHash,target,value,signature,data,eta)](contracts/Timelock.sol#L193)
-
-contracts/Timelock.sol#L154-L196
-
-
  - [ ] ID-115
-Reentrancy in [StabilityPool._payOutTRENGains(address)](contracts/StabilityPool.sol#L984-L990):
-	External calls:
-	- [ICommunityIssuance(communityIssuance).sendTREN(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L987)
-	Event emitted after the call(s):
-	- [TRENPaidToDepositor(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L988)
-
-contracts/StabilityPool.sol#L984-L990
-
-
- - [ ] ID-116
 Reentrancy in [DefaultPool.sendAssetToActivePool(address,uint256)](contracts/DefaultPool.sol#L81-L102):
 	External calls:
 	- [IERC20(_asset).safeTransfer(activePool,safetyTransferAmount)](contracts/DefaultPool.sol#L97)
@@ -1256,7 +1234,7 @@ Reentrancy in [DefaultPool.sendAssetToActivePool(address,uint256)](contracts/Def
 contracts/DefaultPool.sol#L81-L102
 
 
- - [ ] ID-117
+ - [ ] ID-116
 Reentrancy in [FeeCollector.handleRedemptionFee(address,uint256)](contracts/FeeCollector.sol#L196-L201):
 	External calls:
 	- [ITRENStaking(trenStaking).increaseFee_Asset(_asset,_amount)](contracts/FeeCollector.sol#L198)
@@ -1264,6 +1242,28 @@ Reentrancy in [FeeCollector.handleRedemptionFee(address,uint256)](contracts/FeeC
 	- [RedemptionFeeCollected(_asset,_amount)](contracts/FeeCollector.sol#L200)
 
 contracts/FeeCollector.sol#L196-L201
+
+
+ - [ ] ID-117
+Reentrancy in [StabilityPool._withdrawFromSP(uint256,address[])](contracts/StabilityPool.sol#L380-L409):
+	External calls:
+	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L390)
+		- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L415)
+	- [_payOutTRENGains(msg.sender)](contracts/StabilityPool.sol#L400)
+		- [ICommunityIssuance(communityIssuance).sendTREN(_depositor,depositorTRENGain)](contracts/StabilityPool.sol#L1001)
+	- [_sendToDepositor(msg.sender,debtTokensToWithdraw)](contracts/StabilityPool.sol#L401)
+		- [IDebtToken(debtToken).returnFromPool(address(this),_depositor,debtTokenWithdrawal)](contracts/StabilityPool.sol#L938)
+	Event emitted after the call(s):
+	- [DepositSnapshotUpdated(_depositor,0,0)](contracts/StabilityPool.sol#L969)
+		- [_updateDepositAndSnapshots(msg.sender,newDeposit)](contracts/StabilityPool.sol#L405)
+	- [DepositSnapshotUpdated(_depositor,currentP,currentG)](contracts/StabilityPool.sol#L991)
+		- [_updateDepositAndSnapshots(msg.sender,newDeposit)](contracts/StabilityPool.sol#L405)
+	- [GainsWithdrawn(msg.sender,assets,amounts,loss)](contracts/StabilityPool.sol#L408)
+	- [StabilityPoolDebtTokenBalanceUpdated(newTotalDeposits)](contracts/StabilityPool.sol#L655)
+		- [_sendToDepositor(msg.sender,debtTokensToWithdraw)](contracts/StabilityPool.sol#L401)
+	- [UserDepositChanged(msg.sender,newDeposit)](contracts/StabilityPool.sol#L406)
+
+contracts/StabilityPool.sol#L380-L409
 
 
 ## timestamp
@@ -1318,11 +1318,11 @@ contracts/TREN/CommunityIssuance.sol#L133-L139
 
 
  - [ ] ID-124
-[Timelock.queueTransaction(address,uint256,string,bytes,uint256)](contracts/Timelock.sol#L110-L133) uses timestamp for comparisons
+[Timelock.queueTransaction(address,uint256,string,bytes,uint256)](contracts/Timelock.sol#L114-L137) uses timestamp for comparisons
 	Dangerous comparisons:
-	- [eta < block.timestamp + delay || eta > block.timestamp + delay + GRACE_PERIOD](contracts/Timelock.sol#L121)
+	- [eta < block.timestamp + delay || eta > block.timestamp + delay + GRACE_PERIOD](contracts/Timelock.sol#L125)
 
-contracts/Timelock.sol#L110-L133
+contracts/Timelock.sol#L114-L137
 
 
  - [ ] ID-125
@@ -1392,12 +1392,11 @@ contracts/TREN/LockedTREN.sol#L112-L127
 
 
  - [ ] ID-133
-[Timelock.executeTransaction(address,uint256,string,bytes,uint256)](contracts/Timelock.sol#L154-L196) uses timestamp for comparisons
+[PriceFeed._isStalePrice(uint256,uint256)](contracts/PriceFeed.sol#L145-L154) uses timestamp for comparisons
 	Dangerous comparisons:
-	- [block.timestamp < eta](contracts/Timelock.sol#L170)
-	- [block.timestamp > eta + GRACE_PERIOD](contracts/Timelock.sol#L173)
+	- [block.timestamp - _priceTimestamp > _oracleTimeoutSeconds](contracts/PriceFeed.sol#L153)
 
-contracts/Timelock.sol#L154-L196
+contracts/PriceFeed.sol#L145-L154
 
 
  - [ ] ID-134
@@ -1409,6 +1408,15 @@ contracts/FeeCollector.sol#L362-L371
 
 
  - [ ] ID-135
+[Timelock.executeTransaction(address,uint256,string,bytes,uint256)](contracts/Timelock.sol#L158-L200) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [block.timestamp < eta](contracts/Timelock.sol#L174)
+	- [block.timestamp > eta + GRACE_PERIOD](contracts/Timelock.sol#L177)
+
+contracts/Timelock.sol#L158-L200
+
+
+ - [ ] ID-136
 [FeeCollector._calcExpiredAmount(uint256,uint256,uint256)](contracts/FeeCollector.sol#L319-L341) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [_from > NOW](contracts/FeeCollector.sol#L329)
@@ -1417,7 +1425,7 @@ contracts/FeeCollector.sol#L362-L371
 contracts/FeeCollector.sol#L319-L341
 
 
- - [ ] ID-136
+ - [ ] ID-137
 [FeeCollector._decreaseDebt(address,address,uint256)](contracts/FeeCollector.sol#L210-L242) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [sRecord.to <= NOW](contracts/FeeCollector.sol#L218)
@@ -1425,7 +1433,7 @@ contracts/FeeCollector.sol#L319-L341
 contracts/FeeCollector.sol#L210-L242
 
 
- - [ ] ID-137
+ - [ ] ID-138
 [FeeCollector.collectFees(address[],address[])](contracts/FeeCollector.sol#L161-L189) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [expiredAmount > 0](contracts/FeeCollector.sol#L178)
@@ -1433,7 +1441,7 @@ contracts/FeeCollector.sol#L210-L242
 contracts/FeeCollector.sol#L161-L189
 
 
- - [ ] ID-138
+ - [ ] ID-139
 [FeeCollector.simulateRefund(address,address,uint256)](contracts/FeeCollector.sol#L113-L137) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [record.amount == 0 || record.to < block.timestamp](contracts/FeeCollector.sol#L126)
@@ -1441,20 +1449,12 @@ contracts/FeeCollector.sol#L161-L189
 contracts/FeeCollector.sol#L113-L137
 
 
- - [ ] ID-139
-[PriceFeed._fetchOracleScaledPrice(IPriceFeed.OracleRecordV2)](contracts/PriceFeed.sol#L137-L156) uses timestamp for comparisons
-	Dangerous comparisons:
-	- [oraclePrice != 0 && ! _isStalePrice(priceTimestamp,oracle.timeoutSeconds)](contracts/PriceFeed.sol#L152)
-
-contracts/PriceFeed.sol#L137-L156
-
-
  - [ ] ID-140
-[PriceFeed._isStalePrice(uint256,uint256)](contracts/PriceFeed.sol#L158-L167) uses timestamp for comparisons
+[PriceFeed._fetchOracleScaledPrice(IPriceFeed.OracleRecord)](contracts/PriceFeed.sol#L128-L143) uses timestamp for comparisons
 	Dangerous comparisons:
-	- [block.timestamp - _priceTimestamp > _oracleTimeoutSeconds](contracts/PriceFeed.sol#L166)
+	- [oraclePrice != 0 && ! _isStalePrice(priceTimestamp,oracle.timeoutSeconds)](contracts/PriceFeed.sol#L139)
 
-contracts/PriceFeed.sol#L158-L167
+contracts/PriceFeed.sol#L128-L143
 
 
  - [ ] ID-141
@@ -1485,12 +1485,6 @@ contracts/TREN/LockedTREN.sol#L104-L110
 Impact: Informational
 Confidence: Medium
  - [ ] ID-144
-[TrenMath._max(uint256,uint256)](contracts/Dependencies/TrenMath.sol#L28-L30) is never used and should be removed
-
-contracts/Dependencies/TrenMath.sol#L28-L30
-
-
- - [ ] ID-145
 [BorrowerOperations._getUSDValue(uint256,uint256)](contracts/BorrowerOperations.sol#L448-L450) is never used and should be removed
 
 contracts/BorrowerOperations.sol#L448-L450
@@ -1499,47 +1493,41 @@ contracts/BorrowerOperations.sol#L448-L450
 ## low-level-calls
 Impact: Informational
 Confidence: High
- - [ ] ID-146
-Low level call in [Timelock.executeTransaction(address,uint256,string,bytes,uint256)](contracts/Timelock.sol#L154-L196):
-	- [(success,returnData) = target.call{value: value}(callData)](contracts/Timelock.sol#L188)
+ - [ ] ID-145
+Low level call in [Timelock.executeTransaction(address,uint256,string,bytes,uint256)](contracts/Timelock.sol#L158-L200):
+	- [(success,returnData) = target.call{value: value}(callData)](contracts/Timelock.sol#L192)
 
-contracts/Timelock.sol#L154-L196
+contracts/Timelock.sol#L158-L200
 
 
 ## similar-names
 Impact: Informational
 Confidence: Medium
- - [ ] ID-147
+ - [ ] ID-146
 Variable [AdminContract.setPercentDivisor(address,uint256).percentDivisor](contracts/AdminContract.sol#L247) is too similar to [IAdminContract.setPercentDivisor(address,uint256).precentDivisor](contracts/Interfaces/IAdminContract.sol#L82)
 
 contracts/AdminContract.sol#L247
 
 
- - [ ] ID-148
+ - [ ] ID-147
 Variable [IAdminContract.setCollateralParameters(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256).percentDivisor](contracts/Interfaces/IAdminContract.sol#L71) is too similar to [IAdminContract.setPercentDivisor(address,uint256).precentDivisor](contracts/Interfaces/IAdminContract.sol#L82)
 
 contracts/Interfaces/IAdminContract.sol#L71
 
 
- - [ ] ID-149
-Variable [PriceFeed.MAX_PRICE_DEVIATION_BETWEEN_ROUNDS_LOWER_LIMIT](contracts/PriceFeed.sol#L31) is too similar to [PriceFeed.MAX_PRICE_DEVIATION_BETWEEN_ROUNDS_UPPER_LIMIT](contracts/PriceFeed.sol#L32)
-
-contracts/PriceFeed.sol#L31
-
-
- - [ ] ID-150
+ - [ ] ID-148
 Variable [AdminContract.CCR_DEFAULT](contracts/AdminContract.sol#L27) is too similar to [AdminContract.MCR_DEFAULT](contracts/AdminContract.sol#L28)
 
 contracts/AdminContract.sol#L27
 
 
- - [ ] ID-151
+ - [ ] ID-149
 Variable [SfrxEth2EthPriceAggregator.latestRoundData().answeredInRound1](contracts/Pricing/SfrxEth2EthPriceAggregator.sol#L70) is too similar to [SfrxEth2EthPriceAggregator.latestRoundData().answeredInRound2](contracts/Pricing/SfrxEth2EthPriceAggregator.sol#L79)
 
 contracts/Pricing/SfrxEth2EthPriceAggregator.sol#L70
 
 
- - [ ] ID-152
+ - [ ] ID-150
 Variable [AdminContract.setCollateralParameters(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256).percentDivisor](contracts/AdminContract.sol#L156) is too similar to [IAdminContract.setPercentDivisor(address,uint256).precentDivisor](contracts/Interfaces/IAdminContract.sol#L82)
 
 contracts/AdminContract.sol#L156
@@ -1548,13 +1536,13 @@ contracts/AdminContract.sol#L156
 ## constable-states
 Impact: Optimization
 Confidence: High
- - [ ] ID-153
+ - [ ] ID-151
 [TrenBoxManager.isSetupInitialized](contracts/TrenBoxManager.sol#L101) should be constant 
 
 contracts/TrenBoxManager.sol#L101
 
 
- - [ ] ID-154
+ - [ ] ID-152
 [TRENToken._1_MILLION](contracts/TREN/TRENToken.sol#L12) should be constant 
 
 contracts/TREN/TRENToken.sol#L12
