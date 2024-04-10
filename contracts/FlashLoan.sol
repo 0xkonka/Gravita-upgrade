@@ -9,14 +9,15 @@ import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-import "./Interfaces/IAdminContract.sol";
-import "./Interfaces/IBorrowerOperations.sol";
-import "./Interfaces/IFeeCollector.sol";
-import "./Interfaces/IFlashLoan.sol";
-import "./Interfaces/IFlashLoanReceiver.sol";
-import "./Interfaces/ITrenBoxManager.sol";
-import "./Interfaces/IUniswapRouterV3.sol";
-import "./Addresses.sol";
+import { IAdminContract } from "./Interfaces/IAdminContract.sol";
+import { IBorrowerOperations } from "./Interfaces/IBorrowerOperations.sol";
+import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
+import { IFlashLoan } from "./Interfaces/IFlashLoan.sol";
+import { IFlashLoanReceiver } from "./Interfaces/IFlashLoanReceiver.sol";
+import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
+import { IUniswapRouterV3 } from "./Interfaces/IUniswapRouterV3.sol";
+import { IDebtToken } from "./Interfaces/IDebtToken.sol";
+import { Addresses } from "./Addresses.sol";
 
 contract FlashLoan is
     IFlashLoan,

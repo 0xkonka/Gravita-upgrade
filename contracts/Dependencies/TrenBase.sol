@@ -4,24 +4,29 @@ pragma solidity ^0.8.23;
 
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import { UUPSUpgradeable } from
-    "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import { BaseMath } from "./BaseMath.sol";
-import { TrenMath } from "./TrenMath.sol";
 import { IActivePool } from "../Interfaces/IActivePool.sol";
 import { IDefaultPool } from "../Interfaces/IDefaultPool.sol";
-import { ITrenBase } from "../Interfaces/ITrenBase.sol";
 import { IAdminContract } from "../Interfaces/IAdminContract.sol";
 import { IDefaultPool } from "../Interfaces/IDefaultPool.sol";
 import { Addresses } from "../Addresses.sol";
+
+import { BaseMath } from "./BaseMath.sol";
+import { TrenMath } from "./TrenMath.sol";
 
 /*
 * Base contract for TrenBoxManager, BorrowerOperations and StabilityPool. Contains global system
 constants and
  * common functions.
  */
-abstract contract TrenBase is ITrenBase, BaseMath, OwnableUpgradeable, Addresses {
+abstract contract TrenBase is BaseMath, OwnableUpgradeable, Addresses {
+    struct Colls {
+        address[] tokens;
+        uint256[] amounts;
+    }
+
+    error TrenBase__FeeExceededMax(uint256 feePercentage, uint256 maxFeePercentage);
+
     // --- Gas compensation functions ---
 
     // Returns the composite debt (drawn debt + gas compensation) of a trenBox, for the purpose of
@@ -79,6 +84,8 @@ abstract contract TrenBase is ITrenBase, BaseMath, OwnableUpgradeable, Addresses
         view
     {
         uint256 feePercentage = (_fee * IAdminContract(adminContract).DECIMAL_PRECISION()) / _amount;
-        require(feePercentage <= _maxFeePercentage, "Fee exceeded provided maximum");
+        if (feePercentage > _maxFeePercentage) {
+            revert TrenBase__FeeExceededMax(feePercentage, _maxFeePercentage);
+        }
     }
 }
