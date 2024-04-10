@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { AggregatorV3Interface } from
     "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-/*
-* @notice Returns the ETH price for 1 sfrxETH by multiplying the results from the sfrxETH:frxETH and
-frxETH:ETH feeds.
- *         Needs to be multiplied by the ETH:USD feed for the final price.
+/**
+ * @notice Returns the ETH price for 1 sfrxETH by multiplying the results from the sfrxETH:frxETH and
+ * frxETH:ETH feeds.
+ * Needs to be multiplied by the ETH:USD feed for the final price.
  */
 contract SfrxEth2EthPriceAggregator is AggregatorV3Interface {
     error NotImplementedException();
+    error sfrxEthToFrxEthZeroPrice();
+    error frxEthToEthZeroPrice();
 
     int256 internal constant PRECISION = 1 ether;
     AggregatorV3Interface public constant sfrxEth2FrxEthAggregator =
@@ -69,7 +70,10 @@ contract SfrxEth2EthPriceAggregator is AggregatorV3Interface {
             uint256 updatedAt1,
             uint80 answeredInRound1
         ) = sfrxEth2FrxEthAggregator.latestRoundData();
-        require(answer1 > 0, "sfrxETH:frxETH value cannot be zero");
+
+        if (answer1 == 0) {
+            revert sfrxEthToFrxEthZeroPrice();
+        }
 
         (
             uint80 roundId2,
@@ -78,7 +82,10 @@ contract SfrxEth2EthPriceAggregator is AggregatorV3Interface {
             uint256 updatedAt2,
             uint80 answeredInRound2
         ) = frxEth2EthAggregator.latestRoundData();
-        require(answer2 > 0, "frxETH:ETH value cannot be zero");
+
+        if (answer2 == 0) {
+            revert frxEthToEthZeroPrice();
+        }
 
         answer = (answer1 * answer2) / PRECISION;
 
