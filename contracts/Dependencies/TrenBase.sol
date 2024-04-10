@@ -4,10 +4,7 @@ pragma solidity ^0.8.23;
 
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import { UUPSUpgradeable } from
-    "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import { BaseMath } from "./BaseMath.sol";
 import { TrenMath } from "./TrenMath.sol";
 import { IActivePool } from "../Interfaces/IActivePool.sol";
 import { IDefaultPool } from "../Interfaces/IDefaultPool.sol";
@@ -21,7 +18,7 @@ import { Addresses } from "../Addresses.sol";
 constants and
  * common functions.
  */
-abstract contract TrenBase is ITrenBase, BaseMath, OwnableUpgradeable, Addresses {
+abstract contract TrenBase is ITrenBase, OwnableUpgradeable, Addresses {
     // --- Gas compensation functions ---
 
     // Returns the composite debt (drawn debt + gas compensation) of a trenBox, for the purpose of

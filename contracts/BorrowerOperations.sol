@@ -10,7 +10,7 @@ import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/Saf
 import { ReentrancyGuardUpgradeable } from
     "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-import { TrenMath } from "./Dependencies/TrenMath.sol";
+import { TrenMath, DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
 import { TrenBase } from "./Dependencies/TrenBase.sol";
 import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
 

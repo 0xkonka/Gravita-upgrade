@@ -11,15 +11,13 @@ import { ReentrancyGuardUpgradeable } from
 
 import { ITRENStaking } from "../Interfaces/ITRENStaking.sol";
 
-import { BaseMath } from "../Dependencies/BaseMath.sol";
-import { TrenMath } from "../Dependencies/TrenMath.sol";
+import { TrenMath, DECIMAL_PRECISION } from "../Dependencies/TrenMath.sol";
 import { SafetyTransfer } from "../Dependencies/SafetyTransfer.sol";
 
 contract TRENStaking is
     ITRENStaking,
     PausableUpgradeable,
     OwnableUpgradeable,
-    BaseMath,
     ReentrancyGuardUpgradeable
 {
     using SafeERC20 for IERC20;
