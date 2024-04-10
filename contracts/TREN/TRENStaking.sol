@@ -185,7 +185,7 @@ contract TRENStaking is
             assetsList.push(_asset);
         }
 
-        uint256 assetFeePerTRENStaked;
+        uint256 assetFeePerTRENStaked = 0;
         if (totalTRENStaked > 0) assetFeePerTRENStaked = calculateFeePerTRENStaked(_assetFee);
         assetsFee[_asset] += assetFeePerTRENStaked;
 
@@ -197,7 +197,7 @@ contract TRENStaking is
         onlyFeeCollector
         isPaused(debtToken, _debtTokenFee)
     {
-        uint256 debtTokenFeePerTRENStaked;
+        uint256 debtTokenFeePerTRENStaked = 0;
         if (totalTRENStaked > 0) {
             debtTokenFeePerTRENStaked = calculateFeePerTRENStaked(_debtTokenFee);
         }

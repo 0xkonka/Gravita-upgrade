@@ -843,8 +843,6 @@ contract TrenBoxManagerOperations is
                 ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode
             );
         } else {
-            // if (_ICR >= MCR && ( _ICR >= _TCR || singleLiquidation.entireTrenBoxDebt >
-            // _debtTokenInStabPool))
             LiquidationValues memory zeroVals;
             return zeroVals;
         }
