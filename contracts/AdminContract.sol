@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { UUPSUpgradeable } from
@@ -11,7 +10,6 @@ import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol"
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
 import { IActivePool } from "./Interfaces/IActivePool.sol";
-import { IFlashLoan } from "./Interfaces/IFlashLoan.sol";
 import { IDefaultPool } from "./Interfaces/IDefaultPool.sol";
 
 contract AdminContract is

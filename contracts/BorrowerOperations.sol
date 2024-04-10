@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { UUPSUpgradeable } from
@@ -24,6 +23,7 @@ import { IBorrowerOperations } from "./Interfaces/IBorrowerOperations.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
+import { IDeposit } from "./Interfaces/IDeposit.sol";
 
 contract BorrowerOperations is
     TrenBase,
@@ -510,7 +510,7 @@ contract BorrowerOperations is
 
     // Send asset to Active Pool and increase its recorded asset balance
     function _activePoolAddColl(address _asset, uint256 _amount) internal {
-        IActivePool(activePool).receivedERC20(_asset, _amount);
+        IDeposit(activePool).receivedERC20(_asset, _amount);
         IERC20(_asset).safeTransferFrom(
             msg.sender, activePool, SafetyTransfer.decimalsCorrection(_asset, _amount)
         );

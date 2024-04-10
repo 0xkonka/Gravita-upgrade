@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import { IActivePool } from "./IActivePool.sol";
-import { IDefaultPool } from "./IDefaultPool.sol";
-import { IPriceFeed } from "./IPriceFeed.sol";
-
 interface IAdminContract {
     // Structs
     // ----------------------------------------------------------------------------------------------------------
