@@ -613,7 +613,10 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         this.contracts.borrowerOperations
           .connect(user)
           .openTrenBox(notSupportedAsset.address, 100n, 100n, upperHint, lowerHint)
-      ).to.be.revertedWith("collateral does not exist");
+      ).to.be.revertedWithCustomError(
+        this.contracts.adminContract,
+        "AdminContract__CollateralDoesNotExist"
+      );
     });
   });
 }

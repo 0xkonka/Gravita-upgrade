@@ -26,8 +26,11 @@ export default function shouldHaveGetIndex(): void {
     it("should revert", async function () {
       const nonExistentCollateral = ethers.ZeroAddress;
 
-      await expect(this.contracts.adminContract.getIndex(nonExistentCollateral)).to.be.revertedWith(
-        "collateral does not exist"
+      await expect(
+        this.contracts.adminContract.getIndex(nonExistentCollateral)
+      ).to.be.revertedWithCustomError(
+        this.contracts.adminContract,
+        "AdminContract__CollateralDoesNotExist"
       );
     });
   });

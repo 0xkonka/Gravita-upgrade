@@ -33,7 +33,10 @@ export default function shouldHaveGetIndices(): void {
 
         await expect(
           this.contracts.adminContract.getIndices([nonExistentCollateral])
-        ).to.be.revertedWith("collateral does not exist");
+        ).to.be.revertedWithCustomError(
+          this.contracts.adminContract,
+          "AdminContract__CollateralDoesNotExist"
+        );
       });
     });
   });
@@ -67,7 +70,10 @@ export default function shouldHaveGetIndices(): void {
 
         await expect(
           this.contracts.adminContract.getIndices([wETH.address, nonExistentCollateral])
-        ).to.be.revertedWith("collateral does not exist");
+        ).to.be.revertedWithCustomError(
+          this.contracts.adminContract,
+          "AdminContract__CollateralDoesNotExist"
+        );
       });
     });
 
@@ -78,7 +84,10 @@ export default function shouldHaveGetIndices(): void {
 
         await expect(
           this.contracts.adminContract.getIndices([wETH.address, nonExistentCollateral])
-        ).to.be.revertedWith("collateral does not exist");
+        ).to.be.revertedWithCustomError(
+          this.contracts.adminContract,
+          "AdminContract__CollateralDoesNotExist"
+        );
       });
     });
 

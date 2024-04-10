@@ -74,7 +74,10 @@ export default function shouldBehaveLikeCanSetPercentDivisor(): void {
 
       await expect(
         this.contracts.adminContract.setPercentDivisor(collateralAddress, percentDivisor)
-      ).to.be.revertedWith("Collateral is not configured, use setCollateralParameters");
+      ).to.be.revertedWithCustomError(
+        this.contracts.adminContract,
+        "AdminContract__CollateralNotConfigured"
+      );
     });
   });
 }

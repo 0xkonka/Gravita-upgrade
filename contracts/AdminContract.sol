@@ -8,10 +8,10 @@ import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
+import { DECIMAL_PRECISION as _DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
 import { IActivePool } from "./Interfaces/IActivePool.sol";
-import { IFlashLoan } from "./Interfaces/IFlashLoan.sol";
 import { IDefaultPool } from "./Interfaces/IDefaultPool.sol";
 
 contract AdminContract is
@@ -22,10 +22,8 @@ contract AdminContract is
 {
     // Constants
     // --------------------------------------------------------------------------------------------------------
-
     string public constant NAME = "AdminContract";
 
-    uint256 public constant DECIMAL_PRECISION = 1 ether;
     uint256 public constant _100pct = 1 ether; // 1e18 == 100%
     uint256 private constant DEFAULT_DECIMALS = 18;
 
@@ -45,7 +43,7 @@ contract AdminContract is
      * @dev Cannot be public as struct has too many variables for the stack.
      * 		@dev Create special view structs/getters instead.
      */
-    mapping(address => CollateralParams) internal collateralParams;
+    mapping(address collateral => CollateralParams params) internal collateralParams;
 
     FlashLoanParams public flashLoanParams;
 
@@ -86,10 +84,9 @@ contract AdminContract is
         uint256 min,
         uint256 max
     ) {
-        require(
-            collateralParams[_collateral].active,
-            "Collateral is not configured, use setCollateralParameters"
-        );
+        if (collateralParams[_collateral].active == false) {
+            revert AdminContract__CollateralNotConfigured();
+        }
 
         if (enteredValue < min || enteredValue > max) {
             revert SafeCheckError(parameter, enteredValue, min, max);
@@ -130,7 +127,10 @@ contract AdminContract is
         override
         onlyTimelock
     {
-        require(collateralParams[_collateral].mcr == 0, "collateral already exists");
+        if (collateralParams[_collateral].mcr != 0) {
+            revert AdminContract__CollateralExists();
+        }
+
         require(_decimals == DEFAULT_DECIMALS, "collaterals must have the default decimals");
         validCollateral.push(_collateral);
         collateralParams[_collateral] = CollateralParams({
@@ -316,6 +316,9 @@ contract AdminContract is
 
     // View functions
     // ---------------------------------------------------------------------------------------------------
+    function DECIMAL_PRECISION() external pure returns (uint256) {
+        return _DECIMAL_PRECISION;
+    }
 
     function getValidCollateral() external view override returns (address[] memory) {
         return validCollateral;
@@ -425,7 +428,9 @@ contract AdminContract is
     // -----------------------------------------------------------------------------------------------
 
     function _exists(address _collateral) internal view {
-        require(collateralParams[_collateral].mcr != 0, "collateral does not exist");
+        if (collateralParams[_collateral].mcr == 0) {
+            revert AdminContract__CollateralDoesNotExist();
+        }
     }
 
     function authorizeUpgrade(address newImplementation) public {

@@ -32,7 +32,10 @@ export default function shouldBehaveLikeCanSetIsActive(): void {
 
         await expect(
           this.contracts.adminContract.setIsActive(testCollateral.address, true)
-        ).to.be.revertedWith("collateral does not exist");
+        ).to.be.revertedWithCustomError(
+          this.contracts.adminContract,
+          "AdminContract__CollateralDoesNotExist"
+        );
       });
     });
   });

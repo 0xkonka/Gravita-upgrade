@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import { IActivePool } from "./IActivePool.sol";
-import { IDefaultPool } from "./IDefaultPool.sol";
-import { IPriceFeed } from "./IPriceFeed.sol";
-
 interface IAdminContract {
     // Structs
     // ----------------------------------------------------------------------------------------------------------
@@ -38,6 +34,9 @@ interface IAdminContract {
     error AdminContract__OnlyOwner();
     error AdminContract__OnlyTimelock();
     error AdminContract__CollateralAlreadyInitialized();
+    error AdminContract__CollateralExists();
+    error AdminContract__CollateralDoesNotExist();
+    error AdminContract__CollateralNotConfigured();
 
     // Events
     // -----------------------------------------------------------------------------------------------------------
