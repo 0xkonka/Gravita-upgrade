@@ -8,7 +8,7 @@ import { ReentrancyGuardUpgradeable } from
     "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 import { TrenBase } from "./Dependencies/TrenBase.sol";
-import { TrenMath } from "./Dependencies/TrenMath.sol";
+import { TrenMath, DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
 
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { IActivePool } from "./Interfaces/IActivePool.sol";
