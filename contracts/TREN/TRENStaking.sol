@@ -84,8 +84,8 @@ contract TRENStaking is
     {
         if (isSetupInitialized) revert TRENStaking__SetupAlreadyInitialized();
         if (
-            _debtToken != address(0) || _feeCollector != address(0) || _trenToken != address(0)
-                || _treasury != address(0)
+            _debtToken == address(0) || _feeCollector == address(0) || _trenToken == address(0)
+                || _treasury == address(0)
         ) revert TRENStaking__InvalidAddresses();
 
         debtToken = _debtToken;
