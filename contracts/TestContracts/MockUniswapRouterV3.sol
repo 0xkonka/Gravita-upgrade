@@ -27,7 +27,6 @@ contract MockUniswapRouterV3 is IUniswapRouterV3 {
 
     function exactOutput(ExactOutputParams memory params)
         external
-        payable
         returns (uint256 amountIn)
     {
         (address debtToken, address stableCoin, address assetToken, uint24 fee1, uint24 fee2) =
