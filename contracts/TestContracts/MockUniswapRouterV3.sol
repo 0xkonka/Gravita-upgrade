@@ -25,10 +25,7 @@ contract MockUniswapRouterV3 is IUniswapRouterV3 {
         ratioStableToDebt = _ratioStableToDebt;
     }
 
-    function exactOutput(ExactOutputParams memory params)
-        external
-        returns (uint256 amountIn)
-    {
+    function exactOutput(ExactOutputParams memory params) external returns (uint256 amountIn) {
         (address debtToken, address stableCoin, address assetToken, uint24 fee1, uint24 fee2) =
             decodePath(params.path);
 

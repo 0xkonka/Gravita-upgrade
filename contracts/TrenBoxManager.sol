@@ -445,9 +445,7 @@ contract TrenBoxManager is
         uint256 _totalDebtTokenSupply
     )
         external
-        override
         onlyTrenBoxManagerOperations
-        returns (uint256)
     {
         uint256 decayedBaseRate = _calcDecayedBaseRate(_asset);
         uint256 redeemedDebtFraction = (_assetDrawn * _price) / _totalDebtTokenSupply;
@@ -457,7 +455,6 @@ contract TrenBoxManager is
         baseRate[_asset] = newBaseRate;
         emit BaseRateUpdated(_asset, newBaseRate);
         _updateLastFeeOpTime(_asset);
-        return newBaseRate;
     }
 
     function applyPendingRewards(
