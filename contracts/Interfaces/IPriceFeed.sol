@@ -44,11 +44,11 @@ interface IPriceFeed {
     // Custom Errors
     // --------------------------------------------------------------------------------------------------
 
-    error PriceFeedExistingOracleRequired();
-    error PriceFeedInvalidDecimalsError();
-    error PriceFeedInvalidOracleResponseError(address token);
-    error PriceFeedTimelockOnlyError();
-    error PriceFeedUnknownAssetError();
+    error PriceFeed__ExistingOracleRequired();
+    error PriceFeed__InvalidDecimalsError();
+    error PriceFeed__InvalidOracleResponseError(address token);
+    error PriceFeed__TimelockOnlyError();
+    error PriceFeed__UnknownAssetError();
 
     // Events
     // ---------------------------------------------------------------------------------------------------------

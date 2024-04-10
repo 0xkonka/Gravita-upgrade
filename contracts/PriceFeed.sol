@@ -59,11 +59,11 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
         _requireOwnerOrTimelock(_token, _isFallback);
         if (_isFallback && oracles[_token].oracleAddress == address(0)) {
             // fallback setup requires an existing primary oracle for the asset
-            revert PriceFeedExistingOracleRequired();
+            revert PriceFeed__ExistingOracleRequired();
         }
         uint256 decimals = _fetchDecimals(_oracle, _type);
         if (decimals == 0) {
-            revert PriceFeedInvalidDecimalsError();
+            revert PriceFeed__InvalidDecimalsError();
         }
         OracleRecord memory newOracle = OracleRecord({
             oracleAddress: _oracle,
@@ -74,7 +74,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
         });
         uint256 price = _fetchOracleScaledPrice(newOracle);
         if (price == 0) {
-            revert PriceFeedInvalidOracleResponseError(_token);
+            revert PriceFeed__InvalidOracleResponseError(_token);
         }
         if (_isFallback) {
             fallbacks[_token] = newOracle;
@@ -110,7 +110,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
         if (price != 0) {
             return oracle.isEthIndexed ? _calcEthIndexedPrice(price) : price;
         }
-        revert PriceFeedInvalidOracleResponseError(_token);
+        revert PriceFeed__InvalidOracleResponseError(_token);
     }
 
     // Internal functions
@@ -126,10 +126,10 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
     }
 
     function _fetchOracleScaledPrice(OracleRecord memory oracle) internal view returns (uint256) {
-        uint256 oraclePrice;
-        uint256 priceTimestamp;
+        uint256 oraclePrice = 0;
+        uint256 priceTimestamp = 0;
         if (oracle.oracleAddress == address(0)) {
-            revert PriceFeedUnknownAssetError();
+            revert PriceFeed__UnknownAssetError();
         }
         if (ProviderType.Chainlink == oracle.providerType) {
             (oraclePrice, priceTimestamp) = _fetchChainlinkOracleResponse(oracle.oracleAddress);
@@ -232,7 +232,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses
         if (record.oracleAddress == address(0)) {
             _checkOwner();
         } else if (msg.sender != timelockAddress) {
-            revert PriceFeedTimelockOnlyError();
+            revert PriceFeed__TimelockOnlyError();
         }
     }
 

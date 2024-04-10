@@ -1,28 +1,16 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { ChainlinkAggregatorV3Interface } from "../Interfaces/IPriceFeed.sol";
+import { IPriceFeedL2 } from "../Interfaces/IPriceFeedL2.sol";
 import { PriceFeed } from "../PriceFeed.sol";
 
-contract PriceFeedL2 is PriceFeed {
-    // Custom Errors
-    // ----------------------------------------------------------------------------------------------------
-
-    error PriceFeed__SequencerDown();
-    error PriceFeed__SequencerGracePeriodNotOver();
-
-    // Events
-    // -----------------------------------------------------------------------------------------------------------
-
-    event SequencerUptimeFeedUpdated(address _sequencerUptimeFeed);
-
+contract PriceFeedL2 is IPriceFeedL2, PriceFeed {
     // Constants
     // --------------------------------------------------------------------------------------------------------
 
     /// @dev after sequencer comes back up, wait for up to X seconds for openTrenBox, adjustTrenBox
-    /// &
-    /// closeTrenBox
+    /// & closeTrenBox
     uint256 public constant SEQUENCER_BORROWING_DELAY_SECONDS = 3600;
 
     /// @dev after sequencer comes back up, wait for up to X seconds for redemptions & liquidations
@@ -38,15 +26,19 @@ contract PriceFeedL2 is PriceFeed {
 
     /**
      * @dev Requires msg.sender to be the contract owner when the sequencer is first set. Subsequent
-     * updates need to come
-     *     through the timelock contract.
+     * updates need to come through the timelock contract.
      */
     function setSequencerUptimeFeedAddress(address _sequencerUptimeFeedAddress) external {
+        if (_sequencerUptimeFeedAddress == address(0)) {
+            revert PriceFeedL2__SequencerZeroAddress();
+        }
+
         if (sequencerUptimeFeedAddress == address(0)) {
             _checkOwner();
         } else if (msg.sender != timelockAddress) {
-            revert PriceFeedTimelockOnlyError();
+            revert PriceFeed__TimelockOnlyError();
         }
+
         sequencerUptimeFeedAddress = _sequencerUptimeFeedAddress;
         emit SequencerUptimeFeedUpdated(_sequencerUptimeFeedAddress);
     }
@@ -56,14 +48,19 @@ contract PriceFeedL2 is PriceFeed {
 
     /**
      * @dev Callers:
-     *     - BorrowerOperations.openTrenBox()
-     *     - BorrowerOperations.adjustTrenBox()
-     *     - BorrowerOperations.closeTrenBox()
-     *     - TrenBoxManagerOperations.liquidateTrenBoxes()
-     *     - TrenBoxManagerOperations.batchLiquidateTrenBoxes()
-     *     - TrenBoxManagerOperations.redeemCollateral()
+     *   - BorrowerOperations.openTrenBox()
+     *   - BorrowerOperations.adjustTrenBox()
+     *   - BorrowerOperations.closeTrenBox()
+     *   - TrenBoxManagerOperations.liquidateTrenBoxes()
+     *   - TrenBoxManagerOperations.batchLiquidateTrenBoxes()
+     *   - TrenBoxManagerOperations.redeemCollateral()
      */
-    function fetchPrice(address _token) public view override returns (uint256) {
+    function fetchPrice(address _token)
+        public
+        view
+        override(IPriceFeedL2, PriceFeed)
+        returns (uint256)
+    {
         _checkSequencerUptimeFeed();
         return super.fetchPrice(_token);
     }
@@ -88,7 +85,7 @@ contract PriceFeedL2 is PriceFeed {
             // answer == 1 -> sequencer is down
             bool isSequencerUp = answer == 0;
             if (!isSequencerUp) {
-                revert PriceFeed__SequencerDown();
+                revert PriceFeedL2__SequencerDown();
             }
 
             uint256 delay;
@@ -100,7 +97,7 @@ contract PriceFeedL2 is PriceFeed {
             }
             uint256 timeSinceSequencerUp = block.timestamp - updatedAt;
             if (timeSinceSequencerUp <= delay) {
-                revert PriceFeed__SequencerGracePeriodNotOver();
+                revert PriceFeedL2__SequencerGracePeriodNotOver();
             }
         }
     }
