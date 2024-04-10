@@ -216,6 +216,7 @@ contract TrenBoxManagerOperations is
     )
         external
         override
+        nonReentrant
     {
         RedemptionTotals memory totals;
         totals.price = IPriceFeed(priceFeed).fetchPrice(_asset);
