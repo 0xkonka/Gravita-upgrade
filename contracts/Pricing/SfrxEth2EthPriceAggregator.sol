@@ -5,8 +5,8 @@ import { AggregatorV3Interface } from
     "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 /**
- * @notice Returns the ETH price for 1 sfrxETH by multiplying the results from the sfrxETH:frxETH and
- * frxETH:ETH feeds.
+ * @notice Returns the ETH price for 1 sfrxETH by multiplying the results from the sfrxETH:frxETH
+ * and frxETH:ETH feeds.
  * Needs to be multiplied by the ETH:USD feed for the final price.
  */
 contract SfrxEth2EthPriceAggregator is AggregatorV3Interface {
