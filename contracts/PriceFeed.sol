@@ -7,7 +7,8 @@ import { OwnableUpgradeable } from
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import { Addresses } from "./Addresses.sol";
+import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
+
 import { IPriceFeed, ChainlinkAggregatorV3Interface } from "./Interfaces/IPriceFeed.sol";
 import { API3ProxyInterface } from "./Pricing/API3ProxyInterface.sol";
 
@@ -17,7 +18,7 @@ import { API3ProxyInterface } from "./Pricing/API3ProxyInterface.sol";
  * optionally fallback oracles can also be registered in case the primary source
  * fails or is stale.
  */
-contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Addresses {
+contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, ConfigurableAddresses {
     // Constants
     // --------------------------------------------------------------------------------------------------------
 
