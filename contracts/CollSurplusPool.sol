@@ -9,11 +9,16 @@ import { OwnableUpgradeable } from
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
 import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
-import { Addresses } from "./Addresses.sol";
 
-contract CollSurplusPool is UUPSUpgradeable, OwnableUpgradeable, ICollSurplusPool, Addresses {
+contract CollSurplusPool is
+    UUPSUpgradeable,
+    OwnableUpgradeable,
+    ICollSurplusPool,
+    ConfigurableAddresses
+{
     using SafeERC20 for IERC20;
 
     string public constant NAME = "CollSurplusPool";

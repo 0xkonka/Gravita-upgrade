@@ -8,11 +8,10 @@ import { OwnableUpgradeable } from
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
 import { IDefaultPool } from "./Interfaces/IDefaultPool.sol";
 import { IDeposit } from "./Interfaces/IDeposit.sol";
-
-import { Addresses } from "./Addresses.sol";
 
 /*
 * The Default Pool holds the collateral and debt token amounts from liquidations that have been
@@ -23,7 +22,7 @@ struct.
  * When a trenBox makes an operation that applies to its pending collateral and debt, they are moved
  * from the Default Pool to the Active Pool.
  */
-contract DefaultPool is OwnableUpgradeable, UUPSUpgradeable, IDefaultPool, Addresses {
+contract DefaultPool is OwnableUpgradeable, UUPSUpgradeable, IDefaultPool, ConfigurableAddresses {
     using SafeERC20 for IERC20;
 
     string public constant NAME = "DefaultPool";

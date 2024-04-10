@@ -9,6 +9,7 @@ import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
+import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 import "./Interfaces/IAdminContract.sol";
 import "./Interfaces/IBorrowerOperations.sol";
 import "./Interfaces/IFeeCollector.sol";
@@ -16,13 +17,12 @@ import "./Interfaces/IFlashLoan.sol";
 import "./Interfaces/IFlashLoanReceiver.sol";
 import "./Interfaces/ITrenBoxManager.sol";
 import "./Interfaces/IUniswapRouterV3.sol";
-import "./Addresses.sol";
 
 contract FlashLoan is
     IFlashLoan,
     ReentrancyGuardUpgradeable,
     OwnableUpgradeable,
-    Addresses,
+    ConfigurableAddresses,
     UUPSUpgradeable
 {
     string public constant NAME = "FlashLoan";
