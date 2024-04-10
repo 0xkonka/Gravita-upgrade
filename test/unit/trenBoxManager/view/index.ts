@@ -20,7 +20,6 @@ import shouldBehaveLikeGetTrenBoxOwnersCount from "./getTrenBoxOwnersCount";
 import shouldBehaveLikeGetTrenBoxStake from "./getTrenBoxStake";
 import shouldBehaveLikeGetTrenBoxStatus from "./getTrenBoxStatus";
 import shouldBehaveLikeHasPendingRewards from "./hasPendingRewards";
-import shouldHaveIsSetupInitialized from "./isSetupInitialized";
 import shouldBehaveLikeIsTrenBoxActive from "./isTrenBoxActive";
 import shouldBehaveLikeIsValidFirstRedemptionHint from "./isValidFirstRedemptionHint";
 import shouldBehaveLikeOwner from "./owner";
@@ -28,7 +27,6 @@ import shouldBehaveLikeOwner from "./owner";
 export {
   shouldHavePublicConstant,
   shouldBehaveLikeOwner,
-  shouldHaveIsSetupInitialized,
   shouldBehaveLikeIsValidFirstRedemptionHint,
   shouldBehaveLikeGetNominalICR,
   shouldBehaveLikeGetCurrentICR,

@@ -443,10 +443,6 @@ contract BorrowerOperations is
         return debtTokenFee;
     }
 
-    function _getUSDValue(uint256 _coll, uint256 _price) internal pure returns (uint256) {
-        return (_price * _coll) / DECIMAL_PRECISION;
-    }
-
     function _getCollChange(
         uint256 _collReceived,
         uint256 _requestedCollWithdrawal

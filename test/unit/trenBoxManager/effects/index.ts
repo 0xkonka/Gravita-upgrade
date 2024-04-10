@@ -6,7 +6,7 @@ import shouldBehaveLikeCanCloseTrenBoxLiquidation from "./closeTrenBoxLiquidatio
 import shouldBehaveLikeCanDecreaseTrenBoxColl from "./decreaseTrenBoxColl";
 import shouldBehaveLikeCanDecreaseTrenBoxDebt from "./decreaseTrenBoxDebt";
 import shouldBehaveLikeCanExecuteFullRedemption from "./executeFullRedemption";
-import shouldBehaveLikCanExecutePartialRedemption from "./executePartialRedemption";
+import shouldBehaveLikeCanExecutePartialRedemption from "./executePartialRedemption";
 import shouldBehaveLikeCanFinalizeRedemption from "./finalizeRedemption";
 import shouldBehaveLikeCanIncreaseTrenBoxColl from "./increaseTrenBoxColl";
 import shouldBehaveLikeCanIncreaseTrenBoxDebt from "./increaseTrenBoxDebt";
@@ -23,7 +23,7 @@ import shouldBehaveLikeCanUpdateTrenBoxRewardSnapshots from "./updateTrenBoxRewa
 export {
   shouldBehaveLikeCanAddTrenBoxOwnerToArray,
   shouldBehaveLikeCanExecuteFullRedemption,
-  shouldBehaveLikCanExecutePartialRedemption,
+  shouldBehaveLikeCanExecutePartialRedemption,
   shouldBehaveLikeCanFinalizeRedemption,
   shouldBehaveLikeCanUpdateBaseRateFromRedemption,
   shouldBehaveLikeCanApplyPendingRewards,
