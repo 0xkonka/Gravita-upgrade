@@ -9,6 +9,7 @@ import { OwnableUpgradeable } from
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
 import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
 import { Addresses } from "./Addresses.sol";
 
@@ -66,15 +67,20 @@ contract CollSurplusPool is UUPSUpgradeable, OwnableUpgradeable, ICollSurplusPoo
         mapping(address => uint256) storage userBalance = userBalances[_account];
         uint256 claimableCollEther = userBalance[_asset];
 
-        require(claimableCollEther != 0, "CollSurplusPool: No collateral available to claim");
+        uint256 safetyTransferclaimableColl =
+            SafetyTransfer.decimalsCorrection(_asset, claimableCollEther);
+
+        require(
+            safetyTransferclaimableColl != 0, "CollSurplusPool: No collateral available to claim"
+        );
 
         userBalance[_asset] = 0;
         emit CollBalanceUpdated(_account, 0);
 
         balances[_asset] = balances[_asset] - claimableCollEther;
-        emit AssetSent(_account, claimableCollEther);
+        emit AssetSent(_account, safetyTransferclaimableColl);
 
-        IERC20(_asset).safeTransfer(_account, claimableCollEther);
+        IERC20(_asset).safeTransfer(_account, safetyTransferclaimableColl);
     }
 
     function receivedERC20(address _asset, uint256 _amount) external override {

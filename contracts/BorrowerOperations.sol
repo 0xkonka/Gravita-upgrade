@@ -12,6 +12,7 @@ import { ReentrancyGuardUpgradeable } from
 
 import { TrenMath } from "./Dependencies/TrenMath.sol";
 import { TrenBase } from "./Dependencies/TrenBase.sol";
+import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
 
 import { IDefaultPool } from "./Interfaces/IDefaultPool.sol";
 import { IPriceFeed } from "./Interfaces/IPriceFeed.sol";
@@ -25,6 +26,7 @@ import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
 
 import { Addresses } from "./Addresses.sol";
+import "hardhat/console.sol";
 
 contract BorrowerOperations is
     TrenBase,
@@ -122,6 +124,9 @@ contract BorrowerOperations is
 
         vars.ICR = TrenMath._computeCR(_assetAmount, vars.compositeDebt, vars.price);
         vars.NICR = TrenMath._computeNominalCR(_assetAmount, vars.compositeDebt);
+
+        console.log("vars.ICR", vars.ICR);
+        console.log("vars.NICR", vars.NICR);
 
         if (isRecoveryMode) {
             _requireICRisAboveCCR(vars.asset, vars.ICR);
@@ -512,7 +517,9 @@ contract BorrowerOperations is
     // Send asset to Active Pool and increase its recorded asset balance
     function _activePoolAddColl(address _asset, uint256 _amount) internal {
         IActivePool(activePool).receivedERC20(_asset, _amount);
-        IERC20(_asset).safeTransferFrom(msg.sender, activePool, _amount);
+        IERC20(_asset).safeTransferFrom(
+            msg.sender, activePool, SafetyTransfer.decimalsCorrection(_asset, _amount)
+        );
     }
 
     // Issue the specified amount of debt tokens to _account and increases the total active debt
@@ -654,6 +661,7 @@ contract BorrowerOperations is
     }
 
     function _requireICRisAboveMCR(address _asset, uint256 _newICR) internal view {
+        console.log("IAdminContract(adminContract).getMcr(_asset)", IAdminContract(adminContract).getMcr(_asset));
         require(
             _newICR >= IAdminContract(adminContract).getMcr(_asset),
             "BorrowerOps: An operation that would result in ICR < MCR is not permitted"
