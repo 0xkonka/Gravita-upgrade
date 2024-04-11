@@ -17,7 +17,7 @@ Summary
  - [assembly](#assembly) (2 results) (Informational)
  - [boolean-equal](#boolean-equal) (1 results) (Informational)
  - [low-level-calls](#low-level-calls) (1 results) (Informational)
- - [missing-inheritance](#missing-inheritance) (2 results) (Informational)
+ - [missing-inheritance](#missing-inheritance) (1 results) (Informational)
  - [similar-names](#similar-names) (8 results) (Informational)
  - [too-many-digits](#too-many-digits) (1 results) (Informational)
 ## arbitrary-send-erc20
@@ -1431,12 +1431,6 @@ contracts/Timelock.sol#L162-L206
 Impact: Informational
 Confidence: High
  - [ ] ID-141
-[ActivePool](contracts/ActivePool.sol#L27-L172) should inherit from [IDeposit](contracts/Interfaces/IDeposit.sol#L4-L6)
-
-contracts/ActivePool.sol#L27-L172
-
-
- - [ ] ID-142
 [DefaultPool](contracts/DefaultPool.sol#L25-L126) should inherit from [IDeposit](contracts/Interfaces/IDeposit.sol#L4-L6)
 
 contracts/DefaultPool.sol#L25-L126
@@ -1445,49 +1439,49 @@ contracts/DefaultPool.sol#L25-L126
 ## similar-names
 Impact: Informational
 Confidence: Medium
- - [ ] ID-143
+ - [ ] ID-142
 Variable [AdminContract.setPercentDivisor(address,uint256).percentDivisor](contracts/AdminContract.sol#L254) is too similar to [IAdminContract.setPercentDivisor(address,uint256).precentDivisor](contracts/Interfaces/IAdminContract.sol#L89)
 
 contracts/AdminContract.sol#L254
 
 
- - [ ] ID-144
+ - [ ] ID-143
 Variable [IBorrowerOperations.withdrawColl(address,uint256,address,address)._assetAmount](contracts/Interfaces/IBorrowerOperations.sol#L47) is too similar to [BorrowerOperations.openTrenBox(address,uint256,uint256,address,address).assetAmount_](contracts/BorrowerOperations.sol#L138-L140)
 
 contracts/Interfaces/IBorrowerOperations.sol#L47
 
 
- - [ ] ID-145
+ - [ ] ID-144
 Variable [IBorrowerOperations.openTrenBox(address,uint256,uint256,address,address)._assetAmount](contracts/Interfaces/IBorrowerOperations.sol#L30) is too similar to [BorrowerOperations.openTrenBox(address,uint256,uint256,address,address).assetAmount_](contracts/BorrowerOperations.sol#L138-L140)
 
 contracts/Interfaces/IBorrowerOperations.sol#L30
 
 
- - [ ] ID-146
+ - [ ] ID-145
 Variable [BorrowerOperations.openTrenBox(address,uint256,uint256,address,address)._assetAmount](contracts/BorrowerOperations.sol#L87) is too similar to [BorrowerOperations.openTrenBox(address,uint256,uint256,address,address).assetAmount_](contracts/BorrowerOperations.sol#L138-L140)
 
 contracts/BorrowerOperations.sol#L87
 
 
- - [ ] ID-147
+ - [ ] ID-146
 Variable [IAdminContract.setCollateralParameters(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256).percentDivisor](contracts/Interfaces/IAdminContract.sol#L78) is too similar to [IAdminContract.setPercentDivisor(address,uint256).precentDivisor](contracts/Interfaces/IAdminContract.sol#L89)
 
 contracts/Interfaces/IAdminContract.sol#L78
 
 
- - [ ] ID-148
+ - [ ] ID-147
 Variable [AdminContract.CCR_DEFAULT](contracts/AdminContract.sol#L30) is too similar to [AdminContract.MCR_DEFAULT](contracts/AdminContract.sol#L31)
 
 contracts/AdminContract.sol#L30
 
 
- - [ ] ID-149
+ - [ ] ID-148
 Variable [SfrxEth2EthPriceAggregator.latestRoundData().answeredInRound1](contracts/Pricing/SfrxEth2EthPriceAggregator.sol#L71) is too similar to [SfrxEth2EthPriceAggregator.latestRoundData().answeredInRound2](contracts/Pricing/SfrxEth2EthPriceAggregator.sol#L83)
 
 contracts/Pricing/SfrxEth2EthPriceAggregator.sol#L71
 
 
- - [ ] ID-150
+ - [ ] ID-149
 Variable [AdminContract.setCollateralParameters(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256).percentDivisor](contracts/AdminContract.sol#L163) is too similar to [IAdminContract.setPercentDivisor(address,uint256).precentDivisor](contracts/Interfaces/IAdminContract.sol#L89)
 
 contracts/AdminContract.sol#L163
@@ -1496,7 +1490,7 @@ contracts/AdminContract.sol#L163
 ## too-many-digits
 Impact: Informational
 Confidence: Medium
- - [ ] ID-151
+ - [ ] ID-150
 [BytesLib.toAddress(bytes,uint256)](contracts/TestContracts/MockUniswapRouterV3.sol#L58-L68) uses literals with too many digits:
 	- [tempAddress = mload(uint256)(_bytes + 0x20 + _start) / 0x1000000000000000000000000](contracts/TestContracts/MockUniswapRouterV3.sol#L64)
 

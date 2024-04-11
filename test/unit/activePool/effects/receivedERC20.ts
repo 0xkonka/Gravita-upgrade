@@ -45,7 +45,10 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
 
       await expect(
         this.contracts.activePool.connect(this.impostor).receivedERC20(wETH.address, debtAmount)
-      ).to.be.revertedWith("ActivePool: Caller is not an authorized Tren contract");
+      ).to.be.revertedWithCustomError(
+        this.contracts.activePool,
+        "ActivePool__NotAuthorizedContract"
+      );
     });
   });
 }
