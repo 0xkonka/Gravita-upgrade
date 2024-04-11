@@ -34,9 +34,9 @@ interface IStabilityPool is IDeposit {
     event StakeChanged(uint256 _newSystemStake, address _depositor);
     event UserDepositChanged(address indexed _depositor, uint256 _newDeposit);
 
-    event P_Updated(uint256 _P);
-    event S_Updated(address _asset, uint256 _S, uint128 _epoch, uint128 _scale);
-    event G_Updated(uint256 _G, uint128 _epoch, uint128 _scale);
+    event ProductUpdated(uint256 _P);
+    event SumUpdated(address _asset, uint256 _S, uint128 _epoch, uint128 _scale);
+    event GainsUpdated(uint256 _G, uint128 _epoch, uint128 _scale);
     event EpochUpdated(uint128 _currentEpoch);
     event ScaleUpdated(uint128 _currentScale);
 
@@ -46,6 +46,12 @@ interface IStabilityPool is IDeposit {
     error StabilityPool__AdminContractOnly(address sender, address expected);
     error StabilityPool__TrenBoxManagerOnly(address sender, address expected);
     error StabilityPool__ArrayNotInAscendingOrder();
+    error StabilityPool__DebtLossBelowOne(uint256 debtLoss);
+    error StabilityPool__DebtLargerThanTotalDeposits();
+    error StabilityPool__ProductZero();
+    error StabilityPool__AssetsAndAmountsLengthMismatch();
+    error StabilityPool__UserHasNoDeposit();
+    error StabilityPool__AmountMustBeNonZero();
 
     // --- Functions ---
 

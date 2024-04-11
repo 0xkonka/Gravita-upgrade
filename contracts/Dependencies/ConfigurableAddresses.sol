@@ -5,7 +5,7 @@ pragma solidity ^0.8.23;
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-abstract contract AddressesConfigurable is OwnableUpgradeable {
+abstract contract ConfigurableAddresses is OwnableUpgradeable {
     address public activePool;
     address public adminContract;
     address public borrowerOperations;
@@ -14,6 +14,7 @@ abstract contract AddressesConfigurable is OwnableUpgradeable {
     address public debtToken;
     address public defaultPool;
     address public feeCollector;
+    address public flashLoanAddress;
     address public gasPoolAddress;
     address public trenStaking;
     address public priceFeed;
@@ -33,14 +34,27 @@ abstract contract AddressesConfigurable is OwnableUpgradeable {
      */
     uint256[33] private __gap; // Goerli uses 47; Arbitrum uses 33
 
+    error ConfigurableAddresses__SetupIsInitialized();
+    error ConfigurableAddresses__ZeroAddresses(uint256 position, address address_);
+    error ConfigurableAddresses__CommunityIssuanceZeroAddress();
+    error ConfigurableAddresses__TRENStakingZeroAddress();
+    error ConfigurableAddresses__LengthMismatch();
+
     // Dependency setters
     // -----------------------------------------------------------------------------------------------
 
     function setAddresses(address[] calldata _addresses) external onlyOwner {
-        require(!isAddressSetupInitialized, "Setup is already initialized");
-        require(_addresses.length == 15, "Expected 15 addresses at setup");
-        for (uint256 i = 0; i < 15; i++) {
-            require(_addresses[i] != address(0), "Invalid address");
+        if (isAddressSetupInitialized) {
+            revert ConfigurableAddresses__SetupIsInitialized();
+        }
+        if (_addresses.length != 16) {
+            revert ConfigurableAddresses__LengthMismatch();
+        }
+
+        for (uint256 i = 0; i < 16; i++) {
+            if (_addresses[i] == address(0)) {
+                revert ConfigurableAddresses__ZeroAddresses(i, _addresses[i]);
+            }
         }
         activePool = _addresses[0];
         adminContract = _addresses[1];
@@ -49,23 +63,30 @@ abstract contract AddressesConfigurable is OwnableUpgradeable {
         debtToken = _addresses[4];
         defaultPool = _addresses[5];
         feeCollector = _addresses[6];
-        gasPoolAddress = _addresses[7];
-        priceFeed = _addresses[8];
-        sortedTrenBoxes = _addresses[9];
-        stabilityPool = _addresses[10];
-        timelockAddress = _addresses[11];
-        treasuryAddress = _addresses[12];
-        trenBoxManager = _addresses[13];
-        trenBoxManagerOperations = _addresses[14];
+        flashLoanAddress = _addresses[7];
+        gasPoolAddress = _addresses[8];
+        priceFeed = _addresses[9];
+        sortedTrenBoxes = _addresses[10];
+        stabilityPool = _addresses[11];
+        timelockAddress = _addresses[12];
+        treasuryAddress = _addresses[13];
+        trenBoxManager = _addresses[14];
+        trenBoxManagerOperations = _addresses[15];
 
         isAddressSetupInitialized = true;
     }
 
     function setCommunityIssuance(address _communityIssuance) public onlyOwner {
+        if (_communityIssuance == address(0)) {
+            revert ConfigurableAddresses__CommunityIssuanceZeroAddress();
+        }
         communityIssuance = _communityIssuance;
     }
 
     function setTRENStaking(address _trenStaking) public onlyOwner {
+        if (_trenStaking == address(0)) {
+            revert ConfigurableAddresses__TRENStakingZeroAddress();
+        }
         trenStaking = _trenStaking;
     }
 }

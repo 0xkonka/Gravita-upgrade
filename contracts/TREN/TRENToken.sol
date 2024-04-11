@@ -9,7 +9,7 @@ contract TRENToken is ERC20Permit {
     string public constant NAME = "TREN";
     string public constant SYMBOL = "TREN";
 
-    uint256 internal _1_MILLION = 1e24; // 1e6 * 1e18 = 1e24
+    uint256 internal constant _1_MILLION = 1e24; // 1e6 * 1e18 = 1e24
 
     address public immutable treasury;
 

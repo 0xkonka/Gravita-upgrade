@@ -9,13 +9,12 @@ import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import { TrenBase } from "./Dependencies/TrenBase.sol";
-import { TrenMath } from "./Dependencies/TrenMath.sol";
+import { TrenMath, DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
 
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { IActivePool } from "./Interfaces/IActivePool.sol";
 import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
-import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 import { ICommunityIssuance } from "./Interfaces/ICommunityIssuance.sol";
 
 /**
@@ -195,7 +194,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     // Anytime a new collateral is added to AdminContract, both lists are lengthened
     Colls internal totalColl;
 
-    mapping(address => uint256) public deposits; // depositor address -> deposit amount
+    mapping(address depositor => uint256 amount) public deposits;
 
     /*
      * depositSnapshots maintains an entry for each depositor
@@ -205,7 +204,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
      * depositSnapshots are used to allocate TREN rewards, calculate compoundedDepositAmount
      * and to calculate how much Collateral amount the depositor is entitled to
      */
-    mapping(address => Snapshots) public depositSnapshots; // depositor address -> snapshots struct
+    mapping(address depositor => Snapshots snapshot) public depositSnapshots;
 
     /*  Product 'P': Running product by which to multiply an initial deposit, in order to find the
     current compounded deposit,
@@ -235,7 +234,10 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
      * - The middle mapping records (epoch => (scale => sum))
      * - The outer mapping records (collateralType => (epoch => (scale => sum)))
      */
-    mapping(address => mapping(uint128 => mapping(uint128 => uint256))) public epochToScaleToSum;
+    mapping(
+        address collateral
+            => mapping(uint128 collateralType => mapping(uint128 epoch => uint256 sum))
+    ) public epochToScaleToSum;
 
     /*
     * Similarly, the sum 'G' is used to calculate TREN gains. During it's lifetime, each deposit d_t
@@ -248,7 +250,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     *  In each case, the TREN reward is issued (i.e. G is updated), before other state changes are
     made.
      */
-    mapping(uint128 => mapping(uint128 => uint256)) public epochToScaleToG;
+    mapping(uint128 epoch => mapping(uint128 scale => uint256 G)) public epochToScaleToG;
 
     // Error tracker for the error correction in the TREN issuance calculation
     uint256 public lastTRENError;
@@ -353,8 +355,8 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         _updateDepositAndSnapshots(msg.sender, newDeposit);
         emit UserDepositChanged(msg.sender, newDeposit);
 
-        emit GainsWithdrawn(msg.sender, gainAssets, gainAmounts, loss); // loss required for event
-            // log
+        // loss required for event log
+        emit GainsWithdrawn(msg.sender, gainAssets, gainAmounts, loss);
 
         // send any collateral gains accrued to the depositor
         _sendGainsToDepositor(msg.sender, gainAssets, gainAmounts);
@@ -364,7 +366,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
      * @param _amount amount of debtToken to withdraw
      * @param _assets an array of collaterals to be claimed.
      */
-    function withdrawFromSP(uint256 _amount, address[] calldata _assets) external {
+    function withdrawFromSP(uint256 _amount, address[] calldata _assets) external nonReentrant {
         (address[] memory assets, uint256[] memory amounts) = _withdrawFromSP(_amount, _assets);
         _sendGainsToDepositor(msg.sender, assets, amounts);
     }
@@ -433,7 +435,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         uint256 newEpochToScaleToG = epochToScaleToG[currentEpoch][currentScale];
         newEpochToScaleToG += marginalTRENGain;
         epochToScaleToG[currentEpoch][currentScale] = newEpochToScaleToG;
-        emit G_Updated(newEpochToScaleToG, currentEpoch, currentScale);
+        emit GainsUpdated(newEpochToScaleToG, currentEpoch, currentScale);
     }
 
     function _computeTRENPerUnitStaked(
@@ -530,7 +532,10 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         uint256 assetIndex = IAdminContract(adminContract).getIndex(_asset);
         uint256 collateralNumerator =
             (_amountAdded * DECIMAL_PRECISION) + lastAssetError_Offset[assetIndex];
-        require(_debtToOffset <= _totalDeposits, "StabilityPool: Debt is larger than totalDeposits");
+        if (_debtToOffset > _totalDeposits) {
+            revert StabilityPool__DebtLargerThanTotalDeposits();
+        }
+
         if (_debtToOffset == _totalDeposits) {
             debtLossPerUnitStaked = DECIMAL_PRECISION; // When the Pool depletes to 0, so does each
                 // deposit
@@ -557,7 +562,10 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     )
         internal
     {
-        require(_debtLossPerUnitStaked <= DECIMAL_PRECISION, "StabilityPool: Loss < 1");
+        if (_debtLossPerUnitStaked > DECIMAL_PRECISION) {
+            revert StabilityPool__DebtLossBelowOne(_debtLossPerUnitStaked);
+        }
+
         uint256 currentP = P;
         uint256 newP;
 
@@ -584,7 +592,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         uint256 marginalAssetGain = _collGainPerUnitStaked * currentP;
         uint256 newS = currentS + marginalAssetGain;
         epochToScaleToSum[_asset][currentEpochCached][currentScaleCached] = newS;
-        emit S_Updated(_asset, newS, currentEpochCached, currentScaleCached);
+        emit SumUpdated(_asset, newS, currentEpochCached, currentScaleCached);
 
         // If the Stability Pool was emptied, increment the epoch, and reset the scale and product P
         if (newProductFactor == 0) {
@@ -611,9 +619,12 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
             }
         }
 
-        require(newP != 0, "StabilityPool: P = 0");
+        if (newP == 0) {
+            revert StabilityPool__ProductZero();
+        }
+
         P = newP;
-        emit P_Updated(newP);
+        emit ProductUpdated(newP);
     }
 
     /**
@@ -896,7 +907,11 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         internal
     {
         uint256 assetsLen = assets.length;
-        require(assetsLen == amounts.length, "StabilityPool: Length mismatch");
+
+        if (assetsLen != amounts.length) {
+            revert StabilityPool__AssetsAndAmountsLengthMismatch();
+        }
+
         for (uint256 i = 0; i < assetsLen;) {
             uint256 amount = amounts[i];
             if (amount == 0) {
@@ -1018,11 +1033,15 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     }
 
     function _requireUserHasDeposit(uint256 _initialDeposit) internal pure {
-        require(_initialDeposit != 0, "StabilityPool: User must have a non-zero deposit");
+        if (_initialDeposit == 0) {
+            revert StabilityPool__UserHasNoDeposit();
+        }
     }
 
     function _requireNonZeroAmount(uint256 _amount) internal pure {
-        require(_amount != 0, "StabilityPool: Amount must be non-zero");
+        if (_amount == 0) {
+            revert StabilityPool__AmountMustBeNonZero();
+        }
     }
 
     // --- Modifiers ---

@@ -81,7 +81,10 @@ export default function shouldBehaveLikeCanSendAsset(): void {
           this.contracts.activePool
             .connect(this.impostor)
             .sendAsset(wETH.address, recipient, assetAmount)
-        ).to.be.revertedWith("ActivePool: Caller is not an authorized Tren contract");
+        ).to.be.revertedWithCustomError(
+          this.contracts.activePool,
+          "ActivePool__NotAuthorizedContract"
+        );
       });
     }
   );

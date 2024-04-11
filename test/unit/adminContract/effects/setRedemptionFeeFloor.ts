@@ -87,7 +87,10 @@ export default function shouldBehaveLikeCanSetRedemptionFeeFloor(): void {
 
       await expect(
         this.contracts.adminContract.setRedemptionFeeFloor(collateralAddress, redemptionFeeFloor)
-      ).to.be.revertedWith("Collateral is not configured, use setCollateralParameters");
+      ).to.be.revertedWithCustomError(
+        this.contracts.adminContract,
+        "AdminContract__CollateralNotConfigured"
+      );
     });
   });
 }

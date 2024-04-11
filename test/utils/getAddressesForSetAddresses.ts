@@ -21,6 +21,7 @@ export function getAddressesForSetAddresses(context: Context) {
       await contracts.debtToken.getAddress(),
       await contracts.defaultPool.getAddress(),
       await contracts.feeCollector.getAddress(),
+      await contracts.flashLoan.getAddress(),
       await contracts.gasPool.getAddress(),
       await contracts.priceFeed.getAddress(),
       await contracts.sortedTrenBoxes.getAddress(),

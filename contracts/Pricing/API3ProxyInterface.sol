@@ -1,16 +1,7 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
-/**
- * @notice Interface for reading dAPI data feeds from https://market.api3.org/dapis
- */
-interface API3ProxyInterface {
-    function read() external view returns (int224 value, uint32 timestamp);
-}
-
-/// @see https://vscode.blockscan.com/arbitrum-one/0x26690F9f17FdC26D419371315bc17950a0FC90eD
-
+/// @notice Interface for reading dAPI data feeds from https://market.api3.org/dapis
 /// @dev The proxy contracts are generalized to support most types of numerical
 /// data feeds. This means that the user of this proxy is expected to validate
 /// the read values according to the specific use-case. For example, `value` is
@@ -26,3 +17,9 @@ interface API3ProxyInterface {
 /// This may be relevant when either of them drifts. (2) `timestamp` is an
 /// off-chain value that is being reported, similar to `value`. Both should
 /// only be trusted as much as the Airnode(s) that report them.
+///
+/// from https://vscode.blockscan.com/arbitrum-one/0x26690F9f17FdC26D419371315bc17950a0FC90eD
+
+interface API3ProxyInterface {
+    function read() external view returns (int224 value, uint32 timestamp);
+}

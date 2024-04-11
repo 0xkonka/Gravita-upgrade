@@ -396,7 +396,10 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
           defaultPercentDivisor,
           defaultRedemptionFeeFloor
         )
-      ).to.be.revertedWith("collateral does not exist");
+      ).to.be.revertedWithCustomError(
+        this.contracts.adminContract,
+        "AdminContract__CollateralDoesNotExist"
+      );
     });
   });
 }

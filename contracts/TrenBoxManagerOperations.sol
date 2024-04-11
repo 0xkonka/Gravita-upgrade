@@ -8,7 +8,7 @@ import { ReentrancyGuardUpgradeable } from
     "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 import { TrenBase } from "./Dependencies/TrenBase.sol";
-import { TrenMath } from "./Dependencies/TrenMath.sol";
+import { TrenMath, DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
 
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { IActivePool } from "./Interfaces/IActivePool.sol";
@@ -216,6 +216,7 @@ contract TrenBoxManagerOperations is
     )
         external
         override
+        nonReentrant
     {
         RedemptionTotals memory totals;
         totals.price = IPriceFeed(priceFeed).fetchPrice(_asset);
@@ -842,8 +843,6 @@ contract TrenBoxManagerOperations is
                 ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode
             );
         } else {
-            // if (_ICR >= MCR && ( _ICR >= _TCR || singleLiquidation.entireTrenBoxDebt >
-            // _debtTokenInStabPool))
             LiquidationValues memory zeroVals;
             return zeroVals;
         }

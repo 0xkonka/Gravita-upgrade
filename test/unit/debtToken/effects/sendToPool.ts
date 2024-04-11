@@ -84,15 +84,22 @@ export default function shouldBehaveLikeCanSendToPool(): void {
     it("reverts", async function () {
       const amountToSend = 100n;
 
+      const stabilityPoolImpostor = this.signers.accounts[0];
+
       await expect(
         this.contracts.debtToken
-          .connect(this.signers.accounts[0])
+          .connect(stabilityPoolImpostor)
           .sendToPool(
             this.signers.accounts[0].address,
             this.signers.accounts[1].address,
             amountToSend
           )
-      ).to.be.revertedWith("DebtToken: Caller is not the StabilityPool");
+      )
+        .to.be.revertedWithCustomError(
+          this.contracts.debtToken,
+          "DebtToken__CallerIsNotStabilityPool"
+        )
+        .withArgs(stabilityPoolImpostor.address);
     });
   });
 }

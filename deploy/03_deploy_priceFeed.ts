@@ -39,7 +39,7 @@ async function deployAndVerifyOnLayer2(
     contractPath: contractPath,
     contractAddress: deployResult.address,
     args: deployResult.args || [],
-    isUpgradeable: true
+    isUpgradeable: true,
   });
 }
 
@@ -47,7 +47,6 @@ async function deployAndVerifyOnLayer1(
   deployer: string,
   deploy: DeploymentsExtension["deploy"]
 ): Promise<void> {
-
   await preDeploy(deployer, "PriceFeed");
 
   const deployResult: DeployResult = await deploy("PriceFeed", {
@@ -70,7 +69,7 @@ async function deployAndVerifyOnLayer1(
     contractPath: contractPath,
     contractAddress: deployResult.address,
     args: deployResult.args || [],
-    isUpgradeable: true
+    isUpgradeable: true,
   });
 }
 

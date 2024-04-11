@@ -1,18 +1,13 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-
-import { BaseMath } from "../Dependencies/BaseMath.sol";
-import { TrenMath } from "../Dependencies/TrenMath.sol";
-
 import { ICommunityIssuance } from "../Interfaces/ICommunityIssuance.sol";
 import { IStabilityPool } from "../Interfaces/IStabilityPool.sol";
 
-contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable, BaseMath {
+contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable {
     using SafeERC20 for IERC20;
 
     string public constant NAME = "CommunityIssuance";
@@ -36,11 +31,6 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable, BaseMath {
         _;
     }
 
-    modifier isStabilityPool(address _pool) {
-        require(address(stabilityPool) == _pool, "CommunityIssuance: caller is not SP");
-        _;
-    }
-
     modifier onlyStabilityPool() {
         require(address(stabilityPool) == msg.sender, "CommunityIssuance: caller is not SP");
         _;
@@ -55,23 +45,26 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable, BaseMath {
 
     // --- Functions ---
     function setAddresses(
-        address _trenTokenAddress,
-        address _stabilityPoolAddress,
+        address _trenToken,
+        address _stabilityPool,
         address _adminContract
     )
         external
         onlyOwner
     {
-        require(!isSetupInitialized, "Setup is already initialized");
+        if (isSetupInitialized) revert CommunityIssuance__SetupAlreadyInitialized();
+        if (
+            _trenToken == address(0) || _stabilityPool == address(0) || _adminContract == address(0)
+        ) revert CommunityIssuance__InvalidAddresses();
         adminContract = _adminContract;
-        trenToken = IERC20(_trenTokenAddress);
-        stabilityPool = IStabilityPool(_stabilityPoolAddress);
+        trenToken = IERC20(_trenToken);
+        stabilityPool = IStabilityPool(_stabilityPool);
         isSetupInitialized = true;
     }
 
-    function setAdminContract(address _admin) external onlyOwner {
-        require(_admin != address(0));
-        adminContract = _admin;
+    function setAdminContract(address _adminContract) external onlyOwner {
+        if (_adminContract == address(0)) revert CommunityIssuance__InvalidAdminContractAddress();
+        adminContract = _adminContract;
     }
 
     function addFundToStabilityPool(uint256 _assignedSupply) external override isController {

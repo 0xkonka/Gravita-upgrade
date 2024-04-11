@@ -1,16 +1,7 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
-import { IActivePool } from "./IActivePool.sol";
-import { ICollSurplusPool } from "./ICollSurplusPool.sol";
-import { IDebtToken } from "./IDebtToken.sol";
-import { IDefaultPool } from "./IDefaultPool.sol";
-import { ITrenBase } from "./ITrenBase.sol";
-import { ISortedTrenBoxes } from "./ISortedTrenBoxes.sol";
-import { IStabilityPool } from "./IStabilityPool.sol";
-
-interface ITrenBoxManager is ITrenBase {
+interface ITrenBoxManager {
     // Enums
     // ------------------------------------------------------------------------------------------------------------
 
@@ -246,8 +237,7 @@ interface ITrenBoxManager is ITrenBase {
         uint256 _price,
         uint256 _totalDebtTokenSupply
     )
-        external
-        returns (uint256);
+        external;
 
     function getRedemptionFee(address _asset, uint256 _assetDraw) external view returns (uint256);
 

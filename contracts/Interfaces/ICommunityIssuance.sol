@@ -3,6 +3,11 @@
 pragma solidity ^0.8.23;
 
 interface ICommunityIssuance {
+    // --- Errors ---
+    error CommunityIssuance__SetupAlreadyInitialized();
+    error CommunityIssuance__InvalidAddresses();
+    error CommunityIssuance__InvalidAdminContractAddress();
+
     // --- Events ---
 
     event TotalTRENIssuedUpdated(uint256 _totalTRENIssued);

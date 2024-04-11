@@ -1,20 +1,17 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-
 import { ReentrancyGuardUpgradeable } from
     "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
-import { Addresses } from "./Addresses.sol";
+import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
+
 import { IActivePool } from "./Interfaces/IActivePool.sol";
 import { IDeposit } from "./Interfaces/IDeposit.sol";
 
@@ -32,52 +29,49 @@ contract ActivePool is
     UUPSUpgradeable,
     ReentrancyGuardUpgradeable,
     IActivePool,
-    Addresses
+    IDeposit,
+    ConfigurableAddresses
 {
     using SafeERC20 for IERC20;
 
     string public constant NAME = "ActivePool";
 
-    mapping(address => uint256) internal assetsBalances;
-    mapping(address => uint256) internal debtTokenBalances;
+    mapping(address collateral => uint256 balance) internal collateralBalances;
+    mapping(address collateral => uint256 balance) internal debtTokenBalances;
 
-    // --- Modifiers ---
-
-    modifier callerIsBorrowerOpsOrDefaultPool() {
-        require(
-            msg.sender == borrowerOperations || msg.sender == defaultPool,
-            "ActivePool: Caller is not an authorized Tren contract"
-        );
+    modifier onlyBorroweOperationsOrDefaultPool() {
+        if (msg.sender != borrowerOperations && msg.sender != defaultPool) {
+            revert ActivePool__NotAuthorizedContract();
+        }
         _;
     }
 
-    modifier callerIsBorrowerOpsOrTrenBoxMgr() {
-        require(
-            msg.sender == borrowerOperations || msg.sender == trenBoxManager,
-            "ActivePool: Caller is not an authorized Tren contract"
-        );
+    modifier onlyBorrowerOperationsOrTrenBoxManager() {
+        if (msg.sender != borrowerOperations && msg.sender != trenBoxManager) {
+            revert ActivePool__NotAuthorizedContract();
+        }
         _;
     }
 
     modifier callerIsBorrowerOpsOrStabilityPoolOrTrenBoxMgr() {
-        require(
-            msg.sender == borrowerOperations || msg.sender == stabilityPool
-                || msg.sender == trenBoxManager,
-            "ActivePool: Caller is not an authorized Tren contract"
-        );
+        if (
+            msg.sender != borrowerOperations && msg.sender != stabilityPool
+                && msg.sender != trenBoxManager
+        ) {
+            revert ActivePool__NotAuthorizedContract();
+        }
         _;
     }
 
-    modifier callerIsBorrowerOpsOrStabilityPoolOrTrenBoxMgrOrTrenBoxMgrOps() {
-        require(
-            msg.sender == borrowerOperations || msg.sender == stabilityPool
-                || msg.sender == trenBoxManager || msg.sender == trenBoxManagerOperations,
-            "ActivePool: Caller is not an authorized Tren contract"
-        );
+    modifier onlyAuthorizedProtocolContracts() {
+        if (
+            msg.sender != borrowerOperations && msg.sender != stabilityPool
+                && msg.sender != trenBoxManager && msg.sender != trenBoxManagerOperations
+        ) {
+            revert ActivePool__NotAuthorizedContract();
+        }
         _;
     }
-
-    // --- Initializer ---
 
     function initialize() public initializer {
         address initialOwner = _msgSender();
@@ -87,10 +81,8 @@ contract ActivePool is
         __UUPSUpgradeable_init();
     }
 
-    // --- Getters for public variables. Required by IPool interface ---
-
     function getAssetBalance(address _asset) external view override returns (uint256) {
-        return assetsBalances[_asset];
+        return collateralBalances[_asset];
     }
 
     function getDebtTokenBalance(address _asset) external view override returns (uint256) {
@@ -103,7 +95,7 @@ contract ActivePool is
     )
         external
         override
-        callerIsBorrowerOpsOrTrenBoxMgr
+        onlyBorrowerOperationsOrTrenBoxManager
     {
         uint256 newDebt = debtTokenBalances[_collateral] + _amount;
         debtTokenBalances[_collateral] = newDebt;
@@ -124,7 +116,6 @@ contract ActivePool is
     }
 
     // --- Pool functionality ---
-
     function sendAsset(
         address _asset,
         address _account,
@@ -133,13 +124,13 @@ contract ActivePool is
         external
         override
         nonReentrant
-        callerIsBorrowerOpsOrStabilityPoolOrTrenBoxMgrOrTrenBoxMgrOps
+        onlyAuthorizedProtocolContracts
     {
         uint256 safetyTransferAmount = SafetyTransfer.decimalsCorrection(_asset, _amount);
         if (safetyTransferAmount == 0) return;
 
-        uint256 newBalance = assetsBalances[_asset] - _amount;
-        assetsBalances[_asset] = newBalance;
+        uint256 newBalance = collateralBalances[_asset] - _amount;
+        collateralBalances[_asset] = newBalance;
 
         IERC20(_asset).safeTransfer(_account, safetyTransferAmount);
 
@@ -151,20 +142,15 @@ contract ActivePool is
         emit AssetSent(_account, _asset, safetyTransferAmount);
     }
 
-    function isERC20DepositContract(address _account) private view returns (bool) {
-        return (_account == defaultPool || _account == collSurplusPool || _account == stabilityPool);
-    }
-
     function receivedERC20(
         address _asset,
         uint256 _amount
     )
         external
-        override
-        callerIsBorrowerOpsOrDefaultPool
+        onlyBorroweOperationsOrDefaultPool
     {
-        uint256 newBalance = assetsBalances[_asset] + _amount;
-        assetsBalances[_asset] = newBalance;
+        uint256 newBalance = collateralBalances[_asset] + _amount;
+        collateralBalances[_asset] = newBalance;
         emit ActivePoolAssetBalanceUpdated(_asset, newBalance);
     }
 
@@ -173,4 +159,8 @@ contract ActivePool is
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner { }
+
+    function isERC20DepositContract(address _account) private view returns (bool) {
+        return (_account == defaultPool || _account == collSurplusPool || _account == stabilityPool);
+    }
 }

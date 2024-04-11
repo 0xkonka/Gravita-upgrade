@@ -42,7 +42,10 @@ export default function shouldBehaveLikeCanSetMintCap(): void {
 
       await expect(
         this.contracts.adminContract.setMintCap(collateralAddress, mintCap)
-      ).to.be.revertedWith("Collateral is not configured, use setCollateralParameters");
+      ).to.be.revertedWithCustomError(
+        this.contracts.adminContract,
+        "AdminContract__CollateralNotConfigured"
+      );
     });
   });
 }

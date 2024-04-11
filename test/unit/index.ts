@@ -11,6 +11,7 @@ import { testDebtToken } from "./debtToken/DebtToken";
 import { testDefaultPool } from "./defaultPool/DefaultPool";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testFeeCollector } from "./feeCollector/FeeCollector";
+import { testFlashLoan } from "./flashLoan/FlashLoan";
 import { testPriceFeed } from "./priceFeed/PriceFeed";
 import { testSortedTrenBoxes } from "./sortedTrenBoxes/SortedTrenBoxes";
 import { testStabilityPool } from "./stabilityPool/StabilityPool";
@@ -18,6 +19,7 @@ import { loadTestFixture } from "./testContracts.fixture";
 import { testTimelock } from "./timelock/Timelock";
 import { testTrenBoxManager } from "./trenBoxManager/TrenBoxManager";
 import { testTrenBoxManagerOperations } from "./trenBoxManagerOperations/TrenBoxManagerOperations";
+import { testTrenMathTester } from "./trenMathTester/TrenMathTester";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -76,5 +78,7 @@ describe("Unit tests", function () {
   testFeeCollector();
   testStabilityPool();
   testTrenBoxManagerOperations();
+  testFlashLoan();
   testTimelock();
+  testTrenMathTester();
 });

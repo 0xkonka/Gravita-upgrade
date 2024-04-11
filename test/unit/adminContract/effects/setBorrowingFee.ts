@@ -57,7 +57,10 @@ export default function shouldBehaveLikeCanSetBorrowingFee(): void {
 
       await expect(
         this.contracts.adminContract.setBorrowingFee(collateralAddress, borrowingFee)
-      ).to.be.revertedWith("Collateral is not configured, use setCollateralParameters");
+      ).to.be.revertedWithCustomError(
+        this.contracts.adminContract,
+        "AdminContract__CollateralNotConfigured"
+      );
     });
   });
 }

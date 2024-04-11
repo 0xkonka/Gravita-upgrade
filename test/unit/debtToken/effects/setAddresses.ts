@@ -25,6 +25,22 @@ export default function shouldBehaveLikeCanSetAddresses(): void {
       );
     });
 
+    it("should emit event", async function () {
+      const newBorrowerOperationsAddress = this.signers.accounts[1].address;
+      const newStabilityPoolAddress = this.signers.accounts[2].address;
+      const newTrenBoxManagerAddress = this.signers.accounts[3].address;
+
+      await expect(
+        this.contracts.debtToken.setAddresses(
+          newBorrowerOperationsAddress,
+          newStabilityPoolAddress,
+          newTrenBoxManagerAddress
+        )
+      )
+        .to.emit(this.contracts.debtToken, "ProtocolContractsAddressesSet")
+        .withArgs(newBorrowerOperationsAddress, newStabilityPoolAddress, newTrenBoxManagerAddress);
+    });
+
     context("when setting zero address", function () {
       it("should revert when borrowerOperationsAddress is zero", async function () {
         const newBorrowerOperationsAddress = ethers.ZeroAddress;
@@ -37,7 +53,10 @@ export default function shouldBehaveLikeCanSetAddresses(): void {
             newStabilityPoolAddress,
             newTrenBoxManagerAddress
           )
-        ).to.be.revertedWith("Invalid address");
+        ).to.be.revertedWithCustomError(
+          this.contracts.debtToken,
+          "DebtToken__InvalidAddressToConnect"
+        );
       });
 
       it("should revert when stabilityPoolAddress is zero", async function () {
@@ -51,7 +70,10 @@ export default function shouldBehaveLikeCanSetAddresses(): void {
             newStabilityPoolAddress,
             newTrenBoxManagerAddress
           )
-        ).to.be.revertedWith("Invalid address");
+        ).to.be.revertedWithCustomError(
+          this.contracts.debtToken,
+          "DebtToken__InvalidAddressToConnect"
+        );
       });
 
       it("should revert when trenBoxManagerAddress is zero", async function () {
@@ -65,7 +87,10 @@ export default function shouldBehaveLikeCanSetAddresses(): void {
             newStabilityPoolAddress,
             newTrenBoxManagerAddress
           )
-        ).to.be.revertedWith("Invalid address");
+        ).to.be.revertedWithCustomError(
+          this.contracts.debtToken,
+          "DebtToken__InvalidAddressToConnect"
+        );
       });
     });
   });
@@ -91,5 +116,4 @@ export default function shouldBehaveLikeCanSetAddresses(): void {
         .withArgs(notOwner.address);
     });
   });
-  8;
 }

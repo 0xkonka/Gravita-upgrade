@@ -70,7 +70,10 @@ export default function shouldBehaveLikeCanMint(): void {
           this.contracts.debtToken
             .connect(this.borrowerOperationsImpostor)
             .mint(this.collateral.address, this.tokenRecipient.address, amountToMint)
-        ).to.be.revertedWith("Mint is blocked on this collateral");
+        ).to.be.revertedWithCustomError(
+          this.contracts.debtToken,
+          "DebtToken__MintBlockedForCollateral"
+        );
       });
     });
   });
@@ -87,7 +90,12 @@ export default function shouldBehaveLikeCanMint(): void {
         this.contracts.debtToken
           .connect(notBorrowerOperations)
           .mint(collateral.address, tokenRecipient.address, amountToMint)
-      ).to.be.revertedWith("DebtToken: Caller is not BorrowerOperations");
+      )
+        .to.be.revertedWithCustomError(
+          this.contracts.debtToken,
+          "DebtToken__CallerIsNotBorrowerOperations"
+        )
+        .withArgs(notBorrowerOperations.address);
     });
   });
 }

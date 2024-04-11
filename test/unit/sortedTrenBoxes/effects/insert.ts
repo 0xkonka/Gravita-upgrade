@@ -54,7 +54,10 @@ export default function shouldBehaveLikeInsert(): void {
 
       await expect(
         sortedTrenBoxes.connect(impostor).insert(wETH.address, anyUser, 1n, prevId, nextId)
-      ).to.be.revertedWith("SortedTrenBoxes: Caller is neither BO nor TrenBoxM");
+      ).to.be.revertedWithCustomError(
+        sortedTrenBoxes,
+        "SortedTrenBoxes__CallerMustBeBorrowerOperationsOrTrenBoxManager"
+      );
     });
   });
 }
@@ -91,6 +94,7 @@ function shouldBehaveLikeCanInsertModuleCorrectly() {
       .to.emit(sortedTrenBoxes, "NodeAdded")
       .withArgs(wETH.address, idToInsert, 1n);
   });
+
   it("couldn't insert same module", async function () {
     const { sortedTrenBoxes } = this.redeployedContracts;
     const { wETH } = this.collaterals.active;
@@ -106,6 +110,6 @@ function shouldBehaveLikeCanInsertModuleCorrectly() {
 
     await expect(
       sortedTrenBoxes.connect(this.impostor).insert(wETH.address, idToInsert, 1n, prevId, nextId)
-    ).to.be.rejectedWith("SortedTrenBoxes: List already contains the node");
+    ).to.be.revertedWithCustomError(sortedTrenBoxes, "SortedTrenBoxes__ListAlreadyContainsNode");
   });
 }

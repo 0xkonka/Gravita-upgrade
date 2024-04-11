@@ -41,6 +41,8 @@ contract Timelock {
     error Timelock__TxStillLocked();
     error Timelock__TxExpired();
     error Timelock__TxReverted();
+    error Timelock__AdminZeroAddress();
+    error Timelock__TargetZeroAddress();
 
     string public constant NAME = "Timelock";
 
@@ -52,7 +54,7 @@ contract Timelock {
     address public pendingAdmin;
     uint256 public delay;
 
-    mapping(bytes32 => bool) public queuedTransactions;
+    mapping(bytes32 txHash => bool isQueued) public queuedTransactions;
 
     modifier isValidDelay(uint256 _delay) virtual {
         if (_delay < MINIMUM_DELAY) {
@@ -72,7 +74,10 @@ contract Timelock {
     }
 
     constructor(uint256 _delay, address _adminAddress) isValidDelay(_delay) {
-        require(_adminAddress != address(0));
+        if (_adminAddress == address(0)) {
+            revert Timelock__AdminZeroAddress();
+        }
+
         admin = _adminAddress;
         delay = _delay;
     }
@@ -101,6 +106,9 @@ contract Timelock {
     function setPendingAdmin(address _pendingAdmin) external {
         if (msg.sender != address(this)) {
             revert Timelock__TimelockOnly();
+        }
+        if (_pendingAdmin == address(0)) {
+            revert Timelock__AdminZeroAddress();
         }
         pendingAdmin = _pendingAdmin;
 
@@ -163,6 +171,9 @@ contract Timelock {
         adminOnly
         returns (bytes memory)
     {
+        if (target == address(0)) {
+            revert Timelock__TargetZeroAddress();
+        }
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
         if (!queuedTransactions[txHash]) {
             revert Timelock__TxNoQueued();
@@ -184,7 +195,6 @@ contract Timelock {
             callData = abi.encodePacked(bytes4(keccak256(bytes(signature))), data);
         }
 
-        // Execute the call
         (bool success, bytes memory returnData) = target.call{ value: value }(callData);
         if (!success) {
             revert Timelock__TxReverted();

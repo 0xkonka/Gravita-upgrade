@@ -2,10 +2,9 @@
 
 pragma solidity ^0.8.23;
 
-import { ITrenBase } from "./ITrenBase.sol";
 import { ITrenBoxManager } from "./ITrenBoxManager.sol";
 
-interface ITrenBoxManagerOperations is ITrenBase {
+interface ITrenBoxManagerOperations {
     // Events
     // -----------------------------------------------------------------------------------------------------------
 

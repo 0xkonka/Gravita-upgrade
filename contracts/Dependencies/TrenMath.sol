@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.23;
 
-library TrenMath {
-    uint256 internal constant DECIMAL_PRECISION = 1 ether;
+uint256 constant DECIMAL_PRECISION = 1 ether;
 
+library TrenMath {
     uint256 internal constant EXPONENT_CAP = 525_600_000;
 
     /* Precision for Nominal ICR (independent of price). Rationale for the value:

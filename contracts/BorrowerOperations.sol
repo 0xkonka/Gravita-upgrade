@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { UUPSUpgradeable } from
@@ -10,7 +9,7 @@ import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/Saf
 import { ReentrancyGuardUpgradeable } from
     "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-import { TrenMath } from "./Dependencies/TrenMath.sol";
+import { TrenMath, DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
 import { TrenBase } from "./Dependencies/TrenBase.sol";
 import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
 
@@ -24,8 +23,7 @@ import { IBorrowerOperations } from "./Interfaces/IBorrowerOperations.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
-
-import { Addresses } from "./Addresses.sol";
+import { IDeposit } from "./Interfaces/IDeposit.sol";
 
 contract BorrowerOperations is
     TrenBase,
@@ -137,8 +135,10 @@ contract BorrowerOperations is
         // Set the trenBox struct's properties
         ITrenBoxManager(trenBoxManager).setTrenBoxStatus(vars.asset, msg.sender, 1);
 
-        ITrenBoxManager(trenBoxManager).increaseTrenBoxColl(vars.asset, msg.sender, _assetAmount);
-        ITrenBoxManager(trenBoxManager).increaseTrenBoxDebt(
+        uint256 assetAmount_ = ITrenBoxManager(trenBoxManager).increaseTrenBoxColl(
+            vars.asset, msg.sender, _assetAmount
+        );
+        uint256 debtAmount_ = ITrenBoxManager(trenBoxManager).increaseTrenBoxDebt(
             vars.asset, msg.sender, vars.compositeDebt
         );
 
@@ -164,8 +164,8 @@ contract BorrowerOperations is
         emit TrenBoxUpdated(
             vars.asset,
             msg.sender,
-            vars.compositeDebt,
-            _assetAmount,
+            debtAmount_,
+            assetAmount_,
             vars.stake,
             BorrowerOperation.openTrenBox
         );
@@ -445,10 +445,6 @@ contract BorrowerOperations is
         return debtTokenFee;
     }
 
-    function _getUSDValue(uint256 _coll, uint256 _price) internal pure returns (uint256) {
-        return (_price * _coll) / DECIMAL_PRECISION;
-    }
-
     function _getCollChange(
         uint256 _collReceived,
         uint256 _requestedCollWithdrawal
@@ -512,7 +508,7 @@ contract BorrowerOperations is
 
     // Send asset to Active Pool and increase its recorded asset balance
     function _activePoolAddColl(address _asset, uint256 _amount) internal {
-        IActivePool(activePool).receivedERC20(_asset, _amount);
+        IDeposit(activePool).receivedERC20(_asset, _amount);
         IERC20(_asset).safeTransferFrom(
             msg.sender, activePool, SafetyTransfer.decimalsCorrection(_asset, _amount)
         );
