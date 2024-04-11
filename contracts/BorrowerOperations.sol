@@ -26,7 +26,6 @@ import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
 
 import { Addresses } from "./Addresses.sol";
-import "hardhat/console.sol";
 
 contract BorrowerOperations is
     TrenBase,
@@ -124,9 +123,6 @@ contract BorrowerOperations is
 
         vars.ICR = TrenMath._computeCR(_assetAmount, vars.compositeDebt, vars.price);
         vars.NICR = TrenMath._computeNominalCR(_assetAmount, vars.compositeDebt);
-
-        console.log("vars.ICR", vars.ICR);
-        console.log("vars.NICR", vars.NICR);
 
         if (isRecoveryMode) {
             _requireICRisAboveCCR(vars.asset, vars.ICR);
@@ -661,7 +657,6 @@ contract BorrowerOperations is
     }
 
     function _requireICRisAboveMCR(address _asset, uint256 _newICR) internal view {
-        console.log("IAdminContract(adminContract).getMcr(_asset)", IAdminContract(adminContract).getMcr(_asset));
         require(
             _newICR >= IAdminContract(adminContract).getMcr(_asset),
             "BorrowerOps: An operation that would result in ICR < MCR is not permitted"
