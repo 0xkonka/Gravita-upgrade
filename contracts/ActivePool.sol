@@ -36,8 +36,8 @@ contract ActivePool is
 
     string public constant NAME = "ActivePool";
 
-    mapping(address collateral => uint256 balances) internal collateralBalances;
-    mapping(address collateral => uint256 balances) internal debtTokenBalances;
+    mapping(address collateral => uint256 balance) internal collateralBalances;
+    mapping(address collateral => uint256 balance) internal debtTokenBalances;
 
     modifier onlyBorroweOperationsOrDefaultPool() {
         if (msg.sender != borrowerOperations && msg.sender != defaultPool) {
