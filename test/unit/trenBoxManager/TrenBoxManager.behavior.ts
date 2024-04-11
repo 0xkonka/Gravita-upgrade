@@ -9,10 +9,6 @@ export function shouldBehaveLikeTrenBoxManagerContract(): void {
       view.shouldBehaveLikeOwner();
     });
 
-    describe("#IsSetupInitialized", function () {
-      view.shouldHaveIsSetupInitialized();
-    });
-
     describe("#isValidFirstRedemptionHint", function () {
       view.shouldBehaveLikeIsValidFirstRedemptionHint();
     });
@@ -112,7 +108,7 @@ export function shouldBehaveLikeTrenBoxManagerContract(): void {
     });
 
     describe("#executePartialRedemption", function () {
-      effects.shouldBehaveLikCanExecutePartialRedemption();
+      effects.shouldBehaveLikeCanExecutePartialRedemption();
     });
 
     describe("#finalizeRedemption", function () {

@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { ReentrancyGuardUpgradeable } from
@@ -97,8 +96,6 @@ contract TrenBoxManager is
     // Error trackers for the trenBox redistribution calculation
     mapping(address collateral => uint256 collateralError) public lastCollError_Redistribution;
     mapping(address collateral => uint256 debtError) public lastDebtError_Redistribution;
-
-    bool public isSetupInitialized;
 
     // Modifiers
     // ------------------------------------------------------------------------------------------------------

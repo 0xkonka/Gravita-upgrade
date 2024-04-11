@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-export default function shouldBehaveLikCanExecutePartialRedemption(): void {
+export default function shouldBehaveLikeCanExecutePartialRedemption(): void {
   beforeEach(async function () {
     const owner = this.signers.deployer;
 
