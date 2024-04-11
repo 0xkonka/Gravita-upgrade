@@ -247,7 +247,10 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
           wETH.gasCompensation,
           wETH.decimals
         )
-      ).to.be.revertedWith("collateral already exists");
+      ).to.be.revertedWithCustomError(
+        this.contracts.adminContract,
+        "AdminContract__CollateralExists"
+      );
     });
   });
 

@@ -34,6 +34,9 @@ interface IAdminContract {
     error AdminContract__OnlyOwner();
     error AdminContract__OnlyTimelock();
     error AdminContract__CollateralAlreadyInitialized();
+    error AdminContract__CollateralExists();
+    error AdminContract__CollateralDoesNotExist();
+    error AdminContract__CollateralNotConfigured();
 
     // Events
     // -----------------------------------------------------------------------------------------------------------

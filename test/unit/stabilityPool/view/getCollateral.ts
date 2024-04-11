@@ -23,7 +23,10 @@ export default function shouldBehaveLikeGetCollateral(): void {
 
       await expect(
         this.contracts.stabilityPool.getCollateral(testCollateral.address)
-      ).to.be.rejectedWith("collateral does not exist");
+      ).to.be.revertedWithCustomError(
+        this.contracts.adminContract,
+        "AdminContract__CollateralDoesNotExist"
+      );
     });
   });
 }

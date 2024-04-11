@@ -57,7 +57,10 @@ export default function shouldBehaveLikeCanSetRedemptionBlockTimestamp(): void {
           collateralAddress,
           redemptionBlockTimestamp
         )
-      ).to.be.revertedWith("Collateral is not configured, use setCollateralParameters");
+      ).to.be.revertedWithCustomError(
+        this.contracts.adminContract,
+        "AdminContract__CollateralNotConfigured"
+      );
     });
   });
 }

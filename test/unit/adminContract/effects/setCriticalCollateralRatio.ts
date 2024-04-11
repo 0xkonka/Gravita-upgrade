@@ -61,8 +61,11 @@ export default function shouldBehaveLikeCanSetCriticalCollateralRatio(): void {
       const collateralAddress = ethers.ZeroAddress;
       const ccr = "1500000000000000000";
 
-      await expect(this.contracts.adminContract.setCCR(collateralAddress, ccr)).to.be.revertedWith(
-        "Collateral is not configured, use setCollateralParameters"
+      await expect(
+        this.contracts.adminContract.setCCR(collateralAddress, ccr)
+      ).to.be.revertedWithCustomError(
+        this.contracts.adminContract,
+        "AdminContract__CollateralNotConfigured"
       );
     });
   });

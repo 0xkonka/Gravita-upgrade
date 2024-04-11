@@ -28,7 +28,10 @@ export default function shouldHaveGetDecimals(): void {
 
       await expect(
         this.contracts.adminContract.getDecimals(nonExistentCollateral)
-      ).to.be.revertedWith("collateral does not exist");
+      ).to.be.revertedWithCustomError(
+        this.contracts.adminContract,
+        "AdminContract__CollateralDoesNotExist"
+      );
     });
   });
 }

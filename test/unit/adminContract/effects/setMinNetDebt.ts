@@ -58,7 +58,10 @@ export default function shouldBehaveLikeCanSetMinNetDebt(): void {
 
       await expect(
         this.contracts.adminContract.setMinNetDebt(collateralAddress, minNetDebt)
-      ).to.be.revertedWith("Collateral is not configured, use setCollateralParameters");
+      ).to.be.revertedWithCustomError(
+        this.contracts.adminContract,
+        "AdminContract__CollateralNotConfigured"
+      );
     });
   });
 }
