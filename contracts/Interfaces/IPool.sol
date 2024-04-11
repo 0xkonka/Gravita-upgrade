@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
-import { IDeposit } from "./IDeposit.sol";
-
-interface IPool is IDeposit {
+interface IPool {
     // --- Events ---
 
     event AssetSent(address _to, address indexed _asset, uint256 _amount);

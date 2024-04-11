@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import "@openzeppelin/contracts/interfaces/IERC20.sol";
-import "../Interfaces/IUniswapRouterV3.sol";
+import { IERC20 } from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import { IUniswapRouterV3 } from "../Interfaces/IUniswapRouterV3.sol";
 
 contract MockUniswapRouterV3 is IUniswapRouterV3 {
     using BytesLib for bytes;
