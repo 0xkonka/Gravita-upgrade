@@ -366,7 +366,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
      * @param _amount amount of debtToken to withdraw
      * @param _assets an array of collaterals to be claimed.
      */
-    function withdrawFromSP(uint256 _amount, address[] calldata _assets) external {
+    function withdrawFromSP(uint256 _amount, address[] calldata _assets) external nonReentrant {
         (address[] memory assets, uint256[] memory amounts) = _withdrawFromSP(_amount, _assets);
         _sendGainsToDepositor(msg.sender, assets, amounts);
     }

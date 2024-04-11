@@ -11,8 +11,5 @@ interface IUniswapRouterV3 {
         uint256 amountInMaximum;
     }
 
-    function exactOutput(ExactOutputParams calldata params)
-        external
-        payable
-        returns (uint256 amountIn);
+    function exactOutput(ExactOutputParams memory params) external returns (uint256 amountIn);
 }

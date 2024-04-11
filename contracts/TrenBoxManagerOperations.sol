@@ -216,6 +216,7 @@ contract TrenBoxManagerOperations is
     )
         external
         override
+        nonReentrant
     {
         RedemptionTotals memory totals;
         totals.price = IPriceFeed(priceFeed).fetchPrice(_asset);
@@ -842,8 +843,6 @@ contract TrenBoxManagerOperations is
                 ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode
             );
         } else {
-            // if (_ICR >= MCR && ( _ICR >= _TCR || singleLiquidation.entireTrenBoxDebt >
-            // _debtTokenInStabPool))
             LiquidationValues memory zeroVals;
             return zeroVals;
         }
