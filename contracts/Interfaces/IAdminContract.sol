@@ -86,7 +86,7 @@ interface IAdminContract {
 
     function setMinNetDebt(address _collateral, uint256 minNetDebt) external;
 
-    function setPercentDivisor(address _collateral, uint256 precentDivisor) external;
+    function setPercentDivisor(address _collateral, uint256 percentDivisor) external;
 
     function setBorrowingFee(address _collateral, uint256 borrowingFee) external;
 
