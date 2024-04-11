@@ -6,6 +6,8 @@ import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { ReentrancyGuardUpgradeable } from
+    "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
@@ -20,13 +22,20 @@ import { IDeposit } from "./Interfaces/IDeposit.sol";
  * When a trenBox makes an operation that applies to its pending collateral and debt, they are moved
  * from the Default Pool to the Active Pool.
  */
-contract DefaultPool is OwnableUpgradeable, UUPSUpgradeable, IDefaultPool, ConfigurableAddresses {
+contract DefaultPool is
+    OwnableUpgradeable,
+    UUPSUpgradeable,
+    ReentrancyGuardUpgradeable,
+    IDefaultPool,
+    IDeposit,
+    ConfigurableAddresses
+{
     using SafeERC20 for IERC20;
 
     string public constant NAME = "DefaultPool";
 
-    mapping(address asset => uint256 balance) internal assetsBalances;
-    mapping(address asset => uint256 balance) internal debtTokenBalances;
+    mapping(address collateral => uint256 collateralBalances) internal assetsBalances;
+    mapping(address debt => uint256 debtBalances) internal debtTokenBalances;
 
     // --- modifiers ---
 
@@ -97,6 +106,7 @@ contract DefaultPool is OwnableUpgradeable, UUPSUpgradeable, IDefaultPool, Confi
     )
         external
         override
+        nonReentrant
         callerIsTrenBoxManager
     {
         uint256 safetyTransferAmount = SafetyTransfer.decimalsCorrection(_asset, _amount);
