@@ -23,9 +23,9 @@ contract CollSurplusPool is
     string public constant NAME = "CollSurplusPool";
 
     // deposited ether tracker
-    mapping(address asset => uint256 balance) internal balances;
+    mapping(address collateral => uint256 collateralBalances) internal balances;
     // Collateral surplus claimable by trenBox owners
-    mapping(address user => mapping(address asset => uint256 balance)) internal userBalances;
+    mapping(address user => mapping(address => uint256)) internal userBalances;
 
     // --- modifiers ---
 
