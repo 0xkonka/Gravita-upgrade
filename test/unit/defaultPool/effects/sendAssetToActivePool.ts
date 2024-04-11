@@ -89,7 +89,7 @@ export default function shouldBehaveLikeCanSendAsset(): void {
         this.contracts.defaultPool
           .connect(this.trenBoxManagerImpostor)
           .sendAssetToActivePool(wETH.address, assetAmount)
-      ).to.be.revertedWith("DefaultPool: Caller is not the TrenBoxManager");
+      ).to.be.revertedWithCustomError(this.contracts.defaultPool, "DefaultPool__NotTrenBoxManager");
     });
   });
 }

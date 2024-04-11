@@ -35,7 +35,7 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
 
       await expect(
         this.contracts.defaultPool.connect(impostor).receivedERC20(wETH.address, debtAmount)
-      ).to.be.revertedWith("DefaultPool: Caller is not the ActivePool");
+      ).to.be.revertedWithCustomError(this.contracts.defaultPool, "DefaultPool__NotActivePool");
     });
   });
 }
