@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -13,11 +12,10 @@ import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
 import { IDefaultPool } from "./Interfaces/IDefaultPool.sol";
 import { IDeposit } from "./Interfaces/IDeposit.sol";
 
-/*
-* The Default Pool holds the collateral and debt token amounts from liquidations that have been
-redistributed
-* to active trenBoxes but not yet "applied", i.e. not yet recorded on a recipient active trenBox's
-struct.
+/**
+ * @notice The Default Pool holds the collateral and debt token amounts from liquidations that have
+ * been redistributed to active trenBoxes
+ * but not yet "applied", i.e. not yet recorded on a recipient active trenBox's struct.
  *
  * When a trenBox makes an operation that applies to its pending collateral and debt, they are moved
  * from the Default Pool to the Active Pool.
@@ -27,8 +25,24 @@ contract DefaultPool is OwnableUpgradeable, UUPSUpgradeable, IDefaultPool, Confi
 
     string public constant NAME = "DefaultPool";
 
-    mapping(address => uint256) internal assetsBalances;
-    mapping(address => uint256) internal debtTokenBalances;
+    mapping(address asset => uint256 balance) internal assetsBalances;
+    mapping(address asset => uint256 balance) internal debtTokenBalances;
+
+    // --- modifiers ---
+
+    modifier callerIsActivePool() {
+        if (msg.sender != activePool) {
+            revert DefaultPool__NotActivePool();
+        }
+        _;
+    }
+
+    modifier callerIsTrenBoxManager() {
+        if (msg.sender != trenBoxManager) {
+            revert DefaultPool__NotTrenBoxManager();
+        }
+        _;
+    }
 
     // --- Initializer ---
 
@@ -98,18 +112,6 @@ contract DefaultPool is OwnableUpgradeable, UUPSUpgradeable, IDefaultPool, Confi
 
         emit DefaultPoolAssetBalanceUpdated(_asset, newBalance);
         emit AssetSent(activePool, _asset, safetyTransferAmount);
-    }
-
-    // --- 'require' functions ---
-
-    modifier callerIsActivePool() {
-        require(msg.sender == activePool, "DefaultPool: Caller is not the ActivePool");
-        _;
-    }
-
-    modifier callerIsTrenBoxManager() {
-        require(msg.sender == trenBoxManager, "DefaultPool: Caller is not the TrenBoxManager");
-        _;
     }
 
     function receivedERC20(address _asset, uint256 _amount) external callerIsActivePool {
