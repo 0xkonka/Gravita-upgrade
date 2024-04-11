@@ -67,7 +67,7 @@ export default function shouldBehaveLikeCanRemove(): void {
 
       await expect(
         sortedTrenBoxes.connect(this.trenBoxManagerImpostor).remove(wETH.address, user1)
-      ).to.be.rejectedWith("SortedTrenBoxes: List does not contain the id");
+      ).to.be.revertedWithCustomError(sortedTrenBoxes, "SortedTrenBoxer__ListDoesNotContainNode");
     });
   });
 
@@ -81,7 +81,10 @@ export default function shouldBehaveLikeCanRemove(): void {
 
       await expect(
         sortedTrenBoxes.connect(impostor).remove(wETH.address, user1)
-      ).to.be.revertedWith("SortedTrenBoxes: Caller is not the TrenBoxManager");
+      ).to.be.revertedWithCustomError(
+        sortedTrenBoxes,
+        "SortedTrenBoxes__CallerMustBeTrenBoxManager"
+      );
     });
   });
 }
