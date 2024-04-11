@@ -57,7 +57,7 @@ export default function shouldBehaveLikeCanReInsert(): void {
         sortedTrenBoxes
           .connect(this.impostor)
           .reInsert(wETH.address, user1, this.newNICR, prevId, nextId)
-      ).to.be.rejectedWith("SortedTrenBoxes: List does not contain the id");
+      ).to.be.revertedWithCustomError(sortedTrenBoxes, "SortedTrenBoxer__ListDoesNotContainNode");
     });
   });
 
@@ -99,7 +99,10 @@ export default function shouldBehaveLikeCanReInsert(): void {
 
       await expect(
         sortedTrenBoxes.connect(impostor).reInsert(wETH.address, user1, this.NICR, prevId, nextId)
-      ).to.be.revertedWith("SortedTrenBoxes: Caller is neither BO nor TrenBoxM");
+      ).to.be.revertedWithCustomError(
+        sortedTrenBoxes,
+        "SortedTrenBoxes__CallerMustBeBorrowerOperationsOrTrenBoxManager"
+      );
     });
   });
 }

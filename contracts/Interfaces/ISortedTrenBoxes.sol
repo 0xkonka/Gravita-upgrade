@@ -8,6 +8,13 @@ interface ISortedTrenBoxes {
     event NodeAdded(address indexed _asset, address _id, uint256 _NICR);
     event NodeRemoved(address indexed _asset, address _id);
 
+    error SortedTrenBoxer__ListDoesNotContainNode();
+    error SortedTrenBoxes__ListAlreadyContainsNode();
+    error SortedTrenBoxes__IdCannotBeZeroAddress();
+    error SortedTrenBoxes__NICRMustBeGreaterThanZero();
+    error SortedTrenBoxes__CallerMustBeTrenBoxManager();
+    error SortedTrenBoxes__CallerMustBeBorrowerOperationsOrTrenBoxManager();
+
     // --- Functions ---
 
     function insert(

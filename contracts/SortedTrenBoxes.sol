@@ -13,46 +13,46 @@ import { ISortedTrenBoxes } from "./Interfaces/ISortedTrenBoxes.sol";
 import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 
 /*
- * A sorted doubly linked list with nodes sorted in descending order.
- *
- * Nodes map to active TrenBoxes in the system - the ID property is the address of a TrenBox owner.
- * Nodes are ordered according to their current nominal individual collateral ratio (NICR),
- * which is like the ICR but without the price, i.e., just collateral / debt.
- *
- * The list optionally accepts insert position hints.
- *
+* A sorted doubly linked list with nodes sorted in descending order.
+*
+* Nodes map to active TrenBoxes in the system - the ID property is the address of a TrenBox owner.
+* Nodes are ordered according to their current nominal individual collateral ratio (NICR),
+* which is like the ICR but without the price, i.e., just collateral / debt.
+*
+* The list optionally accepts insert position hints.
+*
 * NICRs are computed dynamically at runtime, and not stored on the Node. This is because NICRs of
 active TrenBoxes
- * change dynamically as liquidation events occur.
- *
+* change dynamically as liquidation events occur.
+*
 * The list relies on the fact that liquidation events preserve ordering: a liquidation decreases the
 NICRs of all active TrenBoxes,
 * but maintains their order. A node inserted based on current NICR will maintain the correct
 position,
 * relative to it's peers, as rewards accumulate, as long as it's raw collateral and debt have not
-changed.
- * Thus, Nodes remain sorted by current NICR.
- *
+* changed.
+* Thus, Nodes remain sorted by current NICR.
+*
 * Nodes need only be re-inserted upon a TrenBox operation - when the owner adds or removes
 collateral
 or debt
- * to their position.
- *
- * The list is a modification of the following audited SortedDoublyLinkedList:
- * https://github.com/livepeer/protocol/blob/master/contracts/libraries/SortedDoublyLL.sol
- *
- *
- * Changes made in the Gravita implementation:
- *
- * - Keys have been removed from nodes
- *
+* to their position.
+*
+* The list is a modification of the following audited SortedDoublyLinkedList:
+* https://github.com/livepeer/protocol/blob/master/contracts/libraries/SortedDoublyLL.sol
+*
+*
+* Changes made in the Gravita implementation:
+*
+* - Keys have been removed from nodes
+*
 * - Ordering checks for insertion are performed by comparing an NICR argument to the current NICR,
 calculated at runtime.
- *   The list relies on the property that ordering by ICR is maintained as the ETH:USD price varies.
- *
+*   The list relies on the property that ordering by ICR is maintained as the ETH:USD price varies.
+*
 * - Public functions with parameters have been made internal to save gas, and given an external
 wrapper function for external access
- */
+*/
 contract SortedTrenBoxes is
     OwnableUpgradeable,
     UUPSUpgradeable,
@@ -61,27 +61,51 @@ contract SortedTrenBoxes is
 {
     string public constant NAME = "SortedTrenBoxes";
 
-    // Information for a node in the list
     struct Node {
         bool exists;
         address nextId; // Id of next node (smaller NICR) in the list
         address prevId; // Id of previous node (larger NICR) in the list
     }
 
-    // Information for the list
-    struct Data {
+    struct TrenBoxesList {
         address head; // Head of the list. Also the node in the list with the largest NICR
         address tail; // Tail of the list. Also the node in the list with the smallest NICR
         uint256 size; // Current size of the list
-        // Depositor address => node
-        mapping(address => Node) nodes; // Track the corresponding ids for each node in the list
+        mapping(address depositor => Node node) nodes; // Track the corresponding ids for each node
+            // in the list
     }
 
-    // Collateral type address => ordered list
-    mapping(address => Data) public data;
+    mapping(address collateral => TrenBoxesList orderedList) public trenBoxes;
+
+    modifier onlyTrenBoxManager() {
+        if (msg.sender != trenBoxManager) {
+            revert SortedTrenBoxes__CallerMustBeTrenBoxManager();
+        }
+        _;
+    }
+
+    modifier onlyBorrowerOperationsOrTrenBoxManager() {
+        if (msg.sender != borrowerOperations && msg.sender != trenBoxManager) {
+            revert SortedTrenBoxes__CallerMustBeBorrowerOperationsOrTrenBoxManager();
+        }
+        _;
+    }
+
+    modifier hasNonZeroId(address _id) {
+        if (_id == address(0)) {
+            revert SortedTrenBoxes__IdCannotBeZeroAddress();
+        }
+        _;
+    }
+
+    modifier hasPositiveNICR(uint256 _NICR) {
+        if (_NICR == 0) {
+            revert SortedTrenBoxes__NICRMustBeGreaterThanZero();
+        }
+        _;
+    }
 
     // --- Initializer ---
-
     function initialize() public initializer {
         address initialOwner = _msgSender();
 
@@ -106,8 +130,8 @@ contract SortedTrenBoxes is
     )
         external
         override
+        onlyBorrowerOperationsOrTrenBoxManager
     {
-        _requireCallerIsBOorTrenBoxM();
         _insert(_asset, _id, _NICR, _prevId, _nextId);
     }
 
@@ -119,15 +143,14 @@ contract SortedTrenBoxes is
         address _nextId
     )
         internal
+        hasNonZeroId(_id)
+        hasPositiveNICR(_NICR)
     {
-        Data storage assetData = data[_asset];
+        TrenBoxesList storage assetData = trenBoxes[_asset];
 
-        // List must not already contain node
-        require(!_contains(assetData, _id), "SortedTrenBoxes: List already contains the node");
-        // Node id must not be null
-        require(_id != address(0), "SortedTrenBoxes: Id cannot be zero");
-        // NICR must be non-zero
-        require(_NICR != 0, "SortedTrenBoxes: NICR must be positive");
+        if (_contains(assetData, _id)) {
+            revert SortedTrenBoxes__ListAlreadyContainsNode();
+        }
 
         address prevId = _prevId;
         address nextId = _nextId;
@@ -167,8 +190,7 @@ contract SortedTrenBoxes is
         emit NodeAdded(_asset, _id, _NICR);
     }
 
-    function remove(address _asset, address _id) external override {
-        _requireCallerIsTrenBoxManager();
+    function remove(address _asset, address _id) external override onlyTrenBoxManager {
         _remove(_asset, _id);
     }
 
@@ -177,10 +199,11 @@ contract SortedTrenBoxes is
      * @param _id Node's id
      */
     function _remove(address _asset, address _id) internal {
-        Data storage assetData = data[_asset];
+        TrenBoxesList storage assetData = trenBoxes[_asset];
 
-        // List must contain the node
-        require(_contains(assetData, _id), "SortedTrenBoxes: List does not contain the id");
+        if (!_contains(assetData, _id)) {
+            revert SortedTrenBoxer__ListDoesNotContainNode();
+        }
 
         Node storage node = assetData.nodes[_id];
         if (assetData.size > 1) {
@@ -232,16 +255,17 @@ contract SortedTrenBoxes is
     )
         external
         override
+        onlyBorrowerOperationsOrTrenBoxManager
     {
-        _requireCallerIsBOorTrenBoxM();
-        // List must contain the node
-        require(contains(_asset, _id), "SortedTrenBoxes: List does not contain the id");
-        // NICR must be non-zero
-        require(_newNICR != 0, "SortedTrenBoxes: NICR must be positive");
+        if (!contains(_asset, _id)) {
+            revert SortedTrenBoxer__ListDoesNotContainNode();
+        }
 
-        // Remove node from the list
+        if (_newNICR == 0) {
+            revert SortedTrenBoxes__NICRMustBeGreaterThanZero();
+        }
+
         _remove(_asset, _id);
-
         _insert(_asset, _id, _newNICR, _prevId, _nextId);
     }
 
@@ -249,10 +273,17 @@ contract SortedTrenBoxes is
      * @dev Checks if the list contains a node
      */
     function contains(address _asset, address _id) public view override returns (bool) {
-        return data[_asset].nodes[_id].exists;
+        return trenBoxes[_asset].nodes[_id].exists;
     }
 
-    function _contains(Data storage _dataAsset, address _id) internal view returns (bool) {
+    function _contains(
+        TrenBoxesList storage _dataAsset,
+        address _id
+    )
+        internal
+        view
+        returns (bool)
+    {
         return _dataAsset.nodes[_id].exists;
     }
 
@@ -260,28 +291,28 @@ contract SortedTrenBoxes is
      * @dev Checks if the list is empty
      */
     function isEmpty(address _asset) public view override returns (bool) {
-        return data[_asset].size == 0;
+        return trenBoxes[_asset].size == 0;
     }
 
     /*
      * @dev Returns the current size of the list
      */
     function getSize(address _asset) external view override returns (uint256) {
-        return data[_asset].size;
+        return trenBoxes[_asset].size;
     }
 
     /*
      * @dev Returns the first node in the list (node with the largest NICR)
      */
     function getFirst(address _asset) external view override returns (address) {
-        return data[_asset].head;
+        return trenBoxes[_asset].head;
     }
 
     /*
      * @dev Returns the last node in the list (node with the smallest NICR)
      */
     function getLast(address _asset) external view override returns (address) {
-        return data[_asset].tail;
+        return trenBoxes[_asset].tail;
     }
 
     /*
@@ -289,7 +320,7 @@ contract SortedTrenBoxes is
      * @param _id Node's id
      */
     function getNext(address _asset, address _id) external view override returns (address) {
-        return data[_asset].nodes[_id].nextId;
+        return trenBoxes[_asset].nodes[_id].nextId;
     }
 
     /*
@@ -297,7 +328,7 @@ contract SortedTrenBoxes is
      * @param _id Node's id
      */
     function getPrev(address _asset, address _id) external view override returns (address) {
-        return data[_asset].nodes[_id].prevId;
+        return trenBoxes[_asset].nodes[_id].prevId;
     }
 
     /*
@@ -335,16 +366,16 @@ contract SortedTrenBoxes is
             return isEmpty(_asset);
         } else if (_prevId == address(0)) {
             // `(null, _nextId)` is a valid insert position if `_nextId` is the head of the list
-            return data[_asset].head == _nextId
+            return trenBoxes[_asset].head == _nextId
                 && _NICR >= ITrenBoxManager(trenBoxManager).getNominalICR(_asset, _nextId);
         } else if (_nextId == address(0)) {
             // `(_prevId, null)` is a valid insert position if `_prevId` is the tail of the list
-            return data[_asset].tail == _prevId
+            return trenBoxes[_asset].tail == _prevId
                 && _NICR <= ITrenBoxManager(trenBoxManager).getNominalICR(_asset, _prevId);
         } else {
             // `(_prevId, _nextId)` is a valid insert position if they are adjacent nodes and
             // `_NICR` falls between the two nodes' NICRs
-            return data[_asset].nodes[_prevId].nextId == _nextId
+            return trenBoxes[_asset].nodes[_prevId].nextId == _nextId
                 && ITrenBoxManager(trenBoxManager).getNominalICR(_asset, _prevId) >= _NICR
                 && _NICR >= ITrenBoxManager(trenBoxManager).getNominalICR(_asset, _nextId);
         }
@@ -365,7 +396,7 @@ contract SortedTrenBoxes is
         view
         returns (address, address)
     {
-        Data storage assetData = data[_asset];
+        TrenBoxesList storage assetData = trenBoxes[_asset];
 
         // If `_startId` is the head, check if the insert position is before the head
         if (
@@ -402,7 +433,7 @@ contract SortedTrenBoxes is
         view
         returns (address, address)
     {
-        Data storage assetData = data[_asset];
+        TrenBoxesList storage assetData = trenBoxes[_asset];
 
         // If `_startId` is the tail, check if the insert position is after the tail
         if (
@@ -479,7 +510,7 @@ contract SortedTrenBoxes is
 
         if (prevId == address(0) && nextId == address(0)) {
             // No hint - descend list starting from head
-            return _descendList(_asset, _NICR, data[_asset].head);
+            return _descendList(_asset, _NICR, trenBoxes[_asset].head);
         } else if (prevId == address(0)) {
             // No `prevId` for hint - ascend list starting from `nextId`
             return _ascendList(_asset, _NICR, nextId);
@@ -490,19 +521,6 @@ contract SortedTrenBoxes is
             // Descend list starting from `prevId`
             return _descendList(_asset, _NICR, prevId);
         }
-    }
-
-    // --- 'require' functions ---
-
-    function _requireCallerIsTrenBoxManager() internal view {
-        require(msg.sender == trenBoxManager, "SortedTrenBoxes: Caller is not the TrenBoxManager");
-    }
-
-    function _requireCallerIsBOorTrenBoxM() internal view {
-        require(
-            msg.sender == borrowerOperations || msg.sender == trenBoxManager,
-            "SortedTrenBoxes: Caller is neither BO nor TrenBoxM"
-        );
     }
 
     function authorizeUpgrade(address newImplementation) public {
