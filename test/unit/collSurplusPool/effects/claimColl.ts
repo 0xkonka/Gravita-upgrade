@@ -26,76 +26,136 @@ export default function shouldBehaveLikeCanClaimColl(): void {
     this.activePoolImpostor = this.signers.accounts[2];
     this.trenBoxManagerImpostor = this.signers.accounts[3];
 
-    const { erc20 } = this.testContracts;
-    await erc20.mint(this.redeployedContracts.collSurplusPool, 1000n);
+    const { erc20, erc20_with_6_decimals } = this.testContracts;
+    await erc20.mint(this.redeployedContracts.collSurplusPool, ethers.parseEther("100"));
+    await erc20_with_6_decimals.mint(
+      this.redeployedContracts.collSurplusPool,
+      ethers.parseEther("100")
+    );
   });
-
   context("when caller is borrower operations", function () {
-    beforeEach(async function () {
-      const addressesForSetAddresses1 = await this.utils.getAddressesForSetAddresses({
-        borrowerOperations: this.borrowerOperationsImpostor,
-        activePool: this.activePoolImpostor,
-        trenBoxManager: this.trenBoxManagerImpostor,
+    context("when collateral decimal is 18", function () {
+      beforeEach(async function () {
+        const addressesForSetAddresses1 = await this.utils.getAddressesForSetAddresses({
+          borrowerOperations: this.borrowerOperationsImpostor,
+          activePool: this.activePoolImpostor,
+          trenBoxManager: this.trenBoxManagerImpostor,
+        });
+
+        await this.redeployedContracts.collSurplusPool.setAddresses(addressesForSetAddresses1);
       });
 
-      await this.redeployedContracts.collSurplusPool.setAddresses(addressesForSetAddresses1);
-    });
+      it("reverts custom error", async function () {
+        const { erc20 } = this.testContracts;
+        const user = this.signers.accounts[1];
 
-    it("reverts custom error", async function () {
-      const { erc20 } = this.testContracts;
-      const user = this.signers.accounts[1];
+        await expect(
+          this.redeployedContracts.collSurplusPool
+            .connect(this.borrowerOperationsImpostor)
+            .claimColl(erc20, user)
+        ).to.be.revertedWith("CollSurplusPool: No collateral available to claim");
+      });
 
-      await expect(
-        this.redeployedContracts.collSurplusPool
+      it("should claim Collateral", async function () {
+        const { erc20 } = this.testContracts;
+        const assetAmount = ethers.parseEther("10");
+        const user = this.signers.accounts[1];
+
+        const userAssetBalanceBefore = await this.redeployedContracts.collSurplusPool.getCollateral(
+          erc20,
+          user.address
+        );
+
+        const accountSurplusTx = await this.redeployedContracts.collSurplusPool
+          .connect(this.trenBoxManagerImpostor)
+          .accountSurplus(erc20, user.address, assetAmount);
+
+        await expect(accountSurplusTx)
+          .to.emit(this.redeployedContracts.collSurplusPool, "CollBalanceUpdated")
+          .withArgs(user, assetAmount);
+
+        const userAssetBalanceAfter = await this.redeployedContracts.collSurplusPool.getCollateral(
+          erc20,
+          user.address
+        );
+
+        expect(assetAmount).to.be.equal(userAssetBalanceAfter - userAssetBalanceBefore);
+
+        const assetBalanceBefore =
+          await this.redeployedContracts.collSurplusPool.getAssetBalance(erc20);
+
+        await this.redeployedContracts.collSurplusPool
+          .connect(this.activePoolImpostor)
+          .receivedERC20(erc20, assetAmount);
+
+        const assetBalanceAfter =
+          await this.redeployedContracts.collSurplusPool.getAssetBalance(erc20);
+
+        expect(assetAmount).to.be.equal(assetBalanceAfter - assetBalanceBefore);
+
+        const claimCollTx = await this.redeployedContracts.collSurplusPool
           .connect(this.borrowerOperationsImpostor)
-          .claimColl(erc20, user)
-      ).to.be.revertedWith("CollSurplusPool: No collateral available to claim");
+          .claimColl(erc20, user.address);
+
+        await expect(claimCollTx)
+          .to.emit(this.redeployedContracts.collSurplusPool, "CollBalanceUpdated")
+          .withArgs(user, 0);
+      });
     });
+    context("when collateral has less than 18 decimals", function () {
+      beforeEach(async function () {
+        const addressesForSetAddresses1 = await this.utils.getAddressesForSetAddresses({
+          borrowerOperations: this.borrowerOperationsImpostor,
+          activePool: this.activePoolImpostor,
+          trenBoxManager: this.trenBoxManagerImpostor,
+        });
 
-    it("should claim Collateral", async function () {
-      const { erc20 } = this.testContracts;
-      const assetAmount = BigInt(10);
-      const user = this.signers.accounts[1];
+        await this.redeployedContracts.collSurplusPool.setAddresses(addressesForSetAddresses1);
 
-      const userAssetBalanceBefore = await this.redeployedContracts.collSurplusPool.getCollateral(
-        erc20,
-        user.address
-      );
+        const { erc20_with_6_decimals } = this.testContracts;
+        const assetAmount = ethers.parseEther("10");
+        const user = this.signers.accounts[1];
+        await this.redeployedContracts.collSurplusPool
+          .connect(this.trenBoxManagerImpostor)
+          .accountSurplus(erc20_with_6_decimals, user.address, assetAmount);
 
-      const accountSurplusTx = await this.redeployedContracts.collSurplusPool
-        .connect(this.trenBoxManagerImpostor)
-        .accountSurplus(erc20, user.address, assetAmount);
+        const assetBalanceBefore =
+          await this.redeployedContracts.collSurplusPool.getAssetBalance(erc20_with_6_decimals);
 
-      await expect(accountSurplusTx)
-        .to.emit(this.redeployedContracts.collSurplusPool, "CollBalanceUpdated")
-        .withArgs(user, assetAmount);
+        await this.redeployedContracts.collSurplusPool
+          .connect(this.activePoolImpostor)
+          .receivedERC20(erc20_with_6_decimals, assetAmount);
 
-      const userAssetBalanceAfter = await this.redeployedContracts.collSurplusPool.getCollateral(
-        erc20,
-        user.address
-      );
+        const assetBalanceAfter =
+          await this.redeployedContracts.collSurplusPool.getAssetBalance(erc20_with_6_decimals);
 
-      expect(assetAmount).to.be.equal(userAssetBalanceAfter - userAssetBalanceBefore);
+        expect(assetAmount).to.be.equal(assetBalanceAfter - assetBalanceBefore);
+      });
 
-      const assetBalanceBefore =
-        await this.redeployedContracts.collSurplusPool.getAssetBalance(erc20);
+      it("should claim Collateral", async function () {
+        const { erc20_with_6_decimals } = this.testContracts;
+        const decimal = await erc20_with_6_decimals.decimals();
+        const assetAmount = ethers.parseEther("10");
+        const user = this.signers.accounts[1];
 
-      await this.redeployedContracts.collSurplusPool
-        .connect(this.activePoolImpostor)
-        .receivedERC20(erc20, assetAmount);
+        const userAssetBalanceBefore = await erc20_with_6_decimals.balanceOf(user.address);
+        console.log("userAssetBalanceBefore", userAssetBalanceBefore);
 
-      const assetBalanceAfter =
-        await this.redeployedContracts.collSurplusPool.getAssetBalance(erc20);
+        const claimCollTx = await this.redeployedContracts.collSurplusPool
+          .connect(this.borrowerOperationsImpostor)
+          .claimColl(erc20_with_6_decimals, user.address);
 
-      expect(assetAmount).to.be.equal(assetBalanceAfter - assetBalanceBefore);
+        const userAssetBalanceAfter = await erc20_with_6_decimals.balanceOf(user.address);
+        console.log("userAssetBalanceAfter", userAssetBalanceAfter);
 
-      const claimCollTx = await this.redeployedContracts.collSurplusPool
-        .connect(this.borrowerOperationsImpostor)
-        .claimColl(erc20, user.address);
+        expect(userAssetBalanceAfter).to.be.equal(
+          userAssetBalanceBefore + assetAmount / BigInt(10 ** (18 - Number(decimal)))
+        );
 
-      await expect(claimCollTx)
-        .to.emit(this.redeployedContracts.collSurplusPool, "CollBalanceUpdated")
-        .withArgs(user, 0);
+        await expect(claimCollTx)
+          .to.emit(this.redeployedContracts.collSurplusPool, "CollBalanceUpdated")
+          .withArgs(user, 0);
+      });
     });
   });
 
