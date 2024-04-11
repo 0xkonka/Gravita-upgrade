@@ -35,7 +35,9 @@ abstract contract ConfigurableAddresses is OwnableUpgradeable {
     uint256[33] private __gap; // Goerli uses 47; Arbitrum uses 33
 
     error ConfigurableAddresses__SetupIsInitialized();
-    error ConfigurableAddresses__ZeroAddresses(uint256 postition, address address_);
+    error ConfigurableAddresses__ZeroAddresses(uint256 position, address address_);
+    error ConfigurableAddresses__CommunityIssuanceZeroAddress();
+    error ConfigurableAddresses__TRENStakingZeroAddress();
     error ConfigurableAddresses__LengthMismatch();
 
     // Dependency setters
@@ -75,10 +77,16 @@ abstract contract ConfigurableAddresses is OwnableUpgradeable {
     }
 
     function setCommunityIssuance(address _communityIssuance) public onlyOwner {
+        if (_communityIssuance == address(0)) {
+            revert ConfigurableAddresses__CommunityIssuanceZeroAddress();
+        }
         communityIssuance = _communityIssuance;
     }
 
     function setTRENStaking(address _trenStaking) public onlyOwner {
+        if (_trenStaking == address(0)) {
+            revert ConfigurableAddresses__TRENStakingZeroAddress();
+        }
         trenStaking = _trenStaking;
     }
 }

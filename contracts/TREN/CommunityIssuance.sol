@@ -31,11 +31,6 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable {
         _;
     }
 
-    modifier isStabilityPool(address _pool) {
-        require(address(stabilityPool) == _pool, "CommunityIssuance: caller is not SP");
-        _;
-    }
-
     modifier onlyStabilityPool() {
         require(address(stabilityPool) == msg.sender, "CommunityIssuance: caller is not SP");
         _;
@@ -50,23 +45,26 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable {
 
     // --- Functions ---
     function setAddresses(
-        address _trenTokenAddress,
-        address _stabilityPoolAddress,
+        address _trenToken,
+        address _stabilityPool,
         address _adminContract
     )
         external
         onlyOwner
     {
-        require(!isSetupInitialized, "Setup is already initialized");
+        if (isSetupInitialized) revert CommunityIssuance__SetupAlreadyInitialized();
+        if (
+            _trenToken == address(0) || _stabilityPool == address(0) || _adminContract == address(0)
+        ) revert CommunityIssuance__InvalidAddresses();
         adminContract = _adminContract;
-        trenToken = IERC20(_trenTokenAddress);
-        stabilityPool = IStabilityPool(_stabilityPoolAddress);
+        trenToken = IERC20(_trenToken);
+        stabilityPool = IStabilityPool(_stabilityPool);
         isSetupInitialized = true;
     }
 
-    function setAdminContract(address _admin) external onlyOwner {
-        require(_admin != address(0));
-        adminContract = _admin;
+    function setAdminContract(address _adminContract) external onlyOwner {
+        if (_adminContract == address(0)) revert CommunityIssuance__InvalidAdminContractAddress();
+        adminContract = _adminContract;
     }
 
     function addFundToStabilityPool(uint256 _assignedSupply) external override isController {

@@ -42,6 +42,7 @@ contract Timelock {
     error Timelock__TxExpired();
     error Timelock__TxReverted();
     error Timelock__AdminZeroAddress();
+    error Timelock__TargetZeroAddress();
 
     string public constant NAME = "Timelock";
 
@@ -106,6 +107,9 @@ contract Timelock {
         if (msg.sender != address(this)) {
             revert Timelock__TimelockOnly();
         }
+        if (_pendingAdmin == address(0)) {
+            revert Timelock__AdminZeroAddress();
+        }
         pendingAdmin = _pendingAdmin;
 
         emit NewPendingAdmin(_pendingAdmin);
@@ -167,6 +171,9 @@ contract Timelock {
         adminOnly
         returns (bytes memory)
     {
+        if (target == address(0)) {
+            revert Timelock__TargetZeroAddress();
+        }
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
         if (!queuedTransactions[txHash]) {
             revert Timelock__TxNoQueued();
@@ -188,7 +195,6 @@ contract Timelock {
             callData = abi.encodePacked(bytes4(keccak256(bytes(signature))), data);
         }
 
-        // Execute the call
         (bool success, bytes memory returnData) = target.call{ value: value }(callData);
         if (!success) {
             revert Timelock__TxReverted();
