@@ -96,6 +96,8 @@ interface IAdminContract {
 
     function setRedemptionBlockTimestamp(address _collateral, uint256 _blockTimestamp) external;
 
+    function switchRouteToTRENStaking() external;
+
     function getIndex(address _collateral) external view returns (uint256);
 
     function getIsActive(address _collateral) external view returns (bool);
@@ -127,4 +129,6 @@ interface IAdminContract {
     function getFlashLoanMinNetDebt() external view returns (uint256);
 
     function getFlashLoanMaxNetDebt() external view returns (uint256);
+
+    function getRouteToTRENStaking() external view returns (bool);
 }

@@ -11,6 +11,7 @@ import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol"
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ITRENStaking } from "./Interfaces/ITRENStaking.sol";
+import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 
 contract FeeCollector is
     IFeeCollector,
@@ -35,9 +36,6 @@ contract FeeCollector is
     // ------------------------------------------------------------------------------------------------------------
 
     mapping(address borrower => mapping(address asset => FeeRecord feeParams)) public feeRecords;
-
-    bool public constant routeToTRENStaking = false; // if true, collected fees go to stakers; if
-        // false, to the treasury
 
     // Initializer
     // ------------------------------------------------------------------------------------------------------
@@ -189,20 +187,15 @@ contract FeeCollector is
         }
     }
 
-    /**
-     * Triggered by TrenBoxManager.finalizeRedemption(); assumes _amount of _asset has been already
-     * transferred to
-     * getProtocolRevenueDestination().
-     */
     function handleRedemptionFee(address _asset, uint256 _amount) external onlyTrenBoxManager {
-        if (_routeToTRENStaking()) {
+        if (IAdminContract(adminContract).getRouteToTRENStaking()) {
             ITRENStaking(trenStaking).increaseFeeAsset(_asset, _amount);
         }
         emit RedemptionFeeCollected(_asset, _amount);
     }
 
     function getProtocolRevenueDestination() public view override returns (address) {
-        return _routeToTRENStaking() ? trenStaking : treasuryAddress;
+        return IAdminContract(adminContract).getRouteToTRENStaking() ? trenStaking : treasuryAddress;
     }
 
     // Helper & internal methods
@@ -364,7 +357,7 @@ contract FeeCollector is
         if (_feeAmount != 0) {
             address destination = getProtocolRevenueDestination();
             IERC20(debtToken).safeTransfer(destination, _feeAmount);
-            if (_routeToTRENStaking()) {
+            if (IAdminContract(adminContract).getRouteToTRENStaking()) {
                 ITRENStaking(trenStaking).increaseFeeDebtToken(_feeAmount);
             }
             emit FeeCollected(_borrower, _asset, destination, _feeAmount);
@@ -376,13 +369,6 @@ contract FeeCollector is
             IERC20(debtToken).safeTransfer(_borrower, _refundAmount);
             emit FeeRefunded(_borrower, _asset, _refundAmount);
         }
-    }
-
-    /**
-     * Use a function for reading the constant, as it will be overwritten by the Tester contract.
-     */
-    function _routeToTRENStaking() internal view virtual returns (bool) {
-        return routeToTRENStaking;
     }
 
     // Modifiers

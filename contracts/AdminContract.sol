@@ -51,6 +51,8 @@ contract AdminContract is
     address[] public validCollateral; // index maps to token address.
 
     bool public isSetupInitialized;
+    bool public routeToTRENStaking = false; // if true, collected fees go to stakers; if false, to
+        // the treasury
 
     // Modifiers
     // --------------------------------------------------------------------------------------------------------
@@ -313,6 +315,14 @@ contract AdminContract is
         emit FlashLoanMaxDebtChanged(oldFlashLoanMaxDebt, _flashLoanMaxDebt);
     }
 
+    function switchRouteToTRENStaking() external onlyTimelock {
+        if (routeToTRENStaking) {
+            routeToTRENStaking = false;
+        } else {
+            routeToTRENStaking = true;
+        }
+    }
+
     // View functions
     // ---------------------------------------------------------------------------------------------------
     function DECIMAL_PRECISION() external pure returns (uint256) {
@@ -421,6 +431,10 @@ contract AdminContract is
 
     function getFlashLoanMaxNetDebt() external view override returns (uint256) {
         return flashLoanParams.flashLoanMaxDebt;
+    }
+
+    function getRouteToTRENStaking() external view override returns (bool) {
+        return routeToTRENStaking;
     }
 
     // Internal Functions
