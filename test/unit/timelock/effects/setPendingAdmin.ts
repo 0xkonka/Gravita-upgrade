@@ -47,7 +47,7 @@ export default function shouldBehaveLikeCanSetPendingAdmin(): void {
 
       await expect(
         timelock.connect(this.admin).setPendingAdmin(this.pendingAdmin)
-      ).to.be.revertedWithCustomError(timelock, "Timelock__TimelockOnly");
+      ).to.be.revertedWithCustomError(timelock, "Timelock__OnlyTimelock");
     });
   });
 }
