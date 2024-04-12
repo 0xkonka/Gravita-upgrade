@@ -93,7 +93,7 @@ export default function shouldBehaveLikeCanCloseTrenBox() {
     it("they cannot close TrenBox", async function () {
       const [, usersWithoutTrenBox, debtTokenDonor] = this.users;
       const { erc20 } = this.testContracts;
-      const { debtToken } = this.contracts;
+      const { debtToken, borrowerOperations } = this.contracts;
 
       await debtToken
         .connect(debtTokenDonor)
@@ -104,8 +104,9 @@ export default function shouldBehaveLikeCanCloseTrenBox() {
         asset: erc20,
       });
 
-      await expect(closeTrenBoxTx).to.be.revertedWith(
-        "BorrowerOps: TrenBox does not exist or is closed"
+      await expect(closeTrenBoxTx).to.be.revertedWithCustomError(
+        borrowerOperations,
+        "BorrowerOperations__TrenBoxNotExistOrClosed"
       );
     });
   });

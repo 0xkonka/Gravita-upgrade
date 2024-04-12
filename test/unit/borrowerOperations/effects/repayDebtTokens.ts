@@ -68,8 +68,9 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
           from: user,
         });
 
-        await expect(repayDebtTx).to.be.revertedWith(
-          "BorrowerOps: There must be either a collateral change or a debt change"
+        await expect(repayDebtTx).to.be.revertedWithCustomError(
+          this.contracts.borrowerOperations,
+          "BorrowerOperations__ZeroAdjustment"
         );
       });
     });
@@ -78,7 +79,7 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
       it("should revert", async function () {
         const [user] = this.users;
         const { erc20 } = this.testContracts;
-        const { debtToken } = this.contracts;
+        const { debtToken, borrowerOperations } = this.contracts;
 
         const totalDebt = await debtToken.balanceOf(user.address);
 
@@ -90,8 +91,9 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
           from: user,
         });
 
-        await expect(repayDebtTx).to.be.revertedWith(
-          "BorrowerOps: TrenBox's net debt must be greater than minimum"
+        await expect(repayDebtTx).to.be.revertedWithCustomError(
+          borrowerOperations,
+          "BorrowerOperations__TrenBoxNetDebtLessThanMin"
         );
       });
     });
@@ -104,7 +106,7 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
       it("should revert", async function () {
         const [user, differentUser] = this.users;
         const { erc20 } = this.testContracts;
-        const { debtToken, adminContract } = this.contracts;
+        const { debtToken, adminContract, borrowerOperations } = this.contracts;
 
         const totalBalance = await debtToken.balanceOf(user.address);
         await debtToken.connect(user).transfer(differentUser.address, totalBalance);
@@ -118,8 +120,9 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
           from: user,
         });
 
-        await expect(repayDebtTx).to.be.revertedWith(
-          "BorrowerOps: Caller doesnt have enough debt tokens to make repayment"
+        await expect(repayDebtTx).to.be.revertedWithCustomError(
+          borrowerOperations,
+          "BorrowerOperations__InsufficientDebtBalance"
         );
       });
     });
@@ -276,8 +279,9 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
         from: userWithoutTrenBox,
       });
 
-      await expect(addCollateralTx).to.be.revertedWith(
-        "BorrowerOps: TrenBox does not exist or is closed"
+      await expect(addCollateralTx).to.be.revertedWithCustomError(
+        this.contracts.borrowerOperations,
+        "BorrowerOperations__TrenBoxNotExistOrClosed"
       );
     });
   });
