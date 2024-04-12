@@ -7,7 +7,6 @@ dotenvConfig({ path: resolve(process.cwd(), dotenvConfigPath) });
 export const API_KEYS: string | Record<string, string> | undefined = {
   // ETHEREUM
   mainnet: process.env.ETHERSCAN_API_KEY || "",
-  goerli: process.env.ETHERSCAN_API_KEY || "",
   sepolia: process.env.ETHERSCAN_API_KEY || "",
 
   // BINANCE SMART CHAIN

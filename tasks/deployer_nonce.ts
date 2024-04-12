@@ -5,9 +5,9 @@ task("deployer_nonce", "returns nonce and balance for specified address on multi
   .addParam("address")
   .setAction(async address => {
     const API_URL_SEPOLIA = "https://eth-sepolia.g.alchemy.com/v2/W11DQwj4vGH8BrtxVJWuIQY4pHW8f4Oo";
-    const API_URL_MUMBAI = "";
-    const API_URL_ARBITRUM_SEPOLIA = "";
-    const API_URL_OPTIMISM_SEPOLIA = "";
+    const API_URL_MUMBAI = "https://polygon-mumbai.g.alchemy.com/v2/sQWuxbaPon3KJp93ytOJmMvBX4nU3zdL";
+    const API_URL_ARBITRUM_SEPOLIA = "https://arb-sepolia.g.alchemy.com/v2/r4zEUCE4-eTce0XpGGXGyVY0qV7SQb6V";
+    const API_URL_OPTIMISM_SEPOLIA = "https://opt-sepolia.g.alchemy.com/v2/dXokXHeIHPrJ5dx5sLEofThi-TcR0kpJ";
 
     const sepolia: AlchemyWeb3 = createAlchemyWeb3(API_URL_SEPOLIA);
     const mumbai: AlchemyWeb3 = createAlchemyWeb3(API_URL_MUMBAI);
@@ -27,12 +27,10 @@ task("deployer_nonce", "returns nonce and balance for specified address on multi
     console.log(results);
   });
 
-// 0x19E733F20aAdaB8996f7895ACBD04f746BF4Aac1
-
-//   [
-//     [ '  |NETWORK|   |NONCE|   |BALANCE|  ' ],
-//     [ 'Ethereum Sepolia:', 245, '8.09ETH' ],
-//     [ 'Polygon  Mumbai:', 0, '0.00ETH' ],
-//     [ 'Arbitrum Sepolia:', 0, '0.00ETH' ],
-//     [ 'Optimism Sepolia:', 0, '0.00ETH' ]
-//   ]
+// [
+//   [ '  |NETWORK|   |NONCE|   |BALANCE|  ' ],
+//   [ 'Ethereum Sepolia:', 0, '0.00ETH' ],
+//   [ 'Polygon  Mumbai:', 0, '0.00ETH' ],
+//   [ 'Arbitrum Sepolia:', 0, '0.00ETH' ],
+//   [ 'Optimism Sepolia:', 0, '0.00ETH' ]
+// ]

@@ -11,7 +11,6 @@ if (typeof INFURA_KEY === "undefined") {
 
 const ALCHEMY_KEY = process.env.ALCHEMY_API_KEY;
 
-const infuraUrl = (network: string): string => `https://${network}.infura.io/v3/${INFURA_KEY}`;
 const alchemyUrl = (network: string): string =>
   `https://eth-${network}.g.alchemy.com/v2/${ALCHEMY_KEY}`;
 
@@ -28,7 +27,6 @@ const alchemyUrl = (network: string): string =>
 export enum NetworkName {
   // ETHEREUM
   MAINNET = "mainnet",
-  GOERLI = "goerli",
   SEPOLIA = "sepolia",
 
   // BINANCE SMART CHAIN
@@ -41,11 +39,11 @@ export enum NetworkName {
 
   // OPTIMISM
   OPTIMISM_MAINNET = "optimism-mainnet",
-  OPTIMISM_GOERLI = "optimism-goerli",
+  OPTIMISM_SEPOLIA = "optimism-sepolia",
 
   // ARBITRUM
   ARBITRUM_MAINNET = "arbitrum-mainnet",
-  ARBITRUM_GOERLI = "arbitrum-goerli",
+  ARBITRUM_SEPOLIA = "arbitrum-sepolia",
 
   // AVALANCHE
   AVALANCHE_MAINNET = "avalanche-mainnet",
@@ -69,11 +67,6 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
     chainId: 1,
     url: alchemyUrl("mainnet"),
   },
-  [NetworkName.GOERLI]: {
-    chainId: 5,
-    url: alchemyUrl("goerli"),
-    isTestnet: true,
-  },
   [NetworkName.SEPOLIA]: {
     chainId: 11155111,
     url: alchemyUrl("sepolia"),
@@ -94,23 +87,23 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   // MATIC/POLYGON
   [NetworkName.POLYGON_MAINNET]: {
     chainId: 137,
-    url: infuraUrl("polygon-mainnet"),
+    url: alchemyUrl("polygon-mainnet"),
   },
   [NetworkName.POLYGON_MUMBAI]: {
     chainId: 80_001,
-    url: infuraUrl("polygon-mumbai"),
+    url: alchemyUrl("polygon-mumbai"),
     isTestnet: true,
   },
 
   // OPTIMISM
   [NetworkName.OPTIMISM_MAINNET]: {
     chainId: 10,
-    url: infuraUrl("optimism-mainnet"),
+    url: alchemyUrl("optimism-mainnet"),
     isLayer2: true,
   },
-  [NetworkName.OPTIMISM_GOERLI]: {
+  [NetworkName.OPTIMISM_SEPOLIA]: {
     chainId: 420,
-    url: infuraUrl("optimism-goerli"),
+    url: alchemyUrl("optimism-sepolia"),
     isTestnet: true,
     isLayer2: true,
   },
@@ -118,12 +111,12 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   // ARBITRUM
   [NetworkName.ARBITRUM_MAINNET]: {
     chainId: 42_161,
-    url: infuraUrl("arbitrum-mainnet"),
+    url: alchemyUrl("arbitrum-mainnet"),
     isLayer2: true,
   },
-  [NetworkName.ARBITRUM_GOERLI]: {
+  [NetworkName.ARBITRUM_SEPOLIA]: {
     chainId: 421_611,
-    url: infuraUrl("arbitrum-goerli"),
+    url: alchemyUrl("arbitrum-sepolia"),
     isTestnet: true,
     isLayer2: true,
   },
