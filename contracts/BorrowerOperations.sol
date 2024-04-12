@@ -9,7 +9,7 @@ import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/Saf
 import { ReentrancyGuardUpgradeable } from
     "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-import { TrenMath, DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
+import { TrenMath } from "./Dependencies/TrenMath.sol";
 import { TrenBase } from "./Dependencies/TrenBase.sol";
 import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
 
@@ -35,42 +35,6 @@ contract BorrowerOperations is
 
     string public constant NAME = "BorrowerOperations";
 
-    // --- Connected contract declarations ---
-
-    /* --- Variable container structs  ---
-
-    Used to hold, return and assign variables inside a function, in order to avoid the error:
-    "CompilerError: Stack too deep". */
-
-    struct LocalVariables_adjustTrenBox {
-        address asset;
-        bool isCollIncrease;
-        uint256 price;
-        uint256 collChange;
-        uint256 netDebtChange;
-        uint256 debt;
-        uint256 coll;
-        uint256 oldICR;
-        uint256 newICR;
-        uint256 newTCR;
-        uint256 debtTokenFee;
-        uint256 newDebt;
-        uint256 newColl;
-        uint256 stake;
-    }
-
-    struct LocalVariables_openTrenBox {
-        address asset;
-        uint256 price;
-        uint256 debtTokenFee;
-        uint256 netDebt;
-        uint256 compositeDebt;
-        uint256 ICR;
-        uint256 NICR;
-        uint256 stake;
-        uint256 arrayIndex;
-    }
-
     // --- Initializer ---
 
     function initialize() public initializer {
@@ -92,17 +56,21 @@ contract BorrowerOperations is
         external
         override
     {
-        require(
-            IAdminContract(adminContract).getIsActive(_asset),
-            "BorrowerOperations: Asset is not active"
-        );
-        LocalVariables_openTrenBox memory vars;
+        if (!IAdminContract(adminContract).getIsActive(_asset)) {
+            revert BorrowerOperations__NotActiveColl();
+        }
+
+        OpenTrenBox memory vars;
         vars.asset = _asset;
 
         vars.price = IPriceFeed(priceFeed).fetchPrice(vars.asset);
         bool isRecoveryMode = _checkRecoveryMode(vars.asset, vars.price);
 
-        _requireTrenBoxIsNotActive(vars.asset, msg.sender);
+        uint256 status = ITrenBoxManager(trenBoxManager).getTrenBoxStatus(vars.asset, msg.sender);
+        // require TrenBox is not active
+        if (status == 1) {
+            revert BorrowerOperations__TrenBoxIsActive();
+        }
 
         vars.netDebt = _debtTokenAmount;
 
@@ -117,7 +85,9 @@ contract BorrowerOperations is
         uint256 gasCompensation =
             IAdminContract(adminContract).getDebtTokenGasCompensation(vars.asset);
         vars.compositeDebt = vars.netDebt + gasCompensation;
-        require(vars.compositeDebt != 0, "compositeDebt cannot be 0");
+        if (vars.compositeDebt == 0) {
+            revert BorrowerOperations__CompositeDebtZero();
+        }
 
         vars.ICR = TrenMath._computeCR(_assetAmount, vars.compositeDebt, vars.price);
         vars.NICR = TrenMath._computeNominalCR(_assetAmount, vars.compositeDebt);
@@ -156,6 +126,7 @@ contract BorrowerOperations is
         // Move the asset to the Active Pool, and mint the debtToken amount to the borrower
         _activePoolAddColl(vars.asset, _assetAmount);
         _withdrawDebtTokens(vars.asset, msg.sender, _debtTokenAmount, vars.netDebt);
+
         // Move the debtToken gas compensation to the Gas Pool
         if (gasCompensation != 0) {
             _withdrawDebtTokens(vars.asset, gasPoolAddress, gasCompensation, gasCompensation);
@@ -255,10 +226,9 @@ contract BorrowerOperations is
         );
     }
 
-    /*
-    * _adjustTrenBox(): Alongside a debt change, this function can perform either a collateral
-    top-up
-    or a collateral withdrawal.
+    /**
+     * @dev _adjustTrenBox(): Alongside a debt change, this function can perform either a collateral
+     * top-up or a collateral withdrawal.
      */
     function _adjustTrenBox(
         address _asset,
@@ -272,13 +242,15 @@ contract BorrowerOperations is
     )
         internal
     {
-        LocalVariables_adjustTrenBox memory vars;
+        AdjustTrenBox memory vars;
         vars.asset = _asset;
         vars.price = IPriceFeed(priceFeed).fetchPrice(vars.asset);
         bool isRecoveryMode = _checkRecoveryMode(vars.asset, vars.price);
 
         if (_isDebtIncrease) {
-            _requireNonZeroDebtChange(_debtTokenChange);
+            if (_debtTokenChange == 0) {
+                revert BorrowerOperations__ZeroDebtChange();
+            }
         }
         _requireSingularCollChange(_collWithdrawal, _assetSent);
         _requireNonZeroAdjustment(_collWithdrawal, _debtTokenChange, _assetSent);
@@ -321,7 +293,9 @@ contract BorrowerOperations is
             _isDebtIncrease,
             vars.price
         );
-        require(_collWithdrawal <= vars.coll, "BorrowerOps: bad _collWithdrawal");
+        if (_collWithdrawal > vars.coll) {
+            revert BorrowerOperations__InsufficientCollateral();
+        }
 
         // Check the adjustment satisfies all conditions for the current system mode
         _requireValidAdjustmentInCurrentMode(
@@ -526,10 +500,9 @@ contract BorrowerOperations is
     {
         uint256 newTotalAssetDebt = IActivePool(activePool).getDebtTokenBalance(_asset)
             + IDefaultPool(defaultPool).getDebtTokenBalance(_asset) + _netDebtIncrease;
-        require(
-            newTotalAssetDebt <= IAdminContract(adminContract).getMintCap(_asset),
-            "Exceeds mint cap"
-        );
+        if (newTotalAssetDebt > IAdminContract(adminContract).getMintCap(_asset)) {
+            revert BorrowerOperations__ExceedMintCap();
+        }
         IActivePool(activePool).increaseDebt(_asset, _netDebtIncrease);
         IDebtToken(debtToken).mint(_asset, _account, _debtTokenAmount);
     }
@@ -560,10 +533,9 @@ contract BorrowerOperations is
         internal
         pure
     {
-        require(
-            _collWithdrawal == 0 || _amountSent == 0,
-            "BorrowerOperations: Cannot withdraw and add coll"
-        );
+        if (_collWithdrawal != 0 && _amountSent != 0) {
+            revert BorrowerOperations__NotSingularChange();
+        }
     }
 
     function _requireNonZeroAdjustment(
@@ -574,37 +546,28 @@ contract BorrowerOperations is
         internal
         pure
     {
-        require(
-            _collWithdrawal != 0 || _debtTokenChange != 0 || _assetSent != 0,
-            "BorrowerOps: There must be either a collateral change or a debt change"
-        );
+        if (_collWithdrawal == 0 && _debtTokenChange == 0 && _assetSent == 0) {
+            revert BorrowerOperations__ZeroAdjustment();
+        }
     }
 
     function _requireTrenBoxIsActive(address _asset, address _borrower) internal view {
         uint256 status = ITrenBoxManager(trenBoxManager).getTrenBoxStatus(_asset, _borrower);
-        require(status == 1, "BorrowerOps: TrenBox does not exist or is closed");
-    }
-
-    function _requireTrenBoxIsNotActive(address _asset, address _borrower) internal view {
-        uint256 status = ITrenBoxManager(trenBoxManager).getTrenBoxStatus(_asset, _borrower);
-        require(status != 1, "BorrowerOps: TrenBox is active");
-    }
-
-    function _requireNonZeroDebtChange(uint256 _debtTokenChange) internal pure {
-        require(_debtTokenChange != 0, "BorrowerOps: Debt increase requires non-zero debtChange");
+        if (status != 1) {
+            revert BorrowerOperations__TrenBoxNotExistOrClosed();
+        }
     }
 
     function _requireNotInRecoveryMode(address _asset, uint256 _price) internal view {
-        require(
-            !_checkRecoveryMode(_asset, _price),
-            "BorrowerOps: Operation not permitted during Recovery Mode"
-        );
+        if (_checkRecoveryMode(_asset, _price)) {
+            revert BorrowerOperations__OperationInRecoveryMode();
+        }
     }
 
     function _requireNoCollWithdrawal(uint256 _collWithdrawal) internal pure {
-        require(
-            _collWithdrawal == 0, "BorrowerOps: Collateral withdrawal not permitted Recovery Mode"
-        );
+        if (_collWithdrawal != 0) {
+            revert BorrowerOperations__CollWithdrawalInRecoveryMode();
+        }
     }
 
     function _requireValidAdjustmentInCurrentMode(
@@ -612,7 +575,7 @@ contract BorrowerOperations is
         bool _isRecoveryMode,
         uint256 _collWithdrawal,
         bool _isDebtIncrease,
-        LocalVariables_adjustTrenBox memory _vars
+        AdjustTrenBox memory _vars
     )
         internal
         view
@@ -653,37 +616,33 @@ contract BorrowerOperations is
     }
 
     function _requireICRisAboveMCR(address _asset, uint256 _newICR) internal view {
-        require(
-            _newICR >= IAdminContract(adminContract).getMcr(_asset),
-            "BorrowerOps: An operation that would result in ICR < MCR is not permitted"
-        );
+        if (_newICR < IAdminContract(adminContract).getMcr(_asset)) {
+            revert BorrowerOperations__TrenBoxICRBelowMCR();
+        }
     }
 
     function _requireICRisAboveCCR(address _asset, uint256 _newICR) internal view {
-        require(
-            _newICR >= IAdminContract(adminContract).getCcr(_asset),
-            "BorrowerOps: Operation must leave trenBox with ICR >= CCR"
-        );
+        if (_newICR < IAdminContract(adminContract).getCcr(_asset)) {
+            revert BorrowerOperations__TrenBoxICRBelowCCR();
+        }
     }
 
     function _requireNewICRisAboveOldICR(uint256 _newICR, uint256 _oldICR) internal pure {
-        require(
-            _newICR >= _oldICR, "BorrowerOps: Cannot decrease your TrenBox's ICR in Recovery Mode"
-        );
+        if (_newICR < _oldICR) {
+            revert BorrowerOperations__TrenBoxNewICRBelowOldICR();
+        }
     }
 
     function _requireNewTCRisAboveCCR(address _asset, uint256 _newTCR) internal view {
-        require(
-            _newTCR >= IAdminContract(adminContract).getCcr(_asset),
-            "BorrowerOps: An operation that would result in TCR < CCR is not permitted"
-        );
+        if (_newTCR < IAdminContract(adminContract).getCcr(_asset)) {
+            revert BorrowerOperations__TrenBoxNewTCRBelowCCR();
+        }
     }
 
     function _requireAtLeastMinNetDebt(address _asset, uint256 _netDebt) internal view {
-        require(
-            _netDebt >= IAdminContract(adminContract).getMinNetDebt(_asset),
-            "BorrowerOps: TrenBox's net debt must be greater than minimum"
-        );
+        if (_netDebt < IAdminContract(adminContract).getMinNetDebt(_asset)) {
+            revert BorrowerOperations__TrenBoxNetDebtLessThanMin();
+        }
     }
 
     function _requireValidDebtTokenRepayment(
@@ -694,11 +653,12 @@ contract BorrowerOperations is
         internal
         view
     {
-        require(
+        if (
             _debtRepayment
-                <= _currentDebt - IAdminContract(adminContract).getDebtTokenGasCompensation(_asset),
-            "BorrowerOps: Amount repaid must not be larger than the TrenBox's debt"
-        );
+                > _currentDebt - IAdminContract(adminContract).getDebtTokenGasCompensation(_asset)
+        ) {
+            revert BorrowerOperations__RepayLargerThanTrenBoxDebt();
+        }
     }
 
     function _requireSufficientDebtTokenBalance(
@@ -708,10 +668,9 @@ contract BorrowerOperations is
         internal
         view
     {
-        require(
-            IDebtToken(debtToken).balanceOf(_borrower) >= _debtRepayment,
-            "BorrowerOps: Caller doesnt have enough debt tokens to make repayment"
-        );
+        if (IDebtToken(debtToken).balanceOf(_borrower) < _debtRepayment) {
+            revert BorrowerOperations__InsufficientDebtBalance();
+        }
     }
 
     // --- ICR and TCR getters ---

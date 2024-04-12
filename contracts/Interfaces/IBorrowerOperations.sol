@@ -10,6 +10,35 @@ interface IBorrowerOperations {
         adjustTrenBox
     }
 
+    struct AdjustTrenBox {
+        address asset;
+        bool isCollIncrease;
+        uint256 price;
+        uint256 collChange;
+        uint256 netDebtChange;
+        uint256 debt;
+        uint256 coll;
+        uint256 oldICR;
+        uint256 newICR;
+        uint256 newTCR;
+        uint256 debtTokenFee;
+        uint256 newDebt;
+        uint256 newColl;
+        uint256 stake;
+    }
+
+    struct OpenTrenBox {
+        address asset;
+        uint256 price;
+        uint256 debtTokenFee;
+        uint256 netDebt;
+        uint256 compositeDebt;
+        uint256 ICR;
+        uint256 NICR;
+        uint256 stake;
+        uint256 arrayIndex;
+    }
+
     // --- Events ---
 
     event BorrowingFeePaid(address indexed _asset, address indexed _borrower, uint256 _feeAmount);
@@ -22,6 +51,27 @@ interface IBorrowerOperations {
         uint256 stake,
         BorrowerOperation operation
     );
+
+    // --- Errors ---
+
+    error BorrowerOperations__NotActiveColl();
+    error BorrowerOperations__TrenBoxNotExistOrClosed();
+    error BorrowerOperations__TrenBoxIsActive();
+    error BorrowerOperations__TrenBoxNetDebtLessThanMin();
+    error BorrowerOperations__CompositeDebtZero();
+    error BorrowerOperations__TrenBoxICRBelowCCR();
+    error BorrowerOperations__TrenBoxICRBelowMCR();
+    error BorrowerOperations__TrenBoxNewICRBelowOldICR();
+    error BorrowerOperations__TrenBoxNewTCRBelowCCR();
+    error BorrowerOperations__ZeroDebtChange();
+    error BorrowerOperations__NotSingularChange();
+    error BorrowerOperations__ZeroAdjustment();
+    error BorrowerOperations__OperationInRecoveryMode();
+    error BorrowerOperations__CollWithdrawalInRecoveryMode();
+    error BorrowerOperations__RepayLargerThanTrenBoxDebt();
+    error BorrowerOperations__InsufficientDebtBalance();
+    error BorrowerOperations__InsufficientCollateral();
+    error BorrowerOperations__ExceedMintCap();
 
     // --- Functions ---
 
