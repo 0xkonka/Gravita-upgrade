@@ -9,25 +9,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { getChainId } = hre;
   const chainId = await getChainId();
 
-  await callSetAddresses("ActivePool", hre);
-  await callSetAddresses("AdminContract", hre);
-  await callSetAddresses("BorrowerOperations", hre);
-  await callSetAddresses("CollSurplusPool", hre);
-  await callSetAddresses("DefaultPool", hre);
-  await callSetAddresses("FeeCollector", hre);
-  await callSetAddresses("FlashLoan", hre);
-  await callSetAddresses("SortedTrenBoxes", hre);
-  await callSetAddresses("StabilityPool", hre);
-  await callSetAddresses("TrenBoxManager", hre);
-  await callSetAddresses("TrenBoxManagerOperations", hre);
+  // await callSetAddresses("ActivePool", hre);
+  // await callSetAddresses("AdminContract", hre);
+  // await callSetAddresses("BorrowerOperations", hre);
+  // await callSetAddresses("CollSurplusPool", hre);
+  // await callSetAddresses("DefaultPool", hre);
+  // await callSetAddresses("FeeCollector", hre);
+  // await callSetAddresses("FlashLoan", hre);
+  // await callSetAddresses("SortedTrenBoxes", hre);
+  // await callSetAddresses("StabilityPool", hre);
+  // await callSetAddresses("TrenBoxManager", hre);
+  // await callSetAddresses("TrenBoxManagerOperations", hre);
 
-  if (isLocalhostNetwork(chainId)) {
-    console.log("⛓️ Skipping PriceFeedTestnet connection on a local network");
-  } else if (isLayer2Network(chainId)) {
-    await callSetAddresses("PriceFeedL2", hre);
-  } else if (isSupportedNetwork(chainId)) {
-    await callSetAddresses("PriceFeed", hre);
-  }
+  // if (isLocalhostNetwork(chainId)) {
+  //   console.log("⛓️ Skipping PriceFeedTestnet connection on a local network");
+  // } else if (isLayer2Network(chainId)) {
+  //   await callSetAddresses("PriceFeedL2", hre);
+  // } else if (isSupportedNetwork(chainId)) {
+  //   await callSetAddresses("PriceFeedTestnet", hre);
+  // }
 };
 
 export default func;
@@ -62,7 +62,7 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
   } else if (isLayer2Network(chainId)) {
     priceFeedDeployment = await deployments.get("PriceFeedL2");
   } else {
-    priceFeedDeployment = await deployments.get("PriceFeed");
+    priceFeedDeployment = await deployments.get("PriceFeedTestnet");
   }
 
   const sortedTrenBoxesDeployment = await deployments.get("SortedTrenBoxes");

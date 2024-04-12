@@ -11,9 +11,16 @@ async function deployLocalhostNetwork(
   deploy: DeploymentsExtension["deploy"]
 ): Promise<void> {
   await preDeploy(deployer, "PriceFeedTestnet");
-  await deploy("PriceFeedTestnet", {
+  const deployResult: DeployResult = await deploy("PriceFeedTestnet", {
     from: deployer,
     log: true,
+  });
+
+  const contractPath = `contracts/TestContracts/PriceFeedTestnet.sol:PriceFeedTestnet`;
+  await verifyContract({
+    contractPath: contractPath,
+    contractAddress: deployResult.address,
+    args: deployResult.args || [],
   });
 }
 
@@ -84,7 +91,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   } else if (isLayer2Network(chainId)) {
     await deployAndVerifyOnLayer2(deployer, deploy);
   } else if (isSupportedNetwork(chainId)) {
-    await deployAndVerifyOnLayer1(deployer, deploy);
+    await deployLocalhostNetwork(deployer, deploy);
+    // await deployAndVerifyOnLayer1(deployer, deploy);
   }
 };
 

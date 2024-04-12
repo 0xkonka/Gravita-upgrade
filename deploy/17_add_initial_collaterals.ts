@@ -15,14 +15,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (isLocalhostNetwork(chainId)) {
     console.log(`Adding collaterals on local network`);
     for (const collateral of LOCAL_NETWORK_COLLATERALS) {
-      await addPriceFeedOracle(collateral, hre);
+      // await addPriceFeedOracle(collateral, hre);
       await addCollateral(collateral, hre);
     }
   } else {
     console.log(`Adding collaterals on ${network.name} network`);
     const collaterals = COLLATERALS[network.name as keyof typeof COLLATERALS] ?? [];
     for (const collateral of collaterals) {
-      await addPriceFeedOracle(collateral, hre);
+      // await addPriceFeedOracle(collateral, hre);
       await addCollateral(collateral, hre);
     }
   }
