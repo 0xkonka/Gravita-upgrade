@@ -15,7 +15,7 @@ export default function shouldBehaveLikeCanAccountSurplus(): void {
     this.impostor = this.signers.accounts[1];
   });
 
-  context("when caller is active pool", function () {
+  context("when caller is trenBoxManager", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
         trenBoxManager: this.impostor,
@@ -27,7 +27,7 @@ export default function shouldBehaveLikeCanAccountSurplus(): void {
     shouldBehaveLikeCanAccountSurplusCorrectly();
   });
 
-  context("when caller is not active pool", function () {
+  context("when caller is not trenBoxManager", function () {
     it("reverts custom error", async function () {
       this.impostor = this.signers.accounts[1];
       const { wETH } = this.collaterals.active;
@@ -39,7 +39,10 @@ export default function shouldBehaveLikeCanAccountSurplus(): void {
         this.contracts.collSurplusPool
           .connect(this.impostor)
           .accountSurplus(wETH.address, user, amount)
-      ).to.be.revertedWith("CollSurplusPool: Caller is not TrenBoxManager");
+      ).to.be.revertedWithCustomError(
+        this.contracts.collSurplusPool,
+        "CollSurplusPool__NotTrenBoxManager"
+      );
     });
   });
 }

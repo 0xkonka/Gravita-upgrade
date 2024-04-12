@@ -516,13 +516,13 @@ Impact: Medium Confidence: Medium
       ignores return value by
       [IERC20(\_tokenIn).approve(address(swapRouter),\_collAmountIn)](contracts/FlashLoan.sol#L155)
 
-contracts/FlashLoan.sol#L153-L180
+contracts/Pricing/PriceFeedL2.sol#L71-L103
 
 - [ ] ID-42 [PriceFeedL2.\_checkSequencerUptimeFeed()](contracts/Pricing/PriceFeedL2.sol#L71-L103)
       ignores return value by
       [(answer,updatedAt) = ChainlinkAggregatorV3Interface(sequencerUptimeFeedAddress).latestRoundData()](contracts/Pricing/PriceFeedL2.sol#L74-L82)
 
-contracts/Pricing/PriceFeedL2.sol#L71-L103
+contracts/FlashLoan.sol#L153-L180
 
 - [ ] ID-43 [PriceFeed.\_fetchChainlinkOracleResponse(address)](contracts/PriceFeed.sol#L157-L178)
       ignores return value by
