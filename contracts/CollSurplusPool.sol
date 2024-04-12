@@ -2,15 +2,15 @@
 pragma solidity ^0.8.23;
 
 import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
+
 import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
-import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
 
 contract CollSurplusPool is
     UUPSUpgradeable,
@@ -22,10 +22,8 @@ contract CollSurplusPool is
 
     string public constant NAME = "CollSurplusPool";
 
-    // deposited ether tracker
-    mapping(address collateral => uint256 collateralBalances) internal balances;
-    // Collateral surplus claimable by trenBox owners
-    mapping(address user => mapping(address => uint256)) internal userBalances;
+    mapping(address collateral => uint256 balance) internal collateralBalances;
+    mapping(address user => mapping(address collateral => uint256 balance)) internal userBalances;
 
     // --- modifiers ---
 
@@ -59,12 +57,8 @@ contract CollSurplusPool is
         __UUPSUpgradeable_init();
     }
 
-    /**
-     * @notice Returns the Asset state variable at ActivePool address.
-     * Not necessarily equal to the raw ether balance - ether can be forcibly sent to contracts.
-     */
     function getAssetBalance(address _asset) external view override returns (uint256) {
-        return balances[_asset];
+        return collateralBalances[_asset];
     }
 
     function getCollateral(
@@ -99,10 +93,10 @@ contract CollSurplusPool is
 
     function claimColl(address _asset, address _account) external override onlyBorrowerOperations {
         mapping(address => uint256) storage userBalance = userBalances[_account];
-        uint256 claimableCollEther = userBalance[_asset];
+        uint256 claimableColl = userBalance[_asset];
 
         uint256 safetyTransferclaimableColl =
-            SafetyTransfer.decimalsCorrection(_asset, claimableCollEther);
+            SafetyTransfer.decimalsCorrection(_asset, claimableColl);
 
         if (safetyTransferclaimableColl == 0) {
             revert CollSurplusPool__NoClaimableColl();
@@ -111,14 +105,14 @@ contract CollSurplusPool is
         userBalance[_asset] = 0;
         emit CollBalanceUpdated(_account, 0);
 
-        balances[_asset] = balances[_asset] - claimableCollEther;
+        collateralBalances[_asset] = collateralBalances[_asset] - claimableColl;
         emit AssetSent(_account, safetyTransferclaimableColl);
 
         IERC20(_asset).safeTransfer(_account, safetyTransferclaimableColl);
     }
 
     function receivedERC20(address _asset, uint256 _amount) external override onlyActivePool {
-        balances[_asset] = balances[_asset] + _amount;
+        collateralBalances[_asset] = collateralBalances[_asset] + _amount;
     }
 
     function authorizeUpgrade(address newImplementation) public {
