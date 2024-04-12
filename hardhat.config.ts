@@ -8,6 +8,7 @@ import { removeConsoleLog } from "hardhat-preprocessor";
 import type { HardhatUserConfig } from "hardhat/config";
 import type { HttpNetworkAccountsUserConfig, NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
+import "@nomicfoundation/hardhat-ignition-ethers";
 
 import { API_KEYS } from "./config/api-keys";
 import { NETWORKS, Network, NetworkName } from "./config/networks";
@@ -114,7 +115,7 @@ const config: HardhatUserConfig = {
       url: "http://localhost:24012/rpc",
     },
     // Mainnet and Testnet configs
-    ...getAllNetworkConfigs(),
+    // ...getAllNetworkConfigs(),
   },
   paths: {
     artifacts: "./artifacts",

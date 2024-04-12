@@ -45,6 +45,10 @@ types
 cache_hardhat
 dodoc
 
+# Ignition files
+build-info
+journal.jsonl
+
 # Foundry files
 foundry_cache
 out
