@@ -5,6 +5,16 @@ pragma solidity ^0.8.23;
 import { ITrenBoxManager } from "./ITrenBoxManager.sol";
 
 interface ITrenBoxManagerOperations {
+    // Structs
+    // ----------------------------------------------------------------------------------------------------------
+
+    struct HintHelperLocalVars {
+        address asset;
+        uint256 debtTokenAmount;
+        uint256 price;
+        uint256 maxIterations;
+    }
+
     // Events
     // -----------------------------------------------------------------------------------------------------------
 
