@@ -114,7 +114,7 @@ const config: HardhatUserConfig = {
       url: "http://localhost:24012/rpc",
     },
     // Mainnet and Testnet configs
-    ...getAllNetworkConfigs(),
+    // ...getAllNetworkConfigs(),
   },
   paths: {
     artifacts: "./artifacts",
