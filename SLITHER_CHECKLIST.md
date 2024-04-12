@@ -514,11 +514,9 @@ Confidence: Medium
 contracts/Pricing/PriceFeedL2.sol#L71-L103
 
 
- - [ ] ID-42
 [FlashLoan.swapTokens(address,uint256,uint256)](contracts/FlashLoan.sol#L153-L180) ignores return value by [IERC20(_tokenIn).approve(address(swapRouter),_collAmountIn)](contracts/FlashLoan.sol#L155)
 
 contracts/FlashLoan.sol#L153-L180
-
 
  - [ ] ID-43
 [PriceFeed._fetchChainlinkOracleResponse(address)](contracts/PriceFeed.sol#L157-L178) ignores return value by [(roundId,answer,updatedAt) = ChainlinkAggregatorV3Interface(_oracleAddress).latestRoundData()](contracts/PriceFeed.sol#L162-L177)
