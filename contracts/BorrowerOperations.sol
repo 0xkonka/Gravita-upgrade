@@ -55,6 +55,7 @@ contract BorrowerOperations is
     )
         external
         override
+        nonReentrant
     {
         if (!IAdminContract(adminContract).getIsActive(_asset)) {
             revert BorrowerOperations__NotActiveColl();
@@ -358,7 +359,7 @@ contract BorrowerOperations is
         );
     }
 
-    function closeTrenBox(address _asset) external override {
+    function closeTrenBox(address _asset) external override nonReentrant {
         _requireTrenBoxIsActive(_asset, msg.sender);
         uint256 price = IPriceFeed(priceFeed).fetchPrice(_asset);
         _requireNotInRecoveryMode(_asset, price);
