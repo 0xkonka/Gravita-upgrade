@@ -74,7 +74,7 @@ export default function shouldBehaveLikeCanCancelTransaction(): void {
         timelock
           .connect(this.user)
           .cancelTransaction(target, value, signature, data, eta_TwoHoursAfterDelay)
-      ).to.be.revertedWithCustomError(timelock, "Timelock__AdminOnly");
+      ).to.be.revertedWithCustomError(timelock, "Timelock__OnlyAdmin");
     });
   });
 }

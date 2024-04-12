@@ -51,7 +51,7 @@ export default function shouldBehaveLikeCanAcceptAdmin(): void {
 
       await expect(timelock.connect(this.admin).acceptAdmin()).to.be.revertedWithCustomError(
         timelock,
-        "Timelock__PendingAdminOnly"
+        "Timelock__OnlyPendingAdmin"
       );
     });
   });
