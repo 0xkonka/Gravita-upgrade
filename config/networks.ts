@@ -4,15 +4,35 @@ import { resolve } from "path";
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(process.cwd(), dotenvConfigPath) });
 
-const INFURA_KEY = process.env.INFURA_API_KEY;
-if (typeof INFURA_KEY === "undefined") {
-  console.log(`INFURA_API_KEY must be a defined environment variable`);
+const ALCHEMY_KEY = process.env.ALCHEMY_API_KEY;
+if (typeof ALCHEMY_KEY === "undefined") {
+  console.log(`ALCHEMY_KEY must be a defined environment variable`);
 }
 
-const ALCHEMY_KEY = process.env.ALCHEMY_API_KEY;
+const alchemyUrl = (network: string): string => {
+  const prefix = getPrefix(network);
+  const formattedNetwork = formatNetworkName(network);
+  const apiKey = process.env[`${formattedNetwork}_API_KEY`];
+  if (!apiKey) {
+    throw new Error(`${formattedNetwork}_API_KEY must be defined in the environment variables.`);
+  }
 
-const alchemyUrl = (network: string): string =>
-  `https://eth-${network}.g.alchemy.com/v2/${ALCHEMY_KEY}`;
+  return `https://${prefix}sepolia.g.alchemy.com/v2/${apiKey}`;
+};
+
+const getPrefix = (network: string): string => {
+  if (network.startsWith("optimism-")) {
+    return "opt-";
+  } else if (network.startsWith("arbitrum-")) {
+    return "arb-";
+  } else {
+    return "eth-";
+  }
+};
+
+const formatNetworkName = (network: string): string => {
+  return network.toUpperCase().replace("-", "_");
+};
 
 /**
  * All supported network names
@@ -26,8 +46,8 @@ const alchemyUrl = (network: string): string =>
  */
 export enum NetworkName {
   // ETHEREUM
-  MAINNET = "mainnet",
-  SEPOLIA = "sepolia",
+  ETHEREUM_MAINNET = "ethereum-mainnet",
+  ETHEREUM_SEPOLIA = "ethereum-sepolia",
 
   // BINANCE SMART CHAIN
   BSC = "bsc",
@@ -63,13 +83,13 @@ export interface Network {
 
 export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   // ETHEREUM
-  [NetworkName.MAINNET]: {
+  [NetworkName.ETHEREUM_MAINNET]: {
     chainId: 1,
-    url: alchemyUrl("mainnet"),
+    url: alchemyUrl("ethereum-mainnet"),
   },
-  [NetworkName.SEPOLIA]: {
+  [NetworkName.ETHEREUM_SEPOLIA]: {
     chainId: 11155111,
-    url: alchemyUrl("sepolia"),
+    url: alchemyUrl("ethereum-sepolia"),
     isTestnet: true,
   },
 
@@ -102,7 +122,7 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
     isLayer2: true,
   },
   [NetworkName.OPTIMISM_SEPOLIA]: {
-    chainId: 420,
+    chainId: 11155420,
     url: alchemyUrl("optimism-sepolia"),
     isTestnet: true,
     isLayer2: true,
@@ -115,7 +135,7 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
     isLayer2: true,
   },
   [NetworkName.ARBITRUM_SEPOLIA]: {
-    chainId: 421_611,
+    chainId: 421_614,
     url: alchemyUrl("arbitrum-sepolia"),
     isTestnet: true,
     isLayer2: true,

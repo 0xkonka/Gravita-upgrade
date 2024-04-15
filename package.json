@@ -94,7 +94,6 @@
   "license": "UNLICENSED",
   "packageManager": "yarn@4.1.0",
   "dependencies": {
-    "@alch/alchemy-web3": "^1.4.7",
     "@chainlink/contracts": "^0.8.0"
   }
 }

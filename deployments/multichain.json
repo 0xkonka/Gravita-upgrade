@@ -1,0 +1,7 @@
+{
+  "TRENToken": {
+    "ethereum-sepolia": "0x824dEfa61eBEa2E99b5561e686C7D589Ad73F7D6",
+    "optimism-sepolia": "0x824dEfa61eBEa2E99b5561e686C7D589Ad73F7D6",
+    "arbitrum-sepolia": "0x824dEfa61eBEa2E99b5561e686C7D589Ad73F7D6"
+  }
+}
