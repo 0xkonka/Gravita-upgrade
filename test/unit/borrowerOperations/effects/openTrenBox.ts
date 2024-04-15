@@ -98,8 +98,9 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
                 DEFAULT_LOWER_HINT
               );
 
-            await expect(openTrenBoxTx).to.be.revertedWith(
-              "BorrowerOps: TrenBox's net debt must be greater than minimum"
+            await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+              borrowerOperations,
+              "BorrowerOperations__TrenBoxNetDebtLessThanMin"
             );
           });
         });
@@ -132,7 +133,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
                 DEFAULT_LOWER_HINT
               );
 
-            await expect(openTrenBoxTx).to.be.revertedWith("compositeDebt cannot be 0");
+            await expect(openTrenBoxTx).to.be.revertedWithCustomError(borrowerOperations, "BorrowerOperations__CompositeDebtZero");
           });
         });
 
@@ -151,6 +152,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             it("should revert", async function () {
               const [user] = this.users;
               const { erc20 } = this.testContracts;
+              const { borrowerOperations } = this.contracts
               const asset = await erc20.getAddress();
               const assetAmount = ethers.parseUnits("2", 18);
 
@@ -162,8 +164,9 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
                 from: user,
               });
 
-              await expect(openTrenBoxTx).to.be.revertedWith(
-                "BorrowerOps: An operation that would result in ICR < MCR is not permitted"
+              await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+                borrowerOperations,
+                "BorrowerOperations__TrenBoxICRBelowMCR"
               );
             });
           });
@@ -201,6 +204,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           const { erc20 } = this.testContracts;
           const assetAddress = await erc20.getAddress();
           const assetAmount = ethers.parseUnits("2", 18);
+          const { borrowerOperations } = this.contracts;
 
           const { openTrenBoxTx } = await this.utils.openTrenBox({
             asset: assetAddress,
@@ -208,7 +212,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             from: user,
           });
 
-          await expect(openTrenBoxTx).to.be.revertedWith("BorrowerOps: TrenBox is active");
+          await expect(openTrenBoxTx).to.be.revertedWithCustomError(borrowerOperations, "BorrowerOperations__TrenBoxIsActive");
         });
 
         it("should open tren box when it's was opened by another user", async function () {
@@ -241,6 +245,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           const { erc20 } = this.testContracts;
           const assetAddress = await erc20.getAddress();
           const assetAmount = ethers.parseUnits("2", 18);
+          const { borrowerOperations } = this.contracts;
 
           await this.testContracts.priceFeedTestnet.setPrice(assetAddress, 0);
 
@@ -250,8 +255,9 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             from: user,
           });
 
-          await expect(openTrenBoxTx).to.be.revertedWith(
-            "BorrowerOps: An operation that would result in ICR < MCR is not permitted"
+          await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+            borrowerOperations,
+            "BorrowerOperations__TrenBoxICRBelowMCR"
           );
         });
       });
@@ -314,6 +320,10 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             );
 
           await expect(openTrenBoxTx).to.be.revertedWith("Exceeds mint cap");
+          await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+            borrowerOperations,
+            "BorrowerOperations__CompositeDebtZero"
+          );
         });
       });
 
@@ -643,8 +653,9 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
                 DEFAULT_LOWER_HINT
               );
 
-            await expect(openTrenBoxTx).to.be.revertedWith(
-              "BorrowerOps: TrenBox's net debt must be greater than minimum"
+            await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+              this.contracts.borrowerOperations,
+              "BorrowerOperations__TrenBoxNetDebtLessThanMin"
             );
           });
         });
@@ -677,7 +688,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
                 DEFAULT_LOWER_HINT
               );
 
-            await expect(openTrenBoxTx).to.be.revertedWith("compositeDebt cannot be 0");
+            await expect(openTrenBoxTx).to.be.revertedWithCustomError(borrowerOperations, "BorrowerOperations__CompositeDebtZero");
           });
         });
 
@@ -696,6 +707,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             it("should revert", async function () {
               const [user] = this.users;
               const { erc20_with_6_decimals } = this.testContracts;
+              const { borrowerOperations } = this.contracts
               const asset = await erc20_with_6_decimals.getAddress();
               const assetAmount = ethers.parseUnits("5233.6789", 18);
 
@@ -707,8 +719,8 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
                 from: user,
               });
 
-              await expect(openTrenBoxTx).to.be.revertedWith(
-                "BorrowerOps: An operation that would result in ICR < MCR is not permitted"
+              await expect(openTrenBoxTx).to.be.revertedWithCustomError(borrowerOperations,
+                "BorrowerOperations__TrenBoxICRBelowMCR"
               );
             });
           });
@@ -746,6 +758,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           const { erc20_with_6_decimals } = this.testContracts;
           const assetAddress = await erc20_with_6_decimals.getAddress();
           const assetAmount = ethers.parseUnits("5432.1098", 18);
+          const { borrowerOperations } = this.contracts
 
           const { openTrenBoxTx } = await this.utils.openTrenBox({
             asset: assetAddress,
@@ -753,7 +766,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             from: user,
           });
 
-          await expect(openTrenBoxTx).to.be.revertedWith("BorrowerOps: TrenBox is active");
+          await expect(openTrenBoxTx).to.be.revertedWithCustomError(borrowerOperations, "BorrowerOperations__TrenBoxIsActive");
         });
 
         it("should open tren box when it's was opened by another user", async function () {
@@ -786,6 +799,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           const { erc20_with_6_decimals } = this.testContracts;
           const assetAddress = await erc20_with_6_decimals.getAddress();
           const assetAmount = ethers.parseUnits("5432.1098", 18);
+          const { borrowerOperations } = this.contracts;
 
           await this.testContracts.priceFeedTestnet.setPrice(assetAddress, 0);
 
@@ -795,8 +809,8 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             from: user,
           });
 
-          await expect(openTrenBoxTx).to.be.revertedWith(
-            "BorrowerOps: An operation that would result in ICR < MCR is not permitted"
+          await expect(openTrenBoxTx).to.be.revertedWithCustomError(borrowerOperations,
+            "BorrowerOperations__TrenBoxICRBelowMCR"
           );
         });
       });
@@ -865,8 +879,84 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
       it("should set TrenBox status to active", async function () {
         const [user] = this.users;
         const { erc20_with_6_decimals } = this.testContracts;
-        const asset = await erc20_with_6_decimals.getAddress();
-        const assetAmount = ethers.parseUnits("5432.1098", 18);
+        const assetAddress = await erc20_with_6_decimals.getAddress();
+        const assetAmount = ethers.parseUnits("100", 30);
+
+        const { openTrenBoxTx } = await this.utils.openTrenBox({
+          asset: assetAddress,
+          assetAmount,
+          from: user,
+        });
+
+        await (await openTrenBoxTx).wait();
+
+        const { trenBoxManager } = this.contracts;
+
+        const trenBoxStatus = await trenBoxManager.getTrenBoxStatus(assetAddress, user.address);
+        expect(trenBoxStatus).to.equal(TrenBoxStatus.active);
+
+      });
+
+      it("should open tren box when it's was opened by another user", async function () {
+        const [, anotherUser] = this.users;
+
+        const { erc20 } = this.testContracts;
+        const assetAddress = await erc20.getAddress();
+        const assetAmount = ethers.parseUnits("100", 30);
+
+        const { openTrenBoxTx } = await this.utils.openTrenBox({
+          asset: assetAddress,
+          assetAmount,
+          from: anotherUser,
+        });
+
+        await expect(openTrenBoxTx).to.not.be.rejected;
+      });
+    });
+
+    context("when asset price is 0", function () {
+      beforeEach(async function () {
+        const { erc20 } = this.testContracts;
+        const asset = await erc20.getAddress();
+        const mintCap = ethers.parseUnits("100", 35);
+        await this.contracts.adminContract.setMintCap(asset, mintCap);
+      });
+
+      it("should revert", async function () {
+        const [user] = this.users;
+        const { erc20 } = this.testContracts;
+        const assetAddress = await erc20.getAddress();
+        const assetAmount = ethers.parseUnits("100", 30);
+
+        await this.testContracts.priceFeedTestnet.setPrice(assetAddress, 0);
+
+        const { openTrenBoxTx } = await this.utils.openTrenBox({
+          asset: assetAddress,
+          assetAmount,
+          from: user,
+        });
+
+        await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+          this.contracts.borrowerOperations,
+          "BorrowerOperations__TrenBoxICRBelowMCR"
+        );
+      });
+    });
+
+    context("when new TCR is below CCR", function () {
+      beforeEach(async function () {
+        const { adminContract } = this.contracts;
+        const { erc20 } = this.testContracts;
+        const asset = await erc20.getAddress();
+        const mintCap = ethers.parseUnits("100", 35);
+        await adminContract.setMintCap(asset, mintCap);
+      });
+
+      it.skip("should revert", async function () {
+        const [user] = this.users;
+        const { erc20 } = this.testContracts;
+        const asset = await erc20.getAddress();
+        const assetAmount = ethers.parseUnits("100", 30);
 
         const { openTrenBoxTx } = await this.utils.openTrenBox({
           asset,
@@ -875,6 +965,10 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         });
 
         await (await openTrenBoxTx).wait();
+        await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+          this.contracts.borrowerOperations,
+          "BorrowerOperations__TrenBoxNewTCRBelowCCR"
+        );
 
         const { trenBoxManager } = this.contracts;
 
@@ -1158,6 +1252,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
 
   context("when asset is not active", function () {
     it("should revert", async function () {
+      const { borrowerOperations } = this.contracts;
       const notActiveAsset = this.collaterals.inactive.dai;
 
       const [user] = this.users;
@@ -1166,10 +1261,10 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
       const lowerHint = ethers.ZeroAddress;
 
       await expect(
-        this.contracts.borrowerOperations
+        borrowerOperations
           .connect(user)
           .openTrenBox(notActiveAsset.address, 100n, 100n, upperHint, lowerHint)
-      ).to.be.revertedWith("BorrowerOperations: Asset is not active");
+      ).to.be.revertedWithCustomError(borrowerOperations, "BorrowerOperations__NotActiveColl");
     });
   });
 

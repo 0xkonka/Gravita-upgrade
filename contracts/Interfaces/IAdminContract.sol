@@ -80,7 +80,7 @@ interface IAdminContract {
 
     function setMinNetDebt(address _collateral, uint256 minNetDebt) external;
 
-    function setPercentDivisor(address _collateral, uint256 precentDivisor) external;
+    function setPercentDivisor(address _collateral, uint256 percentDivisor) external;
 
     function setBorrowingFee(address _collateral, uint256 borrowingFee) external;
 
@@ -89,6 +89,8 @@ interface IAdminContract {
     function setMintCap(address _collateral, uint256 mintCap) external;
 
     function setRedemptionBlockTimestamp(address _collateral, uint256 _blockTimestamp) external;
+
+    function switchRouteToTRENStaking() external;
 
     function getIndex(address _collateral) external view returns (uint256);
 
@@ -121,4 +123,6 @@ interface IAdminContract {
     function getFlashLoanMinNetDebt() external view returns (uint256);
 
     function getFlashLoanMaxNetDebt() external view returns (uint256);
+
+    function getRouteToTRENStaking() external view returns (bool);
 }

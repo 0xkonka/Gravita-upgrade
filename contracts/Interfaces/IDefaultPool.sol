@@ -5,6 +5,10 @@ pragma solidity ^0.8.23;
 import { IPool } from "./IPool.sol";
 
 interface IDefaultPool is IPool {
+    // --- Errors ---
+    error DefaultPool__NotActivePool();
+    error DefaultPool__NotTrenBoxManager();
+
     // --- Events ---
     event DefaultPoolDebtUpdated(address _asset, uint256 _debt);
     event DefaultPoolAssetBalanceUpdated(address _asset, uint256 _balance);

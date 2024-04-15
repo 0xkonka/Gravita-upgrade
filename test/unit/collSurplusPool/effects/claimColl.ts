@@ -53,7 +53,8 @@ export default function shouldBehaveLikeCanClaimColl(): void {
           this.redeployedContracts.collSurplusPool
             .connect(this.borrowerOperationsImpostor)
             .claimColl(erc20, user)
-        ).to.be.revertedWith("CollSurplusPool: No collateral available to claim");
+        ).to.be.revertedWithCustomError(this.contracts.collSurplusPool, "CollSurplusPool__NoClaimableColl");
+
       });
 
       it("should claim Collateral", async function () {
@@ -168,7 +169,10 @@ export default function shouldBehaveLikeCanClaimColl(): void {
 
       await expect(
         this.contracts.collSurplusPool.connect(impostor).claimColl(erc20, user)
-      ).to.be.revertedWith("CollSurplusPool: Caller is not Borrower Operations");
+      ).to.be.revertedWithCustomError(
+        this.contracts.collSurplusPool,
+        "CollSurplusPool__NotBorrowerOperations"
+      );
     });
   });
 }

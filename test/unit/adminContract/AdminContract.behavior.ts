@@ -70,6 +70,7 @@ export function shouldBehaveLikeAdminContractContract(): void {
     describe("#getMinNetDebt", function () {
       shouldHaveGetMinNetDebt();
     });
+
     describe("#getPercentDivisor", function () {
       shouldHaveGetPercentDivisor();
     });

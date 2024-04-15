@@ -1,7 +1,34 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
+error Timelock__DelayMustExceedMininumDelay();
+error Timelock__DelayMustNotExceedMaximumDelay();
+error Timelock__OnlyTimelock();
+error Timelock__OnlyPendingAdmin();
+error Timelock__OnlyAdmin();
+error Timelock__ETAMustSatisfyDelay();
+error Timelock__TxNoQueued();
+error Timelock__TxAlreadyQueued();
+error Timelock__TxStillLocked();
+error Timelock__TxExpired();
+error Timelock__TxReverted();
+error Timelock__AdminZeroAddress();
+error Timelock__TargetZeroAddress();
+
 contract Timelock {
+    // ------------------------------------------- State ------------------------------------------
+    string public constant NAME = "Timelock";
+
+    uint256 public constant GRACE_PERIOD = 14 days;
+    uint256 public constant MINIMUM_DELAY = 2 days;
+    uint256 public constant MAXIMUM_DELAY = 15 days;
+
+    address public admin;
+    address public pendingAdmin;
+    uint256 public delay;
+
+    mapping(bytes32 txHash => bool isQueued) public queuedTransactions;
+
     event NewAdmin(address indexed newAdmin);
     event NewPendingAdmin(address indexed newPendingAdmin);
     event NewDelay(uint256 indexed newDelay);
@@ -30,31 +57,7 @@ contract Timelock {
         uint256 eta
     );
 
-    error Timelock__DelayMustExceedMininumDelay();
-    error Timelock__DelayMustNotExceedMaximumDelay();
-    error Timelock__TimelockOnly();
-    error Timelock__PendingAdminOnly();
-    error Timelock__AdminOnly();
-    error Timelock__ETAMustSatisfyDelay();
-    error Timelock__TxNoQueued();
-    error Timelock__TxAlreadyQueued();
-    error Timelock__TxStillLocked();
-    error Timelock__TxExpired();
-    error Timelock__TxReverted();
-    error Timelock__AdminZeroAddress();
-    error Timelock__TargetZeroAddress();
-
-    string public constant NAME = "Timelock";
-
-    uint256 public constant GRACE_PERIOD = 14 days;
-    uint256 public constant MINIMUM_DELAY = 2 days;
-    uint256 public constant MAXIMUM_DELAY = 15 days;
-
-    address public admin;
-    address public pendingAdmin;
-    uint256 public delay;
-
-    mapping(bytes32 txHash => bool isQueued) public queuedTransactions;
+    // ------------------------------------------ Modifiers ---------------------------------------
 
     modifier isValidDelay(uint256 _delay) virtual {
         if (_delay < MINIMUM_DELAY) {
@@ -66,12 +69,14 @@ contract Timelock {
         _;
     }
 
-    modifier adminOnly() {
+    modifier OnlyAdmin() {
         if (msg.sender != admin) {
-            revert Timelock__AdminOnly();
+            revert Timelock__OnlyAdmin();
         }
         _;
     }
+
+    // ------------------------------------------ Constructor -------------------------------------
 
     constructor(uint256 _delay, address _adminAddress) isValidDelay(_delay) {
         if (_adminAddress == address(0)) {
@@ -82,11 +87,11 @@ contract Timelock {
         delay = _delay;
     }
 
-    receive() external payable { }
+    // ------------------------------------------ External Functions ------------------------------
 
     function setDelay(uint256 _delay) external isValidDelay(_delay) {
         if (msg.sender != address(this)) {
-            revert Timelock__TimelockOnly();
+            revert Timelock__OnlyTimelock();
         }
         delay = _delay;
 
@@ -95,7 +100,7 @@ contract Timelock {
 
     function acceptAdmin() external {
         if (msg.sender != pendingAdmin) {
-            revert Timelock__PendingAdminOnly();
+            revert Timelock__OnlyPendingAdmin();
         }
         admin = msg.sender;
         pendingAdmin = address(0);
@@ -105,7 +110,7 @@ contract Timelock {
 
     function setPendingAdmin(address _pendingAdmin) external {
         if (msg.sender != address(this)) {
-            revert Timelock__TimelockOnly();
+            revert Timelock__OnlyTimelock();
         }
         if (_pendingAdmin == address(0)) {
             revert Timelock__AdminZeroAddress();
@@ -123,7 +128,7 @@ contract Timelock {
         uint256 eta
     )
         external
-        adminOnly
+        OnlyAdmin
         returns (bytes32)
     {
         if (eta < block.timestamp + delay || eta > block.timestamp + delay + GRACE_PERIOD) {
@@ -148,7 +153,7 @@ contract Timelock {
         uint256 eta
     )
         external
-        adminOnly
+        OnlyAdmin
     {
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
         if (!queuedTransactions[txHash]) {
@@ -168,7 +173,7 @@ contract Timelock {
     )
         external
         payable
-        adminOnly
+        OnlyAdmin
         returns (bytes memory)
     {
         if (target == address(0)) {
@@ -204,4 +209,8 @@ contract Timelock {
 
         return returnData;
     }
+
+    // ------------------------------------------- Receive function -------------------------------
+
+    receive() external payable { }
 }
