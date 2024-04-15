@@ -142,11 +142,11 @@ contracts/TrenBoxManager.sol#L519-L575
 
 
  - [ ] ID-16
-[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L338-L426) performs a multiplication on the result of a division:
-	- [collLot = (maxRedeemableDebt * DECIMAL_PRECISION) / vars.price](contracts/TrenBoxManagerOperations.sol#L407)
-	- [collLot = (collLot * redemptionSofteningParam) / PERCENTAGE_PRECISION](contracts/TrenBoxManagerOperations.sol#L409)
+[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L322-L410) performs a multiplication on the result of a division:
+	- [collLot = (maxRedeemableDebt * DECIMAL_PRECISION) / vars.price](contracts/TrenBoxManagerOperations.sol#L391)
+	- [collLot = (collLot * redemptionSofteningParam) / PERCENTAGE_PRECISION](contracts/TrenBoxManagerOperations.sol#L393)
 
-contracts/TrenBoxManagerOperations.sol#L338-L426
+contracts/TrenBoxManagerOperations.sol#L322-L410
 
 
  - [ ] ID-17
@@ -431,39 +431,39 @@ contracts/TrenBoxManager.sol#L375-L410
 Impact: Medium
 Confidence: Medium
  - [ ] ID-29
-[TrenBoxManagerOperations._liquidateNormalMode(address,address,uint256).vars](contracts/TrenBoxManagerOperations.sol#L690) is a local variable never initialized
+[TrenBoxManagerOperations._liquidateNormalMode(address,address,uint256).vars](contracts/TrenBoxManagerOperations.sol#L676) is a local variable never initialized
 
-contracts/TrenBoxManagerOperations.sol#L690
+contracts/TrenBoxManagerOperations.sol#L676
 
 
  - [ ] ID-30
-[TrenBoxManagerOperations._getTotalsFromBatchLiquidate_NormalMode(address,uint256,uint256,address[]).vars](contracts/TrenBoxManagerOperations.sol#L594) is a local variable never initialized
+[TrenBoxManagerOperations._getTotalsFromBatchLiquidate_NormalMode(address,uint256,uint256,address[]).vars](contracts/TrenBoxManagerOperations.sol#L580) is a local variable never initialized
 
-contracts/TrenBoxManagerOperations.sol#L594
+contracts/TrenBoxManagerOperations.sol#L580
 
 
  - [ ] ID-31
-[TrenBoxManagerOperations._getTotalsFromLiquidateTrenBoxesSequence_RecoveryMode(address,uint256,uint256,uint256).vars](contracts/TrenBoxManagerOperations.sol#L869) is a local variable never initialized
+[TrenBoxManagerOperations._getTotalsFromLiquidateTrenBoxesSequence_RecoveryMode(address,uint256,uint256,uint256).vars](contracts/TrenBoxManagerOperations.sol#L854) is a local variable never initialized
 
-contracts/TrenBoxManagerOperations.sol#L869
+contracts/TrenBoxManagerOperations.sol#L854
 
 
  - [ ] ID-32
-[TrenBoxManagerOperations.batchLiquidateTrenBoxes(address,address[]).vars](contracts/TrenBoxManagerOperations.sol#L148) is a local variable never initialized
+[TrenBoxManagerOperations.batchLiquidateTrenBoxes(address,address[]).vars](contracts/TrenBoxManagerOperations.sol#L136) is a local variable never initialized
 
-contracts/TrenBoxManagerOperations.sol#L148
+contracts/TrenBoxManagerOperations.sol#L136
 
 
  - [ ] ID-33
-[TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256).vars](contracts/TrenBoxManagerOperations.sol#L741) is a local variable never initialized
+[TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256).vars](contracts/TrenBoxManagerOperations.sol#L727) is a local variable never initialized
 
-contracts/TrenBoxManagerOperations.sol#L741
+contracts/TrenBoxManagerOperations.sol#L727
 
 
  - [ ] ID-34
-[TrenBoxManagerOperations._getTotalFromBatchLiquidate_RecoveryMode(address,uint256,uint256,address[]).vars](contracts/TrenBoxManagerOperations.sol#L516) is a local variable never initialized
+[TrenBoxManagerOperations._getTotalFromBatchLiquidate_RecoveryMode(address,uint256,uint256,address[]).vars](contracts/TrenBoxManagerOperations.sol#L502) is a local variable never initialized
 
-contracts/TrenBoxManagerOperations.sol#L516
+contracts/TrenBoxManagerOperations.sol#L502
 
 
  - [ ] ID-35
@@ -473,27 +473,27 @@ contracts/BorrowerOperations.sol#L64
 
 
  - [ ] ID-36
-[TrenBoxManagerOperations.liquidateTrenBoxes(address,uint256).vars](contracts/TrenBoxManagerOperations.sol#L79) is a local variable never initialized
+[TrenBoxManagerOperations.liquidateTrenBoxes(address,uint256).vars](contracts/TrenBoxManagerOperations.sol#L67) is a local variable never initialized
 
-contracts/TrenBoxManagerOperations.sol#L79
+contracts/TrenBoxManagerOperations.sol#L67
 
 
  - [ ] ID-37
-[TrenBoxManagerOperations._getTotalsFromLiquidateTrenBoxesSequence_NormalMode(address,uint256,uint256,uint256).vars](contracts/TrenBoxManagerOperations.sol#L655) is a local variable never initialized
+[TrenBoxManagerOperations._getTotalsFromLiquidateTrenBoxesSequence_NormalMode(address,uint256,uint256,uint256).vars](contracts/TrenBoxManagerOperations.sol#L641) is a local variable never initialized
 
-contracts/TrenBoxManagerOperations.sol#L655
+contracts/TrenBoxManagerOperations.sol#L641
 
 
  - [ ] ID-38
-[TrenBoxManagerOperations.redeemCollateral(address,uint256,address,address,address,uint256,uint256,uint256).totals](contracts/TrenBoxManagerOperations.sol#L221) is a local variable never initialized
+[TrenBoxManagerOperations.redeemCollateral(address,uint256,address,address,address,uint256,uint256,uint256).totals](contracts/TrenBoxManagerOperations.sol#L209) is a local variable never initialized
 
-contracts/TrenBoxManagerOperations.sol#L221
+contracts/TrenBoxManagerOperations.sol#L209
 
 
  - [ ] ID-39
-[TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256).zeroVals](contracts/TrenBoxManagerOperations.sol#L846) is a local variable never initialized
+[TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256).zeroVals](contracts/TrenBoxManagerOperations.sol#L832) is a local variable never initialized
 
-contracts/TrenBoxManagerOperations.sol#L846
+contracts/TrenBoxManagerOperations.sol#L832
 
 
  - [ ] ID-40
@@ -670,45 +670,45 @@ contracts/TestContracts/FlashLoanTester.sol#L12
 Impact: Low
 Confidence: Medium
  - [ ] ID-60
-[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1063-L1131) has external calls inside a loop: [trenBoxColl = ITrenBoxManager(trenBoxManager).getTrenBoxColl(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L1076)
+[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1045-L1112) has external calls inside a loop: [singleRedemption.debtLot = TrenMath._min(_maxDebtTokenAmount,trenBoxDebt - IAdminContract(adminContract).getDebtTokenGasCompensation(_asset))](contracts/TrenBoxManagerOperations.sol#L1062-L1065)
 
-contracts/TrenBoxManagerOperations.sol#L1063-L1131
+contracts/TrenBoxManagerOperations.sol#L1045-L1112
 
 
  - [ ] ID-61
+[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1045-L1112) has external calls inside a loop: [newDebt == IAdminContract(adminContract).getDebtTokenGasCompensation(_asset)](contracts/TrenBoxManagerOperations.sol#L1080)
+
+contracts/TrenBoxManagerOperations.sol#L1045-L1112
+
+
+ - [ ] ID-62
+[TrenBoxManagerOperations.redeemCollateral(address,uint256,address,address,address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L195-L296) has external calls inside a loop: [currentBorrower != address(0) && ITrenBoxManager(trenBoxManager).getCurrentICR(_asset,currentBorrower,totals.price) < IAdminContract(adminContract).getMcr(_asset)](contracts/TrenBoxManagerOperations.sol#L225-L228)
+
+contracts/TrenBoxManagerOperations.sol#L195-L296
+
+
+ - [ ] ID-63
 [SafetyTransfer.decimalsCorrection(address,uint256)](contracts/Dependencies/SafetyTransfer.sol#L12-L31) has external calls inside a loop: [decimals = IERC20Decimals(_token).decimals()](contracts/Dependencies/SafetyTransfer.sol#L19)
 
 contracts/Dependencies/SafetyTransfer.sol#L12-L31
 
 
- - [ ] ID-62
-[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1063-L1131) has external calls inside a loop: [ITrenBoxManager(trenBoxManager).executeFullRedemption(_asset,_borrower,newColl)](contracts/TrenBoxManagerOperations.sol#L1099)
-
-contracts/TrenBoxManagerOperations.sol#L1063-L1131
-
-
- - [ ] ID-63
-[TrenBoxManagerOperations.getApproxHint(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L440-L484) has external calls inside a loop: [currentAddress = ITrenBoxManager(trenBoxManager).getTrenBoxFromTrenBoxOwnersArray(_asset,arrayIndex)](contracts/TrenBoxManagerOperations.sol#L469-L470)
-
-contracts/TrenBoxManagerOperations.sol#L440-L484
-
-
  - [ ] ID-64
-[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L338-L426) has external calls inside a loop: [maxRedeemableDebt = TrenMath._min(remainingDebt,currentTrenBoxNetDebt - IAdminContract(adminContract).getMinNetDebt(vars.asset))](contracts/TrenBoxManagerOperations.sol#L395-L399)
+[TrenBoxManagerOperations.redeemCollateral(address,uint256,address,address,address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L195-L296) has external calls inside a loop: [nextUserToCheck = ISortedTrenBoxes(sortedTrenBoxes).getPrev(_asset,currentBorrower)](contracts/TrenBoxManagerOperations.sol#L243-L244)
 
-contracts/TrenBoxManagerOperations.sol#L338-L426
+contracts/TrenBoxManagerOperations.sol#L195-L296
 
 
  - [ ] ID-65
-[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1063-L1131) has external calls inside a loop: [newDebt == IAdminContract(adminContract).getDebtTokenGasCompensation(_asset)](contracts/TrenBoxManagerOperations.sol#L1098)
+[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1045-L1112) has external calls inside a loop: [trenBoxColl = ITrenBoxManager(trenBoxManager).getTrenBoxColl(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L1058)
 
-contracts/TrenBoxManagerOperations.sol#L1063-L1131
+contracts/TrenBoxManagerOperations.sol#L1045-L1112
 
 
  - [ ] ID-66
-[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1063-L1131) has external calls inside a loop: [newNICR != _partialRedemptionHintNICR || _getNetDebt(_asset,newDebt) < IAdminContract(adminContract).getMinNetDebt(_asset)](contracts/TrenBoxManagerOperations.sol#L1111-L1113)
+[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L322-L410) has external calls inside a loop: [currentTrenBoxBorrower = ISortedTrenBoxes(sortedTrenBoxes).getPrev(vars.asset,currentTrenBoxBorrower)](contracts/TrenBoxManagerOperations.sol#L353-L354)
 
-contracts/TrenBoxManagerOperations.sol#L1063-L1131
+contracts/TrenBoxManagerOperations.sol#L322-L410
 
 
  - [ ] ID-67
@@ -724,93 +724,93 @@ contracts/Dependencies/TrenBase.sol#L35-L37
 
 
  - [ ] ID-69
-[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L338-L426) has external calls inside a loop: [currentTrenBoxColl = ITrenBoxManager(trenBoxManager).getTrenBoxColl(vars.asset,currentTrenBoxBorrower) + ITrenBoxManager(trenBoxManager).getPendingAssetReward(vars.asset,currentTrenBoxBorrower)](contracts/TrenBoxManagerOperations.sol#L400-L405)
+[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1045-L1112) has external calls inside a loop: [ITrenBoxManager(trenBoxManager).executePartialRedemption(_asset,_borrower,newDebt,newColl,newNICR,_upperPartialRedemptionHint,_lowerPartialRedemptionHint)](contracts/TrenBoxManagerOperations.sol#L1100-L1108)
 
-contracts/TrenBoxManagerOperations.sol#L338-L426
+contracts/TrenBoxManagerOperations.sol#L1045-L1112
 
 
  - [ ] ID-70
-[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L338-L426) has external calls inside a loop: [currentTrenBoxBorrower = ISortedTrenBoxes(sortedTrenBoxes).getPrev(vars.asset,currentTrenBoxBorrower)](contracts/TrenBoxManagerOperations.sol#L421-L422)
+[TrenBoxManagerOperations.redeemCollateral(address,uint256,address,address,address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L195-L296) has external calls inside a loop: [currentBorrower = ISortedTrenBoxes(sortedTrenBoxes).getPrev(_asset,currentBorrower)](contracts/TrenBoxManagerOperations.sol#L230)
 
-contracts/TrenBoxManagerOperations.sol#L338-L426
+contracts/TrenBoxManagerOperations.sol#L195-L296
 
 
  - [ ] ID-71
-[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1063-L1131) has external calls inside a loop: [ITrenBoxManager(trenBoxManager).executePartialRedemption(_asset,_borrower,newDebt,newColl,newNICR,_upperPartialRedemptionHint,_lowerPartialRedemptionHint)](contracts/TrenBoxManagerOperations.sol#L1119-L1127)
+[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1045-L1112) has external calls inside a loop: [ITrenBoxManager(trenBoxManager).executeFullRedemption(_asset,_borrower,newColl)](contracts/TrenBoxManagerOperations.sol#L1081)
 
-contracts/TrenBoxManagerOperations.sol#L1063-L1131
+contracts/TrenBoxManagerOperations.sol#L1045-L1112
 
 
  - [ ] ID-72
-[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1063-L1131) has external calls inside a loop: [trenBoxDebt = ITrenBoxManager(trenBoxManager).getTrenBoxDebt(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L1075)
+[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1045-L1112) has external calls inside a loop: [trenBoxDebt = ITrenBoxManager(trenBoxManager).getTrenBoxDebt(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L1057)
 
-contracts/TrenBoxManagerOperations.sol#L1063-L1131
+contracts/TrenBoxManagerOperations.sol#L1045-L1112
 
 
  - [ ] ID-73
-[TrenBoxManagerOperations.redeemCollateral(address,uint256,address,address,address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L207-L308) has external calls inside a loop: [ITrenBoxManager(trenBoxManager).applyPendingRewards(_asset,currentBorrower)](contracts/TrenBoxManagerOperations.sol#L258)
+[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L322-L410) has external calls inside a loop: [currentTrenBoxColl = ITrenBoxManager(trenBoxManager).getTrenBoxColl(vars.asset,currentTrenBoxBorrower) + ITrenBoxManager(trenBoxManager).getPendingAssetReward(vars.asset,currentTrenBoxBorrower)](contracts/TrenBoxManagerOperations.sol#L384-L389)
 
-contracts/TrenBoxManagerOperations.sol#L207-L308
+contracts/TrenBoxManagerOperations.sol#L322-L410
 
 
  - [ ] ID-74
-[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L338-L426) has external calls inside a loop: [currentTrenBoxNetDebt = _getNetDebt(vars.asset,ITrenBoxManager(trenBoxManager).getTrenBoxDebt(vars.asset,currentTrenBoxBorrower) + ITrenBoxManager(trenBoxManager).getPendingDebtTokenReward(vars.asset,currentTrenBoxBorrower))](contracts/TrenBoxManagerOperations.sol#L382-L388)
+[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L322-L410) has external calls inside a loop: [currentTrenBoxBorrower = ISortedTrenBoxes(sortedTrenBoxes).getPrev(vars.asset,currentTrenBoxBorrower)](contracts/TrenBoxManagerOperations.sol#L405-L406)
 
-contracts/TrenBoxManagerOperations.sol#L338-L426
+contracts/TrenBoxManagerOperations.sol#L322-L410
 
 
  - [ ] ID-75
-[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L338-L426) has external calls inside a loop: [currentTrenBoxNetDebt > IAdminContract(adminContract).getMinNetDebt(vars.asset)](contracts/TrenBoxManagerOperations.sol#L393)
-
-contracts/TrenBoxManagerOperations.sol#L338-L426
-
-
- - [ ] ID-76
-[TrenBoxManagerOperations.redeemCollateral(address,uint256,address,address,address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L207-L308) has external calls inside a loop: [currentBorrower != address(0) && ITrenBoxManager(trenBoxManager).getCurrentICR(_asset,currentBorrower,totals.price) < IAdminContract(adminContract).getMcr(_asset)](contracts/TrenBoxManagerOperations.sol#L237-L240)
-
-contracts/TrenBoxManagerOperations.sol#L207-L308
-
-
- - [ ] ID-77
 [FeeCollector._collectFee(address,address,uint256)](contracts/FeeCollector.sol#L356-L365) has external calls inside a loop: [ITRENStaking(trenStaking).increaseFeeDebtToken(_feeAmount)](contracts/FeeCollector.sol#L361)
 
 contracts/FeeCollector.sol#L356-L365
 
 
+ - [ ] ID-76
+[TrenBoxManagerOperations.getApproxHint(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L426-L470) has external calls inside a loop: [currentNICR = ITrenBoxManager(trenBoxManager).getNominalICR(_asset,currentAddress)](contracts/TrenBoxManagerOperations.sol#L457-L458)
+
+contracts/TrenBoxManagerOperations.sol#L426-L470
+
+
+ - [ ] ID-77
+[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L322-L410) has external calls inside a loop: [currentTrenBoxBorrower != address(0) && ITrenBoxManager(trenBoxManager).getCurrentICR(vars.asset,currentTrenBoxBorrower,vars.price) < IAdminContract(adminContract).getMcr(vars.asset)](contracts/TrenBoxManagerOperations.sol#L348-L351)
+
+contracts/TrenBoxManagerOperations.sol#L322-L410
+
+
  - [ ] ID-78
-[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L338-L426) has external calls inside a loop: [currentTrenBoxBorrower != address(0) && ITrenBoxManager(trenBoxManager).getCurrentICR(vars.asset,currentTrenBoxBorrower,vars.price) < IAdminContract(adminContract).getMcr(vars.asset)](contracts/TrenBoxManagerOperations.sol#L364-L367)
-
-contracts/TrenBoxManagerOperations.sol#L338-L426
-
-
- - [ ] ID-79
-[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1063-L1131) has external calls inside a loop: [singleRedemption.debtLot = TrenMath._min(_maxDebtTokenAmount,trenBoxDebt - IAdminContract(adminContract).getDebtTokenGasCompensation(_asset))](contracts/TrenBoxManagerOperations.sol#L1080-L1083)
-
-contracts/TrenBoxManagerOperations.sol#L1063-L1131
-
-
- - [ ] ID-80
 [TrenBase._getCompositeDebt(address,uint256)](contracts/Dependencies/TrenBase.sol#L31-L33) has external calls inside a loop: [_debt + IAdminContract(adminContract).getDebtTokenGasCompensation(_asset)](contracts/Dependencies/TrenBase.sol#L32)
 
 contracts/Dependencies/TrenBase.sol#L31-L33
 
 
- - [ ] ID-81
-[TrenBoxManagerOperations.getApproxHint(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L440-L484) has external calls inside a loop: [currentNICR = ITrenBoxManager(trenBoxManager).getNominalICR(_asset,currentAddress)](contracts/TrenBoxManagerOperations.sol#L471-L472)
+ - [ ] ID-79
+[TrenBoxManagerOperations.redeemCollateral(address,uint256,address,address,address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L195-L296) has external calls inside a loop: [ITrenBoxManager(trenBoxManager).applyPendingRewards(_asset,currentBorrower)](contracts/TrenBoxManagerOperations.sol#L246)
 
-contracts/TrenBoxManagerOperations.sol#L440-L484
+contracts/TrenBoxManagerOperations.sol#L195-L296
+
+
+ - [ ] ID-80
+[TrenBoxManagerOperations.getApproxHint(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L426-L470) has external calls inside a loop: [currentAddress = ITrenBoxManager(trenBoxManager).getTrenBoxFromTrenBoxOwnersArray(_asset,arrayIndex)](contracts/TrenBoxManagerOperations.sol#L455-L456)
+
+contracts/TrenBoxManagerOperations.sol#L426-L470
+
+
+ - [ ] ID-81
+[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L322-L410) has external calls inside a loop: [maxRedeemableDebt = TrenMath._min(remainingDebt,currentTrenBoxNetDebt - IAdminContract(adminContract).getMinNetDebt(vars.asset))](contracts/TrenBoxManagerOperations.sol#L379-L383)
+
+contracts/TrenBoxManagerOperations.sol#L322-L410
 
 
  - [ ] ID-82
-[TrenBoxManagerOperations.redeemCollateral(address,uint256,address,address,address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L207-L308) has external calls inside a loop: [currentBorrower = ISortedTrenBoxes(sortedTrenBoxes).getPrev(_asset,currentBorrower)](contracts/TrenBoxManagerOperations.sol#L242)
+[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L322-L410) has external calls inside a loop: [currentTrenBoxNetDebt > IAdminContract(adminContract).getMinNetDebt(vars.asset)](contracts/TrenBoxManagerOperations.sol#L377)
 
-contracts/TrenBoxManagerOperations.sol#L207-L308
+contracts/TrenBoxManagerOperations.sol#L322-L410
 
 
  - [ ] ID-83
-[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L338-L426) has external calls inside a loop: [currentTrenBoxBorrower = ISortedTrenBoxes(sortedTrenBoxes).getPrev(vars.asset,currentTrenBoxBorrower)](contracts/TrenBoxManagerOperations.sol#L369-L370)
+[TrenBoxManagerOperations.getRedemptionHints(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L322-L410) has external calls inside a loop: [currentTrenBoxNetDebt = _getNetDebt(vars.asset,ITrenBoxManager(trenBoxManager).getTrenBoxDebt(vars.asset,currentTrenBoxBorrower) + ITrenBoxManager(trenBoxManager).getPendingDebtTokenReward(vars.asset,currentTrenBoxBorrower))](contracts/TrenBoxManagerOperations.sol#L366-L372)
 
-contracts/TrenBoxManagerOperations.sol#L338-L426
+contracts/TrenBoxManagerOperations.sol#L322-L410
 
 
  - [ ] ID-84
@@ -820,9 +820,9 @@ contracts/FeeCollector.sol#L197-L199
 
 
  - [ ] ID-85
-[TrenBoxManagerOperations.redeemCollateral(address,uint256,address,address,address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L207-L308) has external calls inside a loop: [nextUserToCheck = ISortedTrenBoxes(sortedTrenBoxes).getPrev(_asset,currentBorrower)](contracts/TrenBoxManagerOperations.sol#L255-L256)
+[TrenBoxManagerOperations._redeemCollateralFromTrenBox(address,address,uint256,uint256,address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L1045-L1112) has external calls inside a loop: [newNICR != _partialRedemptionHintNICR || _getNetDebt(_asset,newDebt) < IAdminContract(adminContract).getMinNetDebt(_asset)](contracts/TrenBoxManagerOperations.sol#L1092-L1094)
 
-contracts/TrenBoxManagerOperations.sol#L207-L308
+contracts/TrenBoxManagerOperations.sol#L1045-L1112
 
 
 ## reentrancy-benign
@@ -929,30 +929,6 @@ contracts/StabilityPool.sol#L480-L501
 Impact: Low
 Confidence: Medium
  - [ ] ID-94
-Reentrancy in [TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L730-L851):
-	External calls:
-	- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L761-L763)
-	- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L764)
-	- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L771)
-	Event emitted after the call(s):
-	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.entireTrenBoxColl,ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode)](contracts/TrenBoxManagerOperations.sol#L772-L778)
-
-contracts/TrenBoxManagerOperations.sol#L730-L851
-
-
- - [ ] ID-95
-Reentrancy in [TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L730-L851):
-	External calls:
-	- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L785-L787)
-	- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L788)
-	- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L799)
-	Event emitted after the call(s):
-	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.entireTrenBoxColl,ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode)](contracts/TrenBoxManagerOperations.sol#L800-L806)
-
-contracts/TrenBoxManagerOperations.sol#L730-L851
-
-
- - [ ] ID-96
 Reentrancy in [TrenBoxManager.executePartialRedemption(address,address,uint256,uint256,uint256,address,address)](contracts/TrenBoxManager.sol#L375-L410):
 	External calls:
 	- [ISortedTrenBoxes(sortedTrenBoxes).reInsert(_asset,_borrower,_newNICR,_upperPartialRedemptionHint,_lowerPartialRedemptionHint)](contracts/TrenBoxManager.sol#L388-L390)
@@ -965,7 +941,7 @@ Reentrancy in [TrenBoxManager.executePartialRedemption(address,address,uint256,u
 contracts/TrenBoxManager.sol#L375-L410
 
 
- - [ ] ID-97
+ - [ ] ID-95
 Reentrancy in [StabilityPool._triggerTRENIssuance()](contracts/StabilityPool.sol#L413-L418):
 	External calls:
 	- [TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN()](contracts/StabilityPool.sol#L415)
@@ -976,38 +952,7 @@ Reentrancy in [StabilityPool._triggerTRENIssuance()](contracts/StabilityPool.sol
 contracts/StabilityPool.sol#L413-L418
 
 
- - [ ] ID-98
-Reentrancy in [TrenBoxManagerOperations._getTotalFromBatchLiquidate_RecoveryMode(address,uint256,uint256,address[])](contracts/TrenBoxManagerOperations.sol#L507-L583):
-	External calls:
-	- [singleLiquidation = _liquidateRecoveryMode(_asset,vars.user,vars.ICR,vars.remainingDebtTokenInStabPool,TCR,_price)](contracts/TrenBoxManagerOperations.sol#L551-L553)
-		- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L761-L763)
-		- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L764)
-		- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L771)
-		- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L785-L787)
-		- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L788)
-		- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L799)
-		- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L819-L821)
-		- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L824)
-		- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L832)
-		- [ICollSurplusPool(collSurplusPool).accountSurplus(_asset,_borrower,singleLiquidation.collSurplus)](contracts/TrenBoxManagerOperations.sol#L834-L836)
-	- [singleLiquidation = _liquidateNormalMode(_asset,vars.user,vars.remainingDebtTokenInStabPool)](contracts/TrenBoxManagerOperations.sol#L571-L572)
-		- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L698-L700)
-		- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L701)
-		- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L719)
-	Event emitted after the call(s):
-	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.entireTrenBoxColl,ITrenBoxManager.TrenBoxManagerOperation.liquidateInNormalMode)](contracts/TrenBoxManagerOperations.sol#L720-L726)
-		- [singleLiquidation = _liquidateNormalMode(_asset,vars.user,vars.remainingDebtTokenInStabPool)](contracts/TrenBoxManagerOperations.sol#L571-L572)
-	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.entireTrenBoxColl,ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode)](contracts/TrenBoxManagerOperations.sol#L772-L778)
-		- [singleLiquidation = _liquidateRecoveryMode(_asset,vars.user,vars.ICR,vars.remainingDebtTokenInStabPool,TCR,_price)](contracts/TrenBoxManagerOperations.sol#L551-L553)
-	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.entireTrenBoxColl,ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode)](contracts/TrenBoxManagerOperations.sol#L800-L806)
-		- [singleLiquidation = _liquidateRecoveryMode(_asset,vars.user,vars.ICR,vars.remainingDebtTokenInStabPool,TCR,_price)](contracts/TrenBoxManagerOperations.sol#L551-L553)
-	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.collToSendToSP,ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode)](contracts/TrenBoxManagerOperations.sol#L838-L844)
-		- [singleLiquidation = _liquidateRecoveryMode(_asset,vars.user,vars.ICR,vars.remainingDebtTokenInStabPool,TCR,_price)](contracts/TrenBoxManagerOperations.sol#L551-L553)
-
-contracts/TrenBoxManagerOperations.sol#L507-L583
-
-
- - [ ] ID-99
+ - [ ] ID-96
 Reentrancy in [Timelock.executeTransaction(address,uint256,string,bytes,uint256)](contracts/Timelock.sol#L167-L211):
 	External calls:
 	- [(success,returnData) = target.call{value: value}(callData)](contracts/Timelock.sol#L203)
@@ -1017,7 +962,32 @@ Reentrancy in [Timelock.executeTransaction(address,uint256,string,bytes,uint256)
 contracts/Timelock.sol#L167-L211
 
 
- - [ ] ID-100
+ - [ ] ID-97
+Reentrancy in [TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L716-L837):
+	External calls:
+	- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L805-L807)
+	- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L810)
+	- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L818)
+	- [ICollSurplusPool(collSurplusPool).accountSurplus(_asset,_borrower,singleLiquidation.collSurplus)](contracts/TrenBoxManagerOperations.sol#L820-L822)
+	Event emitted after the call(s):
+	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.collToSendToSP,ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode)](contracts/TrenBoxManagerOperations.sol#L824-L830)
+
+contracts/TrenBoxManagerOperations.sol#L716-L837
+
+
+ - [ ] ID-98
+Reentrancy in [TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L716-L837):
+	External calls:
+	- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L747-L749)
+	- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L750)
+	- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L757)
+	Event emitted after the call(s):
+	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.entireTrenBoxColl,ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode)](contracts/TrenBoxManagerOperations.sol#L758-L764)
+
+contracts/TrenBoxManagerOperations.sol#L716-L837
+
+
+ - [ ] ID-99
 Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L480-L501):
 	External calls:
 	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L492)
@@ -1037,7 +1007,7 @@ Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/Stabilit
 contracts/StabilityPool.sol#L480-L501
 
 
- - [ ] ID-101
+ - [ ] ID-100
 Reentrancy in [FeeCollector.handleRedemptionFee(address,uint256)](contracts/FeeCollector.sol#L190-L195):
 	External calls:
 	- [ITRENStaking(trenStaking).increaseFeeAsset(_asset,_amount)](contracts/FeeCollector.sol#L192)
@@ -1047,7 +1017,7 @@ Reentrancy in [FeeCollector.handleRedemptionFee(address,uint256)](contracts/FeeC
 contracts/FeeCollector.sol#L190-L195
 
 
- - [ ] ID-102
+ - [ ] ID-101
 Reentrancy in [FeeCollector._collectFee(address,address,uint256)](contracts/FeeCollector.sol#L356-L365):
 	External calls:
 	- [IERC20(debtToken).safeTransfer(destination,_feeAmount)](contracts/FeeCollector.sol#L359)
@@ -1058,32 +1028,7 @@ Reentrancy in [FeeCollector._collectFee(address,address,uint256)](contracts/FeeC
 contracts/FeeCollector.sol#L356-L365
 
 
- - [ ] ID-103
-Reentrancy in [TrenBoxManagerOperations._liquidateNormalMode(address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L682-L728):
-	External calls:
-	- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L698-L700)
-	- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L701)
-	- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L719)
-	Event emitted after the call(s):
-	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.entireTrenBoxColl,ITrenBoxManager.TrenBoxManagerOperation.liquidateInNormalMode)](contracts/TrenBoxManagerOperations.sol#L720-L726)
-
-contracts/TrenBoxManagerOperations.sol#L682-L728
-
-
- - [ ] ID-104
-Reentrancy in [TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L730-L851):
-	External calls:
-	- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L819-L821)
-	- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L824)
-	- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L832)
-	- [ICollSurplusPool(collSurplusPool).accountSurplus(_asset,_borrower,singleLiquidation.collSurplus)](contracts/TrenBoxManagerOperations.sol#L834-L836)
-	Event emitted after the call(s):
-	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.collToSendToSP,ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode)](contracts/TrenBoxManagerOperations.sol#L838-L844)
-
-contracts/TrenBoxManagerOperations.sol#L730-L851
-
-
- - [ ] ID-105
+ - [ ] ID-102
 Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/StabilityPool.sol#L480-L501):
 	External calls:
 	- [_triggerTRENIssuance()](contracts/StabilityPool.sol#L492)
@@ -1099,7 +1044,7 @@ Reentrancy in [StabilityPool.offset(uint256,address,uint256)](contracts/Stabilit
 contracts/StabilityPool.sol#L480-L501
 
 
- - [ ] ID-106
+ - [ ] ID-103
 Reentrancy in [TrenBoxManager.closeTrenBoxLiquidation(address,address)](contracts/TrenBoxManager.sol#L604-L617):
 	External calls:
 	- [_closeTrenBox(_asset,_borrower,Status.closedByLiquidation)](contracts/TrenBoxManager.sol#L612)
@@ -1111,7 +1056,38 @@ Reentrancy in [TrenBoxManager.closeTrenBoxLiquidation(address,address)](contract
 contracts/TrenBoxManager.sol#L604-L617
 
 
- - [ ] ID-107
+ - [ ] ID-104
+Reentrancy in [TrenBoxManagerOperations._getTotalFromBatchLiquidate_RecoveryMode(address,uint256,uint256,address[])](contracts/TrenBoxManagerOperations.sol#L493-L569):
+	External calls:
+	- [singleLiquidation = _liquidateRecoveryMode(_asset,vars.user,vars.ICR,vars.remainingDebtTokenInStabPool,TCR,_price)](contracts/TrenBoxManagerOperations.sol#L537-L539)
+		- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L747-L749)
+		- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L750)
+		- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L757)
+		- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L771-L773)
+		- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L774)
+		- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L785)
+		- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L805-L807)
+		- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L810)
+		- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L818)
+		- [ICollSurplusPool(collSurplusPool).accountSurplus(_asset,_borrower,singleLiquidation.collSurplus)](contracts/TrenBoxManagerOperations.sol#L820-L822)
+	- [singleLiquidation = _liquidateNormalMode(_asset,vars.user,vars.remainingDebtTokenInStabPool)](contracts/TrenBoxManagerOperations.sol#L557-L558)
+		- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L684-L686)
+		- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L687)
+		- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L705)
+	Event emitted after the call(s):
+	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.entireTrenBoxColl,ITrenBoxManager.TrenBoxManagerOperation.liquidateInNormalMode)](contracts/TrenBoxManagerOperations.sol#L706-L712)
+		- [singleLiquidation = _liquidateNormalMode(_asset,vars.user,vars.remainingDebtTokenInStabPool)](contracts/TrenBoxManagerOperations.sol#L557-L558)
+	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.entireTrenBoxColl,ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode)](contracts/TrenBoxManagerOperations.sol#L758-L764)
+		- [singleLiquidation = _liquidateRecoveryMode(_asset,vars.user,vars.ICR,vars.remainingDebtTokenInStabPool,TCR,_price)](contracts/TrenBoxManagerOperations.sol#L537-L539)
+	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.entireTrenBoxColl,ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode)](contracts/TrenBoxManagerOperations.sol#L786-L792)
+		- [singleLiquidation = _liquidateRecoveryMode(_asset,vars.user,vars.ICR,vars.remainingDebtTokenInStabPool,TCR,_price)](contracts/TrenBoxManagerOperations.sol#L537-L539)
+	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.collToSendToSP,ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode)](contracts/TrenBoxManagerOperations.sol#L824-L830)
+		- [singleLiquidation = _liquidateRecoveryMode(_asset,vars.user,vars.ICR,vars.remainingDebtTokenInStabPool,TCR,_price)](contracts/TrenBoxManagerOperations.sol#L537-L539)
+
+contracts/TrenBoxManagerOperations.sol#L493-L569
+
+
+ - [ ] ID-105
 Reentrancy in [StabilityPool._moveOffsetCollAndDebt(address,uint256,uint256)](contracts/StabilityPool.sol#L639-L650):
 	External calls:
 	- [IActivePool(activePool).decreaseDebt(_asset,_debtToOffset)](contracts/StabilityPool.sol#L646)
@@ -1120,6 +1096,30 @@ Reentrancy in [StabilityPool._moveOffsetCollAndDebt(address,uint256,uint256)](co
 		- [_decreaseDebtTokens(_debtToOffset)](contracts/StabilityPool.sol#L647)
 
 contracts/StabilityPool.sol#L639-L650
+
+
+ - [ ] ID-106
+Reentrancy in [TrenBoxManagerOperations._liquidateNormalMode(address,address,uint256)](contracts/TrenBoxManagerOperations.sol#L668-L714):
+	External calls:
+	- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L684-L686)
+	- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L687)
+	- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L705)
+	Event emitted after the call(s):
+	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.entireTrenBoxColl,ITrenBoxManager.TrenBoxManagerOperation.liquidateInNormalMode)](contracts/TrenBoxManagerOperations.sol#L706-L712)
+
+contracts/TrenBoxManagerOperations.sol#L668-L714
+
+
+ - [ ] ID-107
+Reentrancy in [TrenBoxManagerOperations._liquidateRecoveryMode(address,address,uint256,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L716-L837):
+	External calls:
+	- [ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(_asset,vars.pendingDebtReward,vars.pendingCollReward)](contracts/TrenBoxManagerOperations.sol#L771-L773)
+	- [ITrenBoxManager(trenBoxManager).removeStake(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L774)
+	- [ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset,_borrower)](contracts/TrenBoxManagerOperations.sol#L785)
+	Event emitted after the call(s):
+	- [TrenBoxLiquidated(_asset,_borrower,singleLiquidation.entireTrenBoxDebt,singleLiquidation.entireTrenBoxColl,ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode)](contracts/TrenBoxManagerOperations.sol#L786-L792)
+
+contracts/TrenBoxManagerOperations.sol#L716-L837
 
 
  - [ ] ID-108
@@ -1152,6 +1152,14 @@ contracts/FeeCollector.sol#L356-L365
 
 
  - [ ] ID-111
+[TrenBoxManagerOperations._validateRedemptionRequirements(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L1009-L1041) uses timestamp for comparisons
+	Dangerous comparisons:
+	- [redemptionBlockTimestamp > block.timestamp](contracts/TrenBoxManagerOperations.sol#L1020)
+
+contracts/TrenBoxManagerOperations.sol#L1009-L1041
+
+
+ - [ ] ID-112
 [LockedTREN.isEntityExits(address)](contracts/TREN/LockedTREN.sol#L133-L135) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [entitiesVesting[_entity].createdDate != 0](contracts/TREN/LockedTREN.sol#L134)
@@ -1159,7 +1167,7 @@ contracts/FeeCollector.sol#L356-L365
 contracts/TREN/LockedTREN.sol#L133-L135
 
 
- - [ ] ID-112
+ - [ ] ID-113
 [LockedTREN.addEntityVesting(address,uint256)](contracts/TREN/LockedTREN.sol#L43-L59) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [require(bool,string)(entitiesVesting[_entity].createdDate == 0,Entity already has a Vesting Rule)](contracts/TREN/LockedTREN.sol#L46)
@@ -1167,7 +1175,7 @@ contracts/TREN/LockedTREN.sol#L133-L135
 contracts/TREN/LockedTREN.sol#L43-L59
 
 
- - [ ] ID-113
+ - [ ] ID-114
 [LockedTREN.sendTRENTokenToEntity(address)](contracts/TREN/LockedTREN.sol#L93-L102) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [unclaimedAmount == 0](contracts/TREN/LockedTREN.sol#L95)
@@ -1175,7 +1183,7 @@ contracts/TREN/LockedTREN.sol#L43-L59
 contracts/TREN/LockedTREN.sol#L93-L102
 
 
- - [ ] ID-114
+ - [ ] ID-115
 [FeeCollector.simulateRefund(address,address,uint256)](contracts/FeeCollector.sol#L112-L136) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [record.amount == 0 || record.to < block.timestamp](contracts/FeeCollector.sol#L125)
@@ -1183,7 +1191,7 @@ contracts/TREN/LockedTREN.sol#L93-L102
 contracts/FeeCollector.sol#L112-L136
 
 
- - [ ] ID-115
+ - [ ] ID-116
 [FeeCollector._calcExpiredAmount(uint256,uint256,uint256)](contracts/FeeCollector.sol#L313-L335) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [_from > NOW](contracts/FeeCollector.sol#L323)
@@ -1192,7 +1200,7 @@ contracts/FeeCollector.sol#L112-L136
 contracts/FeeCollector.sol#L313-L335
 
 
- - [ ] ID-116
+ - [ ] ID-117
 [CommunityIssuance._addFundToStabilityPoolFrom(uint256,address)](contracts/TREN/CommunityIssuance.sol#L97-L104) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [lastUpdateTime == 0](contracts/TREN/CommunityIssuance.sol#L98)
@@ -1200,7 +1208,7 @@ contracts/FeeCollector.sol#L313-L335
 contracts/TREN/CommunityIssuance.sol#L97-L104
 
 
- - [ ] ID-117
+ - [ ] ID-118
 [FlashLoan.swapTokens(address,uint256,uint256)](contracts/FlashLoan.sol#L153-L180) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [amountIn < _collAmountIn](contracts/FlashLoan.sol#L176)
@@ -1208,7 +1216,7 @@ contracts/TREN/CommunityIssuance.sol#L97-L104
 contracts/FlashLoan.sol#L153-L180
 
 
- - [ ] ID-118
+ - [ ] ID-119
 [FeeCollector._decreaseDebt(address,address,uint256)](contracts/FeeCollector.sol#L204-L236) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [sRecord.to <= NOW](contracts/FeeCollector.sol#L212)
@@ -1216,7 +1224,7 @@ contracts/FlashLoan.sol#L153-L180
 contracts/FeeCollector.sol#L204-L236
 
 
- - [ ] ID-119
+ - [ ] ID-120
 [PriceFeed._fetchOracleScaledPrice(IPriceFeed.OracleRecord)](contracts/PriceFeed.sol#L129-L144) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [oraclePrice != 0 && ! _isStalePrice(priceTimestamp,oracle.timeoutSeconds)](contracts/PriceFeed.sol#L140)
@@ -1224,7 +1232,7 @@ contracts/FeeCollector.sol#L204-L236
 contracts/PriceFeed.sol#L129-L144
 
 
- - [ ] ID-120
+ - [ ] ID-121
 [PriceFeed._isStalePrice(uint256,uint256)](contracts/PriceFeed.sol#L146-L155) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [block.timestamp - _priceTimestamp > _oracleTimeoutSeconds](contracts/PriceFeed.sol#L154)
@@ -1232,21 +1240,13 @@ contracts/PriceFeed.sol#L129-L144
 contracts/PriceFeed.sol#L146-L155
 
 
- - [ ] ID-121
+ - [ ] ID-122
 [CommunityIssuance.issueTREN()](contracts/TREN/CommunityIssuance.sol#L106-L124) uses timestamp for comparisons
 	Dangerous comparisons:
 	- [totalTRENIssued >= maxPoolSupply](contracts/TREN/CommunityIssuance.sol#L109)
 	- [totalIssuance > maxPoolSupply](contracts/TREN/CommunityIssuance.sol#L114)
 
 contracts/TREN/CommunityIssuance.sol#L106-L124
-
-
- - [ ] ID-122
-[TrenBoxManagerOperations._validateRedemptionRequirements(address,uint256,uint256,uint256)](contracts/TrenBoxManagerOperations.sol#L1027-L1059) uses timestamp for comparisons
-	Dangerous comparisons:
-	- [redemptionBlockTimestamp > block.timestamp](contracts/TrenBoxManagerOperations.sol#L1038)
-
-contracts/TrenBoxManagerOperations.sol#L1027-L1059
 
 
  - [ ] ID-123
