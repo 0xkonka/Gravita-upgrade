@@ -87,6 +87,47 @@ export default function shouldBehaveLikeCanCloseTrenBox() {
 
       await expect(closeTrenBoxTx).to.not.be.reverted;
     });
+
+    context("when user tries to repay trenBox and then to close it", function () {
+      it("should revert repaying and then allow to close", async function () {
+        const [user] = this.users;
+        const { erc20 } = this.testContracts;
+        const { debtToken, borrowerOperations } = this.contracts;
+
+        const totalDebt = await debtToken.balanceOf(user.address);
+
+        const amountToRepay = totalDebt;
+
+        const repayDebtTx = this.utils.repayDebt({
+          debtAmount: amountToRepay,
+          collateral: erc20,
+          from: user,
+        });
+
+        await expect(repayDebtTx).to.be.revertedWithCustomError(
+          borrowerOperations,
+          "BorrowerOperations__TrenBoxNetDebtLessThanMin"
+        );
+
+        await this.contracts.debtToken.addWhitelist(user.address);
+        await this.contracts.debtToken.addWhitelist(this.contracts.feeCollector);
+        await this.contracts.debtToken.connect(user).mintFromWhitelistedContract(ethers.parseUnits("100", 18));
+
+        const closeDebtTx = await this.utils.closeTrenBox({
+          asset: erc20,
+          from: user,
+        });
+
+        const expectedAmount = "-1990432453114427860697";
+
+        await expect(closeDebtTx).to.changeTokenBalances(
+          debtToken,
+          [user],
+          [expectedAmount]
+        );
+        expect(await this.contracts.trenBoxManager.getTrenBoxStatus(erc20, user.address)).to.be.equal(2n);
+      });
+    });
   });
 
   context("when user does not have TrenBox", function () {
