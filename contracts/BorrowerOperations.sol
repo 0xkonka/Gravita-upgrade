@@ -106,7 +106,7 @@ contract BorrowerOperations is
         // Set the trenBox struct's properties
         ITrenBoxManager(trenBoxManager).setTrenBoxStatus(vars.asset, msg.sender, 1);
 
-        uint256 assetAmount_ = ITrenBoxManager(trenBoxManager).increaseTrenBoxColl(
+        uint256 collateralAmountAfterIncrease = ITrenBoxManager(trenBoxManager).increaseTrenBoxColl(
             vars.asset, msg.sender, _assetAmount
         );
         uint256 debtAmount_ = ITrenBoxManager(trenBoxManager).increaseTrenBoxDebt(
@@ -137,7 +137,7 @@ contract BorrowerOperations is
             vars.asset,
             msg.sender,
             debtAmount_,
-            assetAmount_,
+            collateralAmountAfterIncrease,
             vars.stake,
             BorrowerOperation.openTrenBox
         );
