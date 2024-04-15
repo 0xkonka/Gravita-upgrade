@@ -74,8 +74,9 @@ export default function shouldBehaveLikeCanWithdrawColl() {
           amount: amountToWithdraw,
         });
 
-        await expect(withdrawCollateralTx).to.be.revertedWith(
-          "BorrowerOps: There must be either a collateral change or a debt change"
+        await expect(withdrawCollateralTx).to.be.revertedWithCustomError(
+          this.contracts.borrowerOperations,
+          "BorrowerOperations__ZeroAdjustment"
         );
       });
     });
@@ -97,8 +98,9 @@ export default function shouldBehaveLikeCanWithdrawColl() {
           amount: amountToWithdraw,
         });
 
-        await expect(withdrawCollateralTx).to.be.revertedWith(
-          "BorrowerOps: An operation that would result in ICR < MCR is not permitted"
+        await expect(withdrawCollateralTx).to.be.revertedWithCustomError(
+          this.contracts.borrowerOperations,
+          "BorrowerOperations__TrenBoxICRBelowMCR"
         );
       });
     });
@@ -215,8 +217,9 @@ export default function shouldBehaveLikeCanWithdrawColl() {
         amount: amountToWithdraw,
       });
 
-      await expect(addCollateralTx).to.be.revertedWith(
-        "BorrowerOps: TrenBox does not exist or is closed"
+      await expect(addCollateralTx).to.be.revertedWithCustomError(
+        this.contracts.borrowerOperations,
+        "BorrowerOperations__TrenBoxNotExistOrClosed"
       );
     });
   });

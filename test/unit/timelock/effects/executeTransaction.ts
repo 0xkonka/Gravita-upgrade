@@ -170,7 +170,7 @@ export default function shouldBehaveLikeCanExecuteTransaction(): void {
         timelock
           .connect(this.user)
           .executeTransaction(target, value, signature, data, eta_TwelveHoursAfterDelay)
-      ).to.be.revertedWithCustomError(timelock, "Timelock__AdminOnly");
+      ).to.be.revertedWithCustomError(timelock, "Timelock__OnlyAdmin");
     });
   });
 }

@@ -79,8 +79,9 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
               DEFAULT_LOWER_HINT
             );
 
-          await expect(openTrenBoxTx).to.be.revertedWith(
-            "BorrowerOps: TrenBox's net debt must be greater than minimum"
+          await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+            borrowerOperations,
+            "BorrowerOperations__TrenBoxNetDebtLessThanMin"
           );
         });
       });
@@ -113,7 +114,10 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
               DEFAULT_LOWER_HINT
             );
 
-          await expect(openTrenBoxTx).to.be.revertedWith("compositeDebt cannot be 0");
+          await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+            borrowerOperations,
+            "BorrowerOperations__CompositeDebtZero"
+          );
         });
       });
 
@@ -143,8 +147,9 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
               from: user,
             });
 
-            await expect(openTrenBoxTx).to.be.revertedWith(
-              "BorrowerOps: An operation that would result in ICR < MCR is not permitted"
+            await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+              this.contracts.borrowerOperations,
+              "BorrowerOperations__TrenBoxICRBelowMCR"
             );
           });
         });
@@ -189,7 +194,10 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           from: user,
         });
 
-        await expect(openTrenBoxTx).to.be.revertedWith("BorrowerOps: TrenBox is active");
+        await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+          this.contracts.borrowerOperations,
+          "BorrowerOperations__TrenBoxIsActive"
+        );
       });
 
       it("should open tren box when it's was opened by another user", async function () {
@@ -231,8 +239,9 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           from: user,
         });
 
-        await expect(openTrenBoxTx).to.be.revertedWith(
-          "BorrowerOps: An operation that would result in ICR < MCR is not permitted"
+        await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+          this.contracts.borrowerOperations,
+          "BorrowerOperations__TrenBoxICRBelowMCR"
         );
       });
     });
@@ -258,8 +267,9 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           from: user,
         });
 
-        await expect(openTrenBoxTx).to.be.revertedWith(
-          "BorrowerOps: An operation that would result in TCR < CCR is not permitted"
+        await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+          this.contracts.borrowerOperations,
+          "BorrowerOperations__TrenBoxNewTCRBelowCCR"
         );
       });
     });
@@ -288,7 +298,10 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           .connect(user)
           .openTrenBox(asset, assetAmount, debtTokenAmount, DEFAULT_UPPER_HINT, DEFAULT_LOWER_HINT);
 
-        await expect(openTrenBoxTx).to.be.revertedWith("Exceeds mint cap");
+        await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+          borrowerOperations,
+          "BorrowerOperations__ExceedMintCap"
+        );
       });
     });
 
@@ -585,6 +598,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
 
   context("when asset is not active", function () {
     it("should revert", async function () {
+      const { borrowerOperations } = this.contracts;
       const notActiveAsset = this.collaterals.inactive.dai;
 
       const [user] = this.users;
@@ -593,10 +607,10 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
       const lowerHint = ethers.ZeroAddress;
 
       await expect(
-        this.contracts.borrowerOperations
+        borrowerOperations
           .connect(user)
           .openTrenBox(notActiveAsset.address, 100n, 100n, upperHint, lowerHint)
-      ).to.be.revertedWith("BorrowerOperations: Asset is not active");
+      ).to.be.revertedWithCustomError(borrowerOperations, "BorrowerOperations__NotActiveColl");
     });
   });
 

@@ -9,6 +9,7 @@ import shouldHaveHunderdPercent from "./oneHundredPercent";
 import shouldHavePercentDivisorDefault from "./percentDivisorDefault";
 import shouldHaveRedemptionBlockTimestampDefault from "./redemptionBlockTimestampDefault";
 import shouldHaveRedemptionFeeFloorDefault from "./redemptionFeeFloorDefault";
+import shouldHaveRouteToTrenStaking from "./routeToTrenStaking";
 
 export default function shouldHavePublicConstant(): void {
   describe("View Functions", function () {
@@ -54,6 +55,10 @@ export default function shouldHavePublicConstant(): void {
 
     describe("#REDEMPTION_BLOCK_TIMESTAMP_DEFAULT", function () {
       shouldHaveRedemptionBlockTimestampDefault();
+    });
+
+    describe("#routeToTRENStaking", function () {
+      shouldHaveRouteToTrenStaking();
     });
   });
 }

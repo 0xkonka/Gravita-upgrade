@@ -2,7 +2,6 @@ import shouldHaveFeeExpirationSeconds from "./feeExpirationSeconds";
 import shouldHaveMinFeeDays from "./minFeeDays";
 import shouldHaveMinFeeFraction from "./minFeeFraction";
 import shouldHaveName from "./name";
-import shouldHaveRouteToTrenStaking from "./routeToTrenStaking";
 
 export default function shouldHavePublicConstant(): void {
   describe("View Functions", function () {
@@ -20,10 +19,6 @@ export default function shouldHavePublicConstant(): void {
 
     describe("#FEE_EXPIRATION_SECONDS", function () {
       shouldHaveFeeExpirationSeconds();
-    });
-
-    describe("#routeToTRENStaking", function () {
-      shouldHaveRouteToTrenStaking();
     });
   });
 }
