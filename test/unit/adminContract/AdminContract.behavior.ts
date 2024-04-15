@@ -13,7 +13,6 @@ import shouldHavePublicConstant from "./view/constants";
 import shouldHaveGetBorrowingFee from "./view/getBorrowingFee";
 import shouldHaveGetCCR from "./view/getCriticalCollateralRate";
 import shouldHaveGetDebtTokenGasCompensation from "./view/getDebtTokenGasCompensation";
-import shouldHaveGetDecimals from "./view/getDecimals";
 import shouldHaveGetIndex from "./view/getIndex";
 import shouldHaveGetIndices from "./view/getIndices";
 import shouldHaveGetIsActive from "./view/getIsActive";
@@ -46,10 +45,6 @@ export function shouldBehaveLikeAdminContractContract(): void {
 
     describe("#getIsActive", function () {
       shouldHaveGetIsActive();
-    });
-
-    describe("#getDecimals", function () {
-      shouldHaveGetDecimals();
     });
 
     describe("#getIndex", function () {
