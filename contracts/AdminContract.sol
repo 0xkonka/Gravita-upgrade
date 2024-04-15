@@ -85,7 +85,7 @@ contract AdminContract is
         uint256 min,
         uint256 max
     ) {
-        if (collateralParams[_collateral].active == false) {
+        if (!collateralParams[_collateral].active) {
             revert AdminContract__CollateralNotConfigured();
         }
 
@@ -149,10 +149,9 @@ contract AdminContract is
             redemptionBlockTimestamp: REDEMPTION_BLOCK_TIMESTAMP_DEFAULT
         });
 
-        IStabilityPool(stabilityPool).addCollateralType(_collateral);
-
-        // throw event
         emit CollateralAdded(_collateral);
+
+        IStabilityPool(stabilityPool).addCollateralType(_collateral);
     }
 
     function setCollateralParameters(
