@@ -49,8 +49,7 @@ async function addCollateral(collateral: Collateral, hre: HardhatRuntimeEnvironm
   } else {
     const addNewCollateralTx = await adminContract.addNewCollateral(
       collateral.address,
-      collateral.gasCompensation,
-      collateral.decimals
+      collateral.gasCompensation
     );
 
     await addNewCollateralTx.wait();

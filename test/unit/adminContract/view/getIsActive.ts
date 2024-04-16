@@ -31,8 +31,7 @@ export default function shouldHaveGetIsActive(): void {
 
       const addCollateralTx = await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       await addCollateralTx.wait();
