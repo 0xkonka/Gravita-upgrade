@@ -2,14 +2,14 @@
 pragma solidity ^0.8.23;
 
 import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { OwnableUpgradeable } from
+    "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { ILockedTREN } from "../Interfaces/ILockedTREN.sol";
 
 /**
  * @notice This contract is reserved for Linear Vesting to the Team members and the Advisors team.
  */
-contract LockedTREN is ILockedTREN, Ownable, Initializable {
+contract LockedTREN is ILockedTREN, OwnableUpgradeable {
     using SafeERC20 for IERC20;
 
     string public constant NAME = "LockedTREN";
@@ -28,7 +28,11 @@ contract LockedTREN is ILockedTREN, Ownable, Initializable {
         _;
     }
 
-    constructor(address initialOwner) Ownable(initialOwner) { }
+    function initialize() public initializer {
+        address initialOwner = _msgSender();
+
+        __Ownable_init(initialOwner);
+    }
 
     function setAddresses(address _trenAddress) public initializer onlyOwner {
         trenToken = IERC20(_trenAddress);
