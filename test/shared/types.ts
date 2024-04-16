@@ -177,63 +177,62 @@ export type SetupCollateralForTestsArgs = {
 
 export type SetupProtocolCommands =
   | {
-    action: "openTrenBox";
-    args: OpenTrenBoxArgs;
-  }
+      action: "openTrenBox";
+      args: OpenTrenBoxArgs;
+    }
   | {
-    action: "addCollateral";
-    args: AddCollateralArgs;
-  }
+      action: "addCollateral";
+      args: AddCollateralArgs;
+    }
   | {
-    action: "withdrawCollateral";
-    args: WithdrawCollateralArgs;
-  }
+      action: "withdrawCollateral";
+      args: WithdrawCollateralArgs;
+    }
   | {
-    action: "takeDebt";
-    args: TakeDebtArgs;
-  }
+      action: "takeDebt";
+      args: TakeDebtArgs;
+    }
   | {
-    action: "repayDebt";
-    args: RepayDebtArgs;
-  }
+      action: "repayDebt";
+      args: RepayDebtArgs;
+    }
   | {
-    action: "provideToStabilityPool";
-    args: ProvideToStabilityPoolArgs;
-  }
+      action: "provideToStabilityPool";
+      args: ProvideToStabilityPoolArgs;
+    }
   | {
-    action: "withdrawFromStabilityPool";
-    args: WithdrawFromStabilityPoolArgs;
-  }
+      action: "withdrawFromStabilityPool";
+      args: WithdrawFromStabilityPoolArgs;
+    }
   | {
-    action: "redeemCollateral";
-    args: RedeemCollateralArgs;
-  }
+      action: "redeemCollateral";
+      args: RedeemCollateralArgs;
+    }
   | {
-    action: "liquidate";
-    args: LiquidateArgs;
-  }
+      action: "liquidate";
+      args: LiquidateArgs;
+    }
   | {
-    action: "liquidateTrenBoxes";
-    args: LiquidateTrenBoxesArgs;
-  }
+      action: "liquidateTrenBoxes";
+      args: LiquidateTrenBoxesArgs;
+    }
   | {
-    action: "batchLiquidateTrenBoxes";
-    args: BatchLiquidateTrenBoxesArgs;
-  }
+      action: "batchLiquidateTrenBoxes";
+      args: BatchLiquidateTrenBoxesArgs;
+    }
   | {
-    action: "closeTrenBox";
-    args: CloseTrenBoxArgs;
-  }
+      action: "closeTrenBox";
+      args: CloseTrenBoxArgs;
+    }
   | {
-    action: "approve";
-    args: {
-      from: HardhatEthersSigner;
-      spender: AddressLike;
-      amount: bigint;
-      asset: ERC20;
+      action: "approve";
+      args: {
+        from: HardhatEthersSigner;
+        spender: AddressLike;
+        amount: bigint;
+        asset: ERC20;
+      };
     };
-  };
-
 
 export type SetupProtocolForTestsArgs = {
   collaterals?: SetupCollateralForTestsArgs[];

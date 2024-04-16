@@ -133,17 +133,20 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
                 DEFAULT_LOWER_HINT
               );
 
-            await expect(openTrenBoxTx).to.be.revertedWithCustomError(borrowerOperations, "BorrowerOperations__CompositeDebtZero");
+            await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+              borrowerOperations,
+              "BorrowerOperations__CompositeDebtZero"
+            );
           });
         });
 
         context("when asset is in Recovery Mode", function () {
           context("when ICR is below CCR", function () {
-            it.skip("should revert", async function () { });
+            it.skip("should revert", async function () {});
           });
 
           context("when ICR is above CCR", function () {
-            it.skip("should open tren box", async function () { });
+            it.skip("should open tren box", async function () {});
           });
         });
 
@@ -152,7 +155,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             it("should revert", async function () {
               const [user] = this.users;
               const { erc20 } = this.testContracts;
-              const { borrowerOperations } = this.contracts
+              const { borrowerOperations } = this.contracts;
               const asset = await erc20.getAddress();
               const assetAmount = ethers.parseUnits("2", 18);
 
@@ -212,7 +215,10 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             from: user,
           });
 
-          await expect(openTrenBoxTx).to.be.revertedWithCustomError(borrowerOperations, "BorrowerOperations__TrenBoxIsActive");
+          await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+            borrowerOperations,
+            "BorrowerOperations__TrenBoxIsActive"
+          );
         });
 
         it("should open tren box when it's was opened by another user", async function () {
@@ -688,17 +694,20 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
                 DEFAULT_LOWER_HINT
               );
 
-            await expect(openTrenBoxTx).to.be.revertedWithCustomError(borrowerOperations, "BorrowerOperations__CompositeDebtZero");
+            await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+              borrowerOperations,
+              "BorrowerOperations__CompositeDebtZero"
+            );
           });
         });
 
         context("when asset is in Recovery Mode", function () {
           context("when ICR is below CCR", function () {
-            it.skip("should revert", async function () { });
+            it.skip("should revert", async function () {});
           });
 
           context("when ICR is above CCR", function () {
-            it.skip("should open tren box", async function () { });
+            it.skip("should open tren box", async function () {});
           });
         });
 
@@ -707,7 +716,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             it("should revert", async function () {
               const [user] = this.users;
               const { erc20_with_6_decimals } = this.testContracts;
-              const { borrowerOperations } = this.contracts
+              const { borrowerOperations } = this.contracts;
               const asset = await erc20_with_6_decimals.getAddress();
               const assetAmount = ethers.parseUnits("5233.6789", 18);
 
@@ -719,7 +728,8 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
                 from: user,
               });
 
-              await expect(openTrenBoxTx).to.be.revertedWithCustomError(borrowerOperations,
+              await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+                borrowerOperations,
                 "BorrowerOperations__TrenBoxICRBelowMCR"
               );
             });
@@ -758,7 +768,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           const { erc20_with_6_decimals } = this.testContracts;
           const assetAddress = await erc20_with_6_decimals.getAddress();
           const assetAmount = ethers.parseUnits("5432.1098", 18);
-          const { borrowerOperations } = this.contracts
+          const { borrowerOperations } = this.contracts;
 
           const { openTrenBoxTx } = await this.utils.openTrenBox({
             asset: assetAddress,
@@ -766,7 +776,10 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             from: user,
           });
 
-          await expect(openTrenBoxTx).to.be.revertedWithCustomError(borrowerOperations, "BorrowerOperations__TrenBoxIsActive");
+          await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+            borrowerOperations,
+            "BorrowerOperations__TrenBoxIsActive"
+          );
         });
 
         it("should open tren box when it's was opened by another user", async function () {
@@ -809,7 +822,8 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             from: user,
           });
 
-          await expect(openTrenBoxTx).to.be.revertedWithCustomError(borrowerOperations,
+          await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+            borrowerOperations,
             "BorrowerOperations__TrenBoxICRBelowMCR"
           );
         });
@@ -894,7 +908,6 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
 
         const trenBoxStatus = await trenBoxManager.getTrenBoxStatus(assetAddress, user.address);
         expect(trenBoxStatus).to.equal(TrenBoxStatus.active);
-
       });
 
       it("should open tren box when it's was opened by another user", async function () {
