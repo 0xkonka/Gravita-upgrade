@@ -11,7 +11,7 @@ import shouldBehaveLikeHaveDelay from "./view/delay";
 import shouldBehaveLikeHavePendingAdmin from "./view/pendingAdmin";
 
 export function shouldBehaveLikeTimelockContract(): void {
-  describe.only("View Functions", function () {
+  describe("View Functions", function () {
     shouldHavePublicConstant();
 
     describe("#admin", function () {
