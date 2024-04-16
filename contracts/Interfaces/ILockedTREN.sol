@@ -14,4 +14,11 @@ interface ILockedTREN {
     error LockedTREN__InvalidAddress();
     error LockedTREN__AlreadyHaveVestingRule();
     error LockedTREN__TotalSupplyLessThanClaimed();
+
+    event AddEntityVesting(
+        address indexed entity,
+        uint256 totalSupply,
+        uint256 startVestingDate,
+        uint256 endVestingDate
+    );
 }

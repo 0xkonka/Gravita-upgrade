@@ -58,6 +58,13 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
         );
 
         trenToken.safeTransferFrom(msg.sender, address(this), _totalSupply);
+
+        emit AddEntityVesting(
+            _entity,
+            _totalSupply,
+            entitiesVesting[_entity].startVestingDate,
+            entitiesVesting[_entity].endVestingDate
+        );
     }
 
     function lowerEntityVesting(
@@ -120,7 +127,7 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
             claimable = entityRule.totalSupply - entityRule.claimed;
         } else {
             claimable = (
-                (entityRule.totalSupply / TWO_YEARS) * (block.timestamp - entityRule.createdDate)
+                (entityRule.totalSupply * (block.timestamp - entityRule.createdDate)) / TWO_YEARS
             ) - entityRule.claimed;
         }
 
