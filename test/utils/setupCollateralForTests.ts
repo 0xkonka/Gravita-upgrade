@@ -11,13 +11,8 @@ export function setupCollateralForTests(context: Context) {
     const priceFeed = overridePriceFeed || context.testContracts.priceFeedTestnet;
 
     const collateralAddress = await collateral.getAddress();
-    const collateralDecimals = await collateral.decimals();
 
-    await adminContract.addNewCollateral(
-      collateralAddress,
-      debtTokenGasCompensation,
-      collateralDecimals
-    );
+    await adminContract.addNewCollateral(collateralAddress, debtTokenGasCompensation);
 
     if (collateralOptions.setCollateralParams) {
       await adminContract.setCollateralParameters(
