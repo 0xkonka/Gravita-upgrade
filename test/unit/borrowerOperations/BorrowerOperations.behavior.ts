@@ -42,10 +42,10 @@ export function shouldBehaveLikeBorrowerOperationsContract(): void {
         shouldBehaveLikeCanCloseTrenBox();
       });
 
-      describe("#adjustTrenBox", function () {});
-      describe("#claimCollateral", function () {});
+      describe("#adjustTrenBox", function () { });
+      describe("#claimCollateral", function () { });
     });
 
-    describe("Upgradable", function () {});
+    describe("Upgradable", function () { });
   });
 }

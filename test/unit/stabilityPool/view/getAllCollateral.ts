@@ -6,8 +6,7 @@ export default function shouldBehaveLikeGetAllCollateral(): void {
       const { testCollateral } = this.collaterals.notAdded;
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const [tokensInStabilityPool] = await this.contracts.stabilityPool.getAllCollateral();

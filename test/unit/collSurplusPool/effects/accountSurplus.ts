@@ -74,9 +74,21 @@ function shouldBehaveLikeCanAccountSurplusCorrectly() {
     const assetAmount = 50n;
     const user = this.signers.accounts[1];
 
+    const userAssetBalanceBefore = await this.redeployedContracts.collSurplusPool.getCollateral(
+      wETH.address,
+      user.address
+    );
+
     const accountSurplusTx = await this.redeployedContracts.collSurplusPool
       .connect(this.impostor)
       .accountSurplus(wETH.address, user, assetAmount);
+
+    const userAssetBalanceAfter = await this.redeployedContracts.collSurplusPool.getCollateral(
+      wETH.address,
+      user.address
+    );
+
+    expect(assetAmount).to.be.equal(userAssetBalanceAfter - userAssetBalanceBefore);
 
     await expect(accountSurplusTx)
       .to.emit(this.redeployedContracts.collSurplusPool, "CollBalanceUpdated")

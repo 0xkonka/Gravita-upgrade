@@ -91,7 +91,7 @@ contract TrenBoxManager is
 
     // Array of all active trenBox addresses - used to to compute an approximate hint off-chain, for
     // the sorted list insertion
-    mapping(address collateral => address[] owners) public TrenBoxOwners;
+    mapping(address collateral => address[] owners) public trenBoxOwners;
 
     // Error trackers for the trenBox redistribution calculation
     mapping(address collateral => uint256 collateralError) public lastCollError_Redistribution;
@@ -333,7 +333,6 @@ contract TrenBoxManager is
 
     // Called by Tren contracts
     // ------------------------------------------------------------------------------------
-
     function addTrenBoxOwnerToArray(
         address _asset,
         address _borrower
@@ -343,7 +342,7 @@ contract TrenBoxManager is
         onlyBorrowerOperations
         returns (uint256 index)
     {
-        address[] storage assetOwners = TrenBoxOwners[_asset];
+        address[] storage assetOwners = trenBoxOwners[_asset];
         assetOwners.push(_borrower);
         index = assetOwners.length - 1;
         TrenBoxes[_borrower][_asset].arrayIndex = uint128(index);
@@ -448,7 +447,8 @@ contract TrenBoxManager is
         uint256 redeemedDebtFraction = (_assetDrawn * _price) / _totalDebtTokenSupply;
         uint256 newBaseRate = decayedBaseRate + (redeemedDebtFraction / BETA);
         newBaseRate = TrenMath._min(newBaseRate, DECIMAL_PRECISION);
-        assert(newBaseRate != 0);
+        assert(newBaseRate > 0);
+
         baseRate[_asset] = newBaseRate;
         emit BaseRateUpdated(_asset, newBaseRate);
         _updateLastFeeOpTime(_asset);
@@ -773,7 +773,7 @@ contract TrenBoxManager is
     function _closeTrenBox(address _asset, address _borrower, Status closedStatus) internal {
         assert(closedStatus != Status.nonExistent && closedStatus != Status.active);
 
-        uint256 TrenBoxOwnersArrayLength = TrenBoxOwners[_asset].length;
+        uint256 TrenBoxOwnersArrayLength = trenBoxOwners[_asset].length;
         if (TrenBoxOwnersArrayLength <= 1 || ISortedTrenBoxes(sortedTrenBoxes).getSize(_asset) <= 1)
         {
             revert TrenBoxManager__OnlyOneTrenBox();
@@ -808,7 +808,7 @@ contract TrenBoxManager is
 
         assert(index <= idxLast);
 
-        address[] storage trenBoxAssetOwners = TrenBoxOwners[_asset];
+        address[] storage trenBoxAssetOwners = trenBoxOwners[_asset];
         address addressToMove = trenBoxAssetOwners[idxLast];
 
         trenBoxAssetOwners[index] = addressToMove;
@@ -919,7 +919,7 @@ contract TrenBoxManager is
     }
 
     function getTrenBoxOwnersCount(address _asset) external view override returns (uint256) {
-        return TrenBoxOwners[_asset].length;
+        return trenBoxOwners[_asset].length;
     }
 
     function getTrenBoxFromTrenBoxOwnersArray(
@@ -931,7 +931,7 @@ contract TrenBoxManager is
         override
         returns (address)
     {
-        return TrenBoxOwners[_asset][_index];
+        return trenBoxOwners[_asset][_index];
     }
 
     function getNetDebt(address _asset, uint256 _debt) external view returns (uint256) {

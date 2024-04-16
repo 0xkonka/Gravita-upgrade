@@ -52,8 +52,7 @@ export async function loadTestFixture(): Promise<{
   for (const collateral of COLLATERALS_TO_ADD_AS_INACTIVE) {
     const addCollateralTx = await adminContract.addNewCollateral(
       collateral.address,
-      collateral.gasCompensation,
-      collateral.decimals
+      collateral.gasCompensation
     );
 
     await addCollateralTx.wait();
@@ -69,6 +68,11 @@ export async function loadTestFixture(): Promise<{
   const erc20: ERC20Test = (await ERC20Factory.connect(deployer).deploy(...args)) as ERC20Test;
   await erc20.waitForDeployment();
 
+  const erc20_with_6_decimals: ERC20Test = (await ERC20Factory.connect(deployer).deploy(
+    ...args
+  )) as ERC20Test;
+  await erc20_with_6_decimals.waitForDeployment();
+  await erc20_with_6_decimals.setDecimals(6);
   const FlashLoanTesterFactory: FlashLoanTester__factory = (await ethers.getContractFactory(
     "FlashLoanTester"
   )) as FlashLoanTester__factory;
@@ -137,6 +141,7 @@ export async function loadTestFixture(): Promise<{
   return {
     testContracts: {
       erc20,
+      erc20_with_6_decimals,
       mockAggregator,
       mockApi3,
       priceFeedTestnet,
