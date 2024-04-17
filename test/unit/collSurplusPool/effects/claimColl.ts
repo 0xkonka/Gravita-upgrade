@@ -53,8 +53,10 @@ export default function shouldBehaveLikeCanClaimColl(): void {
           this.redeployedContracts.collSurplusPool
             .connect(this.borrowerOperationsImpostor)
             .claimColl(erc20, user)
-        ).to.be.revertedWithCustomError(this.contracts.collSurplusPool, "CollSurplusPool__NoClaimableColl");
-
+        ).to.be.revertedWithCustomError(
+          this.contracts.collSurplusPool,
+          "CollSurplusPool__NoClaimableColl"
+        );
       });
 
       it("should claim Collateral", async function () {
