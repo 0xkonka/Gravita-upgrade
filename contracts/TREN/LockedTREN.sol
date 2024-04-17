@@ -1,24 +1,16 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { OwnableUpgradeable } from
+    "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { ILockedTREN } from "../Interfaces/ILockedTREN.sol";
 
-/*
-This contract is reserved for Linear Vesting to the Team members and the Advisors team.
-*/
-contract LockedTREN is Ownable, Initializable {
+/**
+ * @notice This contract is reserved for Linear Vesting to the Team members and the Advisors team.
+ */
+contract LockedTREN is ILockedTREN, OwnableUpgradeable {
     using SafeERC20 for IERC20;
-
-    struct Rule {
-        uint256 createdDate;
-        uint256 totalSupply;
-        uint256 startVestingDate;
-        uint256 endVestingDate;
-        uint256 claimed;
-    }
 
     string public constant NAME = "LockedTREN";
     uint256 public constant SIX_MONTHS = 26 weeks;
@@ -27,23 +19,33 @@ contract LockedTREN is Ownable, Initializable {
     IERC20 private trenToken;
     uint256 private assignedTRENTokens;
 
-    mapping(address => Rule) public entitiesVesting;
+    mapping(address entity => Rule rule) public entitiesVesting;
 
     modifier entityRuleExists(address _entity) {
-        require(entitiesVesting[_entity].createdDate != 0, "Entity doesn't have a Vesting Rule");
+        if (entitiesVesting[_entity].createdDate == 0) {
+            revert LockedTREN__NotHaveVestingRule();
+        }
         _;
     }
 
-    constructor(address initialOwner) Ownable(initialOwner) { }
+    function initialize() public initializer {
+        address initialOwner = _msgSender();
+
+        __Ownable_init(initialOwner);
+    }
 
     function setAddresses(address _trenAddress) public initializer onlyOwner {
         trenToken = IERC20(_trenAddress);
     }
 
     function addEntityVesting(address _entity, uint256 _totalSupply) public onlyOwner {
-        require(address(0) != _entity, "Invalid Address");
+        if (_entity == address(0)) {
+            revert LockedTREN__InvalidAddress();
+        }
 
-        require(entitiesVesting[_entity].createdDate == 0, "Entity already has a Vesting Rule");
+        if (entitiesVesting[_entity].createdDate != 0) {
+            revert LockedTREN__AlreadyHaveVestingRule();
+        }
 
         assignedTRENTokens += _totalSupply;
 
@@ -56,6 +58,13 @@ contract LockedTREN is Ownable, Initializable {
         );
 
         trenToken.safeTransferFrom(msg.sender, address(this), _totalSupply);
+
+        emit AddEntityVesting(
+            _entity,
+            _totalSupply,
+            entitiesVesting[_entity].startVestingDate,
+            entitiesVesting[_entity].endVestingDate
+        );
     }
 
     function lowerEntityVesting(
@@ -69,10 +78,9 @@ contract LockedTREN is Ownable, Initializable {
         sendTRENTokenToEntity(_entity);
         Rule storage vestingRule = entitiesVesting[_entity];
 
-        require(
-            newTotalSupply > vestingRule.claimed,
-            "Total Supply goes lower or equal than the claimed total."
-        );
+        if (newTotalSupply <= vestingRule.claimed) {
+            revert LockedTREN__TotalSupplyLessThanClaimed();
+        }
 
         vestingRule.totalSupply = newTotalSupply;
     }
@@ -119,7 +127,7 @@ contract LockedTREN is Ownable, Initializable {
             claimable = entityRule.totalSupply - entityRule.claimed;
         } else {
             claimable = (
-                (entityRule.totalSupply / TWO_YEARS) * (block.timestamp - entityRule.createdDate)
+                (entityRule.totalSupply * (block.timestamp - entityRule.createdDate)) / TWO_YEARS
             ) - entityRule.claimed;
         }
 
