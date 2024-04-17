@@ -1,7 +1,50 @@
 {
-  "TRENToken": {
-    "ethereum-sepolia": "0x824dEfa61eBEa2E99b5561e686C7D589Ad73F7D6",
-    "optimism-sepolia": "0x824dEfa61eBEa2E99b5561e686C7D589Ad73F7D6",
-    "arbitrum-sepolia": "0x824dEfa61eBEa2E99b5561e686C7D589Ad73F7D6"
+  "ActivePool": {
+    "address": "0x7ed6D4FfC1f71708F33B5b644BE79d9D9AF2B50F"
+  },
+  "AdminContract": {
+    "address": "0x1ac718A1aCcF80f4Ec4b5c0ec84f7877f3CeAA4c"
+  },
+  "BorrowerOperations": {
+    "address": "0x509DcbC0b2140d253F54cC70397694Dee6b4F010"
+  },
+  "CollSurplusPool": {
+    "address": "0x8B66C8e61DEA2dbFD99dE89B4eAa588AEECa2A7C"
+  },
+  "DebtToken": {
+    "address": "0x63FB650873441ec78624377bcfB82a6296eF97f3"
+  },
+  "DefaultPool": {
+    "address": "0x089065458E5CbCc8694EdD5bBE7Bc47222Ef225E"
+  },
+  "FeeCollector": {
+    "address": "0xc5036d746f2f54733C33C73568e0b9c12639f566"
+  },
+  "FlashLoan": {
+    "address": "0x1c105078F07F0e42070e1fcBd7aB7d179563b886"
+  },
+  "GasPool": {
+    "address": "0x49433698E8a73a8446E83824FB0C519F183BB08A"
+  },
+  "PriceFeed": {
+    "address": "0x6b010625511D7b286521940852fA772D95495131"
+  },
+  "SortedTrenBoxes": {
+    "address": "0x40E04b57e4036b5FF015D16Bb67a75cA277Bd7d9"
+  },
+  "StabilityPool": {
+    "address": "0x63bFb55c92456bE8c509ACcDc97732019F7619da"
+  },
+  "Timelock": {
+    "address": "0x3f218f45cc1EFd56208137A19162CE2726C65C7D"
+  },
+  "Treasury": {
+    "address": "0xf812844A1f3187F6e31336d3684FAd2dD31219E3"
+  },
+  "TrenBoxManager": {
+    "address": "0x122418F5C4A74022aaF7DC68b6E2c719070204D5"
+  },
+  "TrenBoxManagerOperations": {
+    "address": "0xa5e74Df1B244eAe8Da7AB2FD924e46062c25CB52"
   }
 }

@@ -1,17 +1,17 @@
 [
   {
     "network": "ETH_Sepolia",
-    "nonce": 3,
-    "balance": "0.43601647821766396 ETH"
+    "nonce": 4,
+    "balance": "1.776867012339712 ETH"
   },
   {
     "network": "ARB_Sepolia",
-    "nonce": 3,
-    "balance": "0.2988696174456 ETH"
+    "nonce": 4,
+    "balance": "0.292537199259546047 ETH"
   },
   {
     "network": "OP_Sepolia",
-    "nonce": 3,
-    "balance": "0.049802212954741664 ETH"
+    "nonce": 4,
+    "balance": "0.421171562321866258 ETH"
   }
 ]

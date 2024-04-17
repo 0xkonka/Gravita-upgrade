@@ -4,17 +4,12 @@ import { resolve } from "path";
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(process.cwd(), dotenvConfigPath) });
 
-const ALCHEMY_KEY = process.env.ALCHEMY_API_KEY;
-if (typeof ALCHEMY_KEY === "undefined") {
-  console.log(`ALCHEMY_KEY must be a defined environment variable`);
-}
-
 const alchemyUrl = (network: string): string => {
   const prefix = getPrefix(network);
   const formattedNetwork = formatNetworkName(network);
   const apiKey = process.env[`${formattedNetwork}_API_KEY`];
   if (!apiKey) {
-    throw new Error(`${formattedNetwork}_API_KEY must be defined in the environment variables.`);
+    throw new Error(`${formattedNetwork}_API_KEY must be defined in .env file.`);
   }
 
   return `https://${prefix}sepolia.g.alchemy.com/v2/${apiKey}`;

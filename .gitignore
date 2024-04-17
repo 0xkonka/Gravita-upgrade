@@ -67,3 +67,6 @@ flattened.sol
 lcov.info
 package-lock.json
 .DS_Store
+
+# Some output files
+deployer_nonce.json
