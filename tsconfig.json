@@ -25,6 +25,7 @@
     "test/**/*",
     "types/**/*",
     "utils/**/*",
-    "config/**/*"
+    "config/**/*",
+    "ignition/**/*"
   ]
 }

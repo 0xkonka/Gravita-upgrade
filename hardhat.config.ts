@@ -4,6 +4,7 @@ import "@primitivefi/hardhat-dodoc";
 import { config as dotenvConfig } from "dotenv";
 import "hardhat-contract-sizer";
 import "hardhat-deploy";
+import "@nomicfoundation/hardhat-ignition-ethers";
 import { removeConsoleLog } from "hardhat-preprocessor";
 import type { HardhatUserConfig } from "hardhat/config";
 import type { HttpNetworkAccountsUserConfig, NetworkUserConfig } from "hardhat/types";

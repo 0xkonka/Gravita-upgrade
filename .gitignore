@@ -12,6 +12,10 @@
 # Dependency directory
 node_modules
 
+# deployment localhost directory
+deployments/localhost
+ignition/deployments/chain-31337
+
 # dotenv environment variable files
 *.env
 .env.development.local
