@@ -8,8 +8,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
 
       const addNewCollateralTx = await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const expectedAddress = testCollateral.address.toString();
@@ -24,8 +23,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
 
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const validCollaterals = await this.contracts.adminContract.getValidCollateral();
@@ -40,8 +38,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
 
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const index = await this.contracts.adminContract.getIndex(testCollateral.address);
@@ -49,27 +46,12 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
       expect(index).to.be.equal(expectedIndex);
     });
 
-    it("should set correct decimals", async function () {
-      const { testCollateral } = this.collaterals.notAdded;
-
-      await this.contracts.adminContract.addNewCollateral(
-        testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
-      );
-
-      const decimals = await this.contracts.adminContract.getDecimals(testCollateral.address);
-
-      expect(decimals).to.be.equal(testCollateral.decimals);
-    });
-
     it("should set correct gas compensation", async function () {
       const { testCollateral } = this.collaterals.notAdded;
 
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const gasCompensation = await this.contracts.adminContract.getDebtTokenGasCompensation(
@@ -84,8 +66,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
 
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const isActive = await this.contracts.adminContract.getIsActive(testCollateral.address);
@@ -98,8 +79,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
 
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const borrowingFee = await this.contracts.adminContract.getBorrowingFee(
@@ -115,8 +95,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
 
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const CCR = await this.contracts.adminContract.getCcr(testCollateral.address);
@@ -130,8 +109,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
 
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const MCR = await this.contracts.adminContract.getMcr(testCollateral.address);
@@ -145,8 +123,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
 
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const minNetDebt = await this.contracts.adminContract.getMinNetDebt(testCollateral.address);
@@ -160,8 +137,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
 
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const mintCap = await this.contracts.adminContract.getMintCap(testCollateral.address);
@@ -175,8 +151,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
 
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const percentDivisor = await this.contracts.adminContract.getPercentDivisor(
@@ -192,8 +167,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
 
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const redemptionFeeFloor = await this.contracts.adminContract.getRedemptionFeeFloor(
@@ -213,8 +187,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
 
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const redemptionBlockTimestamp =
@@ -227,8 +200,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
       const { testCollateral } = this.collaterals.notAdded;
       await this.contracts.adminContract.addNewCollateral(
         testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.decimals
+        testCollateral.gasCompensation
       );
 
       const [tokensInStabilityPool] = await this.contracts.stabilityPool.getAllCollateral();
@@ -242,11 +214,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
       const { wETH } = this.collaterals.active;
 
       await expect(
-        this.contracts.adminContract.addNewCollateral(
-          wETH.address,
-          wETH.gasCompensation,
-          wETH.decimals
-        )
+        this.contracts.adminContract.addNewCollateral(wETH.address, wETH.gasCompensation)
       ).to.be.revertedWithCustomError(
         this.contracts.adminContract,
         "AdminContract__CollateralExists"
@@ -259,24 +227,8 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
       const zeroAddress = ethers.ZeroAddress;
 
       await expect(
-        this.contracts.adminContract.addNewCollateral(zeroAddress, 0, 0)
+        this.contracts.adminContract.addNewCollateral(zeroAddress, 0)
       ).to.be.revertedWith("invalid address");
-    });
-  });
-
-  context("when adding a collateral with a non-standard amount of decimals", function () {
-    it.skip("should revert", async function () {
-      const { testCollateral } = this.collaterals.notAdded;
-
-      const sixDecimals = 6;
-
-      await expect(
-        this.contracts.adminContract.addNewCollateral(
-          testCollateral.address,
-          testCollateral.gasCompensation,
-          sixDecimals
-        )
-      ).to.be.revertedWith("invalid decimals");
     });
   });
 
@@ -289,11 +241,7 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
       await expect(
         this.contracts.adminContract
           .connect(notOwner)
-          .addNewCollateral(
-            testCollateral.address,
-            testCollateral.gasCompensation,
-            testCollateral.decimals
-          )
+          .addNewCollateral(testCollateral.address, testCollateral.gasCompensation)
       ).to.be.revertedWithCustomError(this.contracts.adminContract, "AdminContract__OnlyOwner");
     });
   });

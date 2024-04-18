@@ -4,9 +4,14 @@ pragma solidity ^0.8.23;
 
 interface ICommunityIssuance {
     // --- Errors ---
+
     error CommunityIssuance__SetupAlreadyInitialized();
     error CommunityIssuance__InvalidAddresses();
-    error CommunityIssuance__InvalidAdminContractAddress();
+    error CommunityIssuance__InvalidAdminContract();
+    error CommunityIssuance__InvalidPermission();
+    error CommunityIssuance__NotStabilityPool();
+    error CommunityIssuance__SPHaveInsufficientSupply();
+    error CommunityIssuance__SPNotAssigned();
 
     // --- Events ---
 

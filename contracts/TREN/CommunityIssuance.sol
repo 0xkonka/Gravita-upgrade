@@ -27,12 +27,16 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable {
     bool public isSetupInitialized;
 
     modifier isController() {
-        require(msg.sender == owner() || msg.sender == adminContract, "Invalid Permission");
+        if (msg.sender != owner() && msg.sender != adminContract) {
+            revert CommunityIssuance__InvalidPermission();
+        }
         _;
     }
 
     modifier onlyStabilityPool() {
-        require(address(stabilityPool) == msg.sender, "CommunityIssuance: caller is not SP");
+        if (msg.sender != address(stabilityPool)) {
+            revert CommunityIssuance__NotStabilityPool();
+        }
         _;
     }
 
@@ -52,10 +56,14 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable {
         external
         onlyOwner
     {
-        if (isSetupInitialized) revert CommunityIssuance__SetupAlreadyInitialized();
+        if (isSetupInitialized) {
+            revert CommunityIssuance__SetupAlreadyInitialized();
+        }
         if (
             _trenToken == address(0) || _stabilityPool == address(0) || _adminContract == address(0)
-        ) revert CommunityIssuance__InvalidAddresses();
+        ) {
+            revert CommunityIssuance__InvalidAddresses();
+        }
         adminContract = _adminContract;
         trenToken = IERC20(_trenToken);
         stabilityPool = IStabilityPool(_stabilityPool);
@@ -63,7 +71,9 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable {
     }
 
     function setAdminContract(address _adminContract) external onlyOwner {
-        if (_adminContract == address(0)) revert CommunityIssuance__InvalidAdminContractAddress();
+        if (_adminContract == address(0)) {
+            revert CommunityIssuance__InvalidAdminContract();
+        }
         adminContract = _adminContract;
     }
 
@@ -73,10 +83,9 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable {
 
     function removeFundFromStabilityPool(uint256 _fundToRemove) external onlyOwner {
         uint256 newCap = TRENSupplyCap - _fundToRemove;
-        require(
-            totalTRENIssued <= newCap,
-            "CommunityIssuance: Stability Pool doesn't have enough supply."
-        );
+        if (totalTRENIssued > newCap) {
+            revert CommunityIssuance__SPHaveInsufficientSupply();
+        }
 
         TRENSupplyCap -= _fundToRemove;
 
@@ -124,7 +133,9 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable {
     }
 
     function _getLastUpdateTokenDistribution() internal view returns (uint256) {
-        require(lastUpdateTime != 0, "Stability pool hasn't been assigned");
+        if (lastUpdateTime == 0) {
+            revert CommunityIssuance__SPNotAssigned();
+        }
         uint256 timePassed = (block.timestamp - lastUpdateTime) / SECONDS_IN_ONE_MINUTE;
         uint256 totalDistribuedSinceBeginning = trenDistribution * timePassed;
 

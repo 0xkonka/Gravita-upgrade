@@ -6,7 +6,6 @@ interface IAdminContract {
     // ----------------------------------------------------------------------------------------------------------
 
     struct CollateralParams {
-        uint256 decimals;
         uint256 index; // Maps to token address in validCollateral[]
         bool active;
         uint256 borrowingFee;
@@ -61,12 +60,7 @@ interface IAdminContract {
 
     function _100pct() external view returns (uint256);
 
-    function addNewCollateral(
-        address _collateral,
-        uint256 _debtTokenGasCompensation,
-        uint256 _decimals
-    )
-        external;
+    function addNewCollateral(address _collateral, uint256 _debtTokenGasCompensation) external;
 
     function setCollateralParameters(
         address _collateral,
