@@ -31,16 +31,6 @@ contract TrenBoxManagerOperations is
 
     uint256 public redemptionSofteningParam;
 
-    // Structs
-    // ----------------------------------------------------------------------------------------------------------
-
-    struct HintHelperLocalVars {
-        address asset;
-        uint256 debtTokenAmount;
-        uint256 price;
-        uint256 maxIterations;
-    }
-
     // Initializer
     // ------------------------------------------------------------------------------------------------------
 
@@ -53,10 +43,9 @@ contract TrenBoxManagerOperations is
     // Liquidation external functions
     // -----------------------------------------------------------------------------------
 
-    /*
-    * Single liquidation function. Closes the trenBox if its ICR is lower than the minimum
-    collateral
-    ratio.
+    /**
+     * @notice Single liquidation function.
+     * Closes the trenBox if its ICR is lower than the minimum collateral ratio.
      */
     function liquidate(address _asset, address _borrower) external override {
         if (!ITrenBoxManager(trenBoxManager).isTrenBoxActive(_asset, _borrower)) {
@@ -67,9 +56,9 @@ contract TrenBoxManagerOperations is
         batchLiquidateTrenBoxes(_asset, borrowers);
     }
 
-    /*
-    * Liquidate a sequence of trenBoxes. Closes a maximum number of n under-collateralized
-    TrenBoxes,
+    /**
+     * @notice Liquidate a sequence of trenBoxes.
+     * Closes a maximum number of n under-collateralized TrenBoxes,
      * starting from the one with the lowest collateral ratio in the system, and moving upwards.
      */
     function liquidateTrenBoxes(address _asset, uint256 _n) external override nonReentrant {
@@ -127,8 +116,8 @@ contract TrenBoxManagerOperations is
         );
     }
 
-    /*
-     * Attempt to liquidate a custom list of trenBoxes provided by the caller.
+    /**
+     * @notice Attempt to liquidate a custom list of trenBoxes provided by the caller.
      */
     function batchLiquidateTrenBoxes(
         address _asset,
@@ -307,31 +296,27 @@ contract TrenBoxManagerOperations is
     // Hint helper functions
     // --------------------------------------------------------------------------------------------
 
-    /* getRedemptionHints() - Helper function for finding the right hints to pass to
-    redeemCollateral().
+    /**
+     * @notice getRedemptionHints() - Helper function for finding the right hints to pass to
+     * redeemCollateral().
      *
-    * It simulates a redemption of `_debtTokenAmount` to figure out where the redemption sequence
-    will start and what state the final TrenBox
-     * of the sequence will end up in.
+     * It simulates a redemption of `_debtTokenAmount` to figure out where the redemption sequence
+     * will start and what state the final TrenBox of the sequence will end up in.
      *
      * Returns three hints:
-    *  - `firstRedemptionHint` is the address of the first TrenBox with ICR >= MCR (i.e. the first
-    TrenBox that will be redeemed).
-    *  - `partialRedemptionHintNICR` is the final nominal ICR of the last TrenBox of the sequence
-    after being hit by partial redemption,
-     *     or zero in case of no partial redemption.
-    *  - `truncatedDebtTokenAmount` is the maximum amount that can be redeemed out of the the
-    provided `_debtTokenAmount`. This can be lower than
-    *    `_debtTokenAmount` when redeeming the full amount would leave the last TrenBox of the
-    redemption sequence with less net debt than the
-     *    minimum allowed value (i.e. IAdminContract(adminContract).MIN_NET_DEBT()).
+     *  - `firstRedemptionHint` is the address of the first TrenBox with ICR >= MCR (i.e. the first
+     *      TrenBox that will be redeemed).
+     *  - `partialRedemptionHintNICR` is the final nominal ICR of the last TrenBox of the sequence
+     *      after being hit by partial redemption, or zero in case of no partial redemption.
+     *  - `truncatedDebtTokenAmount` is the maximum amount that can be redeemed out of the the
+     *      provided `_debtTokenAmount`. This can be lower than `_debtTokenAmount` when redeeming
+     *      the full amount would leave the last TrenBox of the redemption sequence with less net
+     * debt
+     *      than the minimum allowed value (i.e. IAdminContract(adminContract).MIN_NET_DEBT()).
      *
-    * The number of TrenBoxes to consider for redemption can be capped by passing a non-zero value
-    as
-    `_maxIterations`, while passing zero
-     * will leave it uncapped.
+     * The number of TrenBoxes to consider for redemption can be capped by passing a non-zero value
+     * as `_maxIterations`, while passing zero will leave it uncapped.
      */
-
     function getRedemptionHints(
         address _asset,
         uint256 _debtTokenAmount,
@@ -422,18 +407,20 @@ contract TrenBoxManagerOperations is
         truncatedDebtTokenAmount = _debtTokenAmount - remainingDebt;
     }
 
-    /* getApproxHint() - return address of a TrenBox that is, on average, (length / numTrials)
-    positions away in the
-    sortedTrenBoxes list from the correct insert position of the TrenBox to be inserted.
-
-    Note: The output address is worst-case O(n) positions away from the correct insert position,
-    however, the function
-    is probabilistic. Input can be tuned to guarantee results to a high degree of confidence, e.g:
-
-    Submitting numTrials = k * sqrt(length), with k = 15 makes it very, very likely that the ouput
-    address will
-    be <= sqrt(length) positions away from the correct insert position.
-    */
+    /**
+     * @notice getApproxHint() - return address of a TrenBox that is, on average, (length /
+     * numTrials)
+     * positions away in the sortedTrenBoxes list from the correct insert position of the TrenBox
+     * to be inserted.
+     *
+     * Note: The output address is worst-case O(n) positions away from the correct insert position,
+     * however, the function is probabilistic.
+     * Input can be tuned to guarantee results to a high degree of confidence,
+     * e.g:
+     * Submitting numTrials = k * sqrt(length), with k = 15 makes it very, very likely that the
+     * ouput
+     * address will be <= sqrt(length) positions away from the correct insert position.
+     */
     function getApproxHint(
         address _asset,
         uint256 _CR,
@@ -495,11 +482,11 @@ contract TrenBoxManagerOperations is
     // Liquidation internal/helper functions
     // ----------------------------------------------------------------------------
 
-    /*
-    * This function is used when the batch liquidation sequence starts during Recovery Mode. However,
-    it
-    * handles the case where the system *leaves* Recovery Mode, part way through the liquidation
-    sequence
+    /**
+     * @notice This function is used when the batch liquidation sequence starts during Recovery
+     * Mode.
+     * However, it handles the case where the system *leaves* Recovery Mode, part way
+     * through the liquidation sequence
      */
     function _getTotalFromBatchLiquidate_RecoveryMode(
         address _asset,
@@ -802,12 +789,12 @@ contract TrenBoxManagerOperations is
                 ITrenBoxManager.TrenBoxManagerOperation.liquidateInRecoveryMode
             );
 
-            /*
-            * If 110% <= ICR < current TCR (accounting for the preceding liquidations in the current
-            sequence)
-            * and there are debt tokens in the Stability Pool, only offset, with no redistribution,
+            /**
+             * If 110% <= ICR < current TCR (accounting for the preceding liquidations in the
+             * current sequence) and
+             * there are debt tokens in the Stability Pool, only offset, with no redistribution,
              * but at a capped rate of 1.1 and only if the whole debt can be liquidated.
-            * The remainder due to the capped rate will be claimable as collateral surplus.
+             * The remainder due to the capped rate will be claimable as collateral surplus.
              */
         } else if (
             (_ICR >= IAdminContract(adminContract).getMcr(_asset)) && (_ICR < _TCR)
@@ -847,12 +834,11 @@ contract TrenBoxManagerOperations is
         return singleLiquidation;
     }
 
-    /*
-    * This function is used when the liquidateTrenBoxes sequence starts during Recovery Mode.
-    However,
-    it
-    * handles the case where the system *leaves* Recovery Mode, part way through the liquidation
-    sequence
+    /**
+     * @notice This function is used when the liquidateTrenBoxes sequence starts during Recovery
+     * Mode.
+     * However, it handles the case where the system *leaves* Recovery Mode, part way
+     * through the liquidation sequence
      */
     function _getTotalsFromLiquidateTrenBoxesSequence_RecoveryMode(
         address _asset,
@@ -930,10 +916,9 @@ contract TrenBoxManagerOperations is
         }
     }
 
-    /* In a full liquidation, returns the values for a trenBox's coll and debt to be offset, and
-    coll
-    and debt to be
-     * redistributed to active trenBoxes.
+    /**
+     * @notice In a full liquidation, returns the values for a trenBox's coll and debt to be offset,
+     * and coll and debt to be redistributed to active trenBoxes.
      */
     function _getOffsetAndRedistributionVals(
         uint256 _debt,
@@ -950,18 +935,16 @@ contract TrenBoxManagerOperations is
         )
     {
         if (_debtTokenInStabPool != 0) {
-            /*
-            * Offset as much debt & collateral as possible against the Stability Pool, and
-            redistribute the remainder
-             * between all active trenBoxes.
+            /**
+             * Offset as much debt & collateral as possible against the Stability Pool, and
+             * redistribute the remainder between all active trenBoxes.
              *
-            *  If the trenBox's debt is larger than the deposited debt token in the Stability Pool:
+             * If the trenBox's debt is larger than the deposited debt token in the Stability Pool:
              *
-            *  - Offset an amount of the trenBox's debt equal to the debt token in the Stability
-            Pool
-            *  - Send a fraction of the trenBox's collateral to the Stability Pool, equal to the
-            fraction of its offset debt
-             *
+             * - Offset an amount of the trenBox's debt equal to the debt token in the
+             * Stability Pool
+             * - Send a fraction of the trenBox's collateral to the Stability Pool, equal to the
+             * fraction of its offset debt
              */
             debtToOffset = TrenMath._min(_debt, _debtTokenInStabPool);
             collToSendToSP = (_coll * debtToOffset) / _debt;
@@ -975,8 +958,8 @@ contract TrenBoxManagerOperations is
         }
     }
 
-    /*
-     *  Get its offset coll/debt and coll gas comp, and close the trenBox.
+    /**
+     * @dev Get its offset coll/debt and coll gas comp, and close the trenBox.
      */
     function _getCappedOffsetVals(
         address _asset,
@@ -1055,8 +1038,8 @@ contract TrenBoxManagerOperations is
         }
     }
 
-    // Redeem as much collateral as possible from _borrower's trenBox in exchange for GRAI up to
-    // _maxDebtTokenAmount
+    /// @notice Redeem as much collateral as possible from _borrower's trenBox in exchange for GRAI
+    /// up to _maxDebtTokenAmount
     function _redeemCollateralFromTrenBox(
         address _asset,
         address _borrower,
@@ -1097,12 +1080,11 @@ contract TrenBoxManagerOperations is
         } else {
             uint256 newNICR = TrenMath._computeNominalCR(newColl, newDebt);
 
-            /*
-            * If the provided hint is out of date, we bail since trying to reinsert without a good
-            hint will almost
-             * certainly result in running out of gas.
+            /**
+             * If the provided hint is out of date, we bail since trying to reinsert without a good
+             * hint will almost certainly result in running out of gas.
              *
-            * If the resultant net debt of the partial is less than the minimum, net debt we bail.
+             * If the resultant net debt of the partial is less than the minimum, net debt we bail.
              */
             if (
                 newNICR != _partialRedemptionHintNICR

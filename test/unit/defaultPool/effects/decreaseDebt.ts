@@ -33,7 +33,7 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
 
       await expect(
         this.contracts.defaultPool.connect(impostor).decreaseDebt(wETH.address, debtAmount)
-      ).to.be.revertedWith("DefaultPool: Caller is not the TrenBoxManager");
+      ).to.be.revertedWithCustomError(this.contracts.defaultPool, "DefaultPool__NotTrenBoxManager");
     });
   });
 }

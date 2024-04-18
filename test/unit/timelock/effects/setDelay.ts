@@ -136,7 +136,7 @@ export default function shouldBehaveLikeCanSetDelay(): void {
 
       await expect(timelock.connect(this.admin).setDelay(newDelay)).to.be.revertedWithCustomError(
         timelock,
-        "Timelock__TimelockOnly"
+        "Timelock__OnlyTimelock"
       );
     });
   });

@@ -66,8 +66,9 @@ export default function shouldBehaveLikeCanWithdrawDebtTokens() {
           debtAmount: amount,
         });
 
-        await expect(withdrawDebtTokensTx).to.be.revertedWith(
-          "BorrowerOps: Debt increase requires non-zero debtChange"
+        await expect(withdrawDebtTokensTx).to.be.revertedWithCustomError(
+          this.contracts.borrowerOperations,
+          "BorrowerOperations__ZeroDebtChange"
         );
       });
     });

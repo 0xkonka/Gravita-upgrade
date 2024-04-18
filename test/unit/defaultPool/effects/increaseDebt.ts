@@ -35,7 +35,10 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
         this.redeployedContracts.defaultPool
           .connect(impostor)
           .increaseDebt(wETH.address, debtAmount)
-      ).to.be.revertedWith("DefaultPool: Caller is not the TrenBoxManager");
+      ).to.be.revertedWithCustomError(
+        this.redeployedContracts.defaultPool,
+        "DefaultPool__NotTrenBoxManager"
+      );
     });
   });
 }

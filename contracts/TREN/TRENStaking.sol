@@ -35,7 +35,7 @@ contract TRENStaking is
     uint256 public totalTRENStaked;
     uint256 public totalDebtTokenFee;
 
-    mapping(address user => Snapshot) private snapshots;
+    mapping(address user => Snapshot snapshot) private snapshots;
     mapping(address user => uint256 amount) private stakes;
     mapping(address asset => bool tracked) private isAssetTracked;
     mapping(address user => uint256 assetFeeAmount) private assetsFee;

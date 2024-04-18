@@ -116,7 +116,7 @@ export default function shouldBehaveLikeCanQueueTransaction(): void {
         timelock
           .connect(this.user)
           .queueTransaction(target, value, signature, data, eta_twoHoursAfterDelay)
-      ).to.be.revertedWithCustomError(timelock, "Timelock__AdminOnly");
+      ).to.be.revertedWithCustomError(timelock, "Timelock__OnlyAdmin");
     });
   });
 }

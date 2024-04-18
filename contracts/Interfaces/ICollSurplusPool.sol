@@ -1,10 +1,16 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { IDeposit } from "./IDeposit.sol";
 
 interface ICollSurplusPool is IDeposit {
+    // --- Errors ---
+
+    error CollSurplusPool__NotBorrowerOperations();
+    error CollSurplusPool__NotTrenBoxManager();
+    error CollSurplusPool__NotActivePool();
+    error CollSurplusPool__NoClaimableColl();
+
     // --- Events ---
 
     event CollBalanceUpdated(address indexed _account, uint256 _newBalance);

@@ -24,7 +24,6 @@ contract AdminContract is
     string public constant NAME = "AdminContract";
 
     uint256 public constant _100pct = 1 ether; // 1e18 == 100%
-    uint256 private constant DEFAULT_DECIMALS = 18;
 
     uint256 public constant BORROWING_FEE_DEFAULT = 0.005 ether; // 0.5%
     uint256 public constant CCR_DEFAULT = 1.5 ether; // 150%
@@ -85,7 +84,7 @@ contract AdminContract is
         uint256 min,
         uint256 max
     ) {
-        if (collateralParams[_collateral].active == false) {
+        if (!collateralParams[_collateral].active) {
             revert AdminContract__CollateralNotConfigured();
         }
 
@@ -118,9 +117,8 @@ contract AdminContract is
 
     function addNewCollateral(
         address _collateral,
-        uint256 _debtTokenGasCompensation, // the gas compensation is initialized here as it won't
+        uint256 _debtTokenGasCompensation // the gas compensation is initialized here as it won't
             // be changed
-        uint256 _decimals
     )
         external
         override
@@ -130,10 +128,9 @@ contract AdminContract is
             revert AdminContract__CollateralExists();
         }
 
-        require(_decimals == DEFAULT_DECIMALS, "collaterals must have the default decimals");
+        // require(_decimals == DEFAULT_DECIMALS, "collaterals must have the default decimals");
         validCollateral.push(_collateral);
         collateralParams[_collateral] = CollateralParams({
-            decimals: _decimals,
             index: validCollateral.length - 1,
             active: false,
             borrowingFee: BORROWING_FEE_DEFAULT,
@@ -147,10 +144,9 @@ contract AdminContract is
             redemptionBlockTimestamp: REDEMPTION_BLOCK_TIMESTAMP_DEFAULT
         });
 
-        IStabilityPool(stabilityPool).addCollateralType(_collateral);
-
-        // throw event
         emit CollateralAdded(_collateral);
+
+        IStabilityPool(stabilityPool).addCollateralType(_collateral);
     }
 
     function setCollateralParameters(
@@ -339,10 +335,6 @@ contract AdminContract is
         returns (bool)
     {
         return collateralParams[_collateral].active;
-    }
-
-    function getDecimals(address _collateral) external view exists(_collateral) returns (uint256) {
-        return collateralParams[_collateral].decimals;
     }
 
     function getIndex(address _collateral)
