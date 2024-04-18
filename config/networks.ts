@@ -4,16 +4,30 @@ import { resolve } from "path";
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(process.cwd(), dotenvConfigPath) });
 
-const INFURA_KEY = process.env.INFURA_API_KEY;
-if (typeof INFURA_KEY === "undefined") {
-  console.log(`INFURA_API_KEY must be a defined environment variable`);
-}
+const alchemyUrl = (network: string): string => {
+  const prefix = getPrefix(network);
+  const formattedNetwork = formatNetworkName(network);
+  const apiKey = process.env[`${formattedNetwork}_API_KEY`];
+  if (!apiKey) {
+    throw new Error(`${formattedNetwork}_API_KEY must be defined in .env file.`);
+  }
 
-const ALCHEMY_KEY = process.env.ALCHEMY_API_KEY;
+  return `https://${prefix}sepolia.g.alchemy.com/v2/${apiKey}`;
+};
 
-const infuraUrl = (network: string): string => `https://${network}.infura.io/v3/${INFURA_KEY}`;
-const alchemyUrl = (network: string): string =>
-  `https://eth-${network}.g.alchemy.com/v2/${ALCHEMY_KEY}`;
+const getPrefix = (network: string): string => {
+  if (network.startsWith("optimism-")) {
+    return "opt-";
+  } else if (network.startsWith("arbitrum-")) {
+    return "arb-";
+  } else {
+    return "eth-";
+  }
+};
+
+const formatNetworkName = (network: string): string => {
+  return network.toUpperCase().replace("-", "_");
+};
 
 /**
  * All supported network names
@@ -27,9 +41,8 @@ const alchemyUrl = (network: string): string =>
  */
 export enum NetworkName {
   // ETHEREUM
-  MAINNET = "mainnet",
-  GOERLI = "goerli",
-  SEPOLIA = "sepolia",
+  ETHEREUM_MAINNET = "ethereum-mainnet",
+  ETHEREUM_SEPOLIA = "ethereum-sepolia",
 
   // BINANCE SMART CHAIN
   BSC = "bsc",
@@ -41,11 +54,11 @@ export enum NetworkName {
 
   // OPTIMISM
   OPTIMISM_MAINNET = "optimism-mainnet",
-  OPTIMISM_GOERLI = "optimism-goerli",
+  OPTIMISM_SEPOLIA = "optimism-sepolia",
 
   // ARBITRUM
   ARBITRUM_MAINNET = "arbitrum-mainnet",
-  ARBITRUM_GOERLI = "arbitrum-goerli",
+  ARBITRUM_SEPOLIA = "arbitrum-sepolia",
 
   // AVALANCHE
   AVALANCHE_MAINNET = "avalanche-mainnet",
@@ -65,18 +78,13 @@ export interface Network {
 
 export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   // ETHEREUM
-  [NetworkName.MAINNET]: {
+  [NetworkName.ETHEREUM_MAINNET]: {
     chainId: 1,
-    url: alchemyUrl("mainnet"),
+    url: alchemyUrl("ethereum-mainnet"),
   },
-  [NetworkName.GOERLI]: {
-    chainId: 5,
-    url: alchemyUrl("goerli"),
-    isTestnet: true,
-  },
-  [NetworkName.SEPOLIA]: {
+  [NetworkName.ETHEREUM_SEPOLIA]: {
     chainId: 11155111,
-    url: alchemyUrl("sepolia"),
+    url: alchemyUrl("ethereum-sepolia"),
     isTestnet: true,
   },
 
@@ -94,23 +102,23 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   // MATIC/POLYGON
   [NetworkName.POLYGON_MAINNET]: {
     chainId: 137,
-    url: infuraUrl("polygon-mainnet"),
+    url: alchemyUrl("polygon-mainnet"),
   },
   [NetworkName.POLYGON_MUMBAI]: {
     chainId: 80_001,
-    url: infuraUrl("polygon-mumbai"),
+    url: alchemyUrl("polygon-mumbai"),
     isTestnet: true,
   },
 
   // OPTIMISM
   [NetworkName.OPTIMISM_MAINNET]: {
     chainId: 10,
-    url: infuraUrl("optimism-mainnet"),
+    url: alchemyUrl("optimism-mainnet"),
     isLayer2: true,
   },
-  [NetworkName.OPTIMISM_GOERLI]: {
-    chainId: 420,
-    url: infuraUrl("optimism-goerli"),
+  [NetworkName.OPTIMISM_SEPOLIA]: {
+    chainId: 11155420,
+    url: alchemyUrl("optimism-sepolia"),
     isTestnet: true,
     isLayer2: true,
   },
@@ -118,12 +126,12 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   // ARBITRUM
   [NetworkName.ARBITRUM_MAINNET]: {
     chainId: 42_161,
-    url: infuraUrl("arbitrum-mainnet"),
+    url: alchemyUrl("arbitrum-mainnet"),
     isLayer2: true,
   },
-  [NetworkName.ARBITRUM_GOERLI]: {
-    chainId: 421_611,
-    url: infuraUrl("arbitrum-goerli"),
+  [NetworkName.ARBITRUM_SEPOLIA]: {
+    chainId: 421_614,
+    url: alchemyUrl("arbitrum-sepolia"),
     isTestnet: true,
     isLayer2: true,
   },

@@ -8,7 +8,7 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
       this.signers.deployer
     ).deploy();
     await redeployedCollSurplusPool.waitForDeployment();
-    await redeployedCollSurplusPool.initialize();
+    await redeployedCollSurplusPool.initialize(this.signers.deployer);
 
     this.redeployedContracts.collSurplusPool = redeployedCollSurplusPool;
 

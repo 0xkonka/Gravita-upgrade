@@ -11,7 +11,7 @@ export async function priceFeedFixture(): Promise<{
   const PriceFeedFactory = await ethers.getContractFactory("PriceFeed");
   const priceFeed = await PriceFeedFactory.connect(deployerSigner).deploy();
   await priceFeed.waitForDeployment();
-  await priceFeed.initialize();
+  await priceFeed.initialize(deployer);
 
   return {
     priceFeed,

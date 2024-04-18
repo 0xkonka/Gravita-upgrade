@@ -8,6 +8,7 @@ import { removeConsoleLog } from "hardhat-preprocessor";
 import type { HardhatUserConfig } from "hardhat/config";
 import type { HttpNetworkAccountsUserConfig, NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
+import "xdeployer";
 
 import { API_KEYS } from "./config/api-keys";
 import { NETWORKS, Network, NetworkName } from "./config/networks";
@@ -80,6 +81,16 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: API_KEYS,
+    customChains: [
+      {
+        network: "optimisticSepolia",
+        chainId: 11155420,
+        urls: {
+          apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
+          browserURL: "https://sepolia-optimism.etherscan.io",
+        },
+      },
+    ],     
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS ? true : false,
@@ -114,7 +125,20 @@ const config: HardhatUserConfig = {
       url: "http://localhost:24012/rpc",
     },
     // Mainnet and Testnet configs
-    // ...getAllNetworkConfigs(),
+    ...getAllNetworkConfigs(),
+  },
+  xdeploy: {
+    contract: "AdminContract",
+    salt: "TREN",
+    signer: process.env.PRIVATE_KEY,
+    networks: ["sepolia", "optimismSepolia", "arbitrumSepolia"],
+    rpcUrls: [
+      "https://eth-sepolia.g.alchemy.com/v2/W11DQwj4vGH8BrtxVJWuIQY4pHW8f4Oo",
+      "https://opt-sepolia.g.alchemy.com/v2/r4zEUCE4-eTce0XpGGXGyVY0qV7SQb6V", 
+      "https://arb-sepolia.g.alchemy.com/v2/dXokXHeIHPrJ5dx5sLEofThi-TcR0kpJ"
+    ],
+    constructorArgsPath: "./scripts/deploy-args.ts",
+    gasLimit: 10_000_000,
   },
   paths: {
     artifacts: "./artifacts",

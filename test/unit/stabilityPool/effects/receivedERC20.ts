@@ -6,14 +6,14 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
     const StabilityPoolFactory = await ethers.getContractFactory("StabilityPool");
     const stabilityPool = await StabilityPoolFactory.connect(this.signers.deployer).deploy();
     await stabilityPool.waitForDeployment();
-    await stabilityPool.initialize();
+    await stabilityPool.initialize(this.signers.deployer);
 
     this.redeployedContracts.stabilityPool = stabilityPool;
 
     const AdminContractFactory = await ethers.getContractFactory("AdminContract");
     const adminContract = await AdminContractFactory.connect(this.signers.deployer).deploy();
     await adminContract.waitForDeployment();
-    await adminContract.initialize();
+    await adminContract.initialize(this.signers.deployer);
 
     this.redeployedContracts.adminContract = adminContract;
 

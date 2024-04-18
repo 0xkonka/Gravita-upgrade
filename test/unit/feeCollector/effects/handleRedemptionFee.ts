@@ -9,7 +9,7 @@ export default function shouldBehaveLikeCanHandleRedemptionFee(): void {
     const FeeCollectorFactory = await ethers.getContractFactory("FeeCollector");
     const feeCollector = await FeeCollectorFactory.connect(this.owner).deploy();
     await feeCollector.waitForDeployment();
-    await feeCollector.initialize();
+    await feeCollector.initialize(this.signers.deployer);
 
     this.redeployedContracts.feeCollector = feeCollector;
 

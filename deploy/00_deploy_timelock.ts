@@ -5,6 +5,7 @@ import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import { preDeploy } from "../utils/contracts";
 import { isLocalhostNetwork } from "../utils/networks";
 import { verifyContract } from "../utils/verify";
+import { generateSalt } from "../utils/misc";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { getNamedAccounts, getChainId, deployments } = hre;
@@ -22,6 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await preDeploy(deployer, "Timelock");
   const deployResult: DeployResult = await deploy("Timelock", {
     from: deployer,
+    deterministicDeployment: generateSalt("TREN"),
     args: args,
     log: true,
   });

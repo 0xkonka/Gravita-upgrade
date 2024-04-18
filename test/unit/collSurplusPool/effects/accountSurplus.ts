@@ -8,7 +8,7 @@ export default function shouldBehaveLikeCanAccountSurplus(): void {
       this.signers.deployer
     ).deploy();
     await redeployedCollSurplusPool.waitForDeployment();
-    await redeployedCollSurplusPool.initialize();
+    await redeployedCollSurplusPool.initialize(this.signers.deployer);
 
     this.redeployedContracts.collSurplusPool = redeployedCollSurplusPool;
 

@@ -4,28 +4,32 @@ import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import { preDeploy } from "../utils/contracts";
 import { isLocalhostNetwork } from "../utils/networks";
 import { verifyContract } from "../utils/verify";
+import { generateSalt } from "../utils/misc";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { getNamedAccounts, getChainId, deployments } = hre;
-  const { deploy } = deployments;
+  const { deterministic } = deployments;
   const { deployer } = await getNamedAccounts();
   const chainId = await getChainId();
 
   await preDeploy(deployer, "StabilityPool");
-  const deployResult: DeployResult = await deploy("StabilityPool", {
+  const deterministicDeploy = await deterministic("StabilityPool", {
     from: deployer,
     proxy: {
-      execute: {
-        init: {
-          methodName: "initialize",
-          args: [],
+        execute: {
+          init: {
+            methodName: "initialize",
+            args: [deployer],
+          },
         },
+        proxyContract: "OpenZeppelinTransparentProxy",
       },
-      proxyContract: "OpenZeppelinTransparentProxy",
-    },
     log: true,
     autoMine: true,
+    salt: generateSalt("TREN"),
   });
+
+  const deployResult: DeployResult = await deterministicDeploy.deploy();
 
   // You don't want to verify on localhost
   if (isLocalhostNetwork(chainId) === false) {

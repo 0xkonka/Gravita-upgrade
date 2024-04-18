@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { UUPSUpgradeable } from
@@ -45,9 +44,7 @@ contract TrenBoxManagerOperations is
     // Initializer
     // ------------------------------------------------------------------------------------------------------
 
-    function initialize() public initializer {
-        address initialOwner = _msgSender();
-
+    function initialize(address initialOwner) public initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
         __ReentrancyGuard_init();

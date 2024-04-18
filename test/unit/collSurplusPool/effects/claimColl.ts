@@ -6,17 +6,17 @@ export default function shouldBehaveLikeCanClaimColl(): void {
     const CollSurplusPoolFactory = await ethers.getContractFactory("CollSurplusPool");
     const collSurplusPool = await CollSurplusPoolFactory.connect(this.signers.deployer).deploy();
     await collSurplusPool.waitForDeployment();
-    await collSurplusPool.initialize();
+    await collSurplusPool.initialize(this.signers.deployer);
 
     const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
     const activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
     await activePool.waitForDeployment();
-    await activePool.initialize();
+    await activePool.initialize(this.signers.deployer);
 
     const TrenBoxManagerFactory = await ethers.getContractFactory("TrenBoxManager");
     const trenBoxManager = await TrenBoxManagerFactory.connect(this.signers.deployer).deploy();
     await trenBoxManager.waitForDeployment();
-    await trenBoxManager.initialize();
+    await trenBoxManager.initialize(this.signers.deployer);
 
     this.redeployedContracts.collSurplusPool = collSurplusPool;
     this.redeployedContracts.activePool = activePool;

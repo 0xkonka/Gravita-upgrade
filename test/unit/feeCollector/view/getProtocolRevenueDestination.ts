@@ -6,7 +6,7 @@ export default function shouldHaveGetProtocolRevenueDestination(): void {
     const FeeCollectorFactory = await ethers.getContractFactory("FeeCollector");
     const feeCollector = await FeeCollectorFactory.connect(this.signers.deployer).deploy();
     await feeCollector.waitForDeployment();
-    await feeCollector.initialize();
+    await feeCollector.initialize(this.signers.deployer);
 
     this.redeployedContracts.feeCollector = feeCollector;
 

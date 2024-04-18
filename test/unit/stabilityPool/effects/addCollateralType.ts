@@ -6,7 +6,7 @@ export default function shouldBehaveLikeCanAddCollateralType(): void {
     const StabilityPoolFactory = await ethers.getContractFactory("StabilityPool");
     const stabilityPool = await StabilityPoolFactory.connect(this.signers.deployer).deploy();
     await stabilityPool.waitForDeployment();
-    await stabilityPool.initialize();
+    await stabilityPool.initialize(this.signers.deployer);
 
     this.redeployedContracts.stabilityPool = stabilityPool;
 

@@ -11,7 +11,7 @@ export default function shouldBehaveLikeCanCollectFees(): void {
     const FeeCollectorFactory = await ethers.getContractFactory("FeeCollector");
     const feeCollector = await FeeCollectorFactory.connect(this.owner).deploy();
     await feeCollector.waitForDeployment();
-    await feeCollector.initialize();
+    await feeCollector.initialize(this.signers.deployer);
 
     const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
     const debtToken = await DebtTokenFactory.deploy(this.owner);

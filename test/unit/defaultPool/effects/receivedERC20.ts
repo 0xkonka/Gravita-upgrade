@@ -6,7 +6,7 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
     const DefaultPoolFactory = await ethers.getContractFactory("DefaultPool");
     const redeployedDefaultPool = await DefaultPoolFactory.connect(this.signers.deployer).deploy();
     await redeployedDefaultPool.waitForDeployment();
-    await redeployedDefaultPool.initialize();
+    await redeployedDefaultPool.initialize(this.signers.deployer);
 
     this.redeployedContracts.defaultPool = redeployedDefaultPool;
 

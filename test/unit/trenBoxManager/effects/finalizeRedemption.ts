@@ -6,17 +6,17 @@ export default function shouldBehaveLikeCanFinalizeRedemption(): void {
     const TrenBoxManagerFactory = await ethers.getContractFactory("TrenBoxManager");
     const trenBoxManager = await TrenBoxManagerFactory.connect(this.signers.deployer).deploy();
     await trenBoxManager.waitForDeployment();
-    await trenBoxManager.initialize();
+    await trenBoxManager.initialize(this.signers.deployer);
 
     const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
     const activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
     await activePool.waitForDeployment();
-    await activePool.initialize();
+    await activePool.initialize(this.signers.deployer);
 
     const FeeCollectorFactory = await ethers.getContractFactory("FeeCollector");
     const feeCollector = await FeeCollectorFactory.connect(this.signers.deployer).deploy();
     await feeCollector.waitForDeployment();
-    await feeCollector.initialize();
+    await feeCollector.initialize(this.signers.deployer);
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;
     this.redeployedContracts.activePool = activePool;

@@ -6,7 +6,7 @@ export default function shouldBehaveLikeCanRemoveStake(): void {
     const TrenBoxManagerFactory = await ethers.getContractFactory("TrenBoxManager");
     const trenBoxManager = await TrenBoxManagerFactory.connect(this.signers.deployer).deploy();
     await trenBoxManager.waitForDeployment();
-    await trenBoxManager.initialize();
+    await trenBoxManager.initialize(this.signers.deployer);
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;
 
