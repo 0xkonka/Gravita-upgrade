@@ -69,7 +69,8 @@ export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
       gasCompensation: parseEther("200"),
       mintCap: parseEther("2000000"),
     },
-    { // TODO: add later
+    {
+      // TODO: add later
       name: "USDC",
       address: "0xb09B1692F3EC4451394FB2316E5EbCb5d83A1d70",
       decimals: 6,

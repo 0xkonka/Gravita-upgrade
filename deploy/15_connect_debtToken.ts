@@ -22,9 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await setAddressesTx.wait();
 
-  const addWhiteListTx = await debtToken.addWhitelist(
-    feeCollectorDeployment.address
-  );
+  const addWhiteListTx = await debtToken.addWhitelist(feeCollectorDeployment.address);
 
   await addWhiteListTx.wait();
 

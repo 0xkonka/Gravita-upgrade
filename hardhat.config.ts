@@ -90,7 +90,7 @@ const config: HardhatUserConfig = {
           browserURL: "https://sepolia-optimism.etherscan.io",
         },
       },
-    ],     
+    ],
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS ? true : false,
@@ -134,8 +134,8 @@ const config: HardhatUserConfig = {
     networks: ["sepolia", "optimismSepolia", "arbitrumSepolia"],
     rpcUrls: [
       "https://eth-sepolia.g.alchemy.com/v2/W11DQwj4vGH8BrtxVJWuIQY4pHW8f4Oo",
-      "https://opt-sepolia.g.alchemy.com/v2/r4zEUCE4-eTce0XpGGXGyVY0qV7SQb6V", 
-      "https://arb-sepolia.g.alchemy.com/v2/dXokXHeIHPrJ5dx5sLEofThi-TcR0kpJ"
+      "https://opt-sepolia.g.alchemy.com/v2/r4zEUCE4-eTce0XpGGXGyVY0qV7SQb6V",
+      "https://arb-sepolia.g.alchemy.com/v2/dXokXHeIHPrJ5dx5sLEofThi-TcR0kpJ",
     ],
     constructorArgsPath: "./scripts/deploy-args.ts",
     gasLimit: 10_000_000,

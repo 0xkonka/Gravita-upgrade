@@ -21,7 +21,6 @@ async function deployAndVerifyOnLayer2(
   deployer: string,
   deploy: DeploymentsExtension["deploy"]
 ): Promise<void> {
-
   await preDeploy(deployer, "PriceFeedL2");
   const deployResult: DeployResult = await deploy("PriceFeedL2", {
     from: deployer,
@@ -50,7 +49,6 @@ async function deployAndVerifyOnLayer1(
   deployer: string,
   deploy: DeploymentsExtension["deploy"]
 ): Promise<void> {
-
   await preDeploy(deployer, "PriceFeed");
   const deployResult: DeployResult = await deploy("PriceFeed", {
     from: deployer,

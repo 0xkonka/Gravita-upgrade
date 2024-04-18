@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.23;
 
-import "../Interfaces/IPriceFeed.sol";
+import { IPriceFeed } from "../Interfaces/IPriceFeed.sol";
 
 /*
 * PriceFeed placeholder for testnet and development. The price is simply set manually and saved in a
@@ -12,7 +12,7 @@ state
 contract PriceFeedTestnet is IPriceFeed {
     string public constant NAME = "PriceFeedTestnet";
 
-    mapping(address => uint256) public prices;
+    mapping(address asset => uint256 price) public prices;
 
     function getPrice(address _asset) external view returns (uint256) {
         return prices[_asset];
