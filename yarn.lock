@@ -60,7 +60,6 @@ __metadata:
     ts-node: "npm:^10.9.2"
     typechain: "npm:^8.3.2"
     typescript: "npm:^5.3.3"
-    xdeployer: "npm:^3.0.5"
   languageName: unknown
   linkType: soft
 
@@ -8410,17 +8409,6 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 10/171e35012934bd8788150a7f46f963e50bac43a4dc524ee714c20f258693ac4d3ba2abadb00838fdac42a47af9e958c7ae7e6f4bc56db047ba897b8a2268cf7c
-  languageName: node
-  linkType: hard
-
-"xdeployer@npm:^3.0.5":
-  version: 3.0.5
-  resolution: "xdeployer@npm:3.0.5"
-  peerDependencies:
-    "@nomicfoundation/hardhat-ethers": ^3.0.5
-    ethers: ^6.11.1
-    hardhat: ^2.22.2
-  checksum: 10/521364cd1d031dbca156f2f1b69f47b9eacad8e6d0b16d446cb9eb32ea46cc38a1dbde8326f6056e6aa04f8c777191621c8d413832045e889e23ec751c560b70
   languageName: node
   linkType: hard
 
