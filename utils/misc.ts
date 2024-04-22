@@ -1,5 +1,6 @@
 import type { TransactionResponse } from "ethers";
 import { computeAddress, getAddress, solidityPackedKeccak256 } from "ethers";
+import { ethers } from "hardhat";
 
 import { fromWei, toGwei } from "./format";
 
@@ -48,6 +49,11 @@ export function createRandomChecksumAddress(salt: string): string {
   const signerAddress: string = computeAddress(solidityPackedKeccak256(["string"], [salt]));
   const checkSummedSignerAddress: string = getAddress(signerAddress);
   return checkSummedSignerAddress;
+}
+
+export function generateSalt(input: string) {
+  const hash = ethers.keccak256(ethers.toUtf8Bytes(input));
+  return hash;
 }
 
 /**

@@ -79,6 +79,7 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
     {
       from: deployer,
       log: true,
+      gasLimit: 3_000_000,
     },
     "setAddresses",
     [

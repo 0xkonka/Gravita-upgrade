@@ -7,7 +7,7 @@ export default function shouldBehaveLikeContains(): void {
     const SortedTrenBoxesFactory = await ethers.getContractFactory("SortedTrenBoxes");
     const sortedTrenBoxes = await SortedTrenBoxesFactory.connect(this.signers.deployer).deploy();
     await sortedTrenBoxes.waitForDeployment();
-    await sortedTrenBoxes.initialize();
+    await sortedTrenBoxes.initialize(this.signers.deployer);
 
     const users = this.signers.accounts.slice(2, 6);
 

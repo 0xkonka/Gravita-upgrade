@@ -14,7 +14,7 @@ contract MockAggregator is AggregatorV3Interface {
     uint80 private latestRoundId = 2;
     uint80 private prevRoundId = 1;
 
-    bool priceIsAlwaysUpToDate = true;
+    bool private priceIsAlwaysUpToDate = true;
 
     // --- Functions ---
 

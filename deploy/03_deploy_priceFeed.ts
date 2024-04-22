@@ -21,17 +21,19 @@ async function deployAndVerifyOnLayer2(
   deployer: string,
   deploy: DeploymentsExtension["deploy"]
 ): Promise<void> {
-  const initialOwner = deployer;
-
-  type ConstructorParams = [AddressLike];
-  const args: ConstructorParams = [initialOwner];
-
   await preDeploy(deployer, "PriceFeedL2");
   const deployResult: DeployResult = await deploy("PriceFeedL2", {
     from: deployer,
-    args: args,
     log: true,
-    proxy: true,
+    proxy: {
+      execute: {
+        init: {
+          methodName: "initialize",
+          args: [],
+        },
+      },
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
 
   const contractPath = `contracts/Pricing/PriceFeedL2.sol:PriceFeedL2`;
@@ -48,7 +50,6 @@ async function deployAndVerifyOnLayer1(
   deploy: DeploymentsExtension["deploy"]
 ): Promise<void> {
   await preDeploy(deployer, "PriceFeed");
-
   const deployResult: DeployResult = await deploy("PriceFeed", {
     from: deployer,
     proxy: {

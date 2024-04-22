@@ -11,7 +11,7 @@ export default function shouldBehaveLikeCanFlashLoanForRepay(): void {
       const FlashLoanFactory = await ethers.getContractFactory("FlashLoan");
       const flashLoan = await FlashLoanFactory.connect(this.signers.deployer).deploy();
       await flashLoan.waitForDeployment();
-      await flashLoan.initialize();
+      await flashLoan.initialize(this.signers.deployer);
 
       const MockBOFactory = await ethers.getContractFactory("MockBorrowerOperations");
       const mockBorrowerOperations = await MockBOFactory.connect(this.signers.deployer).deploy();

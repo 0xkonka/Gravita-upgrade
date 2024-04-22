@@ -6,7 +6,7 @@ export default function shouldBehaveLikeInsert(): void {
     const SortedTrenBoxesFactory = await ethers.getContractFactory("SortedTrenBoxes");
     const sortedTrenBoxes = await SortedTrenBoxesFactory.connect(this.signers.deployer).deploy();
     await sortedTrenBoxes.waitForDeployment();
-    await sortedTrenBoxes.initialize();
+    await sortedTrenBoxes.initialize(this.signers.deployer);
 
     this.redeployedContracts.sortedTrenBoxes = sortedTrenBoxes;
 

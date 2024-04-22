@@ -12,6 +12,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const borrowerOperationsDeployment = await deployments.get("BorrowerOperations");
   const stabilityPoolDeployment = await deployments.get("StabilityPool");
   const trenBoxManagerDeployment = await deployments.get("TrenBoxManager");
+  const feeCollectorDeployment = await deployments.get("FeeCollector");
 
   const setAddressesTx = await debtToken.setAddresses(
     borrowerOperationsDeployment.address,
@@ -21,12 +22,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await setAddressesTx.wait();
 
+  const addWhiteListTx = await debtToken.addWhitelist(feeCollectorDeployment.address);
+
+  await addWhiteListTx.wait();
+
   const connectedBorrowerOperationsAddress = await debtToken.borrowerOperationsAddress();
   const connectedStabilityPoolAddress = await debtToken.stabilityPoolAddress();
   const connectedTrenBoxManagerAddress = await debtToken.trenBoxManagerAddress();
 
   console.log(
     `⛓️ Connected: ${chalk.cyan("DebtToken")} to ${chalk.cyan("BorrowerOperations")} at ${connectedBorrowerOperationsAddress}, ${chalk.cyan("StabilityPool")} at ${connectedStabilityPoolAddress}, and ${chalk.cyan("TrenBoxManagerOperations")} at ${connectedTrenBoxManagerAddress}`
+  );
+  console.log(
+    `⛓️ Added: ${chalk.cyan("FeeCollector")} to ${chalk.cyan("DebtToken")} as whitelisted contract}`
   );
 };
 

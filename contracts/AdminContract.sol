@@ -97,9 +97,7 @@ contract AdminContract is
     // Initializers
     // -----------------------------------------------------------------------------------------------------
 
-    function initialize() public initializer {
-        address initialOwner = _msgSender();
-
+    function initialize(address initialOwner) public initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
     }

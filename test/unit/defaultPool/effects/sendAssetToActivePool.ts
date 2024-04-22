@@ -6,12 +6,12 @@ export default function shouldBehaveLikeCanSendAsset(): void {
     const DefaultPoolFactory = await ethers.getContractFactory("DefaultPool");
     const defaultPool = await DefaultPoolFactory.connect(this.signers.deployer).deploy();
     await defaultPool.waitForDeployment();
-    await defaultPool.initialize();
+    await defaultPool.initialize(this.signers.deployer);
 
     const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
     const activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
     await activePool.waitForDeployment();
-    await activePool.initialize();
+    await activePool.initialize(this.signers.deployer);
 
     this.redeployedContracts.defaultPool = defaultPool;
     this.redeployedContracts.activePool = activePool;

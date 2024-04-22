@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "../Interfaces/IFlashLoan.sol";
-import "../Interfaces/IFlashLoanReceiver.sol";
+import { IFlashLoan } from "../Interfaces/IFlashLoan.sol";
+import { IFlashLoanReceiver } from "../Interfaces/IFlashLoanReceiver.sol";
 
 contract FlashLoanTester is IFlashLoanReceiver {
     address public flashLoan;

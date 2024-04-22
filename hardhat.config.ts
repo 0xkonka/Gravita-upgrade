@@ -80,6 +80,16 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: API_KEYS,
+    customChains: [
+      {
+        network: "optimisticSepolia",
+        chainId: 11155420,
+        urls: {
+          apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
+          browserURL: "https://sepolia-optimism.etherscan.io",
+        },
+      },
+    ],
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS ? true : false,

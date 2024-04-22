@@ -6,7 +6,7 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
     const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
     const activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
     await activePool.waitForDeployment();
-    await activePool.initialize();
+    await activePool.initialize(this.signers.deployer);
 
     this.redeployedContracts.activePool = activePool;
 

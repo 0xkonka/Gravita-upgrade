@@ -10,27 +10,27 @@ export default function shouldBehaveLikeCanCloseTrenBoxLiquidation(): void {
     const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
     const activePool = await ActivePoolFactory.connect(owner).deploy();
     await activePool.waitForDeployment();
-    await activePool.initialize();
+    await activePool.initialize(this.signers.deployer);
 
     const TrenBoxManagerFactory = await ethers.getContractFactory("TrenBoxManager");
     const trenBoxManager = await TrenBoxManagerFactory.connect(owner).deploy();
     await trenBoxManager.waitForDeployment();
-    await trenBoxManager.initialize();
+    await trenBoxManager.initialize(this.signers.deployer);
 
     const SortedTrenBoxesFactory = await ethers.getContractFactory("SortedTrenBoxes");
     const sortedTrenBoxes = await SortedTrenBoxesFactory.connect(owner).deploy();
     await sortedTrenBoxes.waitForDeployment();
-    await sortedTrenBoxes.initialize();
+    await sortedTrenBoxes.initialize(this.signers.deployer);
 
     const BorrowerOperationsFactory = await ethers.getContractFactory("BorrowerOperations");
     const borrowerOperations = await BorrowerOperationsFactory.connect(owner).deploy();
     await borrowerOperations.waitForDeployment();
-    await borrowerOperations.initialize();
+    await borrowerOperations.initialize(this.signers.deployer);
 
     const FeeCollectorFactory = await ethers.getContractFactory("FeeCollector");
     const feeCollector = await FeeCollectorFactory.connect(owner).deploy();
     await feeCollector.waitForDeployment();
-    await feeCollector.initialize();
+    await feeCollector.initialize(this.signers.deployer);
 
     const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
     const debtToken = await DebtTokenFactory.deploy(owner);

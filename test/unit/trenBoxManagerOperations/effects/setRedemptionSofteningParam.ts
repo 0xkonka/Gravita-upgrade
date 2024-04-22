@@ -12,7 +12,7 @@ export default function shouldBehaveLikeSetRedemptionSofteningParam(): void {
     );
     const trenBoxManagerOperations = await TrenBoxManagerOperationsFactory.connect(owner).deploy();
     await trenBoxManagerOperations.waitForDeployment();
-    await trenBoxManagerOperations.initialize();
+    await trenBoxManagerOperations.initialize(this.signers.deployer);
 
     this.redeployedContracts.trenBoxManagerOperations = trenBoxManagerOperations;
 

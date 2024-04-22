@@ -12,8 +12,8 @@ contract MockUniswapRouterV3 is IUniswapRouterV3 {
     uint256 private constant FEE_SIZE = 3;
     uint256 private constant NEXT_OFFSET = ADDR_SIZE + FEE_SIZE;
 
-    uint256 ratioAssetToStable = 3000;
-    uint256 ratioStableToDebt = 1;
+    uint256 public ratioAssetToStable = 3000;
+    uint256 public ratioStableToDebt = 1;
 
     struct SwapCallbackData {
         bytes path;

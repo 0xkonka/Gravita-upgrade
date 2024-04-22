@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { OwnableUpgradeable } from
@@ -106,9 +105,7 @@ contract SortedTrenBoxes is
     }
 
     // --- Initializer ---
-    function initialize() public initializer {
-        address initialOwner = _msgSender();
-
+    function initialize(address initialOwner) public initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
     }
