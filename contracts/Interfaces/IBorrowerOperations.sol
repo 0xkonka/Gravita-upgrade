@@ -116,8 +116,6 @@ interface IBorrowerOperations {
     )
         external;
 
-    function closeTrenBox(address _asset) external;
-
     function adjustTrenBox(
         address _asset,
         uint256 _assetSent,
