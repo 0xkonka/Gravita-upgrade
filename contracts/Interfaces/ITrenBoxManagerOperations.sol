@@ -33,6 +33,13 @@ interface ITrenBoxManagerOperations {
         uint256 _debtTokenGasCompensation
     );
 
+    event Redistribution(
+        address indexed _asset,
+        address indexed _borrower,
+        uint256 _redistributedDebt,
+        uint256 _redistributedCool
+    );
+
     event TrenBoxLiquidated(
         address indexed _asset,
         address indexed _borrower,

@@ -614,6 +614,20 @@ contract TrenBoxManager is
         );
     }
 
+    function closeTrenBoxRedistribution(
+        address _asset,
+        address _borrower
+    )
+        external
+        onlyTrenBoxManagerOperations
+    {
+        _closeTrenBox(_asset, _borrower, Status.closedByDistribution);
+        IFeeCollector(feeCollector).liquidateDebt(_borrower, _asset);
+        emit TrenBoxUpdated(
+            _asset, _borrower, 0, 0, 0, TrenBoxManagerOperation.redistributeCollAndDebt
+        );
+    }
+
     function sendGasCompensation(
         address _asset,
         address _liquidator,

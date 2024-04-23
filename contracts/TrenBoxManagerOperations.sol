@@ -187,6 +187,77 @@ contract TrenBoxManagerOperations is
         );
     }
 
+    // TODO: add description
+
+    function redistributeTrenBoxes(
+        address _asset,
+        address[] memory _trenBoxArray
+    )
+        external
+        nonReentrant
+        onlyOwner // TODO: no?
+    {
+        if (_trenBoxArray.length == 0 || _trenBoxArray.length > BATCH_SIZE_LIMIT) {
+            revert TrenBoxManagerOperations__InvalidArraySize();
+        }
+
+        LocalVariables_OuterLiquidationFunction memory vars;
+        LiquidationTotals memory totals;
+
+        vars.debtTokenInStabPool = IStabilityPool(stabilityPool).getTotalDebtTokenDeposits();
+        vars.price = IPriceFeed(priceFeed).fetchPrice(_asset);
+        vars.recoveryModeAtStart = _checkRecoveryMode(_asset, vars.price);
+
+        // Perform the appropriate liquidation sequence - tally values and obtain their totals.
+        if (vars.recoveryModeAtStart) {
+            totals = _getTotalFromBatchLiquidate_RecoveryMode(
+                _asset, vars.price, vars.debtTokenInStabPool, _trenBoxArray
+            );
+        } else {
+            totals = _getTotalsFromBatchLiquidate_NormalMode(
+                _asset, vars.price, vars.debtTokenInStabPool, _trenBoxArray
+            );
+        }
+
+        if (totals.totalDebtInSequence == 0) {
+            revert TrenBoxManagerOperations__NothingToLiquidate();
+        }
+
+        ITrenBoxManager(trenBoxManager).redistributeDebtAndColl(
+            _asset,
+            totals.totalDebtToRedistribute,
+            totals.totalCollToRedistribute,
+            totals.totalDebtToOffset,
+            totals.totalCollToSendToSP
+        );
+        if (totals.totalCollSurplus != 0) {
+            IActivePool(activePool).sendAsset(_asset, collSurplusPool, totals.totalCollSurplus);
+        }
+
+        // Update system snapshots
+        ITrenBoxManager(trenBoxManager).updateSystemSnapshots_excludeCollRemainder(
+            _asset, totals.totalCollGasCompensation
+        );
+
+        vars.liquidatedDebt = totals.totalDebtInSequence;
+        vars.liquidatedColl =
+            totals.totalCollInSequence - totals.totalCollGasCompensation - totals.totalCollSurplus;
+        emit Redistribution(
+            _asset,
+            _asset, // TODO: where to get borrower address, do we need it here?
+            vars.liquidatedDebt,
+            vars.liquidatedColl
+        );
+        // TODO: fix gasCompensation direction, we will burn it maybe
+        ITrenBoxManager(trenBoxManager).sendGasCompensation(
+            _asset,
+            msg.sender,
+            totals.totalDebtTokenGasCompensation,
+            totals.totalCollGasCompensation
+        );
+    }
+
+
     // Redemption external functions
     // ------------------------------------------------------------------------------------
 

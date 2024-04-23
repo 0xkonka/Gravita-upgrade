@@ -10,14 +10,16 @@ interface ITrenBoxManager {
         active,
         closedByOwner,
         closedByLiquidation,
-        closedByRedemption
+        closedByRedemption,
+        closedByDistribution
     }
 
     enum TrenBoxManagerOperation {
         applyPendingRewards,
         liquidateInNormalMode,
         liquidateInRecoveryMode,
-        redeemCollateral
+        redeemCollateral,
+        redistributeCollAndDebt
     }
 
     // Events
