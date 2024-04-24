@@ -3,9 +3,7 @@ pragma solidity ^0.8.23;
 
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-
 import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
 import { ReentrancyGuardUpgradeable } from
     "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
@@ -66,7 +64,6 @@ contract BorrowerOperations is
         bool isRecoveryMode = _checkRecoveryMode(vars.asset, vars.price);
 
         uint256 status = ITrenBoxManager(trenBoxManager).getTrenBoxStatus(vars.asset, msg.sender);
-        // require TrenBox is not active
         if (status == 1) {
             revert BorrowerOperations__TrenBoxIsActive();
         }

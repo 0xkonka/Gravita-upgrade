@@ -616,16 +616,19 @@ contract TrenBoxManager is
 
     function closeTrenBoxRedistribution(
         address _asset,
-        address _borrower
+        address _borrower,
+        uint256 _debtTokenGasCompensation
     )
         external
         onlyTrenBoxManagerOperations
     {
-        _closeTrenBox(_asset, _borrower, Status.closedByDistribution);
+        _closeTrenBox(_asset, _borrower, Status.closedByRedistribution);
         IFeeCollector(feeCollector).liquidateDebt(_borrower, _asset);
         emit TrenBoxUpdated(
             _asset, _borrower, 0, 0, 0, TrenBoxManagerOperation.redistributeCollAndDebt
         );
+        IDebtToken(debtToken).burn(gasPoolAddress, _debtTokenGasCompensation);
+        IActivePool(activePool).decreaseDebt(_asset, _debtTokenGasCompensation);
     }
 
     function sendGasCompensation(
