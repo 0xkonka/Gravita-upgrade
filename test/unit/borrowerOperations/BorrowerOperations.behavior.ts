@@ -1,5 +1,4 @@
 import shouldBehaveLikeCanAddColl from "./effects/addColl";
-import shouldBehaveLikeCanCloseTrenBox from "./effects/closeTrenBox";
 import shouldBehaveLikeCanOpenTrenBox from "./effects/openTrenBox";
 import shouldBehaveLikeCanRepayDebtTokens from "./effects/repayDebtTokens";
 import shouldBehaveLikeCanWithdrawColl from "./effects/withdrawColl";
@@ -36,10 +35,6 @@ export function shouldBehaveLikeBorrowerOperationsContract(): void {
 
       describe("#withdrawDebtTokens", function () {
         shouldBehaveLikeCanWithdrawDebtTokens();
-      });
-
-      describe("#closeTrenBox", function () {
-        shouldBehaveLikeCanCloseTrenBox();
       });
 
       describe("#adjustTrenBox", function () {});

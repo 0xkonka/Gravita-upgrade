@@ -186,7 +186,7 @@ contract BorrowerOperations is
     }
 
     // Repay debt tokens to a TrenBox: Burn the repaid debt tokens, and reduce the trenBox's debt
-    // accordingly
+    // accordingly or Close TrenBox if user has enough tokens at all
     function repayDebtTokens(
         address _asset,
         uint256 _debtTokenAmount,
@@ -197,7 +197,18 @@ contract BorrowerOperations is
         override
         nonReentrant
     {
-        _adjustTrenBox(_asset, 0, msg.sender, 0, _debtTokenAmount, false, _upperHint, _lowerHint);
+        if (
+            _debtTokenAmount
+                == _getNetDebt(
+                    _asset, ITrenBoxManager(trenBoxManager).getTrenBoxDebt(_asset, msg.sender)
+                ) - IAdminContract(adminContract).getDebtTokenGasCompensation(_asset)
+        ) {
+            closeTrenBox(_asset);
+        } else {
+            _adjustTrenBox(
+                _asset, 0, msg.sender, 0, _debtTokenAmount, false, _upperHint, _lowerHint
+            );
+        }
     }
 
     function adjustTrenBox(
@@ -304,10 +315,6 @@ contract BorrowerOperations is
         // When the adjustment is a debt repayment, check it's a valid amount and that the caller
         // has enough debt tokens
         if (!_isDebtIncrease && _debtTokenChange != 0) {
-            _requireAtLeastMinNetDebt(
-                vars.asset, _getNetDebt(vars.asset, vars.debt) - vars.netDebtChange
-            );
-            _requireValidDebtTokenRepayment(vars.asset, vars.debt, vars.netDebtChange);
             _requireSufficientDebtTokenBalance(_borrower, vars.netDebtChange);
         }
 
@@ -357,7 +364,7 @@ contract BorrowerOperations is
         );
     }
 
-    function closeTrenBox(address _asset) external override nonReentrant {
+    function closeTrenBox(address _asset) internal {
         _requireTrenBoxIsActive(_asset, msg.sender);
         uint256 price = IPriceFeed(priceFeed).fetchPrice(_asset);
         _requireNotInRecoveryMode(_asset, price);
@@ -641,22 +648,6 @@ contract BorrowerOperations is
     function _requireAtLeastMinNetDebt(address _asset, uint256 _netDebt) internal view {
         if (_netDebt < IAdminContract(adminContract).getMinNetDebt(_asset)) {
             revert BorrowerOperations__TrenBoxNetDebtLessThanMin();
-        }
-    }
-
-    function _requireValidDebtTokenRepayment(
-        address _asset,
-        uint256 _currentDebt,
-        uint256 _debtRepayment
-    )
-        internal
-        view
-    {
-        if (
-            _debtRepayment
-                > _currentDebt - IAdminContract(adminContract).getDebtTokenGasCompensation(_asset)
-        ) {
-            revert BorrowerOperations__RepayLargerThanTrenBoxDebt();
         }
     }
 
