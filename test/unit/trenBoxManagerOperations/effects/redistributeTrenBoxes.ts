@@ -9,8 +9,18 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
       const assetAddress = await erc20.getAddress();
       const assetAmount = ethers.parseUnits("1000", "ether");
       const mintCap = ethers.parseUnits("200", 35);
-      const users = [this.signers.accounts[1], this.signers.accounts[2], this.signers.accounts[3], this.signers.accounts[4], this.signers.accounts[5]];
-      const usersToOpenTrenBoxInt = [this.signers.accounts[1], this.signers.accounts[2], this.signers.accounts[3]];
+      const users = [
+        this.signers.accounts[1],
+        this.signers.accounts[2],
+        this.signers.accounts[3],
+        this.signers.accounts[4],
+        this.signers.accounts[5],
+      ];
+      const usersToOpenTrenBoxInt = [
+        this.signers.accounts[1],
+        this.signers.accounts[2],
+        this.signers.accounts[3],
+      ];
 
       await this.utils.setupProtocolForTests({
         collaterals: [
@@ -88,11 +98,11 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
 
       const newBorrowers = this.signers.accounts.slice(4, 6);
 
-      const openTrenBoxPromises = newBorrowers.map(borrower => {
+      const openTrenBoxPromises = newBorrowers.map((borrower) => {
         return this.utils.openTrenBox({
           asset: erc20,
           assetAmount,
-          from: borrower
+          from: borrower,
         });
       });
 
@@ -112,18 +122,20 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
         .to.emit(this.contracts.trenBoxManager, "TrenBoxUpdated")
         .withArgs(erc20, borrower2, 0n, 0n, 0n, 4n);
 
-      const reapyTrenBoxPromises = newBorrowers.map(borrower => {
+      const reapyTrenBoxPromises = newBorrowers.map((borrower) => {
         return this.utils.repayDebt({
           collateral: erc20,
           debtAmount: ethers.parseUnits("200", "ether"),
-          from: borrower
+          from: borrower,
         });
       });
 
       await Promise.all(reapyTrenBoxPromises);
 
-      const borrower4CollAmountAfterRedistribution = await this.contracts.trenBoxManager.getTrenBoxColl(erc20, borrower4.address);
-      const borrower5CollAmountAfterRedistribution = await this.contracts.trenBoxManager.getTrenBoxColl(erc20, borrower5.address);
+      const borrower4CollAmountAfterRedistribution =
+        await this.contracts.trenBoxManager.getTrenBoxColl(erc20, borrower4.address);
+      const borrower5CollAmountAfterRedistribution =
+        await this.contracts.trenBoxManager.getTrenBoxColl(erc20, borrower5.address);
 
       expect(borrower4CollAmountAfterRedistribution).to.be.equal(assetAmountAfter);
       expect(borrower5CollAmountAfterRedistribution).to.be.equal(assetAmountAfter);

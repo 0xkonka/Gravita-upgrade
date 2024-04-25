@@ -60,7 +60,7 @@ export function shouldBehaveLikeTrenBoxManagerOperationsContract(): void {
         shouldBehaveLikeBatchLiquidateTrenBoxes();
       });
 
-      describe.only("#redistributeTrenBoxes", function () {
+      describe("#redistributeTrenBoxes", function () {
         shouldBehaveLikeRedistributeTrenBoxes();
       });
 
