@@ -36,7 +36,6 @@ contract TrenBoxManagerOperations is
 
     function initialize(address initialOwner) public initializer {
         __Ownable_init(initialOwner);
-        __UUPSUpgradeable_init();
         __ReentrancyGuard_init();
     }
 
@@ -867,7 +866,7 @@ contract TrenBoxManagerOperations is
                     _borrower,
                     singleLiquidation.entireTrenBoxDebt,
                     singleLiquidation.entireTrenBoxColl,
-                    ITrenBoxManager.TrenBoxManagerOperation.redistributeCollAndDebt
+                    ITrenBoxManager.TrenBoxManagerOperation.redistributeCollateral
                 );
             } else {
                 ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset, _borrower);

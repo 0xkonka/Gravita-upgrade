@@ -625,10 +625,9 @@ contract TrenBoxManager is
         _closeTrenBox(_asset, _borrower, Status.closedByRedistribution);
         IFeeCollector(feeCollector).liquidateDebt(_borrower, _asset);
         emit TrenBoxUpdated(
-            _asset, _borrower, 0, 0, 0, TrenBoxManagerOperation.redistributeCollAndDebt
+            _asset, _borrower, 0, 0, 0, TrenBoxManagerOperation.redistributeCollateral
         );
         IDebtToken(debtToken).burn(gasPoolAddress, _debtTokenGasCompensation);
-        IActivePool(activePool).decreaseDebt(_asset, _debtTokenGasCompensation);
     }
 
     function sendGasCompensation(

@@ -19,7 +19,7 @@ interface ITrenBoxManager {
         liquidateInNormalMode,
         liquidateInRecoveryMode,
         redeemCollateral,
-        redistributeCollAndDebt
+        redistributeCollateral
     }
 
     // Events
