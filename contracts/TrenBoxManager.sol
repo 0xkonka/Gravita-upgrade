@@ -614,6 +614,22 @@ contract TrenBoxManager is
         );
     }
 
+    function closeTrenBoxRedistribution(
+        address _asset,
+        address _borrower,
+        uint256 _debtTokenGasCompensation
+    )
+        external
+        onlyTrenBoxManagerOperations
+    {
+        _closeTrenBox(_asset, _borrower, Status.closedByRedistribution);
+        IFeeCollector(feeCollector).liquidateDebt(_borrower, _asset);
+        emit TrenBoxUpdated(
+            _asset, _borrower, 0, 0, 0, TrenBoxManagerOperation.redistributeCollateral
+        );
+        IDebtToken(debtToken).burn(gasPoolAddress, _debtTokenGasCompensation);
+    }
+
     function sendGasCompensation(
         address _asset,
         address _liquidator,

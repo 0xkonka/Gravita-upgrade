@@ -10,14 +10,16 @@ interface ITrenBoxManager {
         active,
         closedByOwner,
         closedByLiquidation,
-        closedByRedemption
+        closedByRedemption,
+        closedByRedistribution
     }
 
     enum TrenBoxManagerOperation {
         applyPendingRewards,
         liquidateInNormalMode,
         liquidateInRecoveryMode,
-        redeemCollateral
+        redeemCollateral,
+        redistributeCollateral
     }
 
     // Events
@@ -152,6 +154,13 @@ interface ITrenBoxManager {
     function closeTrenBox(address _asset, address _borrower) external;
 
     function closeTrenBoxLiquidation(address _asset, address _borrower) external;
+
+    function closeTrenBoxRedistribution(
+        address _asset,
+        address _borrower,
+        uint256 _debtTokenGasCompensationToBurn
+    )
+        external;
 
     function removeStake(address _asset, address _borrower) external;
 

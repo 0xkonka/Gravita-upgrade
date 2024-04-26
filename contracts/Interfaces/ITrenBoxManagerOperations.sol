@@ -33,6 +33,13 @@ interface ITrenBoxManagerOperations {
         uint256 _debtTokenGasCompensation
     );
 
+    event Redistribution(
+        address indexed _asset,
+        uint256 _redistributedDebt,
+        uint256 _redistributedCool,
+        uint256 _totalDebtTokenGasCompensation
+    );
+
     event TrenBoxLiquidated(
         address indexed _asset,
         address indexed _borrower,
@@ -121,6 +128,7 @@ interface ITrenBoxManagerOperations {
 
     struct LocalVariables_LiquidationSequence {
         uint256 remainingDebtTokenInStabPool;
+        uint256 price;
         uint256 ICR;
         address user;
         bool backToNormalMode;

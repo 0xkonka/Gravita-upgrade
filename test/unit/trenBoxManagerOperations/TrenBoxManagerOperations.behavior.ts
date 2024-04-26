@@ -3,6 +3,7 @@ import shouldBehaveLikeBatchLiquidateTrenBoxes from "./effects/batchLiquidateTre
 import shouldBehaveLikeLiquidate from "./effects/liquidate";
 import shouldBehaveLikeLiquidateTrenBoxes from "./effects/liquidateTrenBoxes";
 import shouldBehaveLikeRedeemCollateral from "./effects/redeemCollateral";
+import shouldBehaveLikeRedistributeTrenBoxes from "./effects/redistributeTrenBoxes";
 import shouldBehaveLikeSetRedemptionSofteningParam from "./effects/setRedemptionSofteningParam";
 import shouldBehaveLikeComputeNominalCR from "./view/computeNominalCR";
 import shouldBehaveLikeBatchSizeLimit from "./view/constants/batchSizeLimit";
@@ -57,6 +58,10 @@ export function shouldBehaveLikeTrenBoxManagerOperationsContract(): void {
 
       describe("#batchLiquidateTrenBoxes", function () {
         shouldBehaveLikeBatchLiquidateTrenBoxes();
+      });
+
+      describe("#redistributeTrenBoxes", function () {
+        shouldBehaveLikeRedistributeTrenBoxes();
       });
 
       describe("#redeemCollateral", function () {
