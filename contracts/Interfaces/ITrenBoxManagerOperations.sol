@@ -128,6 +128,7 @@ interface ITrenBoxManagerOperations {
 
     struct LocalVariables_LiquidationSequence {
         uint256 remainingDebtTokenInStabPool;
+        uint256 price;
         uint256 ICR;
         address user;
         bool backToNormalMode;

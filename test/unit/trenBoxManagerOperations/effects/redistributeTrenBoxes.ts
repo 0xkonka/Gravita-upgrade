@@ -54,10 +54,9 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
 
     it("should revert with custom error TrenBoxManagerOperations__NothingToLiquidate", async function () {
       const { erc20 } = this.testContracts;
-      const borrower = this.signers.accounts[1];
 
       await expect(
-        this.contracts.trenBoxManagerOperations.redistributeTrenBoxes(erc20, [borrower])
+        this.contracts.trenBoxManagerOperations.redistributeTrenBoxes(erc20, 1n)
       ).to.be.revertedWithCustomError(
         this.contracts.trenBoxManagerOperations,
         "TrenBoxManagerOperations__NothingToLiquidate"
@@ -66,13 +65,12 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
 
     it("should execute redistributeTrenBoxes and emit Redistribution and TrenBoxUpdated", async function () {
       const { erc20 } = this.testContracts;
-      const borrower = this.signers.accounts[2];
 
       await this.testContracts.priceFeedTestnet.setPrice(erc20, ethers.parseUnits("2", "ether"));
 
       const redistributeTx = await this.contracts.trenBoxManagerOperations.redistributeTrenBoxes(
         erc20,
-        [borrower]
+        1n
       );
 
       const liquidatedDebt = ethers.parseUnits("2000", "ether");
@@ -88,14 +86,12 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
       const { erc20 } = this.testContracts;
       const assetAmount = ethers.parseUnits("2000", "ether");
       const assetAmountAfter = ethers.parseUnits("3500", "ether");
-      const [borrower, borrower2, borrower3, borrower4, borrower5] = [
+      const [borrower, borrower2, borrower4, borrower5] = [
         this.signers.accounts[1],
         this.signers.accounts[2],
-        this.signers.accounts[3],
         this.signers.accounts[4],
         this.signers.accounts[5],
       ];
-
       const newBorrowers = this.signers.accounts.slice(4, 6);
 
       const openTrenBoxPromises = newBorrowers.map((borrower) => {
@@ -112,7 +108,7 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
 
       const redistributeTx = await this.contracts.trenBoxManagerOperations.redistributeTrenBoxes(
         erc20,
-        [borrower, borrower2, borrower3]
+        3n
       );
 
       await expect(redistributeTx)

@@ -70,11 +70,11 @@ contract TrenBoxManagerOperations is
         // Perform the appropriate liquidation sequence - tally the values, and obtain their totals
         if (vars.recoveryModeAtStart) {
             totals = _getTotalsFromLiquidateTrenBoxesSequence_RecoveryMode(
-                _asset, vars.price, vars.debtTokenInStabPool, _n
+                _asset, vars.price, vars.debtTokenInStabPool, _n, false
             );
         } else {
             totals = _getTotalsFromLiquidateTrenBoxesSequence_NormalMode(
-                _asset, vars.price, vars.debtTokenInStabPool, _n
+                _asset, vars.price, vars.debtTokenInStabPool, _n, false
             );
         }
 
@@ -140,11 +140,11 @@ contract TrenBoxManagerOperations is
         // Perform the appropriate liquidation sequence - tally values and obtain their totals.
         if (vars.recoveryModeAtStart) {
             totals = _getTotalFromBatchLiquidate_RecoveryMode(
-                _asset, vars.price, vars.debtTokenInStabPool, _trenBoxArray, false
+                _asset, vars.price, vars.debtTokenInStabPool, _trenBoxArray
             );
         } else {
             totals = _getTotalsFromBatchLiquidate_NormalMode(
-                _asset, vars.price, vars.debtTokenInStabPool, _trenBoxArray, false
+                _asset, vars.price, vars.debtTokenInStabPool, _trenBoxArray
             );
         }
 
@@ -188,12 +188,12 @@ contract TrenBoxManagerOperations is
 
     /**
      * @notice Redistribute (liquidate by protocol) a sequence of low-value trenBoxes.
-     * Closes a maximum number of _trenBoxArray under-collateralized TrenBoxes,
+     * Closes a maximum number of _trenBoxes under-collateralized TrenBoxes,
      * starting from the one with the lowest collateral ratio in the system, and moving upwards.
      */
     function redistributeTrenBoxes(
         address _asset,
-        address[] memory _trenBoxArray
+        uint256 _trenBoxes
     )
         external
         nonReentrant
@@ -207,12 +207,12 @@ contract TrenBoxManagerOperations is
         vars.recoveryModeAtStart = _checkRecoveryMode(_asset, vars.price);
 
         if (vars.recoveryModeAtStart) {
-            totals = _getTotalFromBatchLiquidate_RecoveryMode(
-                _asset, vars.price, vars.debtTokenInStabPool, _trenBoxArray, true
+            totals = _getTotalsFromLiquidateTrenBoxesSequence_RecoveryMode(
+                _asset, vars.price, vars.debtTokenInStabPool, _trenBoxes, true
             );
         } else {
-            totals = _getTotalsFromBatchLiquidate_NormalMode(
-                _asset, vars.price, vars.debtTokenInStabPool, _trenBoxArray, true
+            totals = _getTotalsFromLiquidateTrenBoxesSequence_NormalMode(
+                _asset, vars.price, vars.debtTokenInStabPool, _trenBoxes, true
             );
         }
 
@@ -541,8 +541,7 @@ contract TrenBoxManagerOperations is
         address _asset,
         uint256 _price,
         uint256 _debtTokenInStabPool,
-        address[] memory _trenBoxArray,
-        bool _fullRedistribution
+        address[] memory _trenBoxArray
     )
         internal
         returns (LiquidationTotals memory totals)
@@ -582,27 +581,15 @@ contract TrenBoxManagerOperations is
                 uint256 TCR =
                     TrenMath._computeCR(vars.entireSystemColl, vars.entireSystemDebt, _price);
 
-                if (_fullRedistribution) {
-                    singleLiquidation = _liquidateRecoveryMode(
-                        _asset,
-                        vars.user,
-                        vars.ICR,
-                        vars.remainingDebtTokenInStabPool,
-                        TCR,
-                        _price,
-                        true
-                    );
-                } else {
-                    singleLiquidation = _liquidateRecoveryMode(
-                        _asset,
-                        vars.user,
-                        vars.ICR,
-                        vars.remainingDebtTokenInStabPool,
-                        TCR,
-                        _price,
-                        false
-                    );
-                }
+                singleLiquidation = _liquidateRecoveryMode(
+                    _asset,
+                    vars.user,
+                    vars.ICR,
+                    vars.remainingDebtTokenInStabPool,
+                    TCR,
+                    _price,
+                    false
+                );
 
                 // Update aggregate trackers
                 vars.remainingDebtTokenInStabPool =
@@ -620,15 +607,9 @@ contract TrenBoxManagerOperations is
             } else if (
                 vars.backToNormalMode && vars.ICR < IAdminContract(adminContract).getMcr(_asset)
             ) {
-                if (_fullRedistribution) {
-                    singleLiquidation = _liquidateNormalMode(
-                        _asset, vars.user, vars.remainingDebtTokenInStabPool, true
-                    );
-                } else {
-                    singleLiquidation = _liquidateNormalMode(
-                        _asset, vars.user, vars.remainingDebtTokenInStabPool, false
-                    );
-                }
+                singleLiquidation = _liquidateNormalMode(
+                    _asset, vars.user, vars.remainingDebtTokenInStabPool, false
+                );
 
                 vars.remainingDebtTokenInStabPool =
                     vars.remainingDebtTokenInStabPool - singleLiquidation.debtToOffset;
@@ -646,8 +627,7 @@ contract TrenBoxManagerOperations is
         address _asset,
         uint256 _price,
         uint256 _debtTokenInStabPool,
-        address[] memory _trenBoxArray,
-        bool _fullRedistribution
+        address[] memory _trenBoxArray
     )
         internal
         returns (LiquidationTotals memory totals)
@@ -662,15 +642,9 @@ contract TrenBoxManagerOperations is
             vars.ICR = ITrenBoxManager(trenBoxManager).getCurrentICR(_asset, vars.user, _price);
 
             if (vars.ICR < IAdminContract(adminContract).getMcr(_asset)) {
-                if (_fullRedistribution) {
-                    singleLiquidation = _liquidateNormalMode(
-                        _asset, vars.user, vars.remainingDebtTokenInStabPool, true
-                    );
-                } else {
-                    singleLiquidation = _liquidateNormalMode(
-                        _asset, vars.user, vars.remainingDebtTokenInStabPool, false
-                    );
-                }
+                singleLiquidation = _liquidateNormalMode(
+                    _asset, vars.user, vars.remainingDebtTokenInStabPool, false
+                );
 
                 vars.remainingDebtTokenInStabPool =
                     vars.remainingDebtTokenInStabPool - singleLiquidation.debtToOffset;
@@ -716,7 +690,8 @@ contract TrenBoxManagerOperations is
         address _asset,
         uint256 _price,
         uint256 _debtTokenInStabPool,
-        uint256 _n
+        uint256 _n,
+        bool _fullRedistribution
     )
         internal
         returns (LiquidationTotals memory totals)
@@ -731,9 +706,15 @@ contract TrenBoxManagerOperations is
             vars.ICR = ITrenBoxManager(trenBoxManager).getCurrentICR(_asset, vars.user, _price);
 
             if (vars.ICR < IAdminContract(adminContract).getMcr(_asset)) {
-                singleLiquidation = _liquidateNormalMode(
-                    _asset, vars.user, vars.remainingDebtTokenInStabPool, false
-                );
+                if (_fullRedistribution) {
+                    singleLiquidation = _liquidateNormalMode(
+                        _asset, vars.user, vars.remainingDebtTokenInStabPool, true
+                    );
+                } else {
+                    singleLiquidation = _liquidateNormalMode(
+                        _asset, vars.user, vars.remainingDebtTokenInStabPool, false
+                    );
+                }
 
                 vars.remainingDebtTokenInStabPool =
                     vars.remainingDebtTokenInStabPool - singleLiquidation.debtToOffset;
@@ -962,7 +943,8 @@ contract TrenBoxManagerOperations is
         address _asset,
         uint256 _price,
         uint256 _debtTokenInStabPool,
-        uint256 _n
+        uint256 _n,
+        bool _fullRedistribution
     )
         internal
         returns (LiquidationTotals memory totals)
@@ -972,6 +954,7 @@ contract TrenBoxManagerOperations is
 
         vars.remainingDebtTokenInStabPool = _debtTokenInStabPool;
         vars.backToNormalMode = false;
+        vars.price = _price;
         vars.entireSystemDebt = getEntireSystemDebt(_asset);
         vars.entireSystemColl = getEntireSystemColl(_asset);
 
@@ -981,7 +964,7 @@ contract TrenBoxManagerOperations is
             // we need to cache it, because current user is likely going to be deleted
             address nextUser = ISortedTrenBoxes(sortedTrenBoxes).getPrev(_asset, vars.user);
 
-            vars.ICR = ITrenBoxManager(trenBoxManager).getCurrentICR(_asset, vars.user, _price);
+            vars.ICR = ITrenBoxManager(trenBoxManager).getCurrentICR(_asset, vars.user, vars.price);
 
             if (!vars.backToNormalMode) {
                 // Break the loop if ICR is greater than MCR and Stability Pool is empty
@@ -993,17 +976,29 @@ contract TrenBoxManagerOperations is
                 }
 
                 uint256 TCR =
-                    TrenMath._computeCR(vars.entireSystemColl, vars.entireSystemDebt, _price);
+                    TrenMath._computeCR(vars.entireSystemColl, vars.entireSystemDebt, vars.price);
 
-                singleLiquidation = _liquidateRecoveryMode(
-                    _asset,
-                    vars.user,
-                    vars.ICR,
-                    vars.remainingDebtTokenInStabPool,
-                    TCR,
-                    _price,
-                    false
-                );
+                if (_fullRedistribution) {
+                    singleLiquidation = _liquidateRecoveryMode(
+                        _asset,
+                        vars.user,
+                        vars.ICR,
+                        vars.remainingDebtTokenInStabPool,
+                        TCR,
+                        vars.price,
+                        true
+                    );
+                } else {
+                    singleLiquidation = _liquidateRecoveryMode(
+                        _asset,
+                        vars.user,
+                        vars.ICR,
+                        vars.remainingDebtTokenInStabPool,
+                        TCR,
+                        vars.price,
+                        false
+                    );
+                }
 
                 // Update aggregate trackers
                 vars.remainingDebtTokenInStabPool =
@@ -1016,14 +1011,20 @@ contract TrenBoxManagerOperations is
                 totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
 
                 vars.backToNormalMode = !_checkPotentialRecoveryMode(
-                    _asset, vars.entireSystemColl, vars.entireSystemDebt, _price
+                    _asset, vars.entireSystemColl, vars.entireSystemDebt, vars.price
                 );
             } else if (
                 vars.backToNormalMode && vars.ICR < IAdminContract(adminContract).getMcr(_asset)
             ) {
-                singleLiquidation = _liquidateNormalMode(
-                    _asset, vars.user, vars.remainingDebtTokenInStabPool, false
-                );
+                if (_fullRedistribution) {
+                    singleLiquidation = _liquidateNormalMode(
+                        _asset, vars.user, vars.remainingDebtTokenInStabPool, true
+                    );
+                } else {
+                    singleLiquidation = _liquidateNormalMode(
+                        _asset, vars.user, vars.remainingDebtTokenInStabPool, false
+                    );
+                }
 
                 vars.remainingDebtTokenInStabPool =
                     vars.remainingDebtTokenInStabPool - singleLiquidation.debtToOffset;
