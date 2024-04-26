@@ -36,6 +36,7 @@ contract TrenBoxManagerOperations is
 
     function initialize(address initialOwner) public initializer {
         __Ownable_init(initialOwner);
+        __UUPSUpgradeable_init();
         __ReentrancyGuard_init();
     }
 
