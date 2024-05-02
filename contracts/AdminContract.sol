@@ -10,8 +10,7 @@ import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol"
 import { DECIMAL_PRECISION as _DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
-import { IActivePool } from "./Interfaces/IActivePool.sol";
-import { IDefaultPool } from "./Interfaces/IDefaultPool.sol";
+import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 
 contract AdminContract is
     IAdminContract,
@@ -407,8 +406,8 @@ contract AdminContract is
     }
 
     function getTotalAssetDebt(address _asset) external view override returns (uint256) {
-        return IActivePool(activePool).getDebtTokenBalance(_asset)
-            + IDefaultPool(defaultPool).getDebtTokenBalance(_asset);
+        return ITrenBoxStorage(trenBoxStorage).getActiveDebtBalance(_asset)
+            + ITrenBoxStorage(trenBoxStorage).getLiquidatedDebtBalance(_asset);
     }
 
     function getFlashLoanFee() external view override returns (uint256) {

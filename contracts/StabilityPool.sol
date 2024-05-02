@@ -11,10 +11,10 @@ import { TrenBase } from "./Dependencies/TrenBase.sol";
 import { TrenMath, DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
 
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
-import { IActivePool } from "./Interfaces/IActivePool.sol";
 import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { ICommunityIssuance } from "./Interfaces/ICommunityIssuance.sol";
+import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 
 /**
  * @title The Stability Pool holds debt tokens deposited by Stability Pool depositors.
@@ -468,7 +468,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
      * @notice sets the offset for liquidation
      * @dev Cancels out the specified debt against the debtTokens contained in the Stability Pool
      * (as far as possible)
-     * and transfers the TrenBox's collateral from ActivePool to StabilityPool.
+     * and transfers the TrenBox's collateral from TrenBoxStorage to StabilityPool.
      * Only called by liquidation functions in the TrenBoxManager.
      * @param _debtToOffset how much debt to offset
      * @param _asset token address
@@ -628,7 +628,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
      * @notice Internal function to move offset collateral and debt between pools.
      * @dev Cancel the liquidated debtToken debt with the debtTokens in the stability pool,
      * Burn the debt that was successfully offset. Collateral is moved from
-     * the ActivePool to this contract.
+     * the TrenBoxStorage to this contract.
      * @param _asset collateral address
      * @param _amount amount as uint256
      * @param _debtToOffset uint256
@@ -640,10 +640,10 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     )
         internal
     {
-        IActivePool(activePool).decreaseDebt(_asset, _debtToOffset);
+        ITrenBoxStorage(trenBoxStorage).decreaseActiveDebt(_asset, _debtToOffset);
         _decreaseDebtTokens(_debtToOffset);
         IDebtToken(debtToken).burn(address(this), _debtToOffset);
-        IActivePool(activePool).sendAsset(_asset, address(this), _amount);
+        ITrenBoxStorage(trenBoxStorage).sendAsset(_asset, address(this), _amount);
     }
 
     function _decreaseDebtTokens(uint256 _amount) internal {
@@ -1050,9 +1050,9 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         _;
     }
 
-    modifier onlyActivePool() {
-        if (msg.sender != activePool) {
-            revert StabilityPool__ActivePoolOnly(msg.sender, activePool);
+    modifier onlyTrenBoxStorage() {
+        if (msg.sender != trenBoxStorage) {
+            revert StabilityPool__TrenBoxStorageOnly(msg.sender, trenBoxStorage);
         }
         _;
     }
@@ -1066,7 +1066,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
 
     // --- Fallback function ---
 
-    function receivedERC20(address _asset, uint256 _amount) external override onlyActivePool {
+    function receivedERC20(address _asset, uint256 _amount) external override onlyTrenBoxStorage {
         uint256 collateralIndex = IAdminContract(adminContract).getIndex(_asset);
         uint256 newAssetBalance = totalColl.amounts[collateralIndex] + _amount;
         totalColl.amounts[collateralIndex] = newAssetBalance;

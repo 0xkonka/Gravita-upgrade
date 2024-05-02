@@ -41,9 +41,9 @@ contract CollSurplusPool is
         _;
     }
 
-    modifier onlyActivePool() {
-        if (msg.sender != activePool) {
-            revert CollSurplusPool__NotActivePool();
+    modifier onlyTrenBoxStorage() {
+        if (msg.sender != trenBoxStorage) {
+            revert CollSurplusPool__NotTrenBoxStorage();
         }
         _;
     }
@@ -109,7 +109,7 @@ contract CollSurplusPool is
         IERC20(_asset).safeTransfer(_account, safetyTransferclaimableColl);
     }
 
-    function receivedERC20(address _asset, uint256 _amount) external override onlyActivePool {
+    function receivedERC20(address _asset, uint256 _amount) external override onlyTrenBoxStorage {
         collateralBalances[_asset] = collateralBalances[_asset] + _amount;
     }
 

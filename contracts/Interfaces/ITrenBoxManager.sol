@@ -274,7 +274,7 @@ interface ITrenBoxManager {
     )
         external;
 
-    function movePendingTrenBoxRewardsToActivePool(
+    function movePendingTrenBoxRewardsFromLiquidatedToActive(
         address _asset,
         uint256 _debtTokenAmount,
         uint256 _assetAmount

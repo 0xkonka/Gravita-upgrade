@@ -8,7 +8,7 @@ interface ICollSurplusPool is IDeposit {
 
     error CollSurplusPool__NotBorrowerOperations();
     error CollSurplusPool__NotTrenBoxManager();
-    error CollSurplusPool__NotActivePool();
+    error CollSurplusPool__NotTrenBoxStorage();
     error CollSurplusPool__NoClaimableColl();
 
     // --- Events ---

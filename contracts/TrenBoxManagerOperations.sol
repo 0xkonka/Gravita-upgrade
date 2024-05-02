@@ -10,7 +10,6 @@ import { TrenBase } from "./Dependencies/TrenBase.sol";
 import { TrenMath, DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
 
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
-import { IActivePool } from "./Interfaces/IActivePool.sol";
 import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IPriceFeed } from "./Interfaces/IPriceFeed.sol";
@@ -18,6 +17,7 @@ import { ISortedTrenBoxes } from "./Interfaces/ISortedTrenBoxes.sol";
 import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
 import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 import { ITrenBoxManagerOperations } from "./Interfaces/ITrenBoxManagerOperations.sol";
+import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 
 contract TrenBoxManagerOperations is
     ITrenBoxManagerOperations,
@@ -91,7 +91,9 @@ contract TrenBoxManagerOperations is
             totals.totalCollToSendToSP
         );
         if (totals.totalCollSurplus != 0) {
-            IActivePool(activePool).sendAsset(_asset, collSurplusPool, totals.totalCollSurplus);
+            ITrenBoxStorage(trenBoxStorage).sendAsset(
+                _asset, collSurplusPool, totals.totalCollSurplus
+            );
         }
 
         ITrenBoxManager(trenBoxManager).updateSystemSnapshots_excludeCollRemainder(
@@ -161,7 +163,9 @@ contract TrenBoxManagerOperations is
             totals.totalCollToSendToSP
         );
         if (totals.totalCollSurplus != 0) {
-            IActivePool(activePool).sendAsset(_asset, collSurplusPool, totals.totalCollSurplus);
+            ITrenBoxStorage(trenBoxStorage).sendAsset(
+                _asset, collSurplusPool, totals.totalCollSurplus
+            );
         }
 
         // Update system snapshots
@@ -748,7 +752,7 @@ contract TrenBoxManagerOperations is
             vars.pendingCollReward
         ) = ITrenBoxManager(trenBoxManager).getEntireDebtAndColl(_asset, _borrower);
 
-        ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(
+        ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsFromLiquidatedToActive(
             _asset, vars.pendingDebtReward, vars.pendingCollReward
         );
         ITrenBoxManager(trenBoxManager).removeStake(_asset, _borrower);
@@ -829,7 +833,7 @@ contract TrenBoxManagerOperations is
 
         // If ICR <= 100%, purely redistribute the TrenBox across all active TrenBoxes
         if (_ICR <= IAdminContract(adminContract)._100pct() || _fullRedistribution) {
-            ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(
+            ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsFromLiquidatedToActive(
                 _asset, vars.pendingDebtReward, vars.pendingCollReward
             );
             ITrenBoxManager(trenBoxManager).removeStake(_asset, _borrower);
@@ -866,7 +870,7 @@ contract TrenBoxManagerOperations is
             (_ICR > IAdminContract(adminContract)._100pct())
                 && (_ICR < IAdminContract(adminContract).getMcr(_asset))
         ) {
-            ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(
+            ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsFromLiquidatedToActive(
                 _asset, vars.pendingDebtReward, vars.pendingCollReward
             );
             ITrenBoxManager(trenBoxManager).removeStake(_asset, _borrower);
@@ -900,7 +904,7 @@ contract TrenBoxManagerOperations is
             (_ICR >= IAdminContract(adminContract).getMcr(_asset)) && (_ICR < _TCR)
                 && (singleLiquidation.entireTrenBoxDebt <= _debtTokenInStabPool)
         ) {
-            ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(
+            ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsFromLiquidatedToActive(
                 _asset, vars.pendingDebtReward, vars.pendingCollReward
             );
             assert(_debtTokenInStabPool != 0);
