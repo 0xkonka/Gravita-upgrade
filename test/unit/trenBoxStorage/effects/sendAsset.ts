@@ -3,18 +3,18 @@ import { ethers } from "hardhat";
 
 export default function shouldBehaveLikeCanSendAsset(): void {
   beforeEach(async function () {
-    const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
-    const redeployedActivePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
-    await redeployedActivePool.waitForDeployment();
-    await redeployedActivePool.initialize(this.signers.deployer);
+    const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
+    const trenBoxStorage = await TrenBoxStorageFactory.connect(this.signers.deployer).deploy();
+    await trenBoxStorage.waitForDeployment();
+    await trenBoxStorage.initialize(this.signers.deployer);
 
-    this.redeployedContracts.activePool = redeployedActivePool;
+    this.redeployedContracts.trenBoxStorage = trenBoxStorage;
 
     this.impostor = this.signers.accounts[1];
 
     const { erc20 } = this.testContracts;
     await erc20.mint(this.signers.deployer, 1000n);
-    await erc20.transfer(redeployedActivePool, 5n);
+    await erc20.transfer(this.redeployedContracts.trenBoxStorage, 5n);
     await erc20.approve(this.impostor, 2n);
   });
 
@@ -24,7 +24,7 @@ export default function shouldBehaveLikeCanSendAsset(): void {
         borrowerOperations: this.impostor,
       });
 
-      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses);
+      await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
     });
 
     shouldBehaveLikeCanSendAssetCorrectly();
@@ -37,7 +37,7 @@ export default function shouldBehaveLikeCanSendAsset(): void {
         trenBoxManager: this.impostor,
       });
 
-      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses);
+      await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
     });
 
     shouldBehaveLikeCanSendAssetCorrectly();
@@ -50,7 +50,7 @@ export default function shouldBehaveLikeCanSendAsset(): void {
         trenBoxManagerOperations: this.impostor,
       });
 
-      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses);
+      await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
     });
 
     shouldBehaveLikeCanSendAssetCorrectly();
@@ -63,7 +63,7 @@ export default function shouldBehaveLikeCanSendAsset(): void {
         stabilityPool: this.impostor,
       });
 
-      await this.redeployedContracts.activePool.setAddresses(addressesForSetAddresses);
+      await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
     });
 
     shouldBehaveLikeCanSendAssetCorrectly();
@@ -78,12 +78,12 @@ export default function shouldBehaveLikeCanSendAsset(): void {
         const recipient = this.signers.accounts[2];
 
         await expect(
-          this.contracts.activePool
+          this.contracts.trenBoxStorage
             .connect(this.impostor)
             .sendAsset(wETH.address, recipient, assetAmount)
         ).to.be.revertedWithCustomError(
-          this.contracts.activePool,
-          "ActivePool__NotAuthorizedContract"
+          this.contracts.trenBoxStorage,
+          "TrenBoxStorage__NotAuthorizedContract"
         );
       });
     }
@@ -91,55 +91,40 @@ export default function shouldBehaveLikeCanSendAsset(): void {
 }
 
 function shouldBehaveLikeCanSendAssetCorrectly() {
-  it("sends asset amount", async function () {
-    const { activePool } = this.redeployedContracts;
+  it("sends collateral amount correctly", async function () {
+    const { trenBoxStorage } = this.redeployedContracts;
     const { erc20 } = this.testContracts;
 
-    await activePool.connect(this.impostor).receivedERC20(erc20, 5n);
+    await trenBoxStorage.connect(this.impostor).increaseActiveCollateral(erc20, 50n);
 
     const assetAmount = 2n;
     const recipient = this.signers.accounts[2];
     const balanceBefore = await erc20.balanceOf(recipient.address);
-    const activePoolBalanceBefore = await erc20.balanceOf(activePool);
+    const trenBoxStorageBalanceBefore = await erc20.balanceOf(trenBoxStorage);
 
-    await activePool.connect(this.impostor).sendAsset(erc20, recipient, assetAmount);
+    await trenBoxStorage.connect(this.impostor).sendAsset(erc20, recipient, assetAmount);
     const balanceAfter = await erc20.balanceOf(recipient.address);
-    const activePoolBalanceAfter = await erc20.balanceOf(activePool);
+    const trenBoxStorageBalanceAfter = await erc20.balanceOf(trenBoxStorage);
 
     expect(balanceAfter).to.be.equal(balanceBefore + assetAmount);
-    expect(activePoolBalanceAfter).to.be.equal(activePoolBalanceBefore - assetAmount);
+    expect(trenBoxStorageBalanceAfter).to.be.equal(trenBoxStorageBalanceBefore - assetAmount);
   });
 
-  it("should emit ActivePoolAssetBalanceUpdated", async function () {
-    const { activePool } = this.redeployedContracts;
+  it("should emit CollateralSent", async function () {
+    const { trenBoxStorage } = this.redeployedContracts;
     const { erc20 } = this.testContracts;
 
-    await activePool.connect(this.impostor).receivedERC20(erc20, 5n);
+    await trenBoxStorage.connect(this.impostor).increaseActiveCollateral(erc20, 5n);
 
     const assetAmount = 2n;
     const recipient = this.signers.accounts[2];
 
-    const sendAssetTx = await activePool
+    const sendAssetTx = await trenBoxStorage
       .connect(this.impostor)
       .sendAsset(erc20, recipient, assetAmount);
+
     await expect(sendAssetTx)
-      .to.emit(activePool, "ActivePoolAssetBalanceUpdated")
-      .withArgs(erc20, 3n);
-  });
-
-  it("should emit AssetSent", async function () {
-    const { activePool } = this.redeployedContracts;
-    const { erc20 } = this.testContracts;
-    await activePool.connect(this.impostor).receivedERC20(erc20, 5n);
-
-    const assetAmount = 2n;
-    const recipient = this.signers.accounts[2];
-
-    const sendAssetTx = await activePool
-      .connect(this.impostor)
-      .sendAsset(erc20, recipient, assetAmount);
-    await expect(sendAssetTx)
-      .to.emit(activePool, "AssetSent")
-      .withArgs(recipient, erc20, assetAmount);
+      .to.emit(trenBoxStorage, "CollateralSent")
+      .withArgs(recipient, erc20, 2n);
   });
 }

@@ -8,10 +8,10 @@ export default function shouldBehaveLikeCanClaimColl(): void {
     await collSurplusPool.waitForDeployment();
     await collSurplusPool.initialize(this.signers.deployer);
 
-    const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
-    const activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
-    await activePool.waitForDeployment();
-    await activePool.initialize(this.signers.deployer);
+    const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
+    const trenBoxStorage = await TrenBoxStorageFactory.connect(this.signers.deployer).deploy();
+    await trenBoxStorage.waitForDeployment();
+    await trenBoxStorage.initialize(this.signers.deployer);
 
     const TrenBoxManagerFactory = await ethers.getContractFactory("TrenBoxManager");
     const trenBoxManager = await TrenBoxManagerFactory.connect(this.signers.deployer).deploy();
@@ -19,11 +19,11 @@ export default function shouldBehaveLikeCanClaimColl(): void {
     await trenBoxManager.initialize(this.signers.deployer);
 
     this.redeployedContracts.collSurplusPool = collSurplusPool;
-    this.redeployedContracts.activePool = activePool;
+    this.redeployedContracts.trenBoxStorage = trenBoxStorage;
     this.redeployedContracts.trenBoxManager = trenBoxManager;
 
     this.borrowerOperationsImpostor = this.signers.accounts[1];
-    this.activePoolImpostor = this.signers.accounts[2];
+    this.trenBoxStorageImpostor = this.signers.accounts[2];
     this.trenBoxManagerImpostor = this.signers.accounts[3];
 
     const { erc20, erc20_with_6_decimals } = this.testContracts;
@@ -38,7 +38,7 @@ export default function shouldBehaveLikeCanClaimColl(): void {
       beforeEach(async function () {
         const addressesForSetAddresses1 = await this.utils.getAddressesForSetAddresses({
           borrowerOperations: this.borrowerOperationsImpostor,
-          activePool: this.activePoolImpostor,
+          trenBoxStorage: this.trenBoxStorageImpostor,
           trenBoxManager: this.trenBoxManagerImpostor,
         });
 
@@ -88,7 +88,7 @@ export default function shouldBehaveLikeCanClaimColl(): void {
           await this.redeployedContracts.collSurplusPool.getAssetBalance(erc20);
 
         await this.redeployedContracts.collSurplusPool
-          .connect(this.activePoolImpostor)
+          .connect(this.trenBoxStorageImpostor)
           .receivedERC20(erc20, assetAmount);
 
         const assetBalanceAfter =
@@ -109,7 +109,7 @@ export default function shouldBehaveLikeCanClaimColl(): void {
       beforeEach(async function () {
         const addressesForSetAddresses1 = await this.utils.getAddressesForSetAddresses({
           borrowerOperations: this.borrowerOperationsImpostor,
-          activePool: this.activePoolImpostor,
+          trenBoxStorage: this.trenBoxStorageImpostor,
           trenBoxManager: this.trenBoxManagerImpostor,
         });
 
@@ -126,7 +126,7 @@ export default function shouldBehaveLikeCanClaimColl(): void {
           await this.redeployedContracts.collSurplusPool.getAssetBalance(erc20_with_6_decimals);
 
         await this.redeployedContracts.collSurplusPool
-          .connect(this.activePoolImpostor)
+          .connect(this.trenBoxStorageImpostor)
           .receivedERC20(erc20_with_6_decimals, assetAmount);
 
         const assetBalanceAfter =
@@ -142,14 +142,12 @@ export default function shouldBehaveLikeCanClaimColl(): void {
         const user = this.signers.accounts[1];
 
         const userAssetBalanceBefore = await erc20_with_6_decimals.balanceOf(user.address);
-        console.log("userAssetBalanceBefore", userAssetBalanceBefore);
 
         const claimCollTx = await this.redeployedContracts.collSurplusPool
           .connect(this.borrowerOperationsImpostor)
           .claimColl(erc20_with_6_decimals, user.address);
 
         const userAssetBalanceAfter = await erc20_with_6_decimals.balanceOf(user.address);
-        console.log("userAssetBalanceAfter", userAssetBalanceAfter);
 
         expect(userAssetBalanceAfter).to.be.equal(
           userAssetBalanceBefore + assetAmount / BigInt(10 ** (18 - Number(decimal)))

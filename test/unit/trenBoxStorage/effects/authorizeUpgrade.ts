@@ -5,7 +5,7 @@ export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
     it("should emit DefaultPoolDebtUpdated", async function () {
       const { wETH } = this.collaterals.active;
 
-      await this.contracts.defaultPool
+      await this.contracts.trenBoxStorage
         .connect(this.signers.deployer)
         .authorizeUpgrade(wETH.address);
     });
@@ -17,8 +17,8 @@ export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
       const { wETH } = this.collaterals.active;
 
       await expect(
-        this.contracts.defaultPool.connect(impostor).authorizeUpgrade(wETH.address)
-      ).to.be.revertedWithCustomError(this.contracts.defaultPool, "OwnableUnauthorizedAccount");
+        this.contracts.trenBoxStorage.connect(impostor).authorizeUpgrade(wETH.address)
+      ).to.be.revertedWithCustomError(this.contracts.trenBoxStorage, "OwnableUnauthorizedAccount");
     });
   });
 }

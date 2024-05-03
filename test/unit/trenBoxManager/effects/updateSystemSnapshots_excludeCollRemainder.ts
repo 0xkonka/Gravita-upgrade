@@ -8,13 +8,13 @@ export default function shouldBehaveLikeCanUpdateSystemSnapshots_excludeCollRema
     await trenBoxManager.waitForDeployment();
     await trenBoxManager.initialize(this.signers.deployer);
 
-    const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
-    const activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
-    await activePool.waitForDeployment();
-    await activePool.initialize(this.signers.deployer);
+    const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
+    const trenBoxStorage = await TrenBoxStorageFactory.connect(this.signers.deployer).deploy();
+    await trenBoxStorage.waitForDeployment();
+    await trenBoxStorage.initialize(this.signers.deployer);
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;
-    this.redeployedContracts.activePool = activePool;
+    this.redeployedContracts.trenBoxStorage = trenBoxStorage;
 
     this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
     this.borrowerOperationsImpostor = this.signers.accounts[2];
@@ -24,14 +24,14 @@ export default function shouldBehaveLikeCanUpdateSystemSnapshots_excludeCollRema
     beforeEach(async function () {
       await this.utils.connectRedeployedContracts({
         trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
-        activePool: this.redeployedContracts.activePool,
+        trenBoxStorage: this.redeployedContracts.trenBoxStorage,
         borrowerOperations: this.borrowerOperationsImpostor,
         trenBoxManager: this.redeployedContracts.trenBoxManager,
       });
 
-      await this.redeployedContracts.activePool
+      await this.redeployedContracts.trenBoxStorage
         .connect(this.borrowerOperationsImpostor)
-        .receivedERC20(this.collaterals.active.wETH.address, 20n);
+        .increaseActiveCollateral(this.collaterals.active.wETH.address, 20n);
     });
 
     it("executes updateSystemSnapshots_excludeCollRemainder and emit SystemSnapshotsUpdated", async function () {

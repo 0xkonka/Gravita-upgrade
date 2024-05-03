@@ -8,35 +8,35 @@ export default function shouldBehaveLikeCanSendGasCompensation(): void {
     await trenBoxManager.waitForDeployment();
     await trenBoxManager.initialize(this.signers.deployer);
 
-    const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
-    const activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
-    await activePool.waitForDeployment();
-    await activePool.initialize(this.signers.deployer);
+    const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
+    const trenBoxStorage = await TrenBoxStorageFactory.connect(this.signers.deployer).deploy();
+    await trenBoxStorage.waitForDeployment();
+    await trenBoxStorage.initialize(this.signers.deployer);
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;
-    this.redeployedContracts.activePool = activePool;
+    this.redeployedContracts.trenBoxStorage = trenBoxStorage;
 
     this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
     this.borrowerOperationsImpostor = this.signers.accounts[2];
 
     const { erc20 } = this.testContracts;
-    await erc20.mint(this.redeployedContracts.activePool, 1000n);
+    await erc20.mint(this.redeployedContracts.trenBoxStorage, 1000n);
   });
 
   context("when caller is trenBoxManagerOperations", function () {
     beforeEach(async function () {
       await this.utils.connectRedeployedContracts({
         trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
-        activePool: this.redeployedContracts.activePool,
+        trenBoxStorage: this.redeployedContracts.trenBoxStorage,
         trenBoxManager: this.redeployedContracts.trenBoxManager,
         borrowerOperations: this.borrowerOperationsImpostor,
         debtToken: this.contracts.debtToken,
       });
 
-      const gasPool = this.contracts.gasPool.getAddress();
+      const trenBoxStorageAddress = this.redeployedContracts.trenBoxStorage.getAddress();
       await this.contracts.debtToken
         .connect(this.borrowerOperationsImpostor)
-        .mint(this.testContracts.erc20, gasPool, 50n);
+        .mint(this.testContracts.erc20, trenBoxStorageAddress, 50n);
     });
 
     it("executes sendGasCompensation if we have all values", async function () {
@@ -45,12 +45,12 @@ export default function shouldBehaveLikeCanSendGasCompensation(): void {
       const debtTokenAmount = 50n;
       const assetAmount = 20n;
 
-      await this.redeployedContracts.activePool
+      await this.redeployedContracts.trenBoxStorage
         .connect(this.borrowerOperationsImpostor)
-        .receivedERC20(erc20, assetAmount);
+        .increaseActiveCollateral(erc20, assetAmount);
 
-      const gasPoolBalanceBefore = await this.contracts.debtToken.balanceOf(
-        this.contracts.gasPool.getAddress()
+      const trenBoxStorageBalanceBefore = await this.contracts.debtToken.balanceOf(
+        this.redeployedContracts.trenBoxStorage.getAddress()
       );
       const liquidatorBalanceBefore = await this.contracts.debtToken.balanceOf(liquidator);
 
@@ -58,13 +58,13 @@ export default function shouldBehaveLikeCanSendGasCompensation(): void {
         .connect(this.trenBoxManagerOperationsImpostor)
         .sendGasCompensation(erc20, liquidator, debtTokenAmount, assetAmount);
 
-      const gasPoolBalanceAfter = await this.contracts.debtToken.balanceOf(
-        this.contracts.gasPool.getAddress()
+      const trenBoxStorageBalanceAfter = await this.contracts.debtToken.balanceOf(
+        this.redeployedContracts.trenBoxStorage.getAddress()
       );
       const liquidatorBalanceAfter = await this.contracts.debtToken.balanceOf(liquidator);
       const liquidatorAssetBalanceAfter = await erc20.balanceOf(liquidator);
 
-      expect(gasPoolBalanceAfter).to.be.equal(gasPoolBalanceBefore - debtTokenAmount);
+      expect(trenBoxStorageBalanceAfter).to.be.equal(trenBoxStorageBalanceBefore - debtTokenAmount);
       expect(liquidatorBalanceAfter).to.be.equal(liquidatorBalanceBefore + debtTokenAmount);
       expect(liquidatorAssetBalanceAfter).to.equal(assetAmount);
     });
@@ -73,8 +73,8 @@ export default function shouldBehaveLikeCanSendGasCompensation(): void {
       const { erc20 } = this.testContracts;
       const liquidator = this.signers.accounts[4];
 
-      const gasPoolBalanceBefore = await this.contracts.debtToken.balanceOf(
-        this.contracts.gasPool.getAddress()
+      const trenBoxStorageBalanceBefore = await this.contracts.debtToken.balanceOf(
+        this.redeployedContracts.trenBoxStorage.getAddress()
       );
       const liquidatorBalanceBefore = await this.contracts.debtToken.balanceOf(liquidator);
 
@@ -82,13 +82,13 @@ export default function shouldBehaveLikeCanSendGasCompensation(): void {
         .connect(this.trenBoxManagerOperationsImpostor)
         .sendGasCompensation(erc20, liquidator, 0, 0);
 
-      const gasPoolBalanceAfter = await this.contracts.debtToken.balanceOf(
-        this.contracts.gasPool.getAddress()
+      const trenBoxStorageBalanceAfter = await this.contracts.debtToken.balanceOf(
+        this.redeployedContracts.trenBoxStorage.getAddress()
       );
       const liquidatorBalanceAfter = await this.contracts.debtToken.balanceOf(liquidator);
       const liquidatorAssetBalanceAfter = await erc20.balanceOf(liquidator);
 
-      expect(gasPoolBalanceAfter).to.be.equal(gasPoolBalanceBefore);
+      expect(trenBoxStorageBalanceAfter).to.be.equal(trenBoxStorageBalanceBefore);
       expect(liquidatorBalanceAfter).to.be.equal(liquidatorBalanceBefore);
       expect(liquidatorAssetBalanceAfter).to.equal(0);
     });

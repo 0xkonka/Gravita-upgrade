@@ -12,13 +12,13 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
 
     this.redeployedContracts.collSurplusPool = redeployedCollSurplusPool;
 
-    this.activePoolImpostor = this.signers.accounts[1];
+    this.trenBoxStorageImpostor = this.signers.accounts[1];
   });
 
-  context("when caller is active pool", function () {
+  context("when caller is TrenBoxStorage", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        activePool: this.activePoolImpostor,
+        trenBoxStorage: this.trenBoxStorageImpostor,
       });
 
       await this.redeployedContracts.collSurplusPool.setAddresses(addressesForSetAddresses);
@@ -27,7 +27,7 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
     shouldBehaveLikeCanReceivedERC20Correctly();
   });
 
-  context("when caller is not active pool", function () {
+  context("when caller is not TrenBoxStorage", function () {
     it("reverts custom error", async function () {
       const impostor = this.signers.accounts[1];
       const { wETH } = this.collaterals.active;
@@ -37,7 +37,7 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
         this.contracts.collSurplusPool.connect(impostor).receivedERC20(wETH.address, debtAmount)
       ).to.be.revertedWithCustomError(
         this.contracts.collSurplusPool,
-        "CollSurplusPool__NotActivePool"
+        "CollSurplusPool__NotTrenBoxStorage"
       );
     });
   });
@@ -53,7 +53,7 @@ function shouldBehaveLikeCanReceivedERC20Correctly() {
     );
 
     await this.redeployedContracts.collSurplusPool
-      .connect(this.activePoolImpostor)
+      .connect(this.trenBoxStorageImpostor)
       .receivedERC20(wETH.address, assetAmount);
     const assetBalanceAfter = await this.redeployedContracts.collSurplusPool.getAssetBalance(
       wETH.address

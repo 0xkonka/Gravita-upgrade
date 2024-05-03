@@ -9,17 +9,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { getChainId } = hre;
   const chainId = await getChainId();
 
-  await callSetAddresses("ActivePool", hre);
   await callSetAddresses("AdminContract", hre);
   await callSetAddresses("BorrowerOperations", hre);
   await callSetAddresses("CollSurplusPool", hre);
-  await callSetAddresses("DefaultPool", hre);
   await callSetAddresses("FeeCollector", hre);
   await callSetAddresses("FlashLoan", hre);
   await callSetAddresses("SortedTrenBoxes", hre);
   await callSetAddresses("StabilityPool", hre);
   await callSetAddresses("TrenBoxManager", hre);
   await callSetAddresses("TrenBoxManagerOperations", hre);
+  await callSetAddresses("TrenBoxStorage", hre);
 
   if (isLocalhostNetwork(chainId)) {
     console.log("⛓️ Skipping PriceFeedTestnet connection on a local network");
@@ -46,15 +45,12 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
     contractToSetAddressesDeployment.address
   );
 
-  const activePoolDeployment = await deployments.get("ActivePool");
   const adminContractDeployment = await deployments.get("AdminContract");
   const borrowerOperationsDeployment = await deployments.get("BorrowerOperations");
   const collSurplusPoolDeployment = await deployments.get("CollSurplusPool");
   const debtTokenDeployment = await deployments.get("DebtToken");
-  const defaultPoolDeployment = await deployments.get("DefaultPool");
   const feeCollectorDeployment = await deployments.get("FeeCollector");
   const flashLoanDeployment = await deployments.get("FlashLoan");
-  const gasPoolDeployment = await deployments.get("GasPool");
 
   let priceFeedDeployment: Deployment;
   if (isLocalhostNetwork(chainId)) {
@@ -73,6 +69,7 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
 
   const trenBoxManagerDeployment = await deployments.get("TrenBoxManager");
   const trenBoxManagerOperationsDeployment = await deployments.get("TrenBoxManagerOperations");
+  const trenBoxStorageDeployment = await deployments.get("TrenBoxStorage");
 
   await deployments.execute(
     contractName,
@@ -83,15 +80,12 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
     },
     "setAddresses",
     [
-      activePoolDeployment.address,
       adminContractDeployment.address,
       borrowerOperationsDeployment.address,
       collSurplusPoolDeployment.address,
       debtTokenDeployment.address,
-      defaultPoolDeployment.address,
       feeCollectorDeployment.address,
       flashLoanDeployment.address,
-      gasPoolDeployment.address,
       priceFeedDeployment.address,
       sortedTrenBoxesDeployment.address,
       stabilityPoolDeployment.address,
@@ -99,19 +93,17 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
       treasuryAddress,
       trenBoxManagerDeployment.address,
       trenBoxManagerOperationsDeployment.address,
+      trenBoxStorageDeployment.address,
     ]
   );
 
   console.log(`⛓️ Connected: ${chalk.cyan(contractName)} to:`);
-  console.log(`   - ActivePool: ${chalk.grey(await contract.activePool())}`);
   console.log(`   - AdminContract: ${chalk.grey(await contract.adminContract())}`);
   console.log(`   - BorrowerOperations: ${chalk.grey(await contract.borrowerOperations())}`);
   console.log(`   - CollSurplusPool: ${chalk.grey(await contract.collSurplusPool())}`);
   console.log(`   - DebtToken: ${chalk.grey(await contract.debtToken())}`);
-  console.log(`   - DefaultPool: ${chalk.grey(await contract.defaultPool())}`);
   console.log(`   - FeeCollector: ${chalk.grey(await contract.feeCollector())}`);
   console.log(`   - FlashLoan: ${chalk.grey(await contract.flashLoanAddress())}`);
-  console.log(`   - GasPool: ${chalk.grey(await contract.gasPoolAddress())}`);
   console.log(`   - PriceFeed: ${chalk.grey(await contract.priceFeed())}`);
   console.log(`   - SortedTrenBoxes: ${chalk.grey(await contract.sortedTrenBoxes())}`);
   console.log(`   - StabilityPool: ${chalk.grey(await contract.stabilityPool())}`);
@@ -121,4 +113,5 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
   console.log(
     `   - TrenBoxManagerOperations: ${chalk.grey(await contract.trenBoxManagerOperations())}`
   );
+  console.log(`   - TrenBoxStorage: ${chalk.grey(await contract.trenBoxStorage())}`);
 }

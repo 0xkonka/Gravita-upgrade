@@ -1,3 +1,4 @@
+import type { AddressLike } from "ethers";
 import type { DeployFunction, DeployResult } from "hardhat-deploy/types";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -12,8 +13,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await getNamedAccounts();
   const chainId = await getChainId();
 
-  await preDeploy(deployer, "DefaultPool");
-  const deterministicDeploy = await deterministic("DefaultPool", {
+  await preDeploy(deployer, "TrenBoxStorage");
+  const deterministicDeploy = await deterministic("TrenBoxStorage", {
     from: deployer,
     proxy: {
       execute: {
@@ -33,16 +34,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // You don't want to verify on localhost
   if (isLocalhostNetwork(chainId) === false) {
-    const contractPath = `contracts/DefaultPool.sol:DefaultPool`;
+    const contractPath = `contracts/TrenBoxStorage.sol:TrenBoxStorage`;
     await verifyContract({
       contractPath: contractPath,
       contractAddress: deployResult.address,
       args: deployResult.args || [],
-      isUpgradeable: true,
     });
   }
 };
 
 export default func;
-func.id = "deploy_DefaultPool";
-func.tags = ["DefaultPool"];
+func.id = "deploy_TrenBoxStorage";
+func.tags = ["TrenBoxStorage"];

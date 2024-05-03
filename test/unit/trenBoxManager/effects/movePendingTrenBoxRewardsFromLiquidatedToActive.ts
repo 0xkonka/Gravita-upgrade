@@ -1,26 +1,20 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-export default function shouldBehaveLikeCanMovePendingTrenBoxRewardsToActivePool(): void {
+export default function shouldBehaveLikeCanMovePendingTrenBoxRewardsFromLiquidatedToActive(): void {
   beforeEach(async function () {
     const TrenBoxManagerFactory = await ethers.getContractFactory("TrenBoxManager");
     const trenBoxManager = await TrenBoxManagerFactory.connect(this.signers.deployer).deploy();
     await trenBoxManager.waitForDeployment();
     await trenBoxManager.initialize(this.signers.deployer);
 
-    const DefaultPoolFactory = await ethers.getContractFactory("DefaultPool");
-    const defaultPool = await DefaultPoolFactory.connect(this.signers.deployer).deploy();
-    await defaultPool.waitForDeployment();
-    await defaultPool.initialize(this.signers.deployer);
-
-    const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
-    const activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
-    await activePool.waitForDeployment();
-    await activePool.initialize(this.signers.deployer);
+    const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
+    const trenBoxStorage = await TrenBoxStorageFactory.connect(this.signers.deployer).deploy();
+    await trenBoxStorage.waitForDeployment();
+    await trenBoxStorage.initialize(this.signers.deployer);
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;
-    this.redeployedContracts.defaultPool = defaultPool;
-    this.redeployedContracts.activePool = activePool;
+    this.redeployedContracts.trenBoxStorage = trenBoxStorage;
 
     this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
   });
@@ -29,18 +23,17 @@ export default function shouldBehaveLikeCanMovePendingTrenBoxRewardsToActivePool
     beforeEach(async function () {
       await this.utils.connectRedeployedContracts({
         trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
-        defaultPool: this.redeployedContracts.defaultPool,
         trenBoxManager: this.redeployedContracts.trenBoxManager,
-        activePool: this.redeployedContracts.activePool,
+        trenBoxStorage: this.redeployedContracts.trenBoxStorage,
       });
     });
 
-    it("executes movePendingTrenBoxRewardsToActivePool and returns zero", async function () {
+    it("executes movePendingTrenBoxRewardsFromLiquidatedToActive and returns zero", async function () {
       const { wETH } = this.collaterals.active;
 
       const res = await this.redeployedContracts.trenBoxManager
         .connect(this.trenBoxManagerOperationsImpostor)
-        .movePendingTrenBoxRewardsToActivePool(wETH.address, 0, 0);
+        .movePendingTrenBoxRewardsFromLiquidatedToActive(wETH.address, 0, 0);
 
       expect(res).to.not.be.equal(0);
     });
@@ -54,7 +47,7 @@ export default function shouldBehaveLikeCanMovePendingTrenBoxRewardsToActivePool
       await expect(
         this.redeployedContracts.trenBoxManager
           .connect(impostor)
-          .movePendingTrenBoxRewardsToActivePool(wETH.address, 100n, 50n)
+          .movePendingTrenBoxRewardsFromLiquidatedToActive(wETH.address, 100n, 50n)
       ).to.be.revertedWithCustomError(
         this.contracts.trenBoxManager,
         "TrenBoxManager__OnlyTrenBoxManagerOperations"

@@ -119,7 +119,6 @@ export default function shouldBehaveLikeCanWithdrawColl() {
 
       const collateralAddress = await erc20.getAddress();
 
-      // TODO: How to calculate those values?
       const expectedDebt = 2010050000000000000000n;
       const expectedCollateral = 150000000000000000000000000000000n;
       const expectedStake = 150000000000000000000000000000000n;
@@ -151,10 +150,10 @@ export default function shouldBehaveLikeCanWithdrawColl() {
       await expect(withdrawCollateralTx).to.changeTokenBalances(erc20, [user], [amountToWithdraw]);
     });
 
-    it("should decrease ActivePool collateral balance", async function () {
+    it("should decrease TrenBoxStorage collateral balance", async function () {
       const [user] = this.users;
       const { erc20 } = this.testContracts;
-      const { activePool } = this.contracts;
+      const { trenBoxStorage } = this.contracts;
 
       const amountToWithdraw = ethers.parseUnits("100", 30);
 
@@ -166,7 +165,7 @@ export default function shouldBehaveLikeCanWithdrawColl() {
 
       await expect(withdrawCollateralTx).to.changeTokenBalances(
         erc20,
-        [activePool],
+        [trenBoxStorage],
         [-amountToWithdraw]
       );
     });
@@ -185,22 +184,6 @@ export default function shouldBehaveLikeCanWithdrawColl() {
       });
 
       await expect(withdrawCollateralTx).to.changeTokenBalances(debtToken, [user], [0]);
-    });
-
-    it.skip("should not emit DebtToken Transfer event", async function () {
-      const [user] = this.users;
-      const { erc20 } = this.testContracts;
-      const { debtToken } = this.contracts;
-
-      const amountToWithdraw = ethers.parseUnits("100", 30);
-
-      const withdrawCollateralTx = await this.utils.withdrawCollateral({
-        from: user,
-        collateral: erc20,
-        amount: amountToWithdraw,
-      });
-
-      await expect(withdrawCollateralTx).to.not.emit(debtToken, "Transfer");
     });
   });
 

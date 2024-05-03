@@ -6,16 +6,13 @@ import { AddressLike, BaseContract, ContractTransactionResponse } from "ethers";
 
 import { Collateral } from "../../config/collaterals";
 import type {
-  ActivePool,
   AdminContract,
   BorrowerOperations,
   CollSurplusPool,
   DebtToken,
-  DefaultPool,
   ERC20,
   FeeCollector,
   FlashLoan,
-  GasPool,
   IPriceFeed,
   PriceFeed,
   PriceFeedL2,
@@ -25,6 +22,7 @@ import type {
   Timelock,
   TrenBoxManager,
   TrenBoxManagerOperations,
+  TrenBoxStorage,
 } from "../../types";
 import {
   ERC20Test,
@@ -53,21 +51,19 @@ declare module "mocha" {
 }
 
 export interface Contracts {
-  activePool: ActivePool;
   adminContract: AdminContract;
   borrowerOperations: BorrowerOperations;
   collSurplusPool: CollSurplusPool;
   debtToken: DebtToken;
-  defaultPool: DefaultPool;
   feeCollector: FeeCollector;
   flashLoan: FlashLoan;
-  gasPool: GasPool;
   priceFeed: IPriceFeed;
   sortedTrenBoxes: SortedTrenBoxes;
   stabilityPool: StabilityPool;
   timelock: Timelock;
   trenBoxManager: TrenBoxManager;
   trenBoxManagerOperations: TrenBoxManagerOperations;
+  trenBoxStorage: TrenBoxStorage;
 }
 
 export interface RedeployedContracts extends Contracts {

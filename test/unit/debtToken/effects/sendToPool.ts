@@ -64,20 +64,6 @@ export default function shouldBehaveLikeCanSendToPool(): void {
           .withArgs(this.tokenHolder, this.poolAddress, amountToSend);
       });
     });
-
-    context("when sending to incorrect pool address", function () {
-      context("when pool address is zero", function () {
-        it.skip("reverts", async function () {
-          const amountToSend = 100n;
-
-          await expect(
-            this.contracts.debtToken
-              .connect(this.stabilityPool)
-              .sendToPool(this.tokenHolder, this.signers.accounts[0].address, amountToSend)
-          ).to.be.reverted;
-        });
-      });
-    });
   });
 
   context("when caller is not StabilityPool", function () {

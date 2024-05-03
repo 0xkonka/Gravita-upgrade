@@ -211,7 +211,9 @@ contract TrenBoxStorage is
         uint256 safetyTransferAmount = SafetyTransfer.decimalsCorrection(_collateral, _amount);
         if (safetyTransferAmount == 0) return;
 
-        this.decreaseActiveCollateral(_collateral, _amount);
+        uint256 newBalance = collateralBalances[_collateral].active - _amount;
+        collateralBalances[_collateral].active = newBalance;
+        emit ActiveCollateralBalanceUpdated(_collateral, newBalance);
 
         IERC20(_collateral).safeTransfer(_account, safetyTransferAmount);
 
