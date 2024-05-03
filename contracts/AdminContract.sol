@@ -39,26 +39,27 @@ contract AdminContract is
 
     /**
      * @dev Cannot be public as struct has too many variables for the stack.
-     * 		@dev Create special view structs/getters instead.
+     * Create special view structs/getters instead.
      */
     mapping(address collateral => CollateralParams params) internal collateralParams;
 
     FlashLoanParams public flashLoanParams;
 
-    // list of all collateral types in collateralParams (active and deprecated)
-    // Addresses for easy access
-    address[] public validCollateral; // index maps to token address.
-
+    /// @dev list of all collateral types in collateralParams (active and deprecated)
+    address[] public validCollateral;
+    /// @dev check if all initial collaterals have been configured or not
     bool public isSetupInitialized;
-    bool public routeToTRENStaking = false; // if true, collected fees go to stakers; if false, to
-        // the treasury
+    /// @dev if true, collected fees go to stakers; if false, to the treasury
+    bool public routeToTRENStaking = false;
 
     // Modifiers
     // --------------------------------------------------------------------------------------------------------
 
-    // Require that the collateral exists in the controller. If it is not the 0th index, and the
-    // index is still 0 then it does not exist in the mapping.
-    // no require here for valid collateral 0 index because that means it exists.
+    /**
+     * @dev Require that the collateral exists in the controller. If it is not the 0th index, and
+     * the index is still 0 then it does not exist in the mapping.
+     * no require here for valid collateral 0 index because that means it exists.
+     */
     modifier exists(address _collateral) {
         _exists(_collateral);
         _;
@@ -104,9 +105,8 @@ contract AdminContract is
 
     /**
      * @dev The deployment script will call this function when all initial collaterals have been
-     * configured;
-     *      after this is set to true, all subsequent config/setters will need to go through the
-     * timelocks.
+     * configured; after this is set to true,
+     * all subsequent config/setters will need to go through the timelocks.
      */
     function setSetupIsInitialized() external onlyTimelock {
         isSetupInitialized = true;
@@ -115,10 +115,15 @@ contract AdminContract is
     // External Functions
     // -----------------------------------------------------------------------------------------------
 
+    /**
+     * @notice Add new collateral asset
+     * @param _collateral asset address
+     * @param _debtTokenGasCompensation amount of debtToken to be locked on opening TrenBoxes
+     * as liquidation reserve.
+     */
     function addNewCollateral(
         address _collateral,
-        uint256 _debtTokenGasCompensation // the gas compensation is initialized here as it won't
-            // be changed
+        uint256 _debtTokenGasCompensation
     )
         external
         override
@@ -149,6 +154,17 @@ contract AdminContract is
         IStabilityPool(stabilityPool).addCollateralType(_collateral);
     }
 
+    /**
+     * @notice Set collateral parameters
+     * @param _collateral asset address
+     * @param borrowingFee one time fee charged on the loan amount and added to your debt
+     * @param ccr critical collateral ratio to avoid liquidation during Recovery Mode
+     * @param mcr minimum collateral ratio to avoid liquidation during Normal Mode
+     * @param minNetDebt minimum amount of net debtToken a TrenBox must have
+     * @param mintCap total TrenUSD amount to be allocated
+     * @param percentDivisor divisor to be used in percent calculation
+     * @param redemptionFeeFloor one time fee charged on the redeemed amount
+     */
     function setCollateralParameters(
         address _collateral,
         uint256 borrowingFee,
@@ -173,11 +189,21 @@ contract AdminContract is
         setRedemptionFeeFloor(_collateral, redemptionFeeFloor);
     }
 
+    /**
+     * @notice Set the status of collateral
+     * @param _collateral asset address
+     * @param _active status of collateral; true or false
+     */
     function setIsActive(address _collateral, bool _active) external onlyTimelock {
         CollateralParams storage collParams = collateralParams[_collateral];
         collParams.active = _active;
     }
 
+    /**
+     * @notice Set the borrowing fee
+     * @param _collateral asset address
+     * @param borrowingFee one time fee charged on the loan amount and added to your debt
+     */
     function setBorrowingFee(
         address _collateral,
         uint256 borrowingFee
@@ -193,6 +219,11 @@ contract AdminContract is
         emit BorrowingFeeChanged(oldBorrowing, borrowingFee);
     }
 
+    /**
+     * @notice Set the critical collateral ratio
+     * @param _collateral asset address
+     * @param newCCR new collateral ratio to avoid liquidations during Recovery Mode
+     */
     function setCCR(
         address _collateral,
         uint256 newCCR
@@ -208,6 +239,11 @@ contract AdminContract is
         emit CCRChanged(oldCCR, newCCR);
     }
 
+    /**
+     * @notice Set the minimum collateral ratio
+     * @param _collateral asset address
+     * @param newMCR new collateral ratio to avoid liquidations under normal operation
+     */
     function setMCR(
         address _collateral,
         uint256 newMCR
@@ -223,6 +259,11 @@ contract AdminContract is
         emit MCRChanged(oldMCR, newMCR);
     }
 
+    /**
+     * @notice Set the minimum amount of net debt
+     * @param _collateral asset address
+     * @param minNetDebt minimum amount of net debtToken a TrenBox must have
+     */
     function setMinNetDebt(
         address _collateral,
         uint256 minNetDebt
@@ -238,6 +279,11 @@ contract AdminContract is
         emit MinNetDebtChanged(oldMinNet, minNetDebt);
     }
 
+    /**
+     * @notice Set the total loan amount to be allocated
+     * @param _collateral asset address
+     * @param mintCap total loan amount that can be minted
+     */
     function setMintCap(address _collateral, uint256 mintCap) public override onlyTimelock {
         CollateralParams storage collParams = collateralParams[_collateral];
         uint256 oldMintCap = collParams.mintCap;
@@ -245,6 +291,11 @@ contract AdminContract is
         emit MintCapChanged(oldMintCap, mintCap);
     }
 
+    /**
+     * @notice Set the percent divisor
+     * @param _collateral asset address
+     * @param percentDivisor divisor to be used in percent calculation; min 2, max 200
+     */
     function setPercentDivisor(
         address _collateral,
         uint256 percentDivisor
@@ -260,6 +311,12 @@ contract AdminContract is
         emit PercentDivisorChanged(oldPercent, percentDivisor);
     }
 
+    /**
+     * @notice Set the redemption fee floor
+     * @param _collateral asset address
+     * @param redemptionFeeFloor fee charged on the redeemed amount(scaled by 1e18);
+     * min 0.001(0.1%), max 0.1(10%)
+     */
     function setRedemptionFeeFloor(
         address _collateral,
         uint256 redemptionFeeFloor
@@ -267,8 +324,7 @@ contract AdminContract is
         public
         override
         onlyTimelock
-        safeCheck("Redemption Fee Floor", _collateral, redemptionFeeFloor, 0.001 ether, 0.1 ether) // 0.10%
-            // - 10%
+        safeCheck("Redemption Fee Floor", _collateral, redemptionFeeFloor, 0.001 ether, 0.1 ether)
     {
         CollateralParams storage collParams = collateralParams[_collateral];
         uint256 oldRedemptionFeeFloor = collParams.redemptionFeeFloor;
