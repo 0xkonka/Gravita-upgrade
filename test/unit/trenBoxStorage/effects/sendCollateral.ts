@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-export default function shouldBehaveLikeCanSendAsset(): void {
+export default function shouldBehaveLikeCanSendCollateral(): void {
   beforeEach(async function () {
     const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
     const trenBoxStorage = await TrenBoxStorageFactory.connect(this.signers.deployer).deploy();
@@ -27,7 +27,7 @@ export default function shouldBehaveLikeCanSendAsset(): void {
       await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
     });
 
-    shouldBehaveLikeCanSendAssetCorrectly();
+    shouldBehaveLikeCanSendCollateralCorrectly();
   });
 
   context("when caller is tren box manager", function () {
@@ -40,7 +40,7 @@ export default function shouldBehaveLikeCanSendAsset(): void {
       await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
     });
 
-    shouldBehaveLikeCanSendAssetCorrectly();
+    shouldBehaveLikeCanSendCollateralCorrectly();
   });
 
   context("when caller is tren box manager operations", function () {
@@ -53,7 +53,7 @@ export default function shouldBehaveLikeCanSendAsset(): void {
       await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
     });
 
-    shouldBehaveLikeCanSendAssetCorrectly();
+    shouldBehaveLikeCanSendCollateralCorrectly();
   });
 
   context("when caller is stability pool", function () {
@@ -66,7 +66,7 @@ export default function shouldBehaveLikeCanSendAsset(): void {
       await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
     });
 
-    shouldBehaveLikeCanSendAssetCorrectly();
+    shouldBehaveLikeCanSendCollateralCorrectly();
   });
 
   context(
@@ -80,7 +80,7 @@ export default function shouldBehaveLikeCanSendAsset(): void {
         await expect(
           this.contracts.trenBoxStorage
             .connect(this.impostor)
-            .sendAsset(wETH.address, recipient, assetAmount)
+            .sendCollateral(wETH.address, recipient, assetAmount)
         ).to.be.revertedWithCustomError(
           this.contracts.trenBoxStorage,
           "TrenBoxStorage__NotAuthorizedContract"
@@ -90,7 +90,7 @@ export default function shouldBehaveLikeCanSendAsset(): void {
   );
 }
 
-function shouldBehaveLikeCanSendAssetCorrectly() {
+function shouldBehaveLikeCanSendCollateralCorrectly() {
   it("sends collateral amount correctly", async function () {
     const { trenBoxStorage } = this.redeployedContracts;
     const { erc20 } = this.testContracts;
@@ -102,7 +102,7 @@ function shouldBehaveLikeCanSendAssetCorrectly() {
     const balanceBefore = await erc20.balanceOf(recipient.address);
     const trenBoxStorageBalanceBefore = await erc20.balanceOf(trenBoxStorage);
 
-    await trenBoxStorage.connect(this.impostor).sendAsset(erc20, recipient, assetAmount);
+    await trenBoxStorage.connect(this.impostor).sendCollateral(erc20, recipient, assetAmount);
     const balanceAfter = await erc20.balanceOf(recipient.address);
     const trenBoxStorageBalanceAfter = await erc20.balanceOf(trenBoxStorage);
 
@@ -121,7 +121,7 @@ function shouldBehaveLikeCanSendAssetCorrectly() {
 
     const sendAssetTx = await trenBoxStorage
       .connect(this.impostor)
-      .sendAsset(erc20, recipient, assetAmount);
+      .sendCollateral(erc20, recipient, assetAmount);
 
     await expect(sendAssetTx)
       .to.emit(trenBoxStorage, "CollateralSent")

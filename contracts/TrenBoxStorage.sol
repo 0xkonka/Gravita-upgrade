@@ -26,21 +26,37 @@ contract TrenBoxStorage is
 
     string public constant NAME = "TrenBoxStorage";
 
-    mapping(address collateral => Balance) internal collateralBalances;
-    mapping(address collateral => Balance) internal debtBalances;
+    mapping(address collateral => CollBalances) internal collateralBalances;
+    mapping(address collateral => DebtBalances) internal debtBalances;
+    mapping(address user => mapping(address collateral => uint256 balance)) internal
+        userClaimableCollateralBalances;
 
     // ------------------------------------------ Modifiers ---------------------------------------
 
     modifier onlyTrenBoxManager() {
         if (msg.sender != trenBoxManager) {
-            revert TrenBoxStorage__NotAuthorizedContract();
+            revert TrenBoxStorage__TrenBoxManagerOnly();
+        }
+        _;
+    }
+
+    modifier onlyBorrowerOperations() {
+        if (msg.sender != borrowerOperations) {
+            revert TrenBoxStorage__BorrowerOperationsOnly();
         }
         _;
     }
 
     modifier onlyBorrowerOperationsOrTrenBoxManager() {
         if (msg.sender != borrowerOperations && msg.sender != trenBoxManager) {
-            revert TrenBoxStorage__NotAuthorizedContract();
+            revert TrenBoxStorage__BorrowerOperationsOrTrenBoxManagerOnly();
+        }
+        _;
+    }
+
+    modifier onlyTrenBoxManagerOrTrenBoxManagerOpearations() {
+        if (msg.sender != trenBoxManager && msg.sender != trenBoxManagerOperations) {
+            revert TrenBoxStorage__TrenBoxManagerOrTrenBoxManagerOpearationsOnly();
         }
         _;
     }
@@ -94,6 +110,27 @@ contract TrenBoxStorage is
         returns (uint256)
     {
         return debtBalances[_collateral].liquidated;
+    }
+
+    function getClaimableCollateralBalance(address _collateral)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return collateralBalances[_collateral].claimable;
+    }
+
+    function getUserClaimableCollateralBalance(
+        address _collateral,
+        address _account
+    )
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return userClaimableCollateralBalances[_account][_collateral];
     }
 
     // ------------------------------------------ External functions ------------------------------
@@ -198,7 +235,35 @@ contract TrenBoxStorage is
         emit LiquidatedCollateralBalanceUpdated(_collateral, newBalance);
     }
 
-    function sendAsset(
+    function increaseClaimableCollateral(
+        address _collateral,
+        uint256 _amount
+    )
+        external
+        onlyTrenBoxManagerOrTrenBoxManagerOpearations
+    {
+        uint256 newBalance = collateralBalances[_collateral].claimable + _amount;
+        collateralBalances[_collateral].claimable = newBalance;
+        emit ClaimableCollateralBalanceUpdated(_collateral, newBalance);
+    }
+
+    function updateUserClaimableBalance(
+        address _collateral,
+        address _account,
+        uint256 _amount
+    )
+        external
+        override
+        onlyTrenBoxManager
+    {
+        mapping(address => uint256) storage userBalance = userClaimableCollateralBalances[_account];
+        uint256 newAmount = userBalance[_collateral] + _amount;
+        userBalance[_collateral] = newAmount;
+
+        emit UserClaimableCollateralBalanceUpdated(_account, _collateral, newAmount);
+    }
+
+    function sendCollateral(
         address _collateral,
         address _account,
         uint256 _amount
@@ -217,22 +282,48 @@ contract TrenBoxStorage is
 
         IERC20(_collateral).safeTransfer(_account, safetyTransferAmount);
 
-        if (isERC20DepositContract(_account)) {
+        if (isStabilityPool(_account)) {
             IDeposit(_account).receivedERC20(_collateral, _amount);
         }
 
         emit CollateralSent(_account, _collateral, safetyTransferAmount);
     }
 
-    function authorizeUpgrade(address newImplementation) public {
-        _authorizeUpgrade(newImplementation);
+    // TODO: maybe sendAsset use instead?
+    function claimCollateral(
+        address _collateral,
+        address _account
+    )
+        external
+        override
+        onlyBorrowerOperations
+    {
+        mapping(address => uint256) storage userBalance = userClaimableCollateralBalances[_account];
+        uint256 claimableColl = userBalance[_collateral];
+
+        uint256 safetyTransferAmount = SafetyTransfer.decimalsCorrection(_collateral, claimableColl);
+        if (safetyTransferAmount == 0) {
+            revert TrenBoxStorage__NoClaimableCollateral();
+        }
+
+        userBalance[_collateral] = 0;
+        emit UserClaimableCollateralBalanceUpdated(_account, _collateral, 0);
+
+        collateralBalances[_collateral].claimable -= claimableColl;
+        emit CollateralSent(_account, _collateral, safetyTransferAmount);
+
+        IERC20(_collateral).safeTransfer(_account, safetyTransferAmount);
+    }
+
+    function authorizeUpgrade(address _newImplementation) public {
+        _authorizeUpgrade(_newImplementation);
     }
 
     // ------------------------------------------ Private/internal functions ----------------------
 
     function _authorizeUpgrade(address) internal override onlyOwner { }
 
-    function isERC20DepositContract(address _account) private view returns (bool) {
-        return (_account == collSurplusPool || _account == stabilityPool);
+    function isStabilityPool(address _account) private view returns (bool) {
+        return (_account == stabilityPool);
     }
 }

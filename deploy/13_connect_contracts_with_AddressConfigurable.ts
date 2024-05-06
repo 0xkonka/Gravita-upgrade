@@ -11,7 +11,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await callSetAddresses("AdminContract", hre);
   await callSetAddresses("BorrowerOperations", hre);
-  await callSetAddresses("CollSurplusPool", hre);
   await callSetAddresses("FeeCollector", hre);
   await callSetAddresses("FlashLoan", hre);
   await callSetAddresses("SortedTrenBoxes", hre);
@@ -47,7 +46,6 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
 
   const adminContractDeployment = await deployments.get("AdminContract");
   const borrowerOperationsDeployment = await deployments.get("BorrowerOperations");
-  const collSurplusPoolDeployment = await deployments.get("CollSurplusPool");
   const debtTokenDeployment = await deployments.get("DebtToken");
   const feeCollectorDeployment = await deployments.get("FeeCollector");
   const flashLoanDeployment = await deployments.get("FlashLoan");
@@ -82,7 +80,6 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
     [
       adminContractDeployment.address,
       borrowerOperationsDeployment.address,
-      collSurplusPoolDeployment.address,
       debtTokenDeployment.address,
       feeCollectorDeployment.address,
       flashLoanDeployment.address,
@@ -100,7 +97,6 @@ async function callSetAddresses(contractName: string, hre: HardhatRuntimeEnviron
   console.log(`⛓️ Connected: ${chalk.cyan(contractName)} to:`);
   console.log(`   - AdminContract: ${chalk.grey(await contract.adminContract())}`);
   console.log(`   - BorrowerOperations: ${chalk.grey(await contract.borrowerOperations())}`);
-  console.log(`   - CollSurplusPool: ${chalk.grey(await contract.collSurplusPool())}`);
   console.log(`   - DebtToken: ${chalk.grey(await contract.debtToken())}`);
   console.log(`   - FeeCollector: ${chalk.grey(await contract.feeCollector())}`);
   console.log(`   - FlashLoan: ${chalk.grey(await contract.flashLoanAddress())}`);

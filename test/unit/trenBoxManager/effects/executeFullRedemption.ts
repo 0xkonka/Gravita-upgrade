@@ -28,11 +28,6 @@ export default function shouldBehaveLikeCanExecuteFullRedemption(): void {
     await borrowerOperations.waitForDeployment();
     await borrowerOperations.initialize(this.signers.deployer);
 
-    const CollSurplusPoolFactory = await ethers.getContractFactory("CollSurplusPool");
-    const collSurplusPool = await CollSurplusPoolFactory.connect(owner).deploy();
-    await collSurplusPool.waitForDeployment();
-    await collSurplusPool.initialize(this.signers.deployer);
-
     const FeeCollectorFactory = await ethers.getContractFactory("FeeCollector");
     const feeCollector = await FeeCollectorFactory.connect(owner).deploy();
     await feeCollector.waitForDeployment();
@@ -51,7 +46,6 @@ export default function shouldBehaveLikeCanExecuteFullRedemption(): void {
     this.redeployedContracts.feeCollector = feeCollector;
     this.redeployedContracts.sortedTrenBoxes = sortedTrenBoxes;
     this.redeployedContracts.trenBoxStorage = trenBoxStorage;
-    this.redeployedContracts.collSurplusPool = collSurplusPool;
 
     const { erc20 } = this.testContracts;
 
@@ -80,7 +74,6 @@ export default function shouldBehaveLikeCanExecuteFullRedemption(): void {
       feeCollector: this.redeployedContracts.feeCollector,
       sortedTrenBoxes: this.redeployedContracts.sortedTrenBoxes,
       trenBoxStorage: this.redeployedContracts.trenBoxStorage,
-      collSurplusPool: this.redeployedContracts.collSurplusPool,
       trenBoxManager: this.redeployedContracts.trenBoxManager,
     });
   });

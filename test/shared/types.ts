@@ -8,7 +8,6 @@ import { Collateral } from "../../config/collaterals";
 import type {
   AdminContract,
   BorrowerOperations,
-  CollSurplusPool,
   DebtToken,
   ERC20,
   FeeCollector,
@@ -53,7 +52,6 @@ declare module "mocha" {
 export interface Contracts {
   adminContract: AdminContract;
   borrowerOperations: BorrowerOperations;
-  collSurplusPool: CollSurplusPool;
   debtToken: DebtToken;
   feeCollector: FeeCollector;
   flashLoan: FlashLoan;

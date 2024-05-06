@@ -37,7 +37,7 @@ export default function shouldBehaveLikeCanIncreaseActiveDebt(): void {
           .increaseActiveDebt(wETH.address, debtAmount)
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.trenBoxStorage,
-        "TrenBoxStorage__NotAuthorizedContract"
+        "TrenBoxStorage__BorrowerOperationsOrTrenBoxManagerOnly"
       );
     });
   });

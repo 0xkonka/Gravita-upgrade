@@ -8,7 +8,6 @@ import { OwnableUpgradeable } from
 abstract contract ConfigurableAddresses is OwnableUpgradeable {
     address public adminContract;
     address public borrowerOperations;
-    address public collSurplusPool;
     address public communityIssuance;
     address public debtToken;
     address public feeCollector;
@@ -45,29 +44,28 @@ abstract contract ConfigurableAddresses is OwnableUpgradeable {
         if (isAddressSetupInitialized) {
             revert ConfigurableAddresses__SetupIsInitialized();
         }
-        if (_addresses.length != 14) {
+        if (_addresses.length != 13) {
             revert ConfigurableAddresses__LengthMismatch();
         }
 
-        for (uint256 i = 0; i < 14; i++) {
+        for (uint256 i = 0; i < 13; i++) {
             if (_addresses[i] == address(0)) {
                 revert ConfigurableAddresses__ZeroAddresses(i, _addresses[i]);
             }
         }
         adminContract = _addresses[0];
         borrowerOperations = _addresses[1];
-        collSurplusPool = _addresses[2];
-        debtToken = _addresses[3];
-        feeCollector = _addresses[4];
-        flashLoanAddress = _addresses[5];
-        priceFeed = _addresses[6];
-        sortedTrenBoxes = _addresses[7];
-        stabilityPool = _addresses[8];
-        timelockAddress = _addresses[9];
-        treasuryAddress = _addresses[10];
-        trenBoxManager = _addresses[11];
-        trenBoxManagerOperations = _addresses[12];
-        trenBoxStorage = _addresses[13];
+        debtToken = _addresses[2];
+        feeCollector = _addresses[3];
+        flashLoanAddress = _addresses[4];
+        priceFeed = _addresses[5];
+        sortedTrenBoxes = _addresses[6];
+        stabilityPool = _addresses[7];
+        timelockAddress = _addresses[8];
+        treasuryAddress = _addresses[9];
+        trenBoxManager = _addresses[10];
+        trenBoxManagerOperations = _addresses[11];
+        trenBoxStorage = _addresses[12];
 
         isAddressSetupInitialized = true;
     }

@@ -37,7 +37,7 @@ export default function shouldBehaveLikeCanDecreaseLiquidatedDebt(): void {
           .decreaseLiquidatedDebt(wETH.address, debtAmount)
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.trenBoxStorage,
-        "TrenBoxStorage__NotAuthorizedContract"
+        "TrenBoxStorage__TrenBoxManagerOnly"
       );
     });
   });

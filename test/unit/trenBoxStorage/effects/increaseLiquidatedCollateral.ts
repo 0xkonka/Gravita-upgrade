@@ -37,7 +37,7 @@ export default function shouldBehaveLikeCanIncreaseLiquidatedCollateral(): void 
           .increaseLiquidatedCollateral(wETH.address, collAmount)
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.trenBoxStorage,
-        "TrenBoxStorage__NotAuthorizedContract"
+        "TrenBoxStorage__TrenBoxManagerOnly"
       );
     });
   });

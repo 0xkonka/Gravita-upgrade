@@ -37,7 +37,7 @@ export default function shouldBehaveLikeCanDecreaseActiveCollateral(): void {
           .decreaseActiveCollateral(wETH.address, debtAmount)
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.trenBoxStorage,
-        "TrenBoxStorage__NotAuthorizedContract"
+        "TrenBoxStorage__TrenBoxManagerOnly"
       );
     });
   });

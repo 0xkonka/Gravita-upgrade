@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-export default function shouldBehaveLikeCanIncreaseLiquidatedDebt(): void {
+export default function shouldBehaveLikeCanIncreaseClaimableCollateral(): void {
   beforeEach(async function () {
     const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
     const trenBoxStorage = await TrenBoxStorageFactory.connect(this.signers.deployer).deploy();
@@ -22,55 +22,54 @@ export default function shouldBehaveLikeCanIncreaseLiquidatedDebt(): void {
       await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
     });
 
-    shouldBehaveLikeCanIncreaseDebtCorrectly();
+    shouldBehaveLikeCanIncreaseCollateralCorrectly();
   });
 
   context("when caller is not Tren box manager", function () {
     it("reverts custom error", async function () {
       const impostor = this.signers.accounts[1];
       const { wETH } = this.collaterals.active;
-      const debtAmount = 50n;
+      const collAmount = 50n;
 
       await expect(
         this.redeployedContracts.trenBoxStorage
           .connect(impostor)
-          .increaseLiquidatedDebt(wETH.address, debtAmount)
+          .increaseClaimableCollateral(wETH.address, collAmount)
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.trenBoxStorage,
-        "TrenBoxStorage__TrenBoxManagerOnly"
+        "TrenBoxStorage__TrenBoxManagerOrTrenBoxManagerOpearationsOnly"
       );
     });
   });
 }
 
-function shouldBehaveLikeCanIncreaseDebtCorrectly() {
-  it("increases liquidated debt balance", async function () {
+function shouldBehaveLikeCanIncreaseCollateralCorrectly() {
+  it("increases active collateral balance", async function () {
     const { wETH } = this.collaterals.active;
-    const debtBalanceBefore =
-      await this.redeployedContracts.trenBoxStorage.getLiquidatedDebtBalance(wETH.address);
-    const debtAmount = 50n;
+    const collBalanceBefore =
+      await this.redeployedContracts.trenBoxStorage.getClaimableCollateralBalance(wETH.address);
+    const collAmount = 50n;
 
     await this.redeployedContracts.trenBoxStorage
       .connect(this.trenBoxManagerImpostor)
-      .increaseLiquidatedDebt(wETH.address, debtAmount);
+      .increaseClaimableCollateral(wETH.address, collAmount);
 
-    const debtBalanceAfter = await this.redeployedContracts.trenBoxStorage.getLiquidatedDebtBalance(
-      wETH.address
-    );
+    const collBalanceAfter =
+      await this.redeployedContracts.trenBoxStorage.getClaimableCollateralBalance(wETH.address);
 
-    expect(debtBalanceAfter).to.be.equal(debtBalanceBefore + debtAmount);
+    expect(collBalanceAfter).to.be.equal(collBalanceBefore + collAmount);
   });
 
-  it("should emit LiquidatedDebtBalanceUpdated", async function () {
+  it("should emit ClaimableCollateralBalanceUpdated", async function () {
     const { wETH } = this.collaterals.active;
-    const debtAmount = 50n;
+    const collAmount = 50n;
 
-    const increaseDebtTx = await this.redeployedContracts.trenBoxStorage
+    const increaseCollTx = await this.redeployedContracts.trenBoxStorage
       .connect(this.trenBoxManagerImpostor)
-      .increaseLiquidatedDebt(wETH.address, debtAmount);
+      .increaseClaimableCollateral(wETH.address, collAmount);
 
-    await expect(increaseDebtTx)
-      .to.emit(this.redeployedContracts.trenBoxStorage, "LiquidatedDebtBalanceUpdated")
-      .withArgs(wETH.address, debtAmount);
+    await expect(increaseCollTx)
+      .to.emit(this.redeployedContracts.trenBoxStorage, "ClaimableCollateralBalanceUpdated")
+      .withArgs(wETH.address, collAmount);
   });
 }

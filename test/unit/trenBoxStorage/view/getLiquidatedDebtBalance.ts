@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import { ethers } from "ethers";
 
 export default function shouldBehaveLikeGetLiquidatedDebtBalance(): void {
   context("for active collateral", function () {

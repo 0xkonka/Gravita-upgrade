@@ -16,7 +16,6 @@ export function getAddressesForSetAddresses(context: Context) {
     const addressesForSetAddresses = await Promise.all([
       await contracts.adminContract.getAddress(),
       await contracts.borrowerOperations.getAddress(),
-      await contracts.collSurplusPool.getAddress(),
       await contracts.debtToken.getAddress(),
       await contracts.feeCollector.getAddress(),
       await contracts.flashLoan.getAddress(),

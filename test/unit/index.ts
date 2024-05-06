@@ -5,7 +5,6 @@ import type { Contracts, RedeployedContracts, Signers, TestUtils } from "../shar
 import { setupUtils } from "../utils";
 import { testAdminContract } from "./adminContract/AdminContract";
 import { testBorrowerOperations } from "./borrowerOperations/BorrowerOperations";
-import { testCollSurplusPool } from "./collSurplusPool/CollSurplusPool";
 import { testDebtToken } from "./debtToken/DebtToken";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testFeeCollector } from "./feeCollector/FeeCollector";
@@ -71,7 +70,6 @@ describe("Unit tests", function () {
   testPriceFeed();
   testSortedTrenBoxes();
   testTrenBoxManager();
-  testCollSurplusPool();
   testFeeCollector();
   testStabilityPool();
   testTrenBoxManagerOperations();

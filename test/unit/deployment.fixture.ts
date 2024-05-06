@@ -15,11 +15,6 @@ export async function loadDeploymentFixture(): Promise<Contracts> {
     deploymentSummary.BorrowerOperations.address
   );
 
-  const collSurplusPool = await ethers.getContractAt(
-    "CollSurplusPool",
-    deploymentSummary.CollSurplusPool.address
-  );
-
   const debtToken = await ethers.getContractAt("DebtToken", deploymentSummary.DebtToken.address);
 
   const feeCollector = await ethers.getContractAt(
@@ -64,7 +59,6 @@ export async function loadDeploymentFixture(): Promise<Contracts> {
   return {
     adminContract,
     borrowerOperations,
-    collSurplusPool,
     debtToken,
     feeCollector,
     flashLoan,

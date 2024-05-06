@@ -11,7 +11,6 @@ import { TrenMath, DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
 
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
-import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
 import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
 import { ISortedTrenBoxes } from "./Interfaces/ISortedTrenBoxes.sol";
 import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
@@ -419,7 +418,7 @@ contract TrenBoxManager is
         // Send the asset fee
         if (_assetFeeAmount != 0) {
             address destination = IFeeCollector(feeCollector).getProtocolRevenueDestination();
-            ITrenBoxStorage(trenBoxStorage).sendAsset(_asset, destination, _assetFeeAmount);
+            ITrenBoxStorage(trenBoxStorage).sendCollateral(_asset, destination, _assetFeeAmount);
             IFeeCollector(feeCollector).handleRedemptionFee(_asset, _assetFeeAmount);
         }
         // Burn the total debt tokens that is cancelled with debt, and send the redeemed asset to
@@ -428,7 +427,7 @@ contract TrenBoxManager is
         // Update Active Pool, and send asset to account
         uint256 collToSendToRedeemer = _assetRedeemedAmount - _assetFeeAmount;
         ITrenBoxStorage(trenBoxStorage).decreaseActiveDebt(_asset, _debtToRedeem);
-        ITrenBoxStorage(trenBoxStorage).sendAsset(_asset, _receiver, collToSendToRedeemer);
+        ITrenBoxStorage(trenBoxStorage).sendCollateral(_asset, _receiver, collToSendToRedeemer);
     }
 
     function updateBaseRateFromRedemption(
@@ -644,7 +643,7 @@ contract TrenBoxManager is
             IDebtToken(debtToken).returnFromPool(trenBoxStorage, _liquidator, _debtTokenAmount);
         }
         if (_assetAmount != 0) {
-            ITrenBoxStorage(trenBoxStorage).sendAsset(_asset, _liquidator, _assetAmount);
+            ITrenBoxStorage(trenBoxStorage).sendCollateral(_asset, _liquidator, _assetAmount);
         }
     }
 
@@ -660,11 +659,12 @@ contract TrenBoxManager is
         internal
     {
         IDebtToken(debtToken).burn(trenBoxStorage, _debtTokenAmount);
-        // Update TrenBoxStorage, and send asset to account
+        // Update TrenBoxStorage, and send collateral to account
         ITrenBoxStorage(trenBoxStorage).decreaseActiveDebt(_asset, _debtTokenAmount);
-        // send asset from TrenBoxStorage (active debt) to CollSurplus Pool
-        ICollSurplusPool(collSurplusPool).accountSurplus(_asset, _borrower, _assetAmount);
-        ITrenBoxStorage(trenBoxStorage).sendAsset(_asset, collSurplusPool, _assetAmount);
+        // "send" collateral from active collateral pool to claimable collateral pool
+        ITrenBoxStorage(trenBoxStorage).decreaseActiveCollateral(_asset, _assetAmount);
+        ITrenBoxStorage(trenBoxStorage).updateUserClaimableBalance(_asset, _borrower, _assetAmount);
+        ITrenBoxStorage(trenBoxStorage).increaseClaimableCollateral(_asset, _assetAmount);
     }
 
     function _movePendingTrenBoxRewardsFromLiquidatedToActive(

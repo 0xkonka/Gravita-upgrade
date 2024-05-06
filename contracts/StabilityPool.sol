@@ -643,7 +643,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         ITrenBoxStorage(trenBoxStorage).decreaseActiveDebt(_asset, _debtToOffset);
         _decreaseDebtTokens(_debtToOffset);
         IDebtToken(debtToken).burn(address(this), _debtToOffset);
-        ITrenBoxStorage(trenBoxStorage).sendAsset(_asset, address(this), _amount);
+        ITrenBoxStorage(trenBoxStorage).sendCollateral(_asset, address(this), _amount);
     }
 
     function _decreaseDebtTokens(uint256 _amount) internal {

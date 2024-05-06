@@ -1,11 +1,11 @@
 import { expect } from "chai";
 
-export default function shouldBehaveLikeGetLiquidatedCollateralBalance(): void {
+export default function shouldBehaveLikeGetClaimableCollateralBalance(): void {
   context("for active collateral", function () {
     it("should return ZERO", async function () {
       const { wETH } = this.collaterals.active;
 
-      const assetBalance = await this.contracts.trenBoxStorage.getLiquidatedCollateralBalance(
+      const assetBalance = await this.contracts.trenBoxStorage.getClaimableCollateralBalance(
         wETH.address
       );
 
@@ -17,7 +17,7 @@ export default function shouldBehaveLikeGetLiquidatedCollateralBalance(): void {
     it("should return ZERO", async function () {
       const { dai } = this.collaterals.inactive;
 
-      const assetBalance = await this.contracts.trenBoxStorage.getLiquidatedCollateralBalance(
+      const assetBalance = await this.contracts.trenBoxStorage.getClaimableCollateralBalance(
         dai.address
       );
 

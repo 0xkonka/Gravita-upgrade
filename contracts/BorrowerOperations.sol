@@ -18,7 +18,6 @@ import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 import { IBorrowerOperations } from "./Interfaces/IBorrowerOperations.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
-import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
 import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 
 contract BorrowerOperations is
@@ -394,7 +393,7 @@ contract BorrowerOperations is
         IFeeCollector(feeCollector).closeDebt(msg.sender, _asset);
 
         // Send the collateral back to the user
-        ITrenBoxStorage(trenBoxStorage).sendAsset(_asset, msg.sender, coll);
+        ITrenBoxStorage(trenBoxStorage).sendCollateral(_asset, msg.sender, coll);
     }
 
     /**
@@ -402,8 +401,7 @@ contract BorrowerOperations is
      * Mode
      */
     function claimCollateral(address _asset) external override {
-        // send asset from CollSurplusPool to owner
-        ICollSurplusPool(collSurplusPool).claimColl(_asset, msg.sender);
+        ITrenBoxStorage(trenBoxStorage).claimCollateral(_asset, msg.sender);
     }
 
     function _triggerBorrowingFee(
@@ -477,7 +475,7 @@ contract BorrowerOperations is
         if (_isCollIncrease) {
             _trenBoxStorageAddColl(_asset, _collChange);
         } else {
-            ITrenBoxStorage(trenBoxStorage).sendAsset(_asset, _borrower, _collChange);
+            ITrenBoxStorage(trenBoxStorage).sendCollateral(_asset, _borrower, _collChange);
         }
     }
 
