@@ -139,7 +139,6 @@ contract BorrowerOperations is
         emit BorrowingFeePaid(vars.asset, msg.sender, vars.debtTokenFee);
     }
 
-    // Send collateral to a trenBox
     function addColl(
         address _asset,
         uint256 _assetSent,
@@ -153,7 +152,6 @@ contract BorrowerOperations is
         _adjustTrenBox(_asset, _assetSent, msg.sender, 0, 0, false, _upperHint, _lowerHint);
     }
 
-    // Withdraw collateral from a trenBox
     function withdrawColl(
         address _asset,
         uint256 _collWithdrawal,
@@ -167,8 +165,6 @@ contract BorrowerOperations is
         _adjustTrenBox(_asset, 0, msg.sender, _collWithdrawal, 0, false, _upperHint, _lowerHint);
     }
 
-    // Withdraw debt tokens from a trenBox: mint new debt tokens to the owner, and increase the
-    // trenBox's debt accordingly
     function withdrawDebtTokens(
         address _asset,
         uint256 _debtTokenAmount,
@@ -182,8 +178,6 @@ contract BorrowerOperations is
         _adjustTrenBox(_asset, 0, msg.sender, 0, _debtTokenAmount, true, _upperHint, _lowerHint);
     }
 
-    // Repay debt tokens to a TrenBox: Burn the repaid debt tokens, and reduce the trenBox's debt
-    // accordingly or Close TrenBox if user has enough tokens at all
     function repayDebtTokens(
         address _asset,
         uint256 _debtTokenAmount,
@@ -200,7 +194,7 @@ contract BorrowerOperations is
                     _asset, ITrenBoxManager(trenBoxManager).getTrenBoxDebt(_asset, msg.sender)
                 ) - IAdminContract(adminContract).getDebtTokenGasCompensation(_asset)
         ) {
-            closeTrenBox(_asset);
+            _closeTrenBox(_asset);
         } else {
             _adjustTrenBox(
                 _asset, 0, msg.sender, 0, _debtTokenAmount, false, _upperHint, _lowerHint
@@ -233,8 +227,25 @@ contract BorrowerOperations is
         );
     }
 
+    function claimCollateral(address _asset) external override {
+        // send asset from CollSurplusPool to owner
+        ICollSurplusPool(collSurplusPool).claimColl(_asset, msg.sender);
+    }
+
+    function getCompositeDebt(
+        address _asset,
+        uint256 _debt
+    )
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return _getCompositeDebt(_asset, _debt);
+    }
+
     /**
-     * @dev _adjustTrenBox(): Alongside a debt change, this function can perform either a collateral
+     * @dev Alongside a debt change, this function can perform either a collateral
      * top-up or a collateral withdrawal.
      */
     function _adjustTrenBox(
@@ -361,7 +372,11 @@ contract BorrowerOperations is
         );
     }
 
-    function closeTrenBox(address _asset) internal {
+    /**
+     * @dev Allow a borrower to repay all debt, withdraw all their collateral,
+     * and close their TrenBox
+     */
+    function _closeTrenBox(address _asset) internal {
         _requireTrenBoxIsActive(_asset, msg.sender);
         uint256 price = IPriceFeed(priceFeed).fetchPrice(_asset);
         _requireNotInRecoveryMode(_asset, price);
@@ -399,15 +414,6 @@ contract BorrowerOperations is
         IActivePool(activePool).sendAsset(_asset, msg.sender, coll);
     }
 
-    /**
-     * Claim remaining collateral from a redemption or from a liquidation with ICR > MCR in Recovery
-     * Mode
-     */
-    function claimCollateral(address _asset) external override {
-        // send asset from CollSurplusPool to owner
-        ICollSurplusPool(collSurplusPool).claimColl(_asset, msg.sender);
-    }
-
     function _triggerBorrowingFee(
         address _asset,
         uint256 _debtTokenAmount
@@ -438,7 +444,7 @@ contract BorrowerOperations is
         }
     }
 
-    // Update trenBox's coll and debt based on whether they increase or decrease
+    /// @dev Update TrenBox's coll and debt based on whether they increase or decrease
     function _updateTrenBoxFromAdjustment(
         address _asset,
         address _borrower,
@@ -483,7 +489,7 @@ contract BorrowerOperations is
         }
     }
 
-    // Send asset to Active Pool and increase its recorded asset balance
+    /// @dev Send asset to Active Pool and increase its recorded asset balance
     function _activePoolAddColl(address _asset, uint256 _amount) internal {
         IDeposit(activePool).receivedERC20(_asset, _amount);
         IERC20(_asset).safeTransferFrom(
@@ -491,8 +497,10 @@ contract BorrowerOperations is
         );
     }
 
-    // Issue the specified amount of debt tokens to _account and increases the total active debt
-    // (_netDebtIncrease potentially includes a debtTokenFee)
+    /**
+     * @dev Issue the specified amount of debt tokens to _account and increases the total active debt
+     * (_netDebtIncrease potentially includes a debtTokenFee)
+     */
     function _withdrawDebtTokens(
         address _asset,
         address _account,
@@ -510,7 +518,7 @@ contract BorrowerOperations is
         IDebtToken(debtToken).mint(_asset, _account, _debtTokenAmount);
     }
 
-    // Burn the specified amount of debt tokens from _account and decreases the total active debt
+    /// @dev Burn the specified amount of debt tokens from _account and decreases the total active debt
     function _repayDebtTokens(
         address _asset,
         address _account,
@@ -662,8 +670,10 @@ contract BorrowerOperations is
 
     // --- ICR and TCR getters ---
 
-    // Compute the new collateral ratio, considering the change in coll and debt. Assumes 0 pending
-    // rewards.
+    /**
+     * @dev Compute the new collateral ratio, considering the change in coll and debt.
+     * Assumes 0 pending rewards.
+     */
     function _getNewNominalICRFromTrenBoxChange(
         uint256 _coll,
         uint256 _debt,
@@ -684,8 +694,10 @@ contract BorrowerOperations is
         return newNICR;
     }
 
-    // Compute the new collateral ratio, considering the change in coll and debt. Assumes 0 pending
-    // rewards.
+    /**
+     * @dev Compute the new collateral ratio, considering the change in coll and debt.
+     * Assumes 0 pending rewards.
+     */
     function _getNewICRFromTrenBoxChange(
         uint256 _coll,
         uint256 _debt,
@@ -748,18 +760,6 @@ contract BorrowerOperations is
 
         uint256 newTCR = TrenMath._computeCR(totalColl, totalDebt, _price);
         return newTCR;
-    }
-
-    function getCompositeDebt(
-        address _asset,
-        uint256 _debt
-    )
-        external
-        view
-        override
-        returns (uint256)
-    {
-        return _getCompositeDebt(_asset, _debt);
     }
 
     function authorizeUpgrade(address newImplementation) public {
