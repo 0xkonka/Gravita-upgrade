@@ -1,13 +1,9 @@
 import shouldBehaveLikeCanClaimCollateral from "./effects/claimCollateral";
 import shouldBehaveLikeCanDecreaseActiveCollateral from "./effects/decreaseActiveCollateral";
 import shouldBehaveLikeCanDecreaseActiveDebt from "./effects/decreaseActiveDebt";
-import shouldBehaveLikeCanDecreaseLiquidatedCollateral from "./effects/decreaseLiquidatedCollateral";
-import shouldBehaveLikeCanDecreaseLiquidatedDebt from "./effects/decreaseLiquidatedDebt";
 import shouldBehaveLikeCanIncreaseActiveCollateral from "./effects/increaseActiveCollateral";
 import shouldBehaveLikeCanIncreaseActiveDebt from "./effects/increaseActiveDebt";
 import shouldBehaveLikeCanIncreaseClaimableCollateral from "./effects/increaseClaimableCollateral";
-import shouldBehaveLikeCanIncreaseLiquidatedCollateral from "./effects/increaseLiquidatedCollateral";
-import shouldBehaveLikeCanIncreaseLiquidatedDebt from "./effects/increaseLiquidatedDebt";
 import shouldBehaveLikeCanSendCollateral from "./effects/sendCollateral";
 import shouldBehaveLikeCanUpdateUserClaimableBalance from "./effects/updateUserClaimableBalance";
 import shouldHaveName from "./view/constants/name";
@@ -67,28 +63,12 @@ export function shouldBehaveLikeTrenBoxStorageContract(): void {
       shouldBehaveLikeCanDecreaseActiveDebt();
     });
 
-    describe("#increaseLiquidatedDebt", function () {
-      shouldBehaveLikeCanIncreaseLiquidatedDebt();
-    });
-
-    describe("#decreaseLiquidatedDebt", function () {
-      shouldBehaveLikeCanDecreaseLiquidatedDebt();
-    });
-
     describe("#increaseActiveCollateral", function () {
       shouldBehaveLikeCanIncreaseActiveCollateral();
     });
 
     describe("#decreaseActiveCollateral", function () {
       shouldBehaveLikeCanDecreaseActiveCollateral();
-    });
-
-    describe("#increaseLiquidatedCollateral", function () {
-      shouldBehaveLikeCanIncreaseLiquidatedCollateral();
-    });
-
-    describe("#decreaseLiquidatedCollateral", function () {
-      shouldBehaveLikeCanDecreaseLiquidatedCollateral();
     });
 
     describe("#sendCollateral", function () {

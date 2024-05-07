@@ -8,16 +8,20 @@ export default function shouldBehaveLikeCanClaimCollateral(): void {
     await trenBoxStorage.waitForDeployment();
     await trenBoxStorage.initialize(this.signers.deployer);
 
-    const TrenBoxManagerFactory = await ethers.getContractFactory("TrenBoxManager");
-    const trenBoxManager = await TrenBoxManagerFactory.connect(this.signers.deployer).deploy();
-    await trenBoxManager.waitForDeployment();
-    await trenBoxManager.initialize(this.signers.deployer);
+    const TrenBoxManagerOperationsFactory = await ethers.getContractFactory(
+      "TrenBoxManagerOperations"
+    );
+    const trenBoxManagerOperations = await TrenBoxManagerOperationsFactory.connect(
+      this.signers.deployer
+    ).deploy();
+    await trenBoxManagerOperations.waitForDeployment();
+    await trenBoxManagerOperations.initialize(this.signers.deployer);
 
     this.redeployedContracts.trenBoxStorage = trenBoxStorage;
-    this.redeployedContracts.trenBoxManager = trenBoxManager;
+    this.redeployedContracts.trenBoxManagerOperations = trenBoxManagerOperations;
 
     this.borrowerOperationsImpostor = this.signers.accounts[1];
-    this.trenBoxManagerImpostor = this.signers.accounts[3];
+    this.trenBoxManagerOperationsImpostor = this.signers.accounts[3];
 
     const { erc20, erc20_with_6_decimals } = this.testContracts;
     await erc20.mint(this.redeployedContracts.trenBoxStorage, ethers.parseEther("100"));
@@ -31,7 +35,7 @@ export default function shouldBehaveLikeCanClaimCollateral(): void {
       beforeEach(async function () {
         const addressesForSetAddresses1 = await this.utils.getAddressesForSetAddresses({
           borrowerOperations: this.borrowerOperationsImpostor,
-          trenBoxManager: this.trenBoxManagerImpostor,
+          trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
         });
 
         await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses1);
@@ -63,7 +67,7 @@ export default function shouldBehaveLikeCanClaimCollateral(): void {
           );
 
         const accountSurplusTx = await this.redeployedContracts.trenBoxStorage
-          .connect(this.trenBoxManagerImpostor)
+          .connect(this.trenBoxManagerOperationsImpostor)
           .updateUserClaimableBalance(erc20, user.address, assetAmount);
 
         await expect(accountSurplusTx)
@@ -82,7 +86,7 @@ export default function shouldBehaveLikeCanClaimCollateral(): void {
           await this.redeployedContracts.trenBoxStorage.getClaimableCollateralBalance(erc20);
 
         await this.redeployedContracts.trenBoxStorage
-          .connect(this.trenBoxManagerImpostor)
+          .connect(this.trenBoxManagerOperationsImpostor)
           .increaseClaimableCollateral(erc20, assetAmount);
 
         const assetBalanceAfter =
@@ -103,7 +107,7 @@ export default function shouldBehaveLikeCanClaimCollateral(): void {
       beforeEach(async function () {
         const addressesForSetAddresses1 = await this.utils.getAddressesForSetAddresses({
           borrowerOperations: this.borrowerOperationsImpostor,
-          trenBoxManager: this.trenBoxManagerImpostor,
+          trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
         });
 
         await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses1);
@@ -112,7 +116,7 @@ export default function shouldBehaveLikeCanClaimCollateral(): void {
         const assetAmount = ethers.parseEther("10");
         const user = this.signers.accounts[1];
         await this.redeployedContracts.trenBoxStorage
-          .connect(this.trenBoxManagerImpostor)
+          .connect(this.trenBoxManagerOperationsImpostor)
           .updateUserClaimableBalance(erc20_with_6_decimals, user.address, assetAmount);
 
         const assetBalanceBefore =
@@ -121,7 +125,7 @@ export default function shouldBehaveLikeCanClaimCollateral(): void {
           );
 
         await this.redeployedContracts.trenBoxStorage
-          .connect(this.trenBoxManagerImpostor)
+          .connect(this.trenBoxManagerOperationsImpostor)
           .increaseClaimableCollateral(erc20_with_6_decimals, assetAmount);
 
         const assetBalanceAfter =

@@ -10,13 +10,13 @@ export default function shouldBehaveLikeCanIncreaseActiveDebt(): void {
 
     this.redeployedContracts.trenBoxStorage = trenBoxStorage;
 
-    this.trenBoxManagerImpostor = this.signers.accounts[1];
+    this.borrowerOperationsImpostor = this.signers.accounts[1];
   });
 
   context("when caller is Tren box manager", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        trenBoxManager: this.trenBoxManagerImpostor,
+        borrowerOperations: this.borrowerOperationsImpostor,
       });
 
       await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
@@ -37,7 +37,7 @@ export default function shouldBehaveLikeCanIncreaseActiveDebt(): void {
           .increaseActiveDebt(wETH.address, debtAmount)
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.trenBoxStorage,
-        "TrenBoxStorage__BorrowerOperationsOrTrenBoxManagerOnly"
+        "TrenBoxStorage__BorrowerOperationsOnly"
       );
     });
   });
@@ -52,7 +52,7 @@ function shouldBehaveLikeCanIncreaseDebtCorrectly() {
     const debtAmount = 50n;
 
     await this.redeployedContracts.trenBoxStorage
-      .connect(this.trenBoxManagerImpostor)
+      .connect(this.borrowerOperationsImpostor)
       .increaseActiveDebt(wETH.address, debtAmount);
 
     const debtBalanceAfter = await this.redeployedContracts.trenBoxStorage.getActiveDebtBalance(
@@ -67,7 +67,7 @@ function shouldBehaveLikeCanIncreaseDebtCorrectly() {
     const debtAmount = 50n;
 
     const increaseDebtTx = await this.redeployedContracts.trenBoxStorage
-      .connect(this.trenBoxManagerImpostor)
+      .connect(this.borrowerOperationsImpostor)
       .increaseActiveDebt(wETH.address, debtAmount);
 
     await expect(increaseDebtTx)

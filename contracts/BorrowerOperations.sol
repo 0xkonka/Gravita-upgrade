@@ -497,8 +497,8 @@ contract BorrowerOperations is
     )
         internal
     {
-        uint256 newTotalAssetDebt = ITrenBoxStorage(trenBoxStorage).getActiveDebtBalance(_asset)
-            + ITrenBoxStorage(trenBoxStorage).getLiquidatedDebtBalance(_asset) + _netDebtIncrease;
+        uint256 newTotalAssetDebt =
+            ITrenBoxStorage(trenBoxStorage).getTotalDebtBalance(_asset) + _netDebtIncrease;
         if (newTotalAssetDebt > IAdminContract(adminContract).getMintCap(_asset)) {
             revert BorrowerOperations__ExceedMintCap();
         }

@@ -10,13 +10,13 @@ export default function shouldBehaveLikeCanIncreaseClaimableCollateral(): void {
 
     this.redeployedContracts.trenBoxStorage = trenBoxStorage;
 
-    this.trenBoxManagerImpostor = this.signers.accounts[1];
+    this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
   });
 
-  context("when caller is Tren box manager", function () {
+  context("when caller is TrenBoxManagerOperations", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        trenBoxManager: this.trenBoxManagerImpostor,
+        trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
       });
 
       await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
@@ -25,7 +25,7 @@ export default function shouldBehaveLikeCanIncreaseClaimableCollateral(): void {
     shouldBehaveLikeCanIncreaseCollateralCorrectly();
   });
 
-  context("when caller is not Tren box manager", function () {
+  context("when caller is not TrenBoxManagerOperations", function () {
     it("reverts custom error", async function () {
       const impostor = this.signers.accounts[1];
       const { wETH } = this.collaterals.active;
@@ -37,7 +37,7 @@ export default function shouldBehaveLikeCanIncreaseClaimableCollateral(): void {
           .increaseClaimableCollateral(wETH.address, collAmount)
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.trenBoxStorage,
-        "TrenBoxStorage__TrenBoxManagerOrTrenBoxManagerOpearationsOnly"
+        "TrenBoxStorage__TrenBoxManagerOperationsOnly"
       );
     });
   });
@@ -51,7 +51,7 @@ function shouldBehaveLikeCanIncreaseCollateralCorrectly() {
     const collAmount = 50n;
 
     await this.redeployedContracts.trenBoxStorage
-      .connect(this.trenBoxManagerImpostor)
+      .connect(this.trenBoxManagerOperationsImpostor)
       .increaseClaimableCollateral(wETH.address, collAmount);
 
     const collBalanceAfter =
@@ -65,7 +65,7 @@ function shouldBehaveLikeCanIncreaseCollateralCorrectly() {
     const collAmount = 50n;
 
     const increaseCollTx = await this.redeployedContracts.trenBoxStorage
-      .connect(this.trenBoxManagerImpostor)
+      .connect(this.trenBoxManagerOperationsImpostor)
       .increaseClaimableCollateral(wETH.address, collAmount);
 
     await expect(increaseCollTx)

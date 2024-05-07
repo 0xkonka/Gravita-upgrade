@@ -10,13 +10,13 @@ export default function shouldBehaveLikeCanUpdateUserClaimableBalance(): void {
 
     this.redeployedContracts.trenBoxStorage = trenBoxStorage;
 
-    this.trenBoxManagerImpostor = this.signers.accounts[1];
+    this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
   });
 
-  context("when caller is trenBoxManager", function () {
+  context("when caller is trenBoxManagerOperations", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        trenBoxManager: this.trenBoxManagerImpostor,
+        trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
       });
 
       await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
@@ -25,7 +25,7 @@ export default function shouldBehaveLikeCanUpdateUserClaimableBalance(): void {
     shouldBehaveLikeCanUpdateUserClaimableBalanceCorrectly();
   });
 
-  context("when caller is not trenBoxManager", function () {
+  context("when caller is not trenBoxManagerOperations", function () {
     it("reverts custom error", async function () {
       const { wETH } = this.collaterals.active;
       const amount = 50n;
@@ -33,11 +33,11 @@ export default function shouldBehaveLikeCanUpdateUserClaimableBalance(): void {
 
       await expect(
         this.contracts.trenBoxStorage
-          .connect(this.trenBoxManagerImpostor)
+          .connect(this.signers.accounts[8])
           .updateUserClaimableBalance(wETH.address, user, amount)
       ).to.be.revertedWithCustomError(
         this.contracts.trenBoxStorage,
-        "TrenBoxStorage__TrenBoxManagerOnly"
+        "TrenBoxStorage__TrenBoxManagerOperationsOnly"
       );
     });
   });
@@ -56,7 +56,7 @@ function shouldBehaveLikeCanUpdateUserClaimableBalanceCorrectly() {
       );
 
     await this.redeployedContracts.trenBoxStorage
-      .connect(this.trenBoxManagerImpostor)
+      .connect(this.trenBoxManagerOperationsImpostor)
       .updateUserClaimableBalance(wETH.address, user, assetAmount);
     const assetBalanceAfter =
       await this.redeployedContracts.trenBoxStorage.getUserClaimableCollateralBalance(
@@ -79,7 +79,7 @@ function shouldBehaveLikeCanUpdateUserClaimableBalanceCorrectly() {
       );
 
     const accountSurplusTx = await this.redeployedContracts.trenBoxStorage
-      .connect(this.trenBoxManagerImpostor)
+      .connect(this.trenBoxManagerOperationsImpostor)
       .updateUserClaimableBalance(wETH.address, user, assetAmount);
 
     const userAssetBalanceAfter =

@@ -406,8 +406,7 @@ contract AdminContract is
     }
 
     function getTotalAssetDebt(address _asset) external view override returns (uint256) {
-        return ITrenBoxStorage(trenBoxStorage).getActiveDebtBalance(_asset)
-            + ITrenBoxStorage(trenBoxStorage).getLiquidatedDebtBalance(_asset);
+        return ITrenBoxStorage(trenBoxStorage).getTotalDebtBalance(_asset);
     }
 
     function getFlashLoanFee() external view override returns (uint256) {

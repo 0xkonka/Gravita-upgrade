@@ -50,16 +50,11 @@ abstract contract TrenBase is OwnableUpgradeable, ConfigurableAddresses {
     }
 
     function getEntireSystemColl(address _asset) public view returns (uint256 entireSystemColl) {
-        uint256 activeColl = ITrenBoxStorage(trenBoxStorage).getActiveCollateralBalance(_asset);
-        uint256 liquidatedColl =
-            ITrenBoxStorage(trenBoxStorage).getLiquidatedCollateralBalance(_asset);
-        return activeColl + liquidatedColl;
+        return ITrenBoxStorage(trenBoxStorage).getTotalCollateralBalance(_asset);
     }
 
     function getEntireSystemDebt(address _asset) public view returns (uint256 entireSystemDebt) {
-        uint256 activeDebt = ITrenBoxStorage(trenBoxStorage).getActiveDebtBalance(_asset);
-        uint256 closedDebt = ITrenBoxStorage(trenBoxStorage).getLiquidatedDebtBalance(_asset);
-        return activeDebt + closedDebt;
+        return ITrenBoxStorage(trenBoxStorage).getTotalDebtBalance(_asset);
     }
 
     function _getTCR(address _asset, uint256 _price) internal view returns (uint256 TCR) {

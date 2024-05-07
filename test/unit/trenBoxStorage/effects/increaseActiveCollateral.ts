@@ -10,13 +10,13 @@ export default function shouldBehaveLikeCanIncreaseActiveCollateral(): void {
 
     this.redeployedContracts.trenBoxStorage = trenBoxStorage;
 
-    this.trenBoxManagerImpostor = this.signers.accounts[1];
+    this.borrowerOperationsImpostor = this.signers.accounts[1];
   });
 
   context("when caller is Tren box manager", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        trenBoxManager: this.trenBoxManagerImpostor,
+        borrowerOperations: this.borrowerOperationsImpostor,
       });
 
       await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
@@ -25,7 +25,7 @@ export default function shouldBehaveLikeCanIncreaseActiveCollateral(): void {
     shouldBehaveLikeCanIncreaseCollateralCorrectly();
   });
 
-  context("when caller is not Tren box manager", function () {
+  context("when caller is not BorrowerOperations", function () {
     it("reverts custom error", async function () {
       const impostor = this.signers.accounts[1];
       const { wETH } = this.collaterals.active;
@@ -37,7 +37,7 @@ export default function shouldBehaveLikeCanIncreaseActiveCollateral(): void {
           .increaseActiveCollateral(wETH.address, collAmount)
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.trenBoxStorage,
-        "TrenBoxStorage__BorrowerOperationsOrTrenBoxManagerOnly"
+        "TrenBoxStorage__BorrowerOperationsOnly"
       );
     });
   });
@@ -51,7 +51,7 @@ function shouldBehaveLikeCanIncreaseCollateralCorrectly() {
     const collAmount = 50n;
 
     await this.redeployedContracts.trenBoxStorage
-      .connect(this.trenBoxManagerImpostor)
+      .connect(this.borrowerOperationsImpostor)
       .increaseActiveCollateral(wETH.address, collAmount);
 
     const collBalanceAfter =
@@ -65,7 +65,7 @@ function shouldBehaveLikeCanIncreaseCollateralCorrectly() {
     const collAmount = 50n;
 
     const increaseCollTx = await this.redeployedContracts.trenBoxStorage
-      .connect(this.trenBoxManagerImpostor)
+      .connect(this.borrowerOperationsImpostor)
       .increaseActiveCollateral(wETH.address, collAmount);
 
     await expect(increaseCollTx)

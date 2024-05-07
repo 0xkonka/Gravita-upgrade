@@ -10,13 +10,15 @@ export default function shouldBehaveLikeCanDecreaseActiveCollateral(): void {
 
     this.redeployedContracts.trenBoxStorage = trenBoxStorage;
 
-    this.trenBoxManagerImpostor = this.signers.accounts[1];
+    this.borrowerOperationsImpostor = this.signers.accounts[1];
+    this.trenBoxManagerOperationsImpostor = this.signers.accounts[7];
   });
 
   context("when caller is Tren box manager", function () {
     beforeEach(async function () {
       const addressesForSetAddresses = await this.utils.getAddressesForSetAddresses({
-        trenBoxManager: this.trenBoxManagerImpostor,
+        borrowerOperations: this.borrowerOperationsImpostor,
+        trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
       });
 
       await this.redeployedContracts.trenBoxStorage.setAddresses(addressesForSetAddresses);
@@ -25,7 +27,7 @@ export default function shouldBehaveLikeCanDecreaseActiveCollateral(): void {
     shouldBehaveLikeCanDecreaseCollateralCorrectly();
   });
 
-  context("when caller is not Tren box manager", function () {
+  context("when caller is not BorrowerOperations", function () {
     it("reverts custom error", async function () {
       const impostor = this.signers.accounts[1];
       const { wETH } = this.collaterals.active;
@@ -37,7 +39,7 @@ export default function shouldBehaveLikeCanDecreaseActiveCollateral(): void {
           .decreaseActiveCollateral(wETH.address, debtAmount)
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.trenBoxStorage,
-        "TrenBoxStorage__TrenBoxManagerOnly"
+        "TrenBoxStorage__TrenBoxManagerOperationsOnly"
       );
     });
   });
@@ -50,11 +52,11 @@ function shouldBehaveLikeCanDecreaseCollateralCorrectly() {
     const collAmountToDecrease = 22n;
 
     await this.redeployedContracts.trenBoxStorage
-      .connect(this.trenBoxManagerImpostor)
+      .connect(this.borrowerOperationsImpostor)
       .increaseActiveCollateral(wETH.address, collAmount);
 
     await this.redeployedContracts.trenBoxStorage
-      .connect(this.trenBoxManagerImpostor)
+      .connect(this.trenBoxManagerOperationsImpostor)
       .decreaseActiveCollateral(wETH.address, collAmountToDecrease);
 
     const collBalance = await this.redeployedContracts.trenBoxStorage.getActiveCollateralBalance(
@@ -70,11 +72,11 @@ function shouldBehaveLikeCanDecreaseCollateralCorrectly() {
     const collAmountToDecrease = 22n;
 
     await this.redeployedContracts.trenBoxStorage
-      .connect(this.trenBoxManagerImpostor)
+      .connect(this.borrowerOperationsImpostor)
       .increaseActiveCollateral(wETH.address, collAmount);
 
     const decreaseCollTx = await this.redeployedContracts.trenBoxStorage
-      .connect(this.trenBoxManagerImpostor)
+      .connect(this.trenBoxManagerOperationsImpostor)
       .decreaseActiveCollateral(wETH.address, collAmountToDecrease);
 
     await expect(decreaseCollTx)

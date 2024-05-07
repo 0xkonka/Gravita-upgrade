@@ -564,10 +564,7 @@ contract TrenBoxManager is
         L_Debts[_asset] = liquidatedDebt;
         emit LTermsUpdated(_asset, liquidatedColl, liquidatedDebt);
 
-        ITrenBoxStorage(trenBoxStorage).decreaseActiveDebt(_asset, _debt);
-        ITrenBoxStorage(trenBoxStorage).increaseLiquidatedDebt(_asset, _debt);
-        ITrenBoxStorage(trenBoxStorage).decreaseActiveCollateral(_asset, _coll);
-        ITrenBoxStorage(trenBoxStorage).increaseLiquidatedCollateral(_asset, _coll);
+        ITrenBoxStorage(trenBoxStorage).updateDebtAndCollateralBalances(_asset, _debt, _coll, false);
     }
 
     function updateSystemSnapshots_excludeCollRemainder(
@@ -579,10 +576,8 @@ contract TrenBoxManager is
     {
         uint256 totalStakesCached = totalStakes[_asset];
         totalStakesSnapshot[_asset] = totalStakesCached;
-        uint256 activeColl = ITrenBoxStorage(trenBoxStorage).getActiveCollateralBalance(_asset);
-        uint256 liquidatedColl =
-            ITrenBoxStorage(trenBoxStorage).getLiquidatedCollateralBalance(_asset);
-        uint256 _totalCollateralSnapshot = activeColl - _collRemainder + liquidatedColl;
+        uint256 totalColl = ITrenBoxStorage(trenBoxStorage).getTotalCollateralBalance(_asset);
+        uint256 _totalCollateralSnapshot = totalColl - _collRemainder;
         totalCollateralSnapshot[_asset] = _totalCollateralSnapshot;
         emit SystemSnapshotsUpdated(_asset, totalStakesCached, _totalCollateralSnapshot);
     }
@@ -659,12 +654,14 @@ contract TrenBoxManager is
         internal
     {
         IDebtToken(debtToken).burn(trenBoxStorage, _debtTokenAmount);
-        // Update TrenBoxStorage, and send collateral to account
-        ITrenBoxStorage(trenBoxStorage).decreaseActiveDebt(_asset, _debtTokenAmount);
-        // "send" collateral from active collateral pool to claimable collateral pool
-        ITrenBoxStorage(trenBoxStorage).decreaseActiveCollateral(_asset, _assetAmount);
-        ITrenBoxStorage(trenBoxStorage).updateUserClaimableBalance(_asset, _borrower, _assetAmount);
-        ITrenBoxStorage(trenBoxStorage).increaseClaimableCollateral(_asset, _assetAmount);
+        // Update TrenBoxStorage, and send collateral to account and move collateral from active
+        // collateral pool to claimable collateral pool
+        ITrenBoxStorage(trenBoxStorage).decreaseActiveBalancesAfterRedemption(
+            _asset, _debtTokenAmount, _assetAmount
+        );
+        ITrenBoxStorage(trenBoxStorage).updateUserAndEntireClaimableBalance(
+            _asset, _borrower, _assetAmount
+        );
     }
 
     function _movePendingTrenBoxRewardsFromLiquidatedToActive(
@@ -674,10 +671,9 @@ contract TrenBoxManager is
     )
         internal
     {
-        ITrenBoxStorage(trenBoxStorage).increaseActiveDebt(_asset, _debtTokenAmount);
-        ITrenBoxStorage(trenBoxStorage).decreaseLiquidatedDebt(_asset, _debtTokenAmount);
-        ITrenBoxStorage(trenBoxStorage).increaseActiveCollateral(_asset, _assetAmount);
-        ITrenBoxStorage(trenBoxStorage).decreaseLiquidatedCollateral(_asset, _assetAmount);
+        ITrenBoxStorage(trenBoxStorage).updateDebtAndCollateralBalances(
+            _asset, _debtTokenAmount, _assetAmount, true
+        );
     }
 
     function _getCurrentTrenBoxAmounts(
