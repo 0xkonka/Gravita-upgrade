@@ -498,8 +498,8 @@ contract BorrowerOperations is
     }
 
     /**
-     * @dev Issue the specified amount of debt tokens to _account and increases the total active debt
-     * (_netDebtIncrease potentially includes a debtTokenFee)
+     * @dev Issue the specified amount of debt tokens to _account and increases
+     * the total active debt (_netDebtIncrease potentially includes a debtTokenFee)
      */
     function _withdrawDebtTokens(
         address _asset,
@@ -518,7 +518,10 @@ contract BorrowerOperations is
         IDebtToken(debtToken).mint(_asset, _account, _debtTokenAmount);
     }
 
-    /// @dev Burn the specified amount of debt tokens from _account and decreases the total active debt
+    /**
+     * @dev Burn the specified amount of debt tokens from _account and
+     * decreases the total active debt
+     */
     function _repayDebtTokens(
         address _asset,
         address _account,

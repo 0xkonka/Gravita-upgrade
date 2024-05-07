@@ -55,7 +55,7 @@ interface IBorrowerOperations {
     );
 
     // --- Errors ---
-    
+
     error BorrowerOperations__NotActiveColl();
     error BorrowerOperations__TrenBoxNotExistOrClosed();
     error BorrowerOperations__TrenBoxIsActive();
