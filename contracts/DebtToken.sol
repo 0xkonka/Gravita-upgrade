@@ -50,12 +50,23 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
 
     constructor(address initialOwner) ERC20(NAME, SYMBOL) ERC20Permit(NAME) Ownable(initialOwner) { }
 
-    function emergencyStopMinting(address _asset, bool status) external override onlyOwner {
-        emergencyStopMintingCollateral[_asset] = status;
+    /**
+     * @notice Stop minting debt tokens against specified asset in emergency case
+     * @param _asset address of collateral asset
+     * @param _status flag to indicate whether minting is possible or not
+     */
+    function emergencyStopMinting(address _asset, bool _status) external onlyOwner {
+        emergencyStopMintingCollateral[_asset] = _status;
 
-        emit EmergencyStopMintingCollateral(_asset, status);
+        emit EmergencyStopMintingCollateral(_asset, _status);
     }
 
+    /**
+     * @notice Set addresses of BorrowerOperations, StabilityPool, and TrenBoxManager contracts
+     * @param _borrowerOperationsAddress address of BorrowerOperations contract
+     * @param _stabilityPoolAddress address of StabilityPool contract
+     * @param _trenBoxManagerAddress address of TrenBoxManager contract
+     */
     function setAddresses(
         address _borrowerOperationsAddress,
         address _stabilityPoolAddress,
@@ -78,6 +89,26 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         emit ProtocolContractsAddressesSet(
             _borrowerOperationsAddress, _stabilityPoolAddress, _trenBoxManagerAddress
         );
+    }
+
+    /**
+     * @notice Add a contract to whitelist, called by only owner
+     * @param _address contract address to add
+     */
+    function addWhitelist(address _address) external onlyOwner {
+        whitelistedContracts[_address] = true;
+
+        emit WhitelistChanged(_address, true);
+    }
+
+    /**
+     * @notice Remove a contract from whitelist, called by only owner
+     * @param _address contract address to remove
+     */
+    function removeWhitelist(address _address) external onlyOwner {
+        whitelistedContracts[_address] = false;
+
+        emit WhitelistChanged(_address, false);
     }
 
     function mintFromWhitelistedContract(uint256 _amount)
@@ -122,18 +153,6 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         _burn(_account, _amount);
     }
 
-    function addWhitelist(address _address) external override onlyOwner {
-        whitelistedContracts[_address] = true;
-
-        emit WhitelistChanged(_address, true);
-    }
-
-    function removeWhitelist(address _address) external override onlyOwner {
-        whitelistedContracts[_address] = false;
-
-        emit WhitelistChanged(_address, false);
-    }
-
     function sendToPool(
         address _sender,
         address _poolAddress,
@@ -160,28 +179,39 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         _transfer(_poolAddress, _receiver, _amount);
     }
 
+    /**
+     * @notice Transfer debt tokens from caller to another account
+     * @param _recipient address of account to receive debt tokens
+     * @param _amount debt token amount to transfer
+     */
     function transfer(
-        address recipient,
-        uint256 amount
+        address _recipient,
+        uint256 _amount
     )
         public
         override(IERC20, ERC20)
-        shouldTransferToValidRecipent(recipient)
+        shouldTransferToValidRecipent(_recipient)
         returns (bool)
     {
-        return super.transfer(recipient, amount);
+        return super.transfer(_recipient, _amount);
     }
 
+    /**
+     * @notice Transfer debt tokens from specified sender to another account
+     * @param _sender address of account that sends debt tokens
+     * @param _recipient address of account to receive debt tokens
+     * @param _amount debt token amount to transfer
+     */
     function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
+        address _sender,
+        address _recipient,
+        uint256 _amount
     )
         public
         override(IERC20, ERC20)
-        shouldTransferToValidRecipent(recipient)
+        shouldTransferToValidRecipent(_recipient)
         returns (bool)
     {
-        return super.transferFrom(sender, recipient, amount);
+        return super.transferFrom(_sender, _recipient, _amount);
     }
 }
