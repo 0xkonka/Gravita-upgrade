@@ -123,8 +123,8 @@ export function shouldBehaveLikeTrenBoxManagerContract(): void {
       effects.shouldBehaveLikeCanApplyPendingRewards();
     });
 
-    describe("#movePendingTrenBoxRewardsToActivePool", function () {
-      effects.shouldBehaveLikeCanMovePendingTrenBoxRewardsToActivePool();
+    describe("#movePendingTrenBoxRewardsFromLiquidatedToActive", function () {
+      effects.shouldBehaveLikeCanMovePendingTrenBoxRewardsFromLiquidatedToActive();
     });
 
     describe("#updateTrenBoxRewardSnapshots", function () {

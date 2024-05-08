@@ -18,7 +18,7 @@ export default function shouldBehaveLikeCanAuthorizeUpgrade(): void {
 
       await expect(
         this.contracts.trenBoxManager.connect(impostor).authorizeUpgrade(wETH.address)
-      ).to.be.revertedWithCustomError(this.contracts.activePool, "OwnableUnauthorizedAccount");
+      ).to.be.revertedWithCustomError(this.contracts.trenBoxStorage, "OwnableUnauthorizedAccount");
     });
   });
 }

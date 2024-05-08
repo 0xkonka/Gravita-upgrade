@@ -11,17 +11,14 @@ import { TrenMath } from "./Dependencies/TrenMath.sol";
 import { TrenBase } from "./Dependencies/TrenBase.sol";
 import { SafetyTransfer } from "./Dependencies/SafetyTransfer.sol";
 
-import { IDefaultPool } from "./Interfaces/IDefaultPool.sol";
 import { IPriceFeed } from "./Interfaces/IPriceFeed.sol";
 import { ISortedTrenBoxes } from "./Interfaces/ISortedTrenBoxes.sol";
-import { IActivePool } from "./Interfaces/IActivePool.sol";
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 import { IBorrowerOperations } from "./Interfaces/IBorrowerOperations.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
-import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
-import { IDeposit } from "./Interfaces/IDeposit.sol";
+import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 
 contract BorrowerOperations is
     TrenBase,
@@ -120,12 +117,12 @@ contract BorrowerOperations is
         emit TrenBoxCreated(vars.asset, msg.sender, vars.arrayIndex);
 
         // Move the asset to the Active Pool, and mint the debtToken amount to the borrower
-        _activePoolAddColl(vars.asset, _assetAmount);
+        _trenBoxStorageAddColl(vars.asset, _assetAmount);
         _withdrawDebtTokens(vars.asset, msg.sender, _debtTokenAmount, vars.netDebt);
 
         // Move the debtToken gas compensation to the Gas Pool
         if (gasCompensation != 0) {
-            _withdrawDebtTokens(vars.asset, gasPoolAddress, gasCompensation, gasCompensation);
+            _withdrawDebtTokens(vars.asset, trenBoxStorage, gasCompensation, gasCompensation);
         }
 
         emit TrenBoxUpdated(
@@ -389,14 +386,14 @@ contract BorrowerOperations is
         // Pool
         _repayDebtTokens(_asset, msg.sender, netDebt, refund);
         if (gasCompensation != 0) {
-            _repayDebtTokens(_asset, gasPoolAddress, gasCompensation, 0);
+            _repayDebtTokens(_asset, trenBoxStorage, gasCompensation, 0);
         }
 
         // Signal to the fee collector that debt has been paid in full
         IFeeCollector(feeCollector).closeDebt(msg.sender, _asset);
 
         // Send the collateral back to the user
-        IActivePool(activePool).sendAsset(_asset, msg.sender, coll);
+        ITrenBoxStorage(trenBoxStorage).sendCollateral(_asset, msg.sender, coll);
     }
 
     /**
@@ -404,8 +401,7 @@ contract BorrowerOperations is
      * Mode
      */
     function claimCollateral(address _asset) external override {
-        // send asset from CollSurplusPool to owner
-        ICollSurplusPool(collSurplusPool).claimColl(_asset, msg.sender);
+        ITrenBoxStorage(trenBoxStorage).claimCollateral(_asset, msg.sender);
     }
 
     function _triggerBorrowingFee(
@@ -477,17 +473,17 @@ contract BorrowerOperations is
             _repayDebtTokens(_asset, _borrower, _debtTokenChange, 0);
         }
         if (_isCollIncrease) {
-            _activePoolAddColl(_asset, _collChange);
+            _trenBoxStorageAddColl(_asset, _collChange);
         } else {
-            IActivePool(activePool).sendAsset(_asset, _borrower, _collChange);
+            ITrenBoxStorage(trenBoxStorage).sendCollateral(_asset, _borrower, _collChange);
         }
     }
 
-    // Send asset to Active Pool and increase its recorded asset balance
-    function _activePoolAddColl(address _asset, uint256 _amount) internal {
-        IDeposit(activePool).receivedERC20(_asset, _amount);
+    // Send asset to TrenBoxStorage and increase its recorded asset balance
+    function _trenBoxStorageAddColl(address _asset, uint256 _amount) internal {
+        ITrenBoxStorage(trenBoxStorage).increaseActiveCollateral(_asset, _amount);
         IERC20(_asset).safeTransferFrom(
-            msg.sender, activePool, SafetyTransfer.decimalsCorrection(_asset, _amount)
+            msg.sender, trenBoxStorage, SafetyTransfer.decimalsCorrection(_asset, _amount)
         );
     }
 
@@ -501,12 +497,12 @@ contract BorrowerOperations is
     )
         internal
     {
-        uint256 newTotalAssetDebt = IActivePool(activePool).getDebtTokenBalance(_asset)
-            + IDefaultPool(defaultPool).getDebtTokenBalance(_asset) + _netDebtIncrease;
+        uint256 newTotalAssetDebt =
+            ITrenBoxStorage(trenBoxStorage).getTotalDebtBalance(_asset) + _netDebtIncrease;
         if (newTotalAssetDebt > IAdminContract(adminContract).getMintCap(_asset)) {
             revert BorrowerOperations__ExceedMintCap();
         }
-        IActivePool(activePool).increaseDebt(_asset, _netDebtIncrease);
+        ITrenBoxStorage(trenBoxStorage).increaseActiveDebt(_asset, _netDebtIncrease);
         IDebtToken(debtToken).mint(_asset, _account, _debtTokenAmount);
     }
 
@@ -521,7 +517,7 @@ contract BorrowerOperations is
     {
         /// @dev the borrowing fee partial refund is accounted for when decreasing the debt, as it
         /// was included when trenBox was opened
-        IActivePool(activePool).decreaseDebt(_asset, _debtTokenAmount + _refund);
+        ITrenBoxStorage(trenBoxStorage).decreaseActiveDebt(_asset, _debtTokenAmount + _refund);
         /// @dev the borrowing fee partial refund is not burned here, as it has already been burned
         /// by the FeeCollector
         IDebtToken(debtToken).burn(_account, _debtTokenAmount);

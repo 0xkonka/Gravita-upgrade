@@ -7,10 +7,10 @@ export default function shouldBehaveLikeCanCloseTrenBoxLiquidation(): void {
     this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
     this.user = [this.signers.accounts[2], this.signers.accounts[3]];
 
-    const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
-    const activePool = await ActivePoolFactory.connect(owner).deploy();
-    await activePool.waitForDeployment();
-    await activePool.initialize(this.signers.deployer);
+    const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
+    const trenBoxStorage = await TrenBoxStorageFactory.connect(owner).deploy();
+    await trenBoxStorage.waitForDeployment();
+    await trenBoxStorage.initialize(this.signers.deployer);
 
     const TrenBoxManagerFactory = await ethers.getContractFactory("TrenBoxManager");
     const trenBoxManager = await TrenBoxManagerFactory.connect(owner).deploy();
@@ -44,7 +44,7 @@ export default function shouldBehaveLikeCanCloseTrenBoxLiquidation(): void {
     this.redeployedContracts.debtToken = debtToken;
     this.redeployedContracts.feeCollector = feeCollector;
     this.redeployedContracts.sortedTrenBoxes = sortedTrenBoxes;
-    this.redeployedContracts.activePool = activePool;
+    this.redeployedContracts.trenBoxStorage = trenBoxStorage;
 
     const { erc20 } = this.testContracts;
 
@@ -72,7 +72,7 @@ export default function shouldBehaveLikeCanCloseTrenBoxLiquidation(): void {
       debtToken: this.redeployedContracts.debtToken,
       feeCollector: this.redeployedContracts.feeCollector,
       sortedTrenBoxes: this.redeployedContracts.sortedTrenBoxes,
-      activePool: this.redeployedContracts.activePool,
+      trenBoxStorage: this.redeployedContracts.trenBoxStorage,
       trenBoxManager: this.redeployedContracts.trenBoxManager,
     });
   });

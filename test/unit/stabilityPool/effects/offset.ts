@@ -18,15 +18,10 @@ export default function shouldBehaveLikeOffset(): void {
     await stabilityPool.waitForDeployment();
     await stabilityPool.initialize(this.signers.deployer);
 
-    const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
-    const activePool = await ActivePoolFactory.connect(owner).deploy();
-    await activePool.waitForDeployment();
-    await activePool.initialize(this.signers.deployer);
-
-    const DefaultPoolFactory = await ethers.getContractFactory("DefaultPool");
-    const defaultPool = await DefaultPoolFactory.connect(this.signers.deployer).deploy();
-    await defaultPool.waitForDeployment();
-    await defaultPool.initialize(this.signers.deployer);
+    const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
+    const trenBoxStorage = await TrenBoxStorageFactory.connect(owner).deploy();
+    await trenBoxStorage.waitForDeployment();
+    await trenBoxStorage.initialize(this.signers.deployer);
 
     const TrenBoxManagerFactory = await ethers.getContractFactory("TrenBoxManager");
     const trenBoxManager = await TrenBoxManagerFactory.connect(owner).deploy();
@@ -62,8 +57,7 @@ export default function shouldBehaveLikeOffset(): void {
     this.redeployedContracts.debtToken = debtToken;
     this.redeployedContracts.feeCollector = feeCollector;
     this.redeployedContracts.sortedTrenBoxes = sortedTrenBoxes;
-    this.redeployedContracts.activePool = activePool;
-    this.redeployedContracts.defaultPool = defaultPool;
+    this.redeployedContracts.trenBoxStorage = trenBoxStorage;
 
     const { erc20 } = this.testContracts;
 
@@ -75,8 +69,7 @@ export default function shouldBehaveLikeOffset(): void {
       debtToken: this.redeployedContracts.debtToken,
       feeCollector: this.redeployedContracts.feeCollector,
       sortedTrenBoxes: this.redeployedContracts.sortedTrenBoxes,
-      activePool: this.redeployedContracts.activePool,
-      defaultPool: this.redeployedContracts.defaultPool,
+      trenBoxStorage: this.redeployedContracts.trenBoxStorage,
       trenBoxManager: this.redeployedContracts.trenBoxManager,
     });
 

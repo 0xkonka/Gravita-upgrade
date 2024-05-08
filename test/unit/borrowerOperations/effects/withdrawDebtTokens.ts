@@ -73,10 +73,6 @@ export default function shouldBehaveLikeCanWithdrawDebtTokens() {
       });
     });
 
-    context("when TrenBox is closed", function () {
-      it.skip("they cannot withdraw debt tokens", async function () {});
-    });
-
     it("should emit TrenBoxUpdated event", async function () {
       const [user] = this.users;
       const { erc20 } = this.testContracts;
@@ -90,7 +86,6 @@ export default function shouldBehaveLikeCanWithdrawDebtTokens() {
         debtAmount: amount,
       });
 
-      // TODO: How to calculate those values?
       const expectedDebt = 2100500000000000000000n;
       const expectedCollateral = 100000000000000000000000000000000n;
       const expectedStake = 100000000000000000000000000000000n;

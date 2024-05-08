@@ -5,8 +5,6 @@ import { Contracts } from "../shared/types";
 export async function loadDeploymentFixture(): Promise<Contracts> {
   const deploymentSummary = await deployments.fixture();
 
-  const activePool = await ethers.getContractAt("ActivePool", deploymentSummary.ActivePool.address);
-
   const adminContract = await ethers.getContractAt(
     "AdminContract",
     deploymentSummary.AdminContract.address
@@ -17,17 +15,7 @@ export async function loadDeploymentFixture(): Promise<Contracts> {
     deploymentSummary.BorrowerOperations.address
   );
 
-  const collSurplusPool = await ethers.getContractAt(
-    "CollSurplusPool",
-    deploymentSummary.CollSurplusPool.address
-  );
-
   const debtToken = await ethers.getContractAt("DebtToken", deploymentSummary.DebtToken.address);
-
-  const defaultPool = await ethers.getContractAt(
-    "DefaultPool",
-    deploymentSummary.DefaultPool.address
-  );
 
   const feeCollector = await ethers.getContractAt(
     "FeeCollector",
@@ -35,8 +23,6 @@ export async function loadDeploymentFixture(): Promise<Contracts> {
   );
 
   const flashLoan = await ethers.getContractAt("FlashLoan", deploymentSummary.FlashLoan.address);
-
-  const gasPool = await ethers.getContractAt("GasPool", deploymentSummary.GasPool.address);
 
   const priceFeed = await ethers.getContractAt(
     "IPriceFeed",
@@ -65,21 +51,23 @@ export async function loadDeploymentFixture(): Promise<Contracts> {
     deploymentSummary.TrenBoxManagerOperations.address
   );
 
+  const trenBoxStorage = await ethers.getContractAt(
+    "TrenBoxStorage",
+    deploymentSummary.TrenBoxStorage.address
+  );
+
   return {
-    activePool,
     adminContract,
     borrowerOperations,
-    collSurplusPool,
     debtToken,
-    defaultPool,
     feeCollector,
     flashLoan,
-    gasPool,
     priceFeed,
     sortedTrenBoxes,
     stabilityPool,
     timelock,
     trenBoxManager,
     trenBoxManagerOperations,
+    trenBoxStorage,
   };
 }

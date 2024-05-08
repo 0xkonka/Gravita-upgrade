@@ -89,23 +89,6 @@ export default function shouldBehaveLikeCanAddColl() {
           ],
         });
       });
-
-      it.skip("they cannot add collateral", async function () {
-        const [user] = this.users;
-        const { erc20 } = this.testContracts;
-        const amount = ethers.parseUnits("100", 30);
-
-        const addCollateralTx = this.utils.addCollateral({
-          amount,
-          collateral: erc20,
-          from: user,
-        });
-
-        await expect(addCollateralTx).to.be.revertedWithCustomError(
-          this.contracts.borrowerOperations,
-          "BorrowerOperations__TrenBoxNotExistOrClosed"
-        );
-      });
     });
 
     context("when user has not enough collateral", function () {
@@ -134,7 +117,6 @@ export default function shouldBehaveLikeCanAddColl() {
       const assetAddress = await erc20.getAddress();
       const amount = ethers.parseUnits("100", 30);
 
-      // TODO: How to calculate those values?
       const expectedDebt = 2000000000000000000000n;
       const expectedCollateral = 200000000000000000000000000000000n;
       const expectedStake = 200000000000000000000000000000000n;
@@ -180,15 +162,16 @@ export default function shouldBehaveLikeCanAddColl() {
 
     it("should increase ActivePool collateral balance", async function () {
       const [user] = this.users;
-      const { activePool } = this.contracts;
+      const { trenBoxStorage } = this.contracts;
       const { erc20 } = this.testContracts;
       const amount = ethers.WeiPerEther;
 
-      const activePoolAddress = await activePool.getAddress();
+      const trenBoxStorageAddress = await trenBoxStorage.getAddress();
 
-      const activePoolCollateralBalanceBefore = await erc20.balanceOf(activePoolAddress);
+      const trenBoxStorageCollateralBalanceBefore = await erc20.balanceOf(trenBoxStorageAddress);
 
-      const expectedActivePoolCollateralBalance = activePoolCollateralBalanceBefore + amount;
+      const expectedTrenBoxStorageCollateralBalance =
+        trenBoxStorageCollateralBalanceBefore + amount;
 
       const tx = await this.utils.addCollateral({
         amount,
@@ -196,11 +179,15 @@ export default function shouldBehaveLikeCanAddColl() {
         from: user,
       });
 
-      await expect(tx).to.emit(erc20, "Transfer").withArgs(user.address, activePoolAddress, amount);
+      await expect(tx)
+        .to.emit(erc20, "Transfer")
+        .withArgs(user.address, trenBoxStorageAddress, amount);
 
-      const activePoolCollateralBalanceAfter = await erc20.balanceOf(activePoolAddress);
+      const trenBoxStorageCollateralBalanceAfter = await erc20.balanceOf(trenBoxStorageAddress);
 
-      expect(activePoolCollateralBalanceAfter).to.equal(expectedActivePoolCollateralBalance);
+      expect(trenBoxStorageCollateralBalanceAfter).to.equal(
+        expectedTrenBoxStorageCollateralBalance
+      );
     });
 
     it("should not change user's debt balance", async function () {
@@ -223,16 +210,16 @@ export default function shouldBehaveLikeCanAddColl() {
       expect(userDebtBalance).to.equal(userDebtBalanceBefore);
     });
 
-    it("should not change ActivePool debt balance", async function () {
+    it("should not change TrenBoxStorage debt balance", async function () {
       const [user] = this.users;
-      const { activePool } = this.contracts;
+      const { trenBoxStorage } = this.contracts;
       const { debtToken } = this.contracts;
       const { erc20 } = this.testContracts;
       const amount = ethers.WeiPerEther;
 
-      const activePoolAddress = await activePool.getAddress();
+      const trenBoxStorageAddress = await trenBoxStorage.getAddress();
 
-      const activePoolDebtBalanceBefore = await debtToken.balanceOf(activePoolAddress);
+      const trenBoxStorageDebtBalanceBefore = await debtToken.balanceOf(trenBoxStorageAddress);
 
       await this.utils.addCollateral({
         amount,
@@ -240,24 +227,9 @@ export default function shouldBehaveLikeCanAddColl() {
         from: user,
       });
 
-      const activePoolDebtBalanceAfter = await debtToken.balanceOf(activePoolAddress);
+      const trenBoxStorageDebtBalanceAfter = await debtToken.balanceOf(trenBoxStorageAddress);
 
-      expect(activePoolDebtBalanceAfter).to.equal(activePoolDebtBalanceBefore);
-    });
-
-    it.skip("should not emit DebtToken Transfer event", async function () {
-      const [user] = this.users;
-      const { debtToken } = this.contracts;
-      const { erc20 } = this.testContracts;
-      const amount = ethers.parseUnits("100", 30);
-
-      const addCollateralTx = await this.utils.addCollateral({
-        amount,
-        collateral: erc20,
-        from: user,
-      });
-
-      await expect(addCollateralTx).to.not.emit(debtToken, "Transfer");
+      expect(trenBoxStorageDebtBalanceAfter).to.equal(trenBoxStorageDebtBalanceBefore);
     });
   });
 
