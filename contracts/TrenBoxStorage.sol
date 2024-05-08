@@ -26,7 +26,7 @@ contract TrenBoxStorage is
 {
     using SafeERC20 for IERC20;
 
-    /// @notice A contract name.
+    /// @notice The contract name.
     string public constant NAME = "TrenBoxStorage";
 
     /// @notice The balances of each collateral asset in the storage.
@@ -336,6 +336,12 @@ contract TrenBoxStorage is
 
     // ------------------------------------------ Private/internal functions ----------------------
 
+    /**
+     * @dev Updates active debt balance for a specific collateral asset.
+     * @param _collateral The address of collateral asset.
+     * @param _amount The number of debt to update.
+     * @param _isIncrease The indicator that shows increasing or decreasing of active debt balance.
+     */
     function _updateActiveDebt(address _collateral, uint256 _amount, bool _isIncrease) private {
         uint256 newDebt;
         if (_isIncrease) newDebt = debtBalances[_collateral].active + _amount;
@@ -345,6 +351,12 @@ contract TrenBoxStorage is
         emit ActiveDebtBalanceUpdated(_collateral, newDebt);
     }
 
+    /**
+     * @dev Updates active balance for a specific collateral asset.
+     * @param _collateral The address of collateral asset.
+     * @param _amount The number of collateral to update.
+     * @param _isIncrease The indicator that shows increasing or decreasing of active balance.
+     */
     function _updateActiveCollateral(
         address _collateral,
         uint256 _amount,
@@ -360,6 +372,13 @@ contract TrenBoxStorage is
         emit ActiveCollateralBalanceUpdated(_collateral, newColl);
     }
 
+    /**
+     * @dev Updates entire claimable balance for a specific collateral asset.
+     * @param _collateral The address of collateral asset.
+     * @param _amount The number of collateral to update.
+     * @param _isIncrease The indicator that shows increasing or decreasing of entire claimable
+     * balance.
+     */
     function _updateClaimableCollateral(
         address _collateral,
         uint256 _amount,
@@ -375,6 +394,12 @@ contract TrenBoxStorage is
         emit ClaimableCollateralBalanceUpdated(_collateral, newBalance);
     }
 
+    /**
+     * @dev Updates user claimable balance for a specific collateral asset.
+     * @param _collateral The address of collateral asset.
+     * @param _account The address of the caller.
+     * @param _amount The number of collateral to update.
+     */
     function _updateUserClaimableBalance(
         address _collateral,
         address _account,
@@ -389,8 +414,11 @@ contract TrenBoxStorage is
         emit UserClaimableCollateralBalanceUpdated(_account, _collateral, newAmount);
     }
 
-    /// @dev Checks if caller is a Stability Pool contract
-    /// @return A boolean value indicating whether the operation succeeded.
+    /**
+     * @dev Checks if caller is a Stability Pool contract.
+     * @param _account The address of the caller.
+     * @return The boolean value indicating whether the operation succeeded.
+     */
     function isStabilityPool(address _account) private view returns (bool) {
         return (_account == stabilityPool);
     }
