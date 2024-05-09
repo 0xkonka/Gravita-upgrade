@@ -90,8 +90,8 @@ interface IFeeCollector {
     error FeeCollector__TrenBoxManagerOnly(address _sender, address _expected);
 
     /**
-     * @notice Triggered when a TrenBox is created and again whenever the borrower acquires
-     * additional loans.
+     * @notice Increases debt of fee amount when a TrenBox is created and again
+     * whenever the borrower acquires additional loans.
      * Collects the minimum fee to the platform, for which there is no refund; holds on to the
      * remaining fees until debt is paid, liquidated, or expired.
      * @dev Attention: this method assumes that (debt token) _feeAmount has already been minted and
@@ -103,15 +103,36 @@ interface IFeeCollector {
     function increaseDebt(address _borrower, address _asset, uint256 _feeAmount) external;
 
     /**
-     * @notice Triggered when a trenBox is adjusted or closed, and the borrower
-     *  has paid back ordecreased his loan.
+     * @notice Decreases debt when a TrenBox is adjusted or closed, and the borrower
+     * has paid back or decreased his loan.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _paybackFraction The amount that the borrower pays back.
      */
     function decreaseDebt(address _borrower, address _asset, uint256 _paybackFraction) external;
 
+    /**
+     * @notice Closes debt when it is paid in full.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     */
     function closeDebt(address _borrower, address _asset) external;
 
+    /**
+     * @notice Triggered when a TrenBox is liquidated. In that case, all remaining fees are
+     * collected by the platform, and no refunds are generated.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     */
     function liquidateDebt(address _borrower, address _asset) external;
 
+    /**
+     * @notice Simulates the refund due if a TrenBox would be closed at this moment 
+     * @dev Helper function used by the UI.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _paybackFraction The amount that the borrower pays back.
+     */
     function simulateRefund(
         address _borrower,
         address _asset,
@@ -119,10 +140,23 @@ interface IFeeCollector {
     )
         external
         returns (uint256);
-
+    
+    /**
+     * @notice Batches collect fees from an array of borrowers and assets.
+     * @param _borrowers The address array of borrowers.
+     * @param _assets The address array of collateral assets.
+     */
     function collectFees(address[] calldata _borrowers, address[] calldata _assets) external;
 
+    /**
+     * @notice Sends redemption fee to the protocol revenue destination.
+     * @param _asset The address of collateral asset.
+     * @param _amount The amount of redemption fee to send.
+     */
     function handleRedemptionFee(address _asset, uint256 _amount) external;
 
+    /**
+     * @notice Gets the protocol revenue destination.
+     */
     function getProtocolRevenueDestination() external view returns (address);
 }

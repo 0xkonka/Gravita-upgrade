@@ -70,6 +70,8 @@ contract FeeCollector is
         __UUPSUpgradeable_init();
     }
 
+    // ================= Public/External methods ================ //
+
     function increaseDebt(
         address _borrower,
         address _asset,
@@ -97,9 +99,6 @@ contract FeeCollector is
         _decreaseDebt(_borrower, _asset, _paybackFraction);
     }
 
-    /**
-     * Triggered when a debt is paid in full.
-     */
     function closeDebt(
         address _borrower,
         address _asset
@@ -111,10 +110,6 @@ contract FeeCollector is
         _decreaseDebt(_borrower, _asset, 1 ether);
     }
 
-    /**
-     * Simulates the refund due -if- trenBox would be closed at this moment (helper function used by
-     * the UI).
-     */
     function simulateRefund(
         address _borrower,
         address _asset,
@@ -141,11 +136,6 @@ contract FeeCollector is
         }
     }
 
-    /**
-     * Triggered when a trenBox is liquidated; in that case, all remaining fees are collected by the
-     * platform,
-     * and no refunds are generated.
-     */
     function liquidateDebt(
         address _borrower,
         address _asset
@@ -160,9 +150,6 @@ contract FeeCollector is
         }
     }
 
-    /**
-     * Batch collect fees from an array of borrowers/assets.
-     */
     function collectFees(
         address[] calldata _borrowers,
         address[] calldata _assets
@@ -204,8 +191,7 @@ contract FeeCollector is
         return IAdminContract(adminContract).getRouteToTRENStaking() ? trenStaking : treasuryAddress;
     }
 
-    // Helper & internal methods
-    // ----------------------------------------------------------------------------------------
+    // ================= Helper & Internal methods ================ //
 
     function _decreaseDebt(address _borrower, address _asset, uint256 _paybackFraction) internal {
         uint256 NOW = block.timestamp;
