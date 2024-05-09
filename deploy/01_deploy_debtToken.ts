@@ -21,7 +21,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await preDeploy(deployer, "DebtToken");
   const deployResult: DeployResult = await deploy("DebtToken", {
     from: deployer,
-    deterministicDeployment: generateSalt("TREN"),
+    deterministicDeployment: generateSalt("TRENtestnet"),
     args: args,
     log: true,
   });

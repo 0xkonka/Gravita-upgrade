@@ -26,7 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     },
     log: true,
     autoMine: true,
-    salt: generateSalt("TREN"),
+    salt: generateSalt("TRENtestnet"),
   });
 
   const deployResult: DeployResult = await deterministicDeploy.deploy();
