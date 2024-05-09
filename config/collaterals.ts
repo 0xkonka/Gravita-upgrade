@@ -34,7 +34,7 @@ export const LOCAL_NETWORK_COLLATERALS: Collateral[] = [
     MCR: parseEther("1.25"),
     CCR: parseEther("1.5"),
     minNetDebt: parseEther("1800"),
-    gasCompensation: parseEther("200"),
+    gasCompensation: parseEther("300"),
     mintCap: parseEther("1500000"),
   },
 ];
