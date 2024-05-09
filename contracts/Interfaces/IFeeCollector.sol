@@ -127,7 +127,7 @@ interface IFeeCollector {
     function liquidateDebt(address _borrower, address _asset) external;
 
     /**
-     * @notice Simulates the refund due if a TrenBox would be closed at this moment 
+     * @notice Simulates the refund due if a TrenBox would be closed at this moment
      * @dev Helper function used by the UI.
      * @param _borrower The address of borrower.
      * @param _asset The address of collateral asset.
@@ -140,7 +140,7 @@ interface IFeeCollector {
     )
         external
         returns (uint256);
-    
+
     /**
      * @notice Batches collect fees from an array of borrowers and assets.
      * @param _borrowers The address array of borrowers.
