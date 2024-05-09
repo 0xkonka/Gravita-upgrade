@@ -21,43 +21,55 @@ contract FeeCollector is
 {
     using SafeERC20 for IERC20;
 
-    // Constants
-    // --------------------------------------------------------------------------------------------------------
-
+    /// @notice The contract name.
     string public constant NAME = "FeeCollector";
 
+    /// @notice The duration which the minimum fee is applied.
     uint256 public constant MIN_FEE_DAYS = 7;
-    uint256 public constant MIN_FEE_FRACTION = 0.038461538 * 1 ether; // (1/26) fee divided by 26
-        // weeks
-    uint256 public constant FEE_EXPIRATION_SECONDS = 175 * 1 days; // ~ 6 months, minus one week
-        // (MIN_FEE_DAYS)
 
-    // State
-    // ------------------------------------------------------------------------------------------------------------
+    /// @notice The minimum fee fraction, divided by 26 (1/26).
+    uint256 public constant MIN_FEE_FRACTION = 0.038461538 * 1 ether;
 
+    /// @notice The duration which the fee refund is expired.
+    /// ~ 6 months minus one week (MIN_FEE_DAYS)
+    uint256 public constant FEE_EXPIRATION_SECONDS = 175 * 1 days;
+
+    /// @notice The mapping from borrower address to the nested mapping from
+    /// collateral asset address to fee record struct
     mapping(address borrower => mapping(address asset => FeeRecord feeParams)) public feeRecords;
 
-    // Initializer
-    // ------------------------------------------------------------------------------------------------------
+    // ====================== Modifiers ====================== //
+
+    modifier onlyBorrowerOperations() {
+        if (msg.sender != borrowerOperations) {
+            revert FeeCollector__BorrowerOperationsOnly(msg.sender, borrowerOperations);
+        }
+        _;
+    }
+
+    modifier onlyTrenBoxManager() {
+        if (msg.sender != trenBoxManager) {
+            revert FeeCollector__TrenBoxManagerOnly(msg.sender, trenBoxManager);
+        }
+        _;
+    }
+
+    modifier onlyBorrowerOperationsOrTrenBoxManager() {
+        if (msg.sender != borrowerOperations && msg.sender != trenBoxManager) {
+            revert FeeCollector__BorrowerOperationsOrTrenBoxManagerOnly(
+                msg.sender, borrowerOperations, trenBoxManager
+            );
+        }
+        _;
+    }
+
+    // ====================== Initializer ====================== //
 
     function initialize(address initialOwner) public initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
     }
 
-    // Public/external methods
-    // ------------------------------------------------------------------------------------------
-
-    /**
-     * Triggered when a trenBox is created and again whenever the borrower acquires additional
-     * loans.
-     * Collects the minimum fee to the platform, for which there is no refund; holds on to the
-     * remaining fees until
-     * debt is paid, liquidated, or expired.
-     *
-     * Attention: this method assumes that (debt token) _feeAmount has already been minted and
-     * transferred to this contract.
-     */
     function increaseDebt(
         address _borrower,
         address _asset,
@@ -73,10 +85,6 @@ contract FeeCollector is
         _collectFee(_borrower, _asset, minFeeAmount + feeToCollect);
     }
 
-    /**
-     * Triggered when a trenBox is adjusted or closed (and the borrower has paid back/decreased his
-     * loan).
-     */
     function decreaseDebt(
         address _borrower,
         address _asset,
@@ -367,32 +375,6 @@ contract FeeCollector is
             IERC20(debtToken).safeTransfer(_borrower, _refundAmount);
             emit FeeRefunded(_borrower, _asset, _refundAmount);
         }
-    }
-
-    // Modifiers
-    // --------------------------------------------------------------------------------------------------------
-
-    modifier onlyBorrowerOperations() {
-        if (msg.sender != borrowerOperations) {
-            revert FeeCollector__BorrowerOperationsOnly(msg.sender, borrowerOperations);
-        }
-        _;
-    }
-
-    modifier onlyTrenBoxManager() {
-        if (msg.sender != trenBoxManager) {
-            revert FeeCollector__TrenBoxManagerOnly(msg.sender, trenBoxManager);
-        }
-        _;
-    }
-
-    modifier onlyBorrowerOperationsOrTrenBoxManager() {
-        if (msg.sender != borrowerOperations && msg.sender != trenBoxManager) {
-            revert FeeCollector__BorrowerOperationsOrTrenBoxManagerOnly(
-                msg.sender, borrowerOperations, trenBoxManager
-            );
-        }
-        _;
     }
 
     function authorizeUpgrade(address newImplementation) public {
