@@ -108,13 +108,12 @@ interface IFeeCollector {
      * transferred to this contract.
      * @param _borrower The address of borrower.
      * @param _asset The address of collateral asset.
-     * @param _feeAmount The amount of fees to collect.
+     * @param _feeAmount The fee amount to collect.
      */
     function increaseDebt(address _borrower, address _asset, uint256 _feeAmount) external;
 
     /**
-     * @notice Decreases debt when a TrenBox is adjusted or closed, and the borrower
-     * has paid back or decreased his loan.
+     * @notice Decreases debt when a TrenBox is adjusted.
      * @param _borrower The address of borrower.
      * @param _asset The address of collateral asset.
      * @param _paybackFraction The amount that the borrower pays back.

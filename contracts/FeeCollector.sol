@@ -70,7 +70,7 @@ contract FeeCollector is
         __UUPSUpgradeable_init();
     }
 
-    // ================= Public/External methods ================ //
+    // ================= Public/External functions ================ //
 
     function increaseDebt(
         address _borrower,
@@ -192,12 +192,25 @@ contract FeeCollector is
         emit RedemptionFeeCollected(_asset, _amount);
     }
 
+    function authorizeUpgrade(address newImplementation) public {
+        _authorizeUpgrade(newImplementation);
+    }
+
+    // ================== View functions ================ //
+
     function getProtocolRevenueDestination() public view override returns (address) {
         return IAdminContract(adminContract).getRouteToTRENStaking() ? trenStaking : treasuryAddress;
     }
 
-    // ================= Helper & Internal methods ================ //
+    // ================= Internal functions ================ //
 
+    /**
+     * @dev Decreases debt when a TrenBox is adjusted or closed, and the borrower
+     * has paid back or decreased his loan.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _paybackFraction The amount that the borrower pays back.
+     */
     function _decreaseDebt(address _borrower, address _asset, uint256 _paybackFraction) internal {
         uint256 NOW = block.timestamp;
 
@@ -238,6 +251,12 @@ contract FeeCollector is
         }
     }
 
+    /**
+     * @dev Creates or updates fee record parameters for a specific collateral asset.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _feeAmount The fee amount to collect.
+     */
     function _createOrUpdateFeeRecord(
         address _borrower,
         address _asset,
@@ -259,6 +278,13 @@ contract FeeCollector is
         }
     }
 
+    /**
+     * @dev Creates new fee record for a specific collateral asset.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _feeAmount The fee amount to add.
+     * @param _sRecord The storage to store new fee record.
+     */
     function _createFeeRecord(
         address _borrower,
         address _asset,
@@ -275,6 +301,13 @@ contract FeeCollector is
         emit FeeRecordUpdated(_borrower, _asset, from, to, _feeAmount);
     }
 
+    /**
+     * @dev Updates the existing fee record for a specific collateral asset.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _addedAmount The fee amount to update.
+     * @param _sRecord The storage to store updated fee record.
+     */
     function _updateFeeRecord(
         address _borrower,
         address _asset,
@@ -301,6 +334,12 @@ contract FeeCollector is
         return expiredAmount;
     }
 
+    /**
+     * @dev Closes the expired or liquidated fee record for a specific collateral asset.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _amount The stored fee amount.
+     */
     function _closeExpiredOrLiquidatedFeeRecord(
         address _borrower,
         address _asset,
@@ -313,6 +352,12 @@ contract FeeCollector is
         emit FeeRecordUpdated(_borrower, _asset, block.timestamp, 0, 0);
     }
 
+    /**
+     * @dev Calculates the expired fee amount at the time.
+     * @param _from The timestamp when the fee record is created.
+     * @param _to The timestamp when the fee record expires.
+     * @param _amount The amount of fee record.
+     */
     function _calcExpiredAmount(
         uint256 _from,
         uint256 _to,
@@ -337,24 +382,32 @@ contract FeeCollector is
         return expiredAmount;
     }
 
+    /**
+     * @dev Calculates new duration when fee record is updated.
+     * @param _remainingAmount The amount of refundable fee.
+     * @param _remainingTimeToLive The remaining duration until the refundable fee is all expired.
+     * @param _addedAmount The added amount to fee record.
+     */
     function _calcNewDuration(
-        uint256 remainingAmount,
-        uint256 remainingTimeToLive,
-        uint256 addedAmount
+        uint256 _remainingAmount,
+        uint256 _remainingTimeToLive,
+        uint256 _addedAmount
     )
         internal
         pure
         returns (uint256)
     {
-        uint256 prevWeight = remainingAmount * remainingTimeToLive;
-        uint256 nextWeight = addedAmount * FEE_EXPIRATION_SECONDS;
-        uint256 newDuration = (prevWeight + nextWeight) / (remainingAmount + addedAmount);
+        uint256 prevWeight = _remainingAmount * _remainingTimeToLive;
+        uint256 nextWeight = _addedAmount * FEE_EXPIRATION_SECONDS;
+        uint256 newDuration = (prevWeight + nextWeight) / (_remainingAmount + _addedAmount);
         return newDuration;
     }
 
     /**
-     * Transfers collected (debt token) fees to either the treasury or the TRENStaking contract,
-     * depending on a flag.
+     * @dev Transfers collected (debt token) fees to either the treasury or the staking contract.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _feeAmount The fee amount to collect.
      */
     function _collectFee(address _borrower, address _asset, uint256 _feeAmount) internal {
         if (_feeAmount != 0) {
@@ -367,15 +420,17 @@ contract FeeCollector is
         }
     }
 
+    /**
+     * @dev Refund the remaining fees to the borrower.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _refundAmount The fee amount to refund.
+     */
     function _refundFee(address _borrower, address _asset, uint256 _refundAmount) internal {
         if (_refundAmount != 0) {
             IERC20(debtToken).safeTransfer(_borrower, _refundAmount);
             emit FeeRefunded(_borrower, _asset, _refundAmount);
         }
-    }
-
-    function authorizeUpgrade(address newImplementation) public {
-        _authorizeUpgrade(newImplementation);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner { }
