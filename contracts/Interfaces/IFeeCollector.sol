@@ -90,6 +90,16 @@ interface IFeeCollector {
     error FeeCollector__TrenBoxManagerOnly(address _sender, address _expected);
 
     /**
+     * @dev Emitted when the payback fraction is higher than 1 ether(10**18 wei).
+     */
+    error FeeCollector__PaybackFractionHigherThanOne();
+
+    /**
+     * @dev Emitted when the payback fraction is zero.
+     */
+    error FeeCollector__ZeroPaybackFraction();
+
+    /**
      * @notice Increases debt of fee amount when a TrenBox is created and again
      * whenever the borrower acquires additional loans.
      * Collects the minimum fee to the platform, for which there is no refund; holds on to the

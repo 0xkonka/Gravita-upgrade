@@ -49,7 +49,10 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
           this.redeployedContracts.feeCollector
             .connect(this.borrowerOperationsImpostor)
             .decreaseDebt(this.borrower, this.debtAsset.address, paybackFraction)
-        ).to.be.revertedWith("Payback fraction cannot be zero");
+        ).to.be.revertedWithCustomError(
+          this.redeployedContracts.feeCollector,
+          "FeeCollector__ZeroPaybackFraction"
+        );
       });
 
       it("should revert if payback fraction is higher than 1 ether", async function () {
@@ -58,7 +61,10 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
           this.redeployedContracts.feeCollector
             .connect(this.borrowerOperationsImpostor)
             .decreaseDebt(this.borrower, this.debtAsset.address, paybackFraction)
-        ).to.be.revertedWith("Payback fraction cannot be higher than 1 (@ 10**18)");
+        ).to.be.revertedWithCustomError(
+          this.redeployedContracts.feeCollector,
+          "FeeCollector__PaybackFractionHigherThanOne"
+        );
       });
     });
 

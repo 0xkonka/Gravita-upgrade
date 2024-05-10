@@ -120,8 +120,13 @@ contract FeeCollector is
         override
         returns (uint256)
     {
-        require(_paybackFraction <= 1 ether, "Payback fraction cannot be higher than 1 (@ 10**18)");
-        require(_paybackFraction != 0, "Payback fraction cannot be zero");
+        if (_paybackFraction > 1 ether) {
+            revert FeeCollector__PaybackFractionHigherThanOne();
+        }
+        if (_paybackFraction == 0) {
+            revert FeeCollector__ZeroPaybackFraction();
+        }
+
         FeeRecord storage record = feeRecords[_borrower][_asset];
         if (record.amount == 0 || record.to < block.timestamp) {
             return 0;
@@ -195,8 +200,14 @@ contract FeeCollector is
 
     function _decreaseDebt(address _borrower, address _asset, uint256 _paybackFraction) internal {
         uint256 NOW = block.timestamp;
-        require(_paybackFraction <= 1 ether, "Payback fraction cannot be higher than 1 (@ 10**18)");
-        require(_paybackFraction != 0, "Payback fraction cannot be zero");
+
+        if (_paybackFraction > 1 ether) {
+            revert FeeCollector__PaybackFractionHigherThanOne();
+        }
+        if (_paybackFraction == 0) {
+            revert FeeCollector__ZeroPaybackFraction();
+        }
+
         FeeRecord storage sRecord = feeRecords[_borrower][_asset];
         if (sRecord.amount == 0) {
             return;
