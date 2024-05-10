@@ -9,6 +9,8 @@ import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
+import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
+
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { IBorrowerOperations } from "./Interfaces/IBorrowerOperations.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
@@ -17,7 +19,6 @@ import { IFlashLoanReceiver } from "./Interfaces/IFlashLoanReceiver.sol";
 import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 import { IUniswapRouterV3 } from "./Interfaces/IUniswapRouterV3.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
-import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 
 contract FlashLoan is
     IFlashLoan,
@@ -35,7 +36,7 @@ contract FlashLoan is
 
     bool public isSetupInitialized;
 
-    function initialize(address initialOwner) public initializer {
+    function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
     }

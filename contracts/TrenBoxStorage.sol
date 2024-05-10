@@ -83,7 +83,7 @@ contract TrenBoxStorage is
 
     /// @dev Sets an intiial owner for the contract.
     /// @param initialOwner The address of initial owner.
-    function initialize(address initialOwner) public initializer {
+    function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();

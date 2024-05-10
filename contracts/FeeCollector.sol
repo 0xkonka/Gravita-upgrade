@@ -8,6 +8,7 @@ import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
+
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ITRENStaking } from "./Interfaces/ITRENStaking.sol";
@@ -37,10 +38,36 @@ contract FeeCollector is
 
     mapping(address borrower => mapping(address asset => FeeRecord feeParams)) public feeRecords;
 
+    // Modifiers
+    // --------------------------------------------------------------------------------------------------------
+
+    modifier onlyBorrowerOperations() {
+        if (msg.sender != borrowerOperations) {
+            revert FeeCollector__BorrowerOperationsOnly(msg.sender, borrowerOperations);
+        }
+        _;
+    }
+
+    modifier onlyTrenBoxManager() {
+        if (msg.sender != trenBoxManager) {
+            revert FeeCollector__TrenBoxManagerOnly(msg.sender, trenBoxManager);
+        }
+        _;
+    }
+
+    modifier onlyBorrowerOperationsOrTrenBoxManager() {
+        if (msg.sender != borrowerOperations && msg.sender != trenBoxManager) {
+            revert FeeCollector__BorrowerOperationsOrTrenBoxManagerOnly(
+                msg.sender, borrowerOperations, trenBoxManager
+            );
+        }
+        _;
+    }
+
     // Initializer
     // ------------------------------------------------------------------------------------------------------
 
-    function initialize(address initialOwner) public initializer {
+    function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
     }
@@ -367,32 +394,6 @@ contract FeeCollector is
             IERC20(debtToken).safeTransfer(_borrower, _refundAmount);
             emit FeeRefunded(_borrower, _asset, _refundAmount);
         }
-    }
-
-    // Modifiers
-    // --------------------------------------------------------------------------------------------------------
-
-    modifier onlyBorrowerOperations() {
-        if (msg.sender != borrowerOperations) {
-            revert FeeCollector__BorrowerOperationsOnly(msg.sender, borrowerOperations);
-        }
-        _;
-    }
-
-    modifier onlyTrenBoxManager() {
-        if (msg.sender != trenBoxManager) {
-            revert FeeCollector__TrenBoxManagerOnly(msg.sender, trenBoxManager);
-        }
-        _;
-    }
-
-    modifier onlyBorrowerOperationsOrTrenBoxManager() {
-        if (msg.sender != borrowerOperations && msg.sender != trenBoxManager) {
-            revert FeeCollector__BorrowerOperationsOrTrenBoxManagerOnly(
-                msg.sender, borrowerOperations, trenBoxManager
-            );
-        }
-        _;
     }
 
     function authorizeUpgrade(address newImplementation) public {
