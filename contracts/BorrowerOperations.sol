@@ -195,7 +195,7 @@ contract BorrowerOperations is
             _debtTokenAmount
                 == _getNetDebt(
                     _asset, ITrenBoxManager(trenBoxManager).getTrenBoxDebt(_asset, msg.sender)
-                ) - IAdminContract(adminContract).getDebtTokenGasCompensation(_asset)
+                )
         ) {
             closeTrenBox(_asset);
         } else {
