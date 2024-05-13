@@ -1,0 +1,256 @@
+{
+  "address": "0x801ba2542E3Df1648DAb65Dc785d3eF87Ac9877e",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "PriceFeed__ExistingOracleRequired",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PriceFeed__InvalidDecimalsError",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "PriceFeed__InvalidOracleResponseError",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PriceFeed__TimelockOnlyError",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PriceFeed__UnknownAssetError",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "oracleAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "isEthIndexed",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "isFallback",
+          "type": "bool"
+        }
+      ],
+      "name": "NewOracleRegistered",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "NAME",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_asset",
+          "type": "address"
+        }
+      ],
+      "name": "fetchPrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_asset",
+          "type": "address"
+        }
+      ],
+      "name": "getPrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "prices",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "price",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_token",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_oracle",
+          "type": "address"
+        },
+        {
+          "internalType": "enum IPriceFeed.ProviderType",
+          "name": "_type",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_timeoutMinutes",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "_isEthIndexed",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "_isFallback",
+          "type": "bool"
+        }
+      ],
+      "name": "setOracle",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_asset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_price",
+          "type": "uint256"
+        }
+      ],
+      "name": "setPrice",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xe3b1ee952dcf29015e5c583a9cc153d47faa341e68704d4de9b495dc19b5a7f4",
+  "receipt": {
+    "to": null,
+    "from": "0x19E733F20aAdaB8996f7895ACBD04f746BF4Aac1",
+    "contractAddress": "0x801ba2542E3Df1648DAb65Dc785d3eF87Ac9877e",
+    "transactionIndex": 0,
+    "gasUsed": "226874",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xa65da45ca085b106125b48b08e6490cbc5bfbea691f19b3f5547960a84542e1a",
+    "transactionHash": "0xe3b1ee952dcf29015e5c583a9cc153d47faa341e68704d4de9b495dc19b5a7f4",
+    "logs": [],
+    "blockNumber": 19861086,
+    "cumulativeGasUsed": "226874",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "10f736271acd8614150314323b008696",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.23+commit.f704f362\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"PriceFeed__ExistingOracleRequired\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PriceFeed__InvalidDecimalsError\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"PriceFeed__InvalidOracleResponseError\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PriceFeed__TimelockOnlyError\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PriceFeed__UnknownAssetError\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oracleAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"isEthIndexed\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"isFallback\",\"type\":\"bool\"}],\"name\":\"NewOracleRegistered\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"NAME\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_asset\",\"type\":\"address\"}],\"name\":\"fetchPrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_asset\",\"type\":\"address\"}],\"name\":\"getPrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"asset\",\"type\":\"address\"}],\"name\":\"prices\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_oracle\",\"type\":\"address\"},{\"internalType\":\"enum IPriceFeed.ProviderType\",\"name\":\"_type\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"_timeoutMinutes\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"_isEthIndexed\",\"type\":\"bool\"},{\"internalType\":\"bool\",\"name\":\"_isFallback\",\"type\":\"bool\"}],\"name\":\"setOracle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_asset\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_price\",\"type\":\"uint256\"}],\"name\":\"setPrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/TestContracts/PriceFeedTestnet.sol\":\"PriceFeedTestnet\"},\"evmVersion\":\"paris\",\"libraries\":{\":__CACHE_BREAKER__\":\"0x00000000d41867734bbee4c6863d9255b2b06ac1\"},\"metadata\":{\"bytecodeHash\":\"none\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/Interfaces/IPriceFeed.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.23;\\n\\n/**\\n * @dev from\\n * https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol\\n */\\ninterface ChainlinkAggregatorV3Interface {\\n    function decimals() external view returns (uint8);\\n\\n    function latestRoundData()\\n        external\\n        view\\n        returns (\\n            uint80 roundId,\\n            int256 answer,\\n            uint256 startedAt,\\n            uint256 updatedAt,\\n            uint80 answeredInRound\\n        );\\n}\\n\\ninterface IPriceFeed {\\n    // Enums\\n    // ----------------------------------------------------------------------------------------------------------\\n\\n    enum ProviderType {\\n        Chainlink,\\n        API3\\n    }\\n\\n    // Structs\\n    // --------------------------------------------------------------------------------------------------------\\n\\n    struct OracleRecord {\\n        address oracleAddress;\\n        ProviderType providerType;\\n        uint256 timeoutSeconds;\\n        uint256 decimals;\\n        bool isEthIndexed;\\n    }\\n\\n    // Custom Errors\\n    // --------------------------------------------------------------------------------------------------\\n\\n    error PriceFeed__ExistingOracleRequired();\\n    error PriceFeed__InvalidDecimalsError();\\n    error PriceFeed__InvalidOracleResponseError(address token);\\n    error PriceFeed__TimelockOnlyError();\\n    error PriceFeed__UnknownAssetError();\\n\\n    // Events\\n    // ---------------------------------------------------------------------------------------------------------\\n\\n    event NewOracleRegistered(\\n        address token, address oracleAddress, bool isEthIndexed, bool isFallback\\n    );\\n\\n    // Functions\\n    // ------------------------------------------------------------------------------------------------------\\n\\n    function fetchPrice(address _token) external view returns (uint256);\\n\\n    function setOracle(\\n        address _token,\\n        address _oracle,\\n        ProviderType _type,\\n        uint256 _timeoutSeconds,\\n        bool _isEthIndexed,\\n        bool _isFallback\\n    )\\n        external;\\n}\\n\",\"keccak256\":\"0x9208bb29684a633dd16752d52a9d7f8e79dabe5bfc86070825a1f81ed982cfb0\",\"license\":\"MIT\"},\"contracts/TestContracts/PriceFeedTestnet.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.23;\\n\\nimport { IPriceFeed } from \\\"../Interfaces/IPriceFeed.sol\\\";\\n\\n/*\\n* PriceFeed placeholder for testnet and development. The price is simply set manually and saved in a\\nstate\\n * variable. The contract does not connect to a live Chainlink price feed.\\n */\\ncontract PriceFeedTestnet is IPriceFeed {\\n    string public constant NAME = \\\"PriceFeedTestnet\\\";\\n\\n    mapping(address asset => uint256 price) public prices;\\n\\n    function getPrice(address _asset) external view returns (uint256) {\\n        return prices[_asset];\\n    }\\n\\n    function setPrice(address _asset, uint256 _price) external {\\n        prices[_asset] = _price;\\n    }\\n\\n    function setOracle(\\n        address _token,\\n        address _oracle,\\n        ProviderType _type,\\n        uint256 _timeoutMinutes,\\n        bool _isEthIndexed,\\n        bool _isFallback\\n    )\\n        external\\n        override\\n    { }\\n\\n    function fetchPrice(address _asset) external view override returns (uint256) {\\n        return this.getPrice(_asset);\\n    }\\n}\\n\",\"keccak256\":\"0x3b4b25943e0151c1c1c94feba8b4242c7f4b079391cfcf79dfde0d53a67577b3\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50610324806100206000396000f3fe608060405234801561001057600080fd5b50600436106100615760003560e01c8062e4768b1461006657806341976e0914610092578063a3f4df7e146100ce578063ace1798e1461010a578063cfed246b1461011d578063fcca7fd11461013d575b600080fd5b6100906100743660046101e0565b6001600160a01b03909116600090815260208190526040902055565b005b6100bb6100a036600461020a565b6001600160a01b031660009081526020819052604090205490565b6040519081526020015b60405180910390f35b6100fd6040518060400160405280601081526020016f141c9a58d95199595915195cdd1b995d60821b81525081565b6040516100c5919061022c565b6100bb61011836600461020a565b610153565b6100bb61012b36600461020a565b60006020819052908152604090205481565b61009061014b36600461028b565b505050505050565b6040516341976e0960e01b81526001600160a01b038216600482015260009030906341976e0990602401602060405180830381865afa15801561019a573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906101be91906102fe565b92915050565b80356001600160a01b03811681146101db57600080fd5b919050565b600080604083850312156101f357600080fd5b6101fc836101c4565b946020939093013593505050565b60006020828403121561021c57600080fd5b610225826101c4565b9392505050565b60006020808352835180602085015260005b8181101561025a5785810183015185820160400152820161023e565b506000604082860101526040601f19601f8301168501019250505092915050565b803580151581146101db57600080fd5b60008060008060008060c087890312156102a457600080fd5b6102ad876101c4565b95506102bb602088016101c4565b94506040870135600281106102cf57600080fd5b9350606087013592506102e46080880161027b565b91506102f260a0880161027b565b90509295509295509295565b60006020828403121561031057600080fd5b505191905056fea164736f6c6343000817000a",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100615760003560e01c8062e4768b1461006657806341976e0914610092578063a3f4df7e146100ce578063ace1798e1461010a578063cfed246b1461011d578063fcca7fd11461013d575b600080fd5b6100906100743660046101e0565b6001600160a01b03909116600090815260208190526040902055565b005b6100bb6100a036600461020a565b6001600160a01b031660009081526020819052604090205490565b6040519081526020015b60405180910390f35b6100fd6040518060400160405280601081526020016f141c9a58d95199595915195cdd1b995d60821b81525081565b6040516100c5919061022c565b6100bb61011836600461020a565b610153565b6100bb61012b36600461020a565b60006020819052908152604090205481565b61009061014b36600461028b565b505050505050565b6040516341976e0960e01b81526001600160a01b038216600482015260009030906341976e0990602401602060405180830381865afa15801561019a573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906101be91906102fe565b92915050565b80356001600160a01b03811681146101db57600080fd5b919050565b600080604083850312156101f357600080fd5b6101fc836101c4565b946020939093013593505050565b60006020828403121561021c57600080fd5b610225826101c4565b9392505050565b60006020808352835180602085015260005b8181101561025a5785810183015185820160400152820161023e565b506000604082860101526040601f19601f8301168501019250505092915050565b803580151581146101db57600080fd5b60008060008060008060c087890312156102a457600080fd5b6102ad876101c4565b95506102bb602088016101c4565b94506040870135600281106102cf57600080fd5b9350606087013592506102e46080880161027b565b91506102f260a0880161027b565b90509295509295509295565b60006020828403121561031057600080fd5b505191905056fea164736f6c6343000817000a",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 20874,
+        "contract": "contracts/TestContracts/PriceFeedTestnet.sol:PriceFeedTestnet",
+        "label": "prices",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_address,t_uint256)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_mapping(t_address,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

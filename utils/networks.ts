@@ -8,7 +8,7 @@ import { NETWORKS } from "../config/networks";
  * @returns A boolean indicating whether the network is a localhost network.
  */
 export function isLocalhostNetwork(chainId: string): boolean {
-  return chainId === "31337" || chainId === "1337";
+  return chainId === "31337" || chainId === "1337" || chainId === "1771";
 }
 
 /**
