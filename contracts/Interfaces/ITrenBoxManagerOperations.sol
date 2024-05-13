@@ -97,7 +97,7 @@ interface ITrenBoxManagerOperations {
         uint256 totalCollToSendToSP;
         uint256 totalDebtToRedistribute;
         uint256 totalCollToRedistribute;
-        uint256 totalCollSurplus;
+        uint256 totalCollToClaim;
     }
 
     struct LiquidationValues {
@@ -109,7 +109,7 @@ interface ITrenBoxManagerOperations {
         uint256 collToSendToSP;
         uint256 debtToRedistribute;
         uint256 collToRedistribute;
-        uint256 collSurplus;
+        uint256 collToClaim;
     }
 
     struct LocalVariables_InnerSingleLiquidateFunction {

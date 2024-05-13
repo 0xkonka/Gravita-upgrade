@@ -17,12 +17,12 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
 
     this.redeployedContracts.adminContract = adminContract;
 
-    this.activePoolImpostor = this.signers.accounts[1];
+    this.trenBoxStorageImpostor = this.signers.accounts[1];
 
     await this.utils.connectRedeployedContracts({
       adminContract: this.redeployedContracts.adminContract,
       stabilityPool: this.redeployedContracts.stabilityPool,
-      activePool: this.activePoolImpostor,
+      trenBoxStorage: this.trenBoxStorageImpostor,
     });
 
     const user = this.signers.accounts[0];
@@ -52,7 +52,7 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
       const assetBalanceBefore = await this.redeployedContracts.stabilityPool.getCollateral(erc20);
 
       await this.redeployedContracts.stabilityPool
-        .connect(this.activePoolImpostor)
+        .connect(this.trenBoxStorageImpostor)
         .receivedERC20(erc20, assetAmount);
       const assetBalanceAfter = await this.redeployedContracts.stabilityPool.getCollateral(erc20);
 
@@ -66,7 +66,7 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
       const balanceBefore = await this.redeployedContracts.stabilityPool.getCollateral(erc20);
 
       const receivedERC20Tx = await this.redeployedContracts.stabilityPool
-        .connect(this.activePoolImpostor)
+        .connect(this.trenBoxStorageImpostor)
         .receivedERC20(erc20, assetAmount);
 
       await expect(receivedERC20Tx)
@@ -85,7 +85,7 @@ export default function shouldBehaveLikeCanReceivedERC20(): void {
         this.contracts.stabilityPool.connect(this.impostor).receivedERC20(erc20, debtAmount)
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.stabilityPool,
-        "StabilityPool__ActivePoolOnly"
+        "StabilityPool__TrenBoxStorageOnly"
       );
     });
   });

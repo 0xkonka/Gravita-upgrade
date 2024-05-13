@@ -8,10 +8,10 @@ export default function shouldBehaveLikeCanExecuteFullRedemption(): void {
 
     await this.utils.setUsers([this.signers.accounts[2], this.signers.accounts[3]]);
 
-    const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
-    const activePool = await ActivePoolFactory.connect(owner).deploy();
-    await activePool.waitForDeployment();
-    await activePool.initialize(this.signers.deployer);
+    const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
+    const trenBoxStorage = await TrenBoxStorageFactory.connect(owner).deploy();
+    await trenBoxStorage.waitForDeployment();
+    await trenBoxStorage.initialize(this.signers.deployer);
 
     const TrenBoxManagerFactory = await ethers.getContractFactory("TrenBoxManager");
     const trenBoxManager = await TrenBoxManagerFactory.connect(owner).deploy();
@@ -27,11 +27,6 @@ export default function shouldBehaveLikeCanExecuteFullRedemption(): void {
     const borrowerOperations = await BorrowerOperationsFactory.connect(owner).deploy();
     await borrowerOperations.waitForDeployment();
     await borrowerOperations.initialize(this.signers.deployer);
-
-    const CollSurplusPoolFactory = await ethers.getContractFactory("CollSurplusPool");
-    const collSurplusPool = await CollSurplusPoolFactory.connect(owner).deploy();
-    await collSurplusPool.waitForDeployment();
-    await collSurplusPool.initialize(this.signers.deployer);
 
     const FeeCollectorFactory = await ethers.getContractFactory("FeeCollector");
     const feeCollector = await FeeCollectorFactory.connect(owner).deploy();
@@ -50,8 +45,7 @@ export default function shouldBehaveLikeCanExecuteFullRedemption(): void {
     this.redeployedContracts.debtToken = debtToken;
     this.redeployedContracts.feeCollector = feeCollector;
     this.redeployedContracts.sortedTrenBoxes = sortedTrenBoxes;
-    this.redeployedContracts.activePool = activePool;
-    this.redeployedContracts.collSurplusPool = collSurplusPool;
+    this.redeployedContracts.trenBoxStorage = trenBoxStorage;
 
     const { erc20 } = this.testContracts;
 
@@ -79,8 +73,7 @@ export default function shouldBehaveLikeCanExecuteFullRedemption(): void {
       debtToken: this.redeployedContracts.debtToken,
       feeCollector: this.redeployedContracts.feeCollector,
       sortedTrenBoxes: this.redeployedContracts.sortedTrenBoxes,
-      activePool: this.redeployedContracts.activePool,
-      collSurplusPool: this.redeployedContracts.collSurplusPool,
+      trenBoxStorage: this.redeployedContracts.trenBoxStorage,
       trenBoxManager: this.redeployedContracts.trenBoxManager,
     });
   });

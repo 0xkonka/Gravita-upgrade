@@ -331,7 +331,7 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
 
       await expect(repayDebtTx).to.not.emit(erc20, "Transfer");
     });
-    
+
     context("when user has enough debt token amount to close TrenBox", function () {
       it("should emit TrenBoxUpdated event", async function () {
         const [user, differentUser] = this.users;
@@ -342,7 +342,9 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
         await debtToken.connect(user).transfer(differentUser.address, totalBalance);
 
         await this.contracts.debtToken.addWhitelist(user.address);
-        await this.contracts.debtToken.connect(user).mintFromWhitelistedContract(ethers.parseUnits("3000", 18));
+        await this.contracts.debtToken
+          .connect(user)
+          .mintFromWhitelistedContract(ethers.parseUnits("3000", 18));
 
         const amountToRepay = ethers.parseUnits("201005", 16);
 
@@ -353,15 +355,8 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
         });
 
         await expect(repayDebtTx)
-        .to.emit(borrowerOperations, "TrenBoxUpdated")
-        .withArgs(
-          erc20,
-          user.address,
-          0n,
-          0n,
-          0n,
-          1n
-        );
+          .to.emit(borrowerOperations, "TrenBoxUpdated")
+          .withArgs(erc20, user.address, 0n, 0n, 0n, 1n);
       });
 
       it("should increase user collateral balance", async function () {

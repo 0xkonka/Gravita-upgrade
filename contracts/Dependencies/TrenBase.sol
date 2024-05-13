@@ -3,13 +3,13 @@ pragma solidity ^0.8.23;
 
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
 import { ConfigurableAddresses } from "./ConfigurableAddresses.sol";
 import { TrenMath } from "./TrenMath.sol";
-import { IActivePool } from "../Interfaces/IActivePool.sol";
-import { IDefaultPool } from "../Interfaces/IDefaultPool.sol";
-import { IAdminContract } from "../Interfaces/IAdminContract.sol";
-import { IDefaultPool } from "../Interfaces/IDefaultPool.sol";
 import { TrenMath } from "./TrenMath.sol";
+
+import { IAdminContract } from "../Interfaces/IAdminContract.sol";
+import { ITrenBoxStorage } from "../Interfaces/ITrenBoxStorage.sol";
 
 /*
 * Base contract for TrenBoxManager, BorrowerOperations and StabilityPool. Contains global system
@@ -50,15 +50,11 @@ abstract contract TrenBase is OwnableUpgradeable, ConfigurableAddresses {
     }
 
     function getEntireSystemColl(address _asset) public view returns (uint256 entireSystemColl) {
-        uint256 activeColl = IActivePool(activePool).getAssetBalance(_asset);
-        uint256 liquidatedColl = IDefaultPool(defaultPool).getAssetBalance(_asset);
-        return activeColl + liquidatedColl;
+        return ITrenBoxStorage(trenBoxStorage).getTotalCollateralBalance(_asset);
     }
 
     function getEntireSystemDebt(address _asset) public view returns (uint256 entireSystemDebt) {
-        uint256 activeDebt = IActivePool(activePool).getDebtTokenBalance(_asset);
-        uint256 closedDebt = IDefaultPool(defaultPool).getDebtTokenBalance(_asset);
-        return activeDebt + closedDebt;
+        return ITrenBoxStorage(trenBoxStorage).getTotalDebtBalance(_asset);
     }
 
     function _getTCR(address _asset, uint256 _price) internal view returns (uint256 TCR) {

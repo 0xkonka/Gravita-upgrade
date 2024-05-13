@@ -491,14 +491,14 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           .withArgs(asset, user.address, expectedBorrowingFee);
       });
 
-      it("should increase asset debt in ActivePool", async function () {
+      it("should increase asset debt in trenBoxStorage", async function () {
         const [user] = this.users;
         const { erc20 } = this.testContracts;
         const asset = await erc20.getAddress();
         const assetAmount = ethers.parseUnits("2", 18);
 
-        const { activePool } = this.contracts;
-        const assetDebtBefore = await activePool.getDebtTokenBalance(asset);
+        const { trenBoxStorage } = this.contracts;
+        const assetDebtBefore = await trenBoxStorage.getActiveDebtBalance(asset);
 
         const { openTrenBoxTx, totalDebt } = await this.utils.openTrenBox({
           asset,
@@ -508,13 +508,13 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
 
         await (await openTrenBoxTx).wait();
 
-        const assetDebtAfter = await activePool.getDebtTokenBalance(asset);
+        const assetDebtAfter = await trenBoxStorage.getActiveDebtBalance(asset);
         const expectedAssetDebt = assetDebtBefore + totalDebt;
 
         expect(assetDebtAfter).to.equal(expectedAssetDebt);
       });
 
-      it("should emit ActivePoolDebtUpdated event", async function () {
+      it("should emit trenBoxStorageDebtUpdated event", async function () {
         const [user] = this.users;
         const { erc20 } = this.testContracts;
         const asset = await erc20.getAddress();
@@ -526,10 +526,10 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           from: user,
         });
 
-        const { activePool } = this.contracts;
+        const { trenBoxStorage } = this.contracts;
 
         await expect(openTrenBoxTx)
-          .to.emit(activePool, "ActivePoolDebtUpdated")
+          .to.emit(trenBoxStorage, "ActiveDebtBalanceUpdated")
           .withArgs(asset, totalDebt);
       });
 
@@ -578,14 +578,14 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         expect(assetBalanceAfter).to.equal(expectedAssetBalance);
       });
 
-      it("should increase collateral balance in ActivePool", async function () {
+      it("should increase collateral balance in trenBoxStorage", async function () {
         const [user] = this.users;
         const { erc20 } = this.testContracts;
         const asset = await erc20.getAddress();
         const assetAmount = ethers.parseUnits("2", 18);
 
-        const { activePool } = this.contracts;
-        const assetBalanceBefore = await activePool.getAssetBalance(asset);
+        const { trenBoxStorage } = this.contracts;
+        const assetBalanceBefore = await trenBoxStorage.getActiveCollateralBalance(asset);
 
         const { openTrenBoxTx } = await this.utils.openTrenBox({
           asset,
@@ -595,20 +595,20 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
 
         await (await openTrenBoxTx).wait();
 
-        const assetBalanceAfter = await activePool.getAssetBalance(asset);
+        const assetBalanceAfter = await trenBoxStorage.getActiveCollateralBalance(asset);
         const expectedAssetBalance = assetBalanceBefore + assetAmount;
 
         expect(assetBalanceAfter).to.equal(expectedAssetBalance);
       });
 
-      it("should emit ActivePoolAssetBalanceUpdated event", async function () {
+      it("should emit trenBoxStorageAssetBalanceUpdated event", async function () {
         const [user] = this.users;
         const { erc20 } = this.testContracts;
         const asset = await erc20.getAddress();
         const assetAmount = ethers.parseUnits("2", 18);
-        const { activePool } = this.contracts;
+        const { trenBoxStorage } = this.contracts;
 
-        const assetBalanceBefore = await activePool.getAssetBalance(asset);
+        const assetBalanceBefore = await trenBoxStorage.getActiveCollateralBalance(asset);
 
         const { openTrenBoxTx } = await this.utils.openTrenBox({
           asset,
@@ -619,7 +619,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         const expectedAssetBalance = assetBalanceBefore + assetAmount;
 
         await expect(openTrenBoxTx)
-          .to.emit(activePool, "ActivePoolAssetBalanceUpdated")
+          .to.emit(trenBoxStorage, "ActiveCollateralBalanceUpdated")
           .withArgs(asset, expectedAssetBalance);
       });
     });
@@ -1127,14 +1127,14 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           .withArgs(asset, user.address, expectedBorrowingFee);
       });
 
-      it("should increase asset debt in ActivePool", async function () {
+      it("should increase asset debt in trenBoxStorage", async function () {
         const [user] = this.users;
         const { erc20_with_6_decimals } = this.testContracts;
         const asset = await erc20_with_6_decimals.getAddress();
         const assetAmount = ethers.parseUnits("5432.1098", 18);
 
-        const { activePool } = this.contracts;
-        const assetDebtBefore = await activePool.getDebtTokenBalance(asset);
+        const { trenBoxStorage } = this.contracts;
+        const assetDebtBefore = await trenBoxStorage.getActiveDebtBalance(asset);
 
         const { openTrenBoxTx, totalDebt } = await this.utils.openTrenBox({
           asset,
@@ -1144,13 +1144,13 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
 
         await (await openTrenBoxTx).wait();
 
-        const assetDebtAfter = await activePool.getDebtTokenBalance(asset);
+        const assetDebtAfter = await trenBoxStorage.getActiveDebtBalance(asset);
         const expectedAssetDebt = assetDebtBefore + totalDebt;
 
         expect(assetDebtAfter).to.equal(expectedAssetDebt);
       });
 
-      it("should emit ActivePoolDebtUpdated event", async function () {
+      it("should emit ActiveDebtUpdated event", async function () {
         const [user] = this.users;
         const { erc20_with_6_decimals } = this.testContracts;
         const asset = await erc20_with_6_decimals.getAddress();
@@ -1162,10 +1162,10 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           from: user,
         });
 
-        const { activePool } = this.contracts;
+        const { trenBoxStorage } = this.contracts;
 
         await expect(openTrenBoxTx)
-          .to.emit(activePool, "ActivePoolDebtUpdated")
+          .to.emit(trenBoxStorage, "ActiveDebtBalanceUpdated")
           .withArgs(asset, totalDebt);
       });
 
@@ -1216,14 +1216,14 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         expect(assetBalanceAfter).to.equal(expectedAssetBalance);
       });
 
-      it("should increase collateral balance in ActivePool", async function () {
+      it("should increase collateral balance in trenBoxStorage", async function () {
         const [user] = this.users;
         const { erc20_with_6_decimals } = this.testContracts;
         const asset = await erc20_with_6_decimals.getAddress();
         const assetAmount = ethers.parseUnits("5432.1098", 18);
 
-        const { activePool } = this.contracts;
-        const assetBalanceBefore = await activePool.getAssetBalance(asset);
+        const { trenBoxStorage } = this.contracts;
+        const assetBalanceBefore = await trenBoxStorage.getActiveCollateralBalance(asset);
 
         const { openTrenBoxTx } = await this.utils.openTrenBox({
           asset,
@@ -1233,20 +1233,20 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
 
         await (await openTrenBoxTx).wait();
 
-        const assetBalanceAfter = await activePool.getAssetBalance(asset);
+        const assetBalanceAfter = await trenBoxStorage.getActiveCollateralBalance(asset);
         const expectedAssetBalance = assetBalanceBefore + assetAmount;
 
         expect(assetBalanceAfter).to.equal(expectedAssetBalance);
       });
 
-      it("should emit ActivePoolAssetBalanceUpdated event", async function () {
+      it("should emit trenBoxStorageAssetBalanceUpdated event", async function () {
         const [user] = this.users;
         const { erc20_with_6_decimals } = this.testContracts;
         const asset = await erc20_with_6_decimals.getAddress();
         const assetAmount = ethers.parseUnits("5432.1098", 18);
-        const { activePool } = this.contracts;
+        const { trenBoxStorage } = this.contracts;
 
-        const assetBalanceBefore = await activePool.getAssetBalance(asset);
+        const assetBalanceBefore = await trenBoxStorage.getActiveCollateralBalance(asset);
 
         const { openTrenBoxTx } = await this.utils.openTrenBox({
           asset,
@@ -1257,7 +1257,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         const expectedAssetBalance = assetBalanceBefore + assetAmount;
 
         await expect(openTrenBoxTx)
-          .to.emit(activePool, "ActivePoolAssetBalanceUpdated")
+          .to.emit(trenBoxStorage, "ActiveCollateralBalanceUpdated")
           .withArgs(asset, expectedAssetBalance);
       });
     });

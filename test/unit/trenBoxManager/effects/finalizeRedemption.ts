@@ -8,10 +8,10 @@ export default function shouldBehaveLikeCanFinalizeRedemption(): void {
     await trenBoxManager.waitForDeployment();
     await trenBoxManager.initialize(this.signers.deployer);
 
-    const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
-    const activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
-    await activePool.waitForDeployment();
-    await activePool.initialize(this.signers.deployer);
+    const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
+    const trenBoxStorage = await TrenBoxStorageFactory.connect(this.signers.deployer).deploy();
+    await trenBoxStorage.waitForDeployment();
+    await trenBoxStorage.initialize(this.signers.deployer);
 
     const FeeCollectorFactory = await ethers.getContractFactory("FeeCollector");
     const feeCollector = await FeeCollectorFactory.connect(this.signers.deployer).deploy();
@@ -19,7 +19,7 @@ export default function shouldBehaveLikeCanFinalizeRedemption(): void {
     await feeCollector.initialize(this.signers.deployer);
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;
-    this.redeployedContracts.activePool = activePool;
+    this.redeployedContracts.trenBoxStorage = trenBoxStorage;
     this.redeployedContracts.feeCollector = feeCollector;
 
     this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
@@ -27,7 +27,7 @@ export default function shouldBehaveLikeCanFinalizeRedemption(): void {
 
     const { erc20 } = this.testContracts;
     await erc20.mint(this.signers.deployer, 1000n);
-    await erc20.transfer(this.redeployedContracts.activePool, 105n);
+    await erc20.transfer(this.redeployedContracts.trenBoxStorage, 105n);
     await erc20.approve(this.trenBoxManagerOperationsImpostor, 105n);
   });
 
@@ -35,7 +35,7 @@ export default function shouldBehaveLikeCanFinalizeRedemption(): void {
     beforeEach(async function () {
       await this.utils.connectRedeployedContracts({
         trenBoxManagerOperations: this.trenBoxManagerOperationsImpostor,
-        activePool: this.redeployedContracts.activePool,
+        trenBoxStorage: this.redeployedContracts.trenBoxStorage,
         feeCollector: this.redeployedContracts.feeCollector,
         borrowerOperations: this.borrowerOperationsImpostor,
         trenBoxManager: this.redeployedContracts.trenBoxManager,
@@ -57,13 +57,13 @@ export default function shouldBehaveLikeCanFinalizeRedemption(): void {
       const assetFeeAmount = 5n;
       const assetRedeemedAmount = 100n;
 
-      await this.redeployedContracts.activePool
+      await this.redeployedContracts.trenBoxStorage
         .connect(this.borrowerOperationsImpostor)
-        .increaseDebt(erc20, debtToIncrease);
+        .increaseActiveDebt(erc20, debtToIncrease);
 
-      await this.redeployedContracts.activePool
+      await this.redeployedContracts.trenBoxStorage
         .connect(this.borrowerOperationsImpostor)
-        .receivedERC20(erc20, 105n);
+        .increaseActiveCollateral(erc20, 105n);
 
       await this.redeployedContracts.trenBoxManager
         .connect(this.trenBoxManagerOperationsImpostor)
@@ -82,13 +82,13 @@ export default function shouldBehaveLikeCanFinalizeRedemption(): void {
       const assetFeeAmount = 0n;
       const assetRedeemedAmount = 100n;
 
-      await this.redeployedContracts.activePool
+      await this.redeployedContracts.trenBoxStorage
         .connect(this.borrowerOperationsImpostor)
-        .increaseDebt(erc20, debtToIncrease);
+        .increaseActiveDebt(erc20, debtToIncrease);
 
-      await this.redeployedContracts.activePool
+      await this.redeployedContracts.trenBoxStorage
         .connect(this.borrowerOperationsImpostor)
-        .receivedERC20(erc20, 105n);
+        .increaseActiveCollateral(erc20, 105n);
 
       await this.redeployedContracts.trenBoxManager
         .connect(this.trenBoxManagerOperationsImpostor)
