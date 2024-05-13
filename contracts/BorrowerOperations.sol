@@ -31,6 +31,7 @@ contract BorrowerOperations is
 {
     using SafeERC20 for IERC20;
 
+    /// @notice The contract name.
     string public constant NAME = "BorrowerOperations";
 
     // --- Initializer ---
