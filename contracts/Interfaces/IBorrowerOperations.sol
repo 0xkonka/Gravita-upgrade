@@ -17,7 +17,7 @@ interface IBorrowerOperations {
     /**
      * @dev Struct for storing collateral and debt changes for a specific asset.
      * @param asset The address of collateral asset.
-     * @param isCollIncrease Flag to indicate whether the collateral balance increases or not.
+     * @param isCollIncrease The flag to indicate whether the collateral balance increases or not.
      * @param price The price of collateral asset.
      * @param collChange The change of collateral balance.
      * @param netDebtChange The change of net debt balance.
@@ -174,17 +174,15 @@ interface IBorrowerOperations {
     /// @dev Error emitted when the total debt amount exceeds mint cap.
     error BorrowerOperations__ExceedMintCap();
 
-    // --- Functions ---
-
     /**
-     * @notice Create a TrenBox for the caller with requested debt and the specified asset
-     * as collateral. In addition to the requested debt, extra debt is issued to pay
-     * the borrowing fee, and cover the gas compensation.
-     * @param _asset collateral asset address
-     * @param _assetAmount collateral amount
-     * @param _debtTokenAmount requested debt amount
-     * @param _upperHint Id of previous node for the insert position, used in SortedTrenBoxes
-     * @param _lowerHint Id of next node for the insert position, used in SortedTrenBoxes
+     * @notice Creates a trenBox for the specific collateral asset with requested debt amount.
+     * @dev In addition to the requested debt, extra debt is issued to pay the borrowing fee,
+     * and cover the gas compensation.
+     * @param _asset The address of collateral asset.
+     * @param _assetAmount The amount of collateral asset.
+     * @param _debtTokenAmount The amount of debt tokens.
+     * @param _upperHint Id of previous node for the insert position, used in SortedTrenBoxes.
+     * @param _lowerHint Id of next node for the insert position, used in SortedTrenBoxes.
      */
     function openTrenBox(
         address _asset,
@@ -196,11 +194,11 @@ interface IBorrowerOperations {
         external;
 
     /**
-     * @notice Add collateral to the caller's active TrenBox
-     * @param _asset collateral asset address
-     * @param _assetSent collateral amount to send
-     * @param _upperHint Id of previous node for the new insert position, used in SortedTrenBoxes
-     * @param _lowerHint Id of next node for the new insert position, used in SortedTrenBoxes
+     * @notice Adds collateral to the caller's active trenBox.
+     * @param _asset The address of collateral asset.
+     * @param _assetSent The amount of collateral asset to add.
+     * @param _upperHint Id of previous node for the new insert position, used in SortedTrenBoxes.
+     * @param _lowerHint Id of next node for the new insert position, used in SortedTrenBoxes.
      */
     function addColl(
         address _asset,
@@ -211,11 +209,11 @@ interface IBorrowerOperations {
         external;
 
     /**
-     * @notice Withdraw collateral from the caller's active TrenBox
-     * @param _asset collateral asset address
-     * @param _collWithdrawal collateral amount to withdraw
-     * @param _upperHint Id of previous node for the new insert position
-     * @param _lowerHint Id of next node for the new insert position
+     * @notice Withdraws collateral from the caller's active trenBox.
+     * @param _asset The address of collateral asset.
+     * @param _collWithdrawal The amount of collateral asset to withdraw.
+     * @param _upperHint Id of previous node for the new insert position.
+     * @param _lowerHint Id of next node for the new insert position.
      */
     function withdrawColl(
         address _asset,
@@ -226,12 +224,12 @@ interface IBorrowerOperations {
         external;
 
     /**
-     * @notice Withdraw debt tokens from caller's TrenBox.
-     * mint new debt tokens to the owner, and increase the TrenBox's debt accordingly
-     * @param _asset collateral asset address
-     * @param _debtTokenAmount debt token amount to withdraw
-     * @param _upperHint Id of previous node for the new insert position
-     * @param _lowerHint Id of next node for the new insert position
+     * @notice Withdraws debt tokens from the caller's trenBox. Mints new debt tokens to the owner,
+     * and increase the trenBox's debt accordingly.
+     * @param _asset The address of collateral asset.
+     * @param _debtTokenAmount The amount of debt token to withdraw.
+     * @param _upperHint Id of previous node for the new insert position.
+     * @param _lowerHint Id of next node for the new insert position.
      */
     function withdrawDebtTokens(
         address _asset,
@@ -242,12 +240,12 @@ interface IBorrowerOperations {
         external;
 
     /**
-     * @notice Repay debt tokens to caller's TrenBox. Burn the repaid debt tokens, and
-     * reduce the TrenBox's debt accordingly or Close TrenBox if user has enough tokens at all
-     * @param _asset collateral asset address
-     * @param _debtTokenAmount debt token amount to repay
-     * @param _upperHint Id of previous node for the new insert position
-     * @param _lowerHint Id of next node for the new insert position
+     * @notice Repays debt tokens to the caller's trenBox. Burns the repaid debt tokens, and
+     * reduces the trenBox's debt accordingly or Closes trenBox if user has enough tokens at all.
+     * @param _asset The address of collateral asset.
+     * @param _debtTokenAmount The amount of debt token to repay.
+     * @param _upperHint Id of previous node for the new insert position.
+     * @param _lowerHint Id of next node for the new insert position.
      */
     function repayDebtTokens(
         address _asset,
@@ -258,14 +256,14 @@ interface IBorrowerOperations {
         external;
 
     /**
-     * @notice Enable a caller to simultaneously change both their collateral and debt
-     * @param _asset collateral asset address
-     * @param _assetSent collateral amount to send
-     * @param _collWithdrawal collateral amount to withdraw
-     * @param _debtTokenChange debt token amount to withdraw or repay
-     * @param _isDebtIncrease true if withdraw, false if repay
-     * @param _upperHint Id of previous node for the new insert position
-     * @param _lowerHint Id of next node for the new insert position
+     * @notice Enables a caller to simultaneously change both their collateral and debt balances.
+     * @param _asset The address of collateral asset.
+     * @param _assetSent The amount of collateral asset to send.
+     * @param _collWithdrawal The amount of collateral asset to withdraw.
+     * @param _debtTokenChange The amount of debt token to withdraw or repay.
+     * @param _isDebtIncrease The flag to indicate if current operation is withdrawal or repayment.
+     * @param _upperHint Id of previous node for the new insert position.
+     * @param _lowerHint Id of next node for the new insert position.
      */
     function adjustTrenBox(
         address _asset,
@@ -279,14 +277,14 @@ interface IBorrowerOperations {
         external;
 
     /**
-     * @notice Claim remaining collateral from redemption or from liquidation with ICR > MCR
+     * @notice Claims remaining collateral from redemption or from liquidation with ICR > MCR
      * in Recovery Mode
-     * @param _asset collateral asset address
+     * @param _asset The address of collateral asset.
      */
     function claimCollateral(address _asset) external;
 
     /**
-     * @notice Return the composite debt (drawn debt + gas compensation) of a TrenBox
+     * @notice Returns the composite debt (drawn debt + gas compensation) of a trenBox.
      */
     function getCompositeDebt(address _asset, uint256 _debt) external view returns (uint256);
 }
