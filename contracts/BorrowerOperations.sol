@@ -247,7 +247,7 @@ contract BorrowerOperations is
      * a collateral withdrawal.
      * @param _asset The address of collateral asset.
      * @param _assetSent The amount of collateral asset to send.
-     * @param _borrower The address of borrower.
+     * @param _borrower The borrower address.
      * @param _collWithdrawal The amount of collateral asset to withdraw.
      * @param _debtTokenChange The amount of debt token to withdraw or repay.
      * @param _isDebtIncrease The flag to indicate if current operation is withdrawal or repayment.

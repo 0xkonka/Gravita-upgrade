@@ -3,7 +3,7 @@ pragma solidity ^0.8.23;
 
 interface IBorrowerOperations {
     /**
-     * @dev Enum for storing the borrowers' operation type.
+     * @dev Enum for storing the borrower operation type.
      * @param openTrenBox The operation type to open a trenBox.
      * @param closeTrenBox The operation type to close a trenBox.
      * @param adjustTrenBox The operation type to adjust trenBoxes.
@@ -277,8 +277,8 @@ interface IBorrowerOperations {
         external;
 
     /**
-     * @notice Claims remaining collateral from redemption or from liquidation with ICR > MCR
-     * in Recovery Mode
+     * @notice Claims remaining collateral from a redemption or from a liquidation
+     * with ICR > MCR in Recovery Mode.
      * @param _asset The address of collateral asset.
      */
     function claimCollateral(address _asset) external;
