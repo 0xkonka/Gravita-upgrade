@@ -48,11 +48,16 @@ abstract contract ConfigurableAddresses is OwnableUpgradeable {
             revert ConfigurableAddresses__LengthMismatch();
         }
 
-        for (uint256 i = 0; i < 13; i++) {
+        for (uint256 i = 0; i < 13;) {
             if (_addresses[i] == address(0)) {
                 revert ConfigurableAddresses__ZeroAddresses(i, _addresses[i]);
             }
+
+            unchecked {
+                ++i;
+            }
         }
+
         adminContract = _addresses[0];
         borrowerOperations = _addresses[1];
         debtToken = _addresses[2];

@@ -8,6 +8,7 @@ import { OwnableUpgradeable } from
 
 import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 import { DECIMAL_PRECISION as _DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
+
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
 import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
@@ -96,7 +97,7 @@ contract AdminContract is
     // Initializers
     // -----------------------------------------------------------------------------------------------------
 
-    function initialize(address initialOwner) public initializer {
+    function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
     }
@@ -158,7 +159,7 @@ contract AdminContract is
         uint256 percentDivisor,
         uint256 redemptionFeeFloor
     )
-        public
+        external
         override
         onlyTimelock
     {
@@ -279,7 +280,7 @@ contract AdminContract is
         address _collateral,
         uint256 _blockTimestamp
     )
-        public
+        external
         override
         onlyTimelock
     {
@@ -354,7 +355,7 @@ contract AdminContract is
             _exists(_colls[i]);
             indices[i] = collateralParams[_colls[i]].index;
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
@@ -428,13 +429,13 @@ contract AdminContract is
     // Internal Functions
     // -----------------------------------------------------------------------------------------------
 
-    function _exists(address _collateral) internal view {
+    function _exists(address _collateral) private view {
         if (collateralParams[_collateral].mcr == 0) {
             revert AdminContract__CollateralDoesNotExist();
         }
     }
 
-    function authorizeUpgrade(address newImplementation) public {
+    function authorizeUpgrade(address newImplementation) external {
         _authorizeUpgrade(newImplementation);
     }
 

@@ -8,6 +8,7 @@ import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
+
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ITRENStaking } from "./Interfaces/ITRENStaking.sol";
@@ -38,7 +39,8 @@ contract FeeCollector is
     /// collateral asset address to fee record struct
     mapping(address borrower => mapping(address asset => FeeRecord feeParams)) public feeRecords;
 
-    // ====================== Modifiers ====================== //
+    // Modifiers
+    // --------------------------------------------------------------------------------------------------------
 
     modifier onlyBorrowerOperations() {
         if (msg.sender != borrowerOperations) {
@@ -63,9 +65,10 @@ contract FeeCollector is
         _;
     }
 
-    // ====================== Initializer ====================== //
+    // Initializer
+    // ------------------------------------------------------------------------------------------------------
 
-    function initialize(address initialOwner) public initializer {
+    function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
     }
@@ -180,7 +183,7 @@ contract FeeCollector is
                 emit FeeRecordUpdated(borrower, asset, NOW, sRecord.to, updatedAmount);
             }
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
