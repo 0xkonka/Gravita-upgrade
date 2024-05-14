@@ -9,10 +9,10 @@ import { PausableUpgradeable } from
 import { ReentrancyGuardUpgradeable } from
     "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-import { ITRENStaking } from "../Interfaces/ITRENStaking.sol";
-
 import { TrenMath, DECIMAL_PRECISION } from "../Dependencies/TrenMath.sol";
 import { SafetyTransfer } from "../Dependencies/SafetyTransfer.sol";
+
+import { ITRENStaking } from "../Interfaces/ITRENStaking.sol";
 
 contract TRENStaking is
     ITRENStaking,

@@ -122,7 +122,7 @@ contract BorrowerOperations is
         // Mints the debtToken amount to the borrower
         _withdrawDebtTokens(vars.asset, msg.sender, _debtTokenAmount, vars.netDebt);
 
-        // Moves the debtToken gas compensation to the trenBox storage pool
+        // Move the debtToken gas compensation to the TrenBoxStorage
         if (gasCompensation != 0) {
             _withdrawDebtTokens(vars.asset, trenBoxStorage, gasCompensation, gasCompensation);
         }
@@ -191,7 +191,7 @@ contract BorrowerOperations is
             _debtTokenAmount
                 == _getNetDebt(
                     _asset, ITrenBoxManager(trenBoxManager).getTrenBoxDebt(_asset, msg.sender)
-                ) - IAdminContract(adminContract).getDebtTokenGasCompensation(_asset)
+                )
         ) {
             _closeTrenBox(_asset);
         } else {
@@ -407,8 +407,8 @@ contract BorrowerOperations is
 
         emit TrenBoxUpdated(_asset, msg.sender, 0, 0, 0, BorrowerOperation.closeTrenBox);
 
-        // Burn the repaid debt tokens from the user's balance and the gas compensation from the Gas
-        // Pool
+        // Burn the repaid debt tokens from the user's balance and the gas compensation from
+        // TrenBoxStorage
         _repayDebtTokens(_asset, msg.sender, netDebt, refund);
         if (gasCompensation != 0) {
             _repayDebtTokens(_asset, trenBoxStorage, gasCompensation, 0);
