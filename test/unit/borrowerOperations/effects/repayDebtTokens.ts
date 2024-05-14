@@ -23,6 +23,7 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
         {
           collateral: erc20,
           collateralOptions: {
+            debtTokenGasCompensation: ethers.parseUnits("200", "ether"),
             setAsActive: true,
             price: ethers.parseUnits("200", "ether"),
             mints: [
