@@ -3,8 +3,8 @@ pragma solidity ^0.8.23;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-
 import { ERC20Permit } from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 
 contract DebtToken is IDebtToken, ERC20Permit, Ownable {

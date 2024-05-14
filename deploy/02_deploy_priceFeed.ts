@@ -1,4 +1,3 @@
-import type { AddressLike } from "ethers";
 import type { DeployFunction, DeployResult, DeploymentsExtension } from "hardhat-deploy/types";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -56,7 +55,7 @@ async function deployAndVerifyOnLayer1(
       execute: {
         init: {
           methodName: "initialize",
-          args: [],
+          args: [deployer],
         },
       },
       proxyContract: "OpenZeppelinTransparentProxy",
