@@ -8,15 +8,10 @@ export default function shouldBehaveLikeCanRedistributeDebtAndColl(): void {
     await trenBoxManager.waitForDeployment();
     await trenBoxManager.initialize(this.signers.deployer);
 
-    const ActivePoolFactory = await ethers.getContractFactory("ActivePool");
-    const activePool = await ActivePoolFactory.connect(this.signers.deployer).deploy();
-    await activePool.waitForDeployment();
-    await activePool.initialize(this.signers.deployer);
-
-    const DefaultPoolFactory = await ethers.getContractFactory("DefaultPool");
-    const defaultPool = await DefaultPoolFactory.connect(this.signers.deployer).deploy();
-    await defaultPool.waitForDeployment();
-    await defaultPool.initialize(this.signers.deployer);
+    const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
+    const trenBoxStorage = await TrenBoxStorageFactory.connect(this.signers.deployer).deploy();
+    await trenBoxStorage.waitForDeployment();
+    await trenBoxStorage.initialize(this.signers.deployer);
 
     const StabilityPoolFactory = await ethers.getContractFactory("StabilityPool");
     const stabilityPool = await StabilityPoolFactory.connect(this.signers.deployer).deploy();
@@ -24,8 +19,7 @@ export default function shouldBehaveLikeCanRedistributeDebtAndColl(): void {
     await stabilityPool.initialize(this.signers.deployer);
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;
-    this.redeployedContracts.activePool = activePool;
-    this.redeployedContracts.defaultPool = defaultPool;
+    this.redeployedContracts.trenBoxStorage = trenBoxStorage;
     this.redeployedContracts.stabilityPool = stabilityPool;
 
     this.borrowerOperationsImpostor = this.signers.accounts[1];
@@ -35,16 +29,15 @@ export default function shouldBehaveLikeCanRedistributeDebtAndColl(): void {
     beforeEach(async function () {
       await this.utils.connectRedeployedContracts({
         trenBoxManagerOperations: this.borrowerOperationsImpostor,
-        activePool: this.redeployedContracts.activePool,
-        defaultPool: this.redeployedContracts.defaultPool,
+        trenBoxStorage: this.redeployedContracts.trenBoxStorage,
         stabilityPool: this.redeployedContracts.stabilityPool,
         borrowerOperations: this.borrowerOperationsImpostor,
         trenBoxManager: this.redeployedContracts.trenBoxManager,
       });
 
-      await this.redeployedContracts.activePool
+      await this.redeployedContracts.trenBoxStorage
         .connect(this.borrowerOperationsImpostor)
-        .increaseDebt(this.collaterals.active.wETH.address, 50n);
+        .increaseActiveDebt(this.collaterals.active.wETH.address, 50n);
     });
 
     it("executes redistributeDebtAndColl and emit LTermsUpdated", async function () {

@@ -42,7 +42,7 @@ interface IStabilityPool is IDeposit {
 
     // --- Errors ---
 
-    error StabilityPool__ActivePoolOnly(address sender, address expected);
+    error StabilityPool__TrenBoxStorageOnly(address sender, address expected);
     error StabilityPool__AdminContractOnly(address sender, address expected);
     error StabilityPool__TrenBoxManagerOnly(address sender, address expected);
     error StabilityPool__ArrayNotInAscendingOrder();

@@ -97,37 +97,6 @@ export default function shouldBehaveLikeCanReturnFromPool(): void {
             .withArgs(this.pool, this.tokenHolder, amountToReturn);
         });
       });
-
-      context("when recipient is zero address", function () {
-        it.skip("reverts", async function () {
-          const amountToReturn = 100n;
-
-          await expect(
-            this.contracts.debtToken
-              .connect(this.caller)
-              .returnFromPool(this.pool, ethers.ZeroAddress, amountToReturn)
-          ).to.be.revertedWithCustomError(
-            this.contracts.debtToken,
-            "DebtToken__CannotTransferTokensToZeroAddress"
-          );
-        });
-      });
-
-      context("when recipient is the token contract", function () {
-        it.skip("reverts", async function () {
-          const amountToReturn = 100n;
-
-          const debtTokenAddress = await this.contracts.debtToken.getAddress();
-
-          await expect(
-            this.contracts.debtToken
-              .connect(this.caller)
-              .returnFromPool(this.pool, debtTokenAddress, amountToReturn)
-          ).to.be.revertedWith(
-            "DebtToken: Cannot transfer tokens directly to the token contract or the zero address"
-          );
-        });
-      });
     });
 
     context("when pool has insufficient balance", function () {

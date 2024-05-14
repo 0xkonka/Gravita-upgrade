@@ -105,7 +105,7 @@ contract SortedTrenBoxes is
     }
 
     // --- Initializer ---
-    function initialize(address initialOwner) public initializer {
+    function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
     }

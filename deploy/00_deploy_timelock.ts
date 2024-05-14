@@ -23,7 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await preDeploy(deployer, "Timelock");
   const deployResult: DeployResult = await deploy("Timelock", {
     from: deployer,
-    deterministicDeployment: generateSalt("TREN"),
+    deterministicDeployment: generateSalt("TRENtestnet"),
     args: args,
     log: true,
   });

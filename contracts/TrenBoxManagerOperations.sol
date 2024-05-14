@@ -10,14 +10,13 @@ import { TrenBase } from "./Dependencies/TrenBase.sol";
 import { TrenMath, DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
 
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
-import { IActivePool } from "./Interfaces/IActivePool.sol";
-import { ICollSurplusPool } from "./Interfaces/ICollSurplusPool.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IPriceFeed } from "./Interfaces/IPriceFeed.sol";
 import { ISortedTrenBoxes } from "./Interfaces/ISortedTrenBoxes.sol";
 import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
 import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 import { ITrenBoxManagerOperations } from "./Interfaces/ITrenBoxManagerOperations.sol";
+import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 
 contract TrenBoxManagerOperations is
     ITrenBoxManagerOperations,
@@ -34,7 +33,7 @@ contract TrenBoxManagerOperations is
     // Initializer
     // ------------------------------------------------------------------------------------------------------
 
-    function initialize(address initialOwner) public initializer {
+    function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
         __ReentrancyGuard_init();
@@ -90,8 +89,13 @@ contract TrenBoxManagerOperations is
             totals.totalDebtToOffset,
             totals.totalCollToSendToSP
         );
-        if (totals.totalCollSurplus != 0) {
-            IActivePool(activePool).sendAsset(_asset, collSurplusPool, totals.totalCollSurplus);
+        if (totals.totalCollToClaim != 0) {
+            ITrenBoxStorage(trenBoxStorage).decreaseActiveCollateral(
+                _asset, totals.totalCollToClaim
+            );
+            ITrenBoxStorage(trenBoxStorage).increaseClaimableCollateral(
+                _asset, totals.totalCollToClaim
+            );
         }
 
         ITrenBoxManager(trenBoxManager).updateSystemSnapshots_excludeCollRemainder(
@@ -100,7 +104,7 @@ contract TrenBoxManagerOperations is
 
         vars.liquidatedDebt = totals.totalDebtInSequence;
         vars.liquidatedColl =
-            totals.totalCollInSequence - totals.totalCollGasCompensation - totals.totalCollSurplus;
+            totals.totalCollInSequence - totals.totalCollGasCompensation - totals.totalCollToClaim;
         emit Liquidation(
             _asset,
             vars.liquidatedDebt,
@@ -160,8 +164,13 @@ contract TrenBoxManagerOperations is
             totals.totalDebtToOffset,
             totals.totalCollToSendToSP
         );
-        if (totals.totalCollSurplus != 0) {
-            IActivePool(activePool).sendAsset(_asset, collSurplusPool, totals.totalCollSurplus);
+        if (totals.totalCollToClaim != 0) {
+            ITrenBoxStorage(trenBoxStorage).decreaseActiveCollateral(
+                _asset, totals.totalCollToClaim
+            );
+            ITrenBoxStorage(trenBoxStorage).increaseClaimableCollateral(
+                _asset, totals.totalCollToClaim
+            );
         }
 
         // Update system snapshots
@@ -171,7 +180,7 @@ contract TrenBoxManagerOperations is
 
         vars.liquidatedDebt = totals.totalDebtInSequence;
         vars.liquidatedColl =
-            totals.totalCollInSequence - totals.totalCollGasCompensation - totals.totalCollSurplus;
+            totals.totalCollInSequence - totals.totalCollGasCompensation - totals.totalCollToClaim;
         emit Liquidation(
             _asset,
             vars.liquidatedDebt,
@@ -232,7 +241,7 @@ contract TrenBoxManagerOperations is
         emit Redistribution(
             _asset,
             totals.totalDebtInSequence,
-            totals.totalCollInSequence - totals.totalCollSurplus,
+            totals.totalCollInSequence - totals.totalCollToClaim,
             totals.totalDebtTokenGasCompensation
         );
     }
@@ -597,7 +606,7 @@ contract TrenBoxManagerOperations is
                     vars.remainingDebtTokenInStabPool - singleLiquidation.debtToOffset;
                 vars.entireSystemDebt = vars.entireSystemDebt - singleLiquidation.debtToOffset;
                 vars.entireSystemColl = vars.entireSystemColl - singleLiquidation.collToSendToSP
-                    - singleLiquidation.collGasCompensation - singleLiquidation.collSurplus;
+                    - singleLiquidation.collGasCompensation - singleLiquidation.collToClaim;
 
                 // Add liquidation values to their respective running totals
                 totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
@@ -683,7 +692,7 @@ contract TrenBoxManagerOperations is
             oldTotals.totalDebtToRedistribute + singleLiquidation.debtToRedistribute;
         newTotals.totalCollToRedistribute =
             oldTotals.totalCollToRedistribute + singleLiquidation.collToRedistribute;
-        newTotals.totalCollSurplus = oldTotals.totalCollSurplus + singleLiquidation.collSurplus;
+        newTotals.totalCollToClaim = oldTotals.totalCollToClaim + singleLiquidation.collToClaim;
         return newTotals;
     }
 
@@ -748,7 +757,7 @@ contract TrenBoxManagerOperations is
             vars.pendingCollReward
         ) = ITrenBoxManager(trenBoxManager).getEntireDebtAndColl(_asset, _borrower);
 
-        ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(
+        ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsFromLiquidatedToActive(
             _asset, vars.pendingDebtReward, vars.pendingCollReward
         );
         ITrenBoxManager(trenBoxManager).removeStake(_asset, _borrower);
@@ -829,7 +838,7 @@ contract TrenBoxManagerOperations is
 
         // If ICR <= 100%, purely redistribute the TrenBox across all active TrenBoxes
         if (_ICR <= IAdminContract(adminContract)._100pct() || _fullRedistribution) {
-            ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(
+            ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsFromLiquidatedToActive(
                 _asset, vars.pendingDebtReward, vars.pendingCollReward
             );
             ITrenBoxManager(trenBoxManager).removeStake(_asset, _borrower);
@@ -866,7 +875,7 @@ contract TrenBoxManagerOperations is
             (_ICR > IAdminContract(adminContract)._100pct())
                 && (_ICR < IAdminContract(adminContract).getMcr(_asset))
         ) {
-            ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(
+            ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsFromLiquidatedToActive(
                 _asset, vars.pendingDebtReward, vars.pendingCollReward
             );
             ITrenBoxManager(trenBoxManager).removeStake(_asset, _borrower);
@@ -900,7 +909,7 @@ contract TrenBoxManagerOperations is
             (_ICR >= IAdminContract(adminContract).getMcr(_asset)) && (_ICR < _TCR)
                 && (singleLiquidation.entireTrenBoxDebt <= _debtTokenInStabPool)
         ) {
-            ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsToActivePool(
+            ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsFromLiquidatedToActive(
                 _asset, vars.pendingDebtReward, vars.pendingCollReward
             );
             assert(_debtTokenInStabPool != 0);
@@ -914,9 +923,9 @@ contract TrenBoxManagerOperations is
             );
 
             ITrenBoxManager(trenBoxManager).closeTrenBoxLiquidation(_asset, _borrower);
-            if (singleLiquidation.collSurplus != 0) {
-                ICollSurplusPool(collSurplusPool).accountSurplus(
-                    _asset, _borrower, singleLiquidation.collSurplus
+            if (singleLiquidation.collToClaim != 0) {
+                ITrenBoxStorage(trenBoxStorage).updateUserClaimableBalance(
+                    _asset, _borrower, singleLiquidation.collToClaim
                 );
             }
             emit TrenBoxLiquidated(
@@ -1006,7 +1015,7 @@ contract TrenBoxManagerOperations is
                     vars.remainingDebtTokenInStabPool - singleLiquidation.debtToOffset;
                 vars.entireSystemDebt = vars.entireSystemDebt - singleLiquidation.debtToOffset;
                 vars.entireSystemColl = vars.entireSystemColl - singleLiquidation.collToSendToSP
-                    - singleLiquidation.collGasCompensation - singleLiquidation.collSurplus;
+                    - singleLiquidation.collGasCompensation - singleLiquidation.collToClaim;
 
                 // Add liquidation values to their respective running totals
                 totals = _addLiquidationValuesToTotals(totals, singleLiquidation);
@@ -1109,7 +1118,7 @@ contract TrenBoxManagerOperations is
 
         singleLiquidation.debtToOffset = _entireTrenBoxDebt;
         singleLiquidation.collToSendToSP = cappedCollPortion - singleLiquidation.collGasCompensation;
-        singleLiquidation.collSurplus = _entireTrenBoxColl - cappedCollPortion;
+        singleLiquidation.collToClaim = _entireTrenBoxColl - cappedCollPortion;
         singleLiquidation.debtToRedistribute = 0;
         singleLiquidation.collToRedistribute = 0;
     }

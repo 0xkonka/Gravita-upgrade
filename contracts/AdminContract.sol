@@ -8,10 +8,10 @@ import { OwnableUpgradeable } from
 
 import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 import { DECIMAL_PRECISION as _DECIMAL_PRECISION } from "./Dependencies/TrenMath.sol";
+
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
-import { IActivePool } from "./Interfaces/IActivePool.sol";
-import { IDefaultPool } from "./Interfaces/IDefaultPool.sol";
+import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 
 contract AdminContract is
     IAdminContract,
@@ -122,7 +122,7 @@ contract AdminContract is
     // Initializers
     // -----------------------------------------------------------------------------------------------------
 
-    function initialize(address initialOwner) public initializer {
+    function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
     }
@@ -182,7 +182,7 @@ contract AdminContract is
         uint256 _percentDivisor,
         uint256 _redemptionFeeFloor
     )
-        public
+        external
         override
         onlyTimelock
     {
@@ -302,7 +302,7 @@ contract AdminContract is
         address _collateral,
         uint256 _blockTimestamp
     )
-        public
+        external
         override
         onlyTimelock
     {
@@ -378,7 +378,7 @@ contract AdminContract is
             _exists(_colls[i]);
             indices[i] = collateralParams[_colls[i]].index;
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
@@ -430,8 +430,7 @@ contract AdminContract is
     }
 
     function getTotalAssetDebt(address _asset) external view override returns (uint256) {
-        return IActivePool(activePool).getDebtTokenBalance(_asset)
-            + IDefaultPool(defaultPool).getDebtTokenBalance(_asset);
+        return ITrenBoxStorage(trenBoxStorage).getTotalDebtBalance(_asset);
     }
 
     function getFlashLoanFee() external view override returns (uint256) {
@@ -457,13 +456,13 @@ contract AdminContract is
      * @dev Checks if the specific collateral asset exists or not.
      * @param _collateral The address of collateral asset.
      */
-    function _exists(address _collateral) internal view {
+    function _exists(address _collateral) private view {
         if (collateralParams[_collateral].mcr == 0) {
             revert AdminContract__CollateralDoesNotExist();
         }
     }
 
-    function authorizeUpgrade(address newImplementation) public {
+    function authorizeUpgrade(address newImplementation) external {
         _authorizeUpgrade(newImplementation);
     }
 

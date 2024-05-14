@@ -10,7 +10,7 @@ import shouldBehaveLikeCanExecutePartialRedemption from "./executePartialRedempt
 import shouldBehaveLikeCanFinalizeRedemption from "./finalizeRedemption";
 import shouldBehaveLikeCanIncreaseTrenBoxColl from "./increaseTrenBoxColl";
 import shouldBehaveLikeCanIncreaseTrenBoxDebt from "./increaseTrenBoxDebt";
-import shouldBehaveLikeCanMovePendingTrenBoxRewardsToActivePool from "./movePendingTrenBoxRewardsToActivePool";
+import shouldBehaveLikeCanMovePendingTrenBoxRewardsFromLiquidatedToActive from "./movePendingTrenBoxRewardsFromLiquidatedToActive";
 import shouldBehaveLikeCanRedistributeDebtAndColl from "./redistributeDebtAndColl";
 import shouldBehaveLikeCanRemoveStake from "./removeStake";
 import shouldBehaveLikeCanSendGasCompensation from "./sendGasCompensation";
@@ -27,7 +27,7 @@ export {
   shouldBehaveLikeCanFinalizeRedemption,
   shouldBehaveLikeCanUpdateBaseRateFromRedemption,
   shouldBehaveLikeCanApplyPendingRewards,
-  shouldBehaveLikeCanMovePendingTrenBoxRewardsToActivePool,
+  shouldBehaveLikeCanMovePendingTrenBoxRewardsFromLiquidatedToActive,
   shouldBehaveLikeCanUpdateTrenBoxRewardSnapshots,
   shouldBehaveLikeCanUpdateStakeAndTotalStakes,
   shouldBehaveLikeCanRemoveStake,

@@ -3,12 +3,9 @@ import { ethers, getNamedAccounts, getUnnamedAccounts, network } from "hardhat";
 
 import type { Contracts, RedeployedContracts, Signers, TestUtils } from "../shared/types";
 import { setupUtils } from "../utils";
-import { testActivePool } from "./activePool/ActivePool";
 import { testAdminContract } from "./adminContract/AdminContract";
 import { testBorrowerOperations } from "./borrowerOperations/BorrowerOperations";
-import { testCollSurplusPool } from "./collSurplusPool/CollSurplusPool";
 import { testDebtToken } from "./debtToken/DebtToken";
-import { testDefaultPool } from "./defaultPool/DefaultPool";
 import { loadDeploymentFixture } from "./deployment.fixture";
 import { testFeeCollector } from "./feeCollector/FeeCollector";
 import { testFlashLoan } from "./flashLoan/FlashLoan";
@@ -19,6 +16,7 @@ import { loadTestFixture } from "./testContracts.fixture";
 import { testTimelock } from "./timelock/Timelock";
 import { testTrenBoxManager } from "./trenBoxManager/TrenBoxManager";
 import { testTrenBoxManagerOperations } from "./trenBoxManagerOperations/TrenBoxManagerOperations";
+import { testTrenBoxStorage } from "./trenBoxStorage/TrenBoxStorage";
 import { testTrenMathTester } from "./trenMathTester/TrenMathTester";
 
 describe("Unit tests", function () {
@@ -66,19 +64,17 @@ describe("Unit tests", function () {
     await this.utils.revertToInitialSnapshot();
   });
 
-  testActivePool();
   testAdminContract();
   testBorrowerOperations();
   testDebtToken();
   testPriceFeed();
   testSortedTrenBoxes();
   testTrenBoxManager();
-  testCollSurplusPool();
-  testDefaultPool();
   testFeeCollector();
   testStabilityPool();
   testTrenBoxManagerOperations();
   testFlashLoan();
   testTimelock();
   testTrenMathTester();
+  testTrenBoxStorage();
 });
