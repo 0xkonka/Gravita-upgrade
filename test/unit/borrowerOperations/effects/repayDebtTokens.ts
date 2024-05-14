@@ -23,6 +23,7 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
         {
           collateral: erc20,
           collateralOptions: {
+            debtTokenGasCompensation: ethers.parseUnits("200", "ether"),
             setAsActive: true,
             price: ethers.parseUnits("200", "ether"),
             mints: [
@@ -180,7 +181,7 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
 
       const collateralAddress = await erc20.getAddress();
 
-      const expectedDebt = 19950497512437810944n;
+      const expectedDebt = 219950497512437810944n;
       const expectedCollateral = 100000000000000000000000000000000n;
       const expectedStake = 100000000000000000000000000000000n;
 
@@ -212,7 +213,7 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
         from: user,
       });
 
-      const expectedDebtTokenBalance = 1980579317339060419308n;
+      const expectedDebtTokenBalance = 1981440853064360912030n;
 
       await expect(repayDebtTx).to.changeTokenBalances(
         debtToken,
@@ -282,7 +283,7 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
       const expectedDebt = debtBefore - amountToRepay;
 
       const trenBoxBalanceAfter = await trenBoxManager.getTrenBoxDebt(erc20, user.address);
-      const debtAmountAfter = ethers.parseUnits("1", 16);
+      const debtAmountAfter = ethers.parseUnits("20001", 16);
 
       expect(debtAfter).to.be.equal(expectedDebt);
       expect(trenBoxBalanceAfter).to.be.equal(debtAmountAfter);
@@ -439,7 +440,7 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
   });
 
   context("when user does not have TrenBox", function () {
-    it("they cannot add collateral", async function () {
+    it("reverts with panic because user has no debt at all", async function () {
       const { erc20 } = this.testContracts;
 
       const debtAmountToRepay = 100n;
@@ -450,10 +451,7 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
         from: this.users[2],
       });
 
-      await expect(addCollateralTx).to.be.revertedWithCustomError(
-        this.contracts.borrowerOperations,
-        "BorrowerOperations__TrenBoxNotExistOrClosed"
-      );
+      await expect(addCollateralTx).to.be.revertedWithPanic();
     });
   });
 }
