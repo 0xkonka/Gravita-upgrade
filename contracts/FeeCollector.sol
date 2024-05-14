@@ -180,7 +180,7 @@ contract FeeCollector is
                 emit FeeRecordUpdated(borrower, asset, NOW, sRecord.to, updatedAmount);
             }
             unchecked {
-                i++;
+                ++i;
             }
         }
     }

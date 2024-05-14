@@ -111,7 +111,7 @@ contract TRENStaking is
         uint256 assetLength = assetsList.length;
         address asset;
 
-        for (uint256 i = 0; i < assetLength; i++) {
+        for (uint256 i = 0; i < assetLength;) {
             asset = assetsList[i];
 
             if (currentStake != 0) {
@@ -123,6 +123,10 @@ contract TRENStaking is
             }
 
             _updateUserSnapshots(asset, msg.sender);
+
+            unchecked {
+                ++i;
+            }
         }
 
         uint256 newStake = currentStake + _TRENamount;
@@ -143,7 +147,7 @@ contract TRENStaking is
         uint256 assetLength = assetsList.length;
         address asset;
 
-        for (uint256 i = 0; i < assetLength; i++) {
+        for (uint256 i = 0; i < assetLength;) {
             asset = assetsList[i];
 
             if (i == 0) {
@@ -153,6 +157,10 @@ contract TRENStaking is
             checkAssetGain(asset);
 
             _updateUserSnapshots(asset, msg.sender);
+
+            unchecked {
+                ++i;
+            }
         }
 
         if (_TRENamount > 0) {
