@@ -716,7 +716,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         for (uint256 i = 0; i < assetsLen;) {
             amounts[i] = _getGainFromSnapshots(initialDeposit, snapshots, _assets[i]);
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
@@ -913,7 +913,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
             uint256 amount = amounts[i];
             if (amount == 0) {
                 unchecked {
-                    i++;
+                    ++i;
                 }
                 continue;
             }
@@ -921,7 +921,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
             // Assumes we're internally working only with the wrapped version of ERC20 tokens
             IERC20(asset).safeTransfer(_to, amount);
             unchecked {
-                i++;
+                ++i;
             }
         }
         totalColl.amounts = _leftSubColls(totalColl, assets, amounts);
@@ -975,7 +975,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
             uint256 currentS = epochToScaleToSum[asset][currentEpochCached][currentScaleCached];
             depositSnapshots[_depositor].S[asset] = currentS;
             unchecked {
-                i++;
+                ++i;
             }
         }
 
@@ -1018,11 +1018,11 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
                     _coll1.amounts[i] -= _amounts[j];
                 }
                 unchecked {
-                    j++;
+                    ++j;
                 }
             }
             unchecked {
-                i++;
+                ++i;
             }
         }
 

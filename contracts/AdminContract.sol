@@ -354,7 +354,7 @@ contract AdminContract is
             _exists(_colls[i]);
             indices[i] = collateralParams[_colls[i]].index;
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
