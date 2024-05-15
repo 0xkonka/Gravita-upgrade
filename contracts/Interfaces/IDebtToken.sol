@@ -3,6 +3,10 @@ pragma solidity ^0.8.23;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+/**
+ * @title IDebtToken
+ * @notice Defines the basic interface for DebtToken contract.
+ */
 interface IDebtToken is IERC20 {
     /**
      * @dev Emitted when minting debt tokens against specific collateral asset

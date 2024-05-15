@@ -7,6 +7,10 @@ import { ERC20Permit } from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 
+/**
+ * @title DebtToken contract
+ * @notice The stablecoin token contract which mints, burns and transfers TrenUSD tokens.
+ */
 contract DebtToken is IDebtToken, ERC20Permit, Ownable {
     /// @notice The debt token name.
     string public constant NAME = "TREN Debt Token";
@@ -124,6 +128,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         emit WhitelistChanged(_address, false);
     }
 
+    /// @inheritdoc IDebtToken
     function mintFromWhitelistedContract(uint256 _amount)
         external
         override
@@ -132,6 +137,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         _mint(msg.sender, _amount);
     }
 
+    /// @inheritdoc IDebtToken
     function burnFromWhitelistedContract(uint256 _amount)
         external
         override
@@ -140,6 +146,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         _burn(msg.sender, _amount);
     }
 
+    /// @inheritdoc IDebtToken
     function mint(
         address _asset,
         address _account,
@@ -156,6 +163,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         _mint(_account, _amount);
     }
 
+    /// @inheritdoc IDebtToken
     function burn(address _account, uint256 _amount) external override {
         if (
             msg.sender != borrowerOperationsAddress && msg.sender != trenBoxManagerAddress
@@ -166,6 +174,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         _burn(_account, _amount);
     }
 
+    /// @inheritdoc IDebtToken
     function sendToPool(
         address _sender,
         address _poolAddress,
@@ -178,6 +187,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         _transfer(_sender, _poolAddress, _amount);
     }
 
+    /// @inheritdoc IDebtToken
     function returnFromPool(
         address _poolAddress,
         address _receiver,
