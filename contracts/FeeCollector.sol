@@ -14,6 +14,11 @@ import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ITRENStaking } from "./Interfaces/ITRENStaking.sol";
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 
+/**
+ * @title FeeCollector contract
+ * @notice Handles the borrowing fee; controls the decaying refund and maintains
+ * its record that includes the refund balance.
+ */
 contract FeeCollector is
     IFeeCollector,
     UUPSUpgradeable,
@@ -68,6 +73,10 @@ contract FeeCollector is
     // Initializer
     // ------------------------------------------------------------------------------------------------------
 
+    /**
+     * @dev Runs all the setup logic only once.
+     * @param initialOwner The address of initial owner.
+     */
     function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
@@ -75,6 +84,7 @@ contract FeeCollector is
 
     // ================= Public/External functions ================ //
 
+    /// @inheritdoc IFeeCollector
     function increaseDebt(
         address _borrower,
         address _asset,
@@ -90,6 +100,7 @@ contract FeeCollector is
         _collectFee(_borrower, _asset, minFeeAmount + feeToCollect);
     }
 
+    /// @inheritdoc IFeeCollector
     function decreaseDebt(
         address _borrower,
         address _asset,
@@ -102,6 +113,7 @@ contract FeeCollector is
         _decreaseDebt(_borrower, _asset, _paybackFraction);
     }
 
+    /// @inheritdoc IFeeCollector
     function closeDebt(
         address _borrower,
         address _asset
@@ -113,6 +125,7 @@ contract FeeCollector is
         _decreaseDebt(_borrower, _asset, 1 ether);
     }
 
+    /// @inheritdoc IFeeCollector
     function simulateRefund(
         address _borrower,
         address _asset,
@@ -144,6 +157,7 @@ contract FeeCollector is
         }
     }
 
+    /// @inheritdoc IFeeCollector
     function liquidateDebt(
         address _borrower,
         address _asset
@@ -158,6 +172,7 @@ contract FeeCollector is
         }
     }
 
+    /// @inheritdoc IFeeCollector
     function collectFees(
         address[] calldata _borrowers,
         address[] calldata _assets
@@ -188,6 +203,7 @@ contract FeeCollector is
         }
     }
 
+    /// @inheritdoc IFeeCollector
     function handleRedemptionFee(address _asset, uint256 _amount) external onlyTrenBoxManager {
         if (IAdminContract(adminContract).getRouteToTRENStaking()) {
             ITRENStaking(trenStaking).increaseFeeAsset(_asset, _amount);
@@ -201,6 +217,7 @@ contract FeeCollector is
 
     // ================== View functions ================ //
 
+    /// @inheritdoc IFeeCollector
     function getProtocolRevenueDestination() public view override returns (address) {
         return IAdminContract(adminContract).getRouteToTRENStaking() ? trenStaking : treasuryAddress;
     }

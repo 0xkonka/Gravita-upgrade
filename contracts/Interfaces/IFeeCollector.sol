@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
+/**
+ * @title IFeeCollector
+ * @notice Defines the basic interface for the FeeCollector contract.
+ */
 interface IFeeCollector {
     /**
      * @dev Struct for storing fee records of specific collateral asset.
