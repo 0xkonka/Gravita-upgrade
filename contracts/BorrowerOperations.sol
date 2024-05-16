@@ -20,6 +20,11 @@ import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 
+/**
+ * @title BorrowerOperations contract
+ * @notice Contains the basic operations by which borrowers interact with their TrenBoxes:
+ * TrenBox creation, collateral top-up / withdrawal, debt token issuance and repayment.
+ */
 contract BorrowerOperations is
     TrenBase,
     ReentrancyGuardUpgradeable,
@@ -33,6 +38,10 @@ contract BorrowerOperations is
 
     // --- Initializer ---
 
+    /**
+     * @dev Runs all the setup logic only once.
+     * @param initialOwner The address of initial owner.
+     */
     function initialize(address initialOwner) public initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
@@ -40,6 +49,7 @@ contract BorrowerOperations is
 
     // --- External/Public Functions ---
 
+    /// @inheritdoc IBorrowerOperations
     function openTrenBox(
         address _asset,
         uint256 _assetAmount,
@@ -138,6 +148,7 @@ contract BorrowerOperations is
         emit BorrowingFeePaid(vars.asset, msg.sender, vars.debtTokenFee);
     }
 
+    /// @inheritdoc IBorrowerOperations
     function addColl(
         address _asset,
         uint256 _assetSent,
@@ -151,6 +162,7 @@ contract BorrowerOperations is
         _adjustTrenBox(_asset, _assetSent, msg.sender, 0, 0, false, _upperHint, _lowerHint);
     }
 
+    /// @inheritdoc IBorrowerOperations
     function withdrawColl(
         address _asset,
         uint256 _collWithdrawal,
@@ -164,6 +176,7 @@ contract BorrowerOperations is
         _adjustTrenBox(_asset, 0, msg.sender, _collWithdrawal, 0, false, _upperHint, _lowerHint);
     }
 
+    /// @inheritdoc IBorrowerOperations
     function withdrawDebtTokens(
         address _asset,
         uint256 _debtTokenAmount,
@@ -177,6 +190,7 @@ contract BorrowerOperations is
         _adjustTrenBox(_asset, 0, msg.sender, 0, _debtTokenAmount, true, _upperHint, _lowerHint);
     }
 
+    /// @inheritdoc IBorrowerOperations
     function repayDebtTokens(
         address _asset,
         uint256 _debtTokenAmount,
@@ -201,6 +215,7 @@ contract BorrowerOperations is
         }
     }
 
+    /// @inheritdoc IBorrowerOperations
     function adjustTrenBox(
         address _asset,
         uint256 _assetSent,
@@ -226,10 +241,12 @@ contract BorrowerOperations is
         );
     }
 
+    /// @inheritdoc IBorrowerOperations
     function claimCollateral(address _asset) external override {
         ITrenBoxStorage(trenBoxStorage).claimCollateral(_asset, msg.sender);
     }
 
+    /// @inheritdoc IBorrowerOperations
     function getCompositeDebt(
         address _asset,
         uint256 _debt

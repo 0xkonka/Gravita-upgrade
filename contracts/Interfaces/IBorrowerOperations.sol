@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
+/**
+ * @title IBorrowerOperations
+ * @notice Defines the basic interface for BorrowerOperations contract.
+ */
 interface IBorrowerOperations {
     /**
      * @dev Enum for storing the borrower operation type.
