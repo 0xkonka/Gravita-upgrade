@@ -8,6 +8,7 @@ import shouldHaveName from "./view/constants/name";
 import shouldBehaveLikeGetAllCollateral from "./view/getAllCollateral";
 import shouldBehaveLikeGetCollateral from "./view/getCollateral";
 import shouldBehaveLikeGetCompoundedDebtTokenDeposits from "./view/getCompoundedDebtTokenDeposits";
+import shouldBehaveLikeGetDepositorGains from "./view/getDepositorGains";
 import shouldBehaveLikeGetDepositorTRENGain from "./view/getDepositorTRENGain";
 import shouldBehaveLikeGetSnapshot from "./view/getSnapShot";
 import shouldBehaveLikeGetTotalDebtTokenDeposits from "./view/getTotalDebtTokenDeposits";
@@ -32,6 +33,9 @@ export function shouldBehaveLikeStabilityPoolContract(): void {
     });
     describe("#getDepositorTRENGain", function () {
       shouldBehaveLikeGetDepositorTRENGain();
+    });
+    describe("#getDepositorGains", function () {
+      shouldBehaveLikeGetDepositorGains();
     });
     describe("#getSnapshot", function () {
       shouldBehaveLikeGetSnapshot();
