@@ -13,6 +13,11 @@ import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 import { IStabilityPool } from "./Interfaces/IStabilityPool.sol";
 import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 
+/**
+ * @title AdminContract
+ * @notice Contains all the functions to create a new collateral or modify its parameters.
+ * It is called by other contracts to check if a collateral is valid and what are their parameters.
+ */
 contract AdminContract is
     IAdminContract,
     UUPSUpgradeable,
@@ -122,6 +127,10 @@ contract AdminContract is
     // Initializers
     // -----------------------------------------------------------------------------------------------------
 
+    /**
+     * @dev Runs all the setup logic only once.
+     * @param initialOwner The address of initial owner.
+     */
     function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
@@ -139,6 +148,7 @@ contract AdminContract is
     // External Functions
     // -----------------------------------------------------------------------------------------------
 
+    /// @inheritdoc IAdminContract
     function addNewCollateral(
         address _collateral,
         uint256 _debtTokenGasCompensation
@@ -172,6 +182,7 @@ contract AdminContract is
         IStabilityPool(stabilityPool).addCollateralType(_collateral);
     }
 
+    /// @inheritdoc IAdminContract
     function setCollateralParameters(
         address _collateral,
         uint256 _borrowingFee,
@@ -196,11 +207,13 @@ contract AdminContract is
         setRedemptionFeeFloor(_collateral, _redemptionFeeFloor);
     }
 
+    /// @inheritdoc IAdminContract
     function setIsActive(address _collateral, bool _active) external onlyTimelock {
         CollateralParams storage collParams = collateralParams[_collateral];
         collParams.active = _active;
     }
 
+    /// @inheritdoc IAdminContract
     function setBorrowingFee(
         address _collateral,
         uint256 _borrowingFee
@@ -216,6 +229,7 @@ contract AdminContract is
         emit BorrowingFeeChanged(oldBorrowing, _borrowingFee);
     }
 
+    /// @inheritdoc IAdminContract
     function setCCR(
         address _collateral,
         uint256 _newCCR
@@ -231,6 +245,7 @@ contract AdminContract is
         emit CCRChanged(oldCCR, _newCCR);
     }
 
+    /// @inheritdoc IAdminContract
     function setMCR(
         address _collateral,
         uint256 _newMCR
@@ -246,6 +261,7 @@ contract AdminContract is
         emit MCRChanged(oldMCR, _newMCR);
     }
 
+    /// @inheritdoc IAdminContract
     function setMinNetDebt(
         address _collateral,
         uint256 _minNetDebt
@@ -261,6 +277,7 @@ contract AdminContract is
         emit MinNetDebtChanged(oldMinNet, _minNetDebt);
     }
 
+    /// @inheritdoc IAdminContract
     function setMintCap(address _collateral, uint256 _mintCap) public override onlyTimelock {
         CollateralParams storage collParams = collateralParams[_collateral];
         uint256 oldMintCap = collParams.mintCap;
@@ -268,6 +285,7 @@ contract AdminContract is
         emit MintCapChanged(oldMintCap, _mintCap);
     }
 
+    /// @inheritdoc IAdminContract
     function setPercentDivisor(
         address _collateral,
         uint256 _percentDivisor
@@ -283,6 +301,7 @@ contract AdminContract is
         emit PercentDivisorChanged(oldPercent, _percentDivisor);
     }
 
+    /// @inheritdoc IAdminContract
     function setRedemptionFeeFloor(
         address _collateral,
         uint256 _redemptionFeeFloor
@@ -298,6 +317,7 @@ contract AdminContract is
         emit RedemptionFeeFloorChanged(oldRedemptionFeeFloor, _redemptionFeeFloor);
     }
 
+    /// @inheritdoc IAdminContract
     function setRedemptionBlockTimestamp(
         address _collateral,
         uint256 _blockTimestamp
@@ -310,6 +330,7 @@ contract AdminContract is
         emit RedemptionBlockTimestampChanged(_collateral, _blockTimestamp);
     }
 
+    /// @inheritdoc IAdminContract
     function setFeeForFlashLoan(uint256 _flashLoanFee) external onlyTimelock {
         uint256 oldFlashLoanFee = flashLoanParams.flashLoanFee;
         flashLoanParams.flashLoanFee = _flashLoanFee;
@@ -317,6 +338,7 @@ contract AdminContract is
         emit FlashLoanFeeChanged(oldFlashLoanFee, _flashLoanFee);
     }
 
+    /// @inheritdoc IAdminContract
     function setMinDebtForFlashLoan(uint256 _flashLoanMinDebt) external onlyTimelock {
         uint256 oldFlashLoanMinDebt = flashLoanParams.flashLoanMinDebt;
         flashLoanParams.flashLoanMinDebt = _flashLoanMinDebt;
@@ -324,6 +346,7 @@ contract AdminContract is
         emit FlashLoanMinDebtChanged(oldFlashLoanMinDebt, _flashLoanMinDebt);
     }
 
+    /// @inheritdoc IAdminContract
     function setMaxDebtForFlashLoan(uint256 _flashLoanMaxDebt) external onlyTimelock {
         uint256 oldFlashLoanMaxDebt = flashLoanParams.flashLoanMaxDebt;
         flashLoanParams.flashLoanMaxDebt = _flashLoanMaxDebt;
@@ -331,6 +354,7 @@ contract AdminContract is
         emit FlashLoanMaxDebtChanged(oldFlashLoanMaxDebt, _flashLoanMaxDebt);
     }
 
+    /// @inheritdoc IAdminContract
     function switchRouteToTRENStaking() external onlyTimelock {
         if (routeToTRENStaking) {
             routeToTRENStaking = false;
@@ -342,14 +366,17 @@ contract AdminContract is
     // View functions
     // ---------------------------------------------------------------------------------------------------
 
+    /// @inheritdoc IAdminContract
     function DECIMAL_PRECISION() external pure returns (uint256) {
         return _DECIMAL_PRECISION;
     }
 
+    /// @inheritdoc IAdminContract
     function getValidCollateral() external view override returns (address[] memory) {
         return validCollateral;
     }
 
+    /// @inheritdoc IAdminContract
     function getIsActive(address _collateral)
         external
         view
@@ -360,6 +387,7 @@ contract AdminContract is
         return collateralParams[_collateral].active;
     }
 
+    /// @inheritdoc IAdminContract
     function getIndex(address _collateral)
         external
         view
@@ -370,6 +398,7 @@ contract AdminContract is
         return (collateralParams[_collateral].index);
     }
 
+    /// @inheritdoc IAdminContract
     function getIndices(address[] memory _colls) external view returns (uint256[] memory indices) {
         uint256 len = _colls.length;
         indices = new uint256[](len);
@@ -383,14 +412,17 @@ contract AdminContract is
         }
     }
 
+    /// @inheritdoc IAdminContract
     function getMcr(address _collateral) external view override returns (uint256) {
         return collateralParams[_collateral].mcr;
     }
 
+    /// @inheritdoc IAdminContract
     function getCcr(address _collateral) external view override returns (uint256) {
         return collateralParams[_collateral].ccr;
     }
 
+    /// @inheritdoc IAdminContract
     function getDebtTokenGasCompensation(address _collateral)
         external
         view
@@ -400,22 +432,27 @@ contract AdminContract is
         return collateralParams[_collateral].debtTokenGasCompensation;
     }
 
+    /// @inheritdoc IAdminContract
     function getMinNetDebt(address _collateral) external view override returns (uint256) {
         return collateralParams[_collateral].minNetDebt;
     }
 
+    /// @inheritdoc IAdminContract
     function getPercentDivisor(address _collateral) external view override returns (uint256) {
         return collateralParams[_collateral].percentDivisor;
     }
 
+    /// @inheritdoc IAdminContract
     function getBorrowingFee(address _collateral) external view override returns (uint256) {
         return collateralParams[_collateral].borrowingFee;
     }
 
+    /// @inheritdoc IAdminContract
     function getRedemptionFeeFloor(address _collateral) external view override returns (uint256) {
         return collateralParams[_collateral].redemptionFeeFloor;
     }
 
+    /// @inheritdoc IAdminContract
     function getRedemptionBlockTimestamp(address _collateral)
         external
         view
@@ -425,26 +462,32 @@ contract AdminContract is
         return collateralParams[_collateral].redemptionBlockTimestamp;
     }
 
+    /// @inheritdoc IAdminContract
     function getMintCap(address _collateral) external view override returns (uint256) {
         return collateralParams[_collateral].mintCap;
     }
 
+    /// @inheritdoc IAdminContract
     function getTotalAssetDebt(address _asset) external view override returns (uint256) {
         return ITrenBoxStorage(trenBoxStorage).getTotalDebtBalance(_asset);
     }
 
+    /// @inheritdoc IAdminContract
     function getFlashLoanFee() external view override returns (uint256) {
         return flashLoanParams.flashLoanFee;
     }
 
+    /// @inheritdoc IAdminContract
     function getFlashLoanMinNetDebt() external view override returns (uint256) {
         return flashLoanParams.flashLoanMinDebt;
     }
 
+    /// @inheritdoc IAdminContract
     function getFlashLoanMaxNetDebt() external view override returns (uint256) {
         return flashLoanParams.flashLoanMaxDebt;
     }
 
+    /// @inheritdoc IAdminContract
     function getRouteToTRENStaking() external view override returns (bool) {
         return routeToTRENStaking;
     }

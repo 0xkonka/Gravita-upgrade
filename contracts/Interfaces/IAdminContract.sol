@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
+/**
+ * @title IAdminContract
+ * @notice Defines the basic interface for AdminContract.
+ */
 interface IAdminContract {
     /**
      * @dev Struct for storing parameters of a specific collateral asset.
