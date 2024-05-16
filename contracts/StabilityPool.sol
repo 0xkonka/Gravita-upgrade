@@ -704,17 +704,26 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         returns (uint256[] memory amounts)
     {
         uint256 assetsLen = _assets.length;
-        // asset list must be on ascending order - used to avoid any repeated elements
-        unchecked {
-            for (uint256 i = 1; i < assetsLen; i++) {
-                if (_assets[i] <= _assets[i - 1]) {
-                    revert StabilityPool__ArrayNotInAscendingOrder();
-                }
-            }
-        }
+        uniqueAddresses(_assets);
         amounts = new uint256[](assetsLen);
         for (uint256 i = 0; i < assetsLen;) {
             amounts[i] = _getGainFromSnapshots(initialDeposit, snapshots, _assets[i]);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function uniqueAddresses(address[] memory _assets) private pure {
+        for (uint256 i = 0; i < _assets.length;) {
+            for (uint256 j = i + 1; j < _assets.length;) {
+                if (_assets[i] == _assets[j]) {
+                    revert StabilityPool__ArrayNotInAscendingOrder();
+                }
+                unchecked {
+                    ++j;
+                }
+            }
             unchecked {
                 ++i;
             }
