@@ -7,16 +7,33 @@ import { ERC20Permit } from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 
+/**
+ * @title DebtToken contract
+ * @notice The stablecoin token contract which mints, burns and transfers TrenUSD tokens.
+ */
 contract DebtToken is IDebtToken, ERC20Permit, Ownable {
+    /// @notice The debt token name.
     string public constant NAME = "TREN Debt Token";
+
+    /// @notice The debt token symbol.
     string public constant SYMBOL = "trenUSD";
 
+    /// @notice The address of BorrowerOperations
     address public borrowerOperationsAddress;
+
+    /// @notice The address of StabilityPool
     address public stabilityPoolAddress;
+
+    /// @notice The address of TrenBoxManager
     address public trenBoxManagerAddress;
 
+    /// @notice The mapping from collateral asset address to mintable status
     mapping(address collateral => bool isStopped) public emergencyStopMintingCollateral;
+
+    /// @notice The mapping from contract address to its whitelisted status
     mapping(address whitelistedContract => bool isWhitelisted) public whitelistedContracts;
+
+    // ======================= Modifiers ======================= //
 
     modifier onlyWhitelistedContract() {
         if (!whitelistedContracts[msg.sender]) {
@@ -50,12 +67,23 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
 
     constructor(address initialOwner) ERC20(NAME, SYMBOL) ERC20Permit(NAME) Ownable(initialOwner) { }
 
-    function emergencyStopMinting(address _asset, bool status) external override onlyOwner {
-        emergencyStopMintingCollateral[_asset] = status;
+    /**
+     * @notice Stops minting debt tokens against specific collateral asset in emergency case.
+     * @param _asset The address of collateral asset.
+     * @param _status The indicator whether minting is possible or not.
+     */
+    function emergencyStopMinting(address _asset, bool _status) external onlyOwner {
+        emergencyStopMintingCollateral[_asset] = _status;
 
-        emit EmergencyStopMintingCollateral(_asset, status);
+        emit EmergencyStopMintingCollateral(_asset, _status);
     }
 
+    /**
+     * @notice Sets addresses of BorrowerOperations, StabilityPool, and TrenBoxManager.
+     * @param _borrowerOperationsAddress The address of BorrowerOperations contract.
+     * @param _stabilityPoolAddress The address of StabilityPool contract.
+     * @param _trenBoxManagerAddress The  address of TrenBoxManager contract.
+     */
     function setAddresses(
         address _borrowerOperationsAddress,
         address _stabilityPoolAddress,
@@ -80,6 +108,27 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         );
     }
 
+    /**
+     * @notice Adds a contract to whitelist, called by only owner.
+     * @param _address The address of contract to add.
+     */
+    function addWhitelist(address _address) external onlyOwner {
+        whitelistedContracts[_address] = true;
+
+        emit WhitelistChanged(_address, true);
+    }
+
+    /**
+     * @notice Removes a contract from whitelist, called by only owner.
+     * @param _address The address of contract to remove.
+     */
+    function removeWhitelist(address _address) external onlyOwner {
+        whitelistedContracts[_address] = false;
+
+        emit WhitelistChanged(_address, false);
+    }
+
+    /// @inheritdoc IDebtToken
     function mintFromWhitelistedContract(uint256 _amount)
         external
         override
@@ -88,6 +137,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         _mint(msg.sender, _amount);
     }
 
+    /// @inheritdoc IDebtToken
     function burnFromWhitelistedContract(uint256 _amount)
         external
         override
@@ -96,6 +146,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         _burn(msg.sender, _amount);
     }
 
+    /// @inheritdoc IDebtToken
     function mint(
         address _asset,
         address _account,
@@ -112,6 +163,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         _mint(_account, _amount);
     }
 
+    /// @inheritdoc IDebtToken
     function burn(address _account, uint256 _amount) external override {
         if (
             msg.sender != borrowerOperationsAddress && msg.sender != trenBoxManagerAddress
@@ -122,18 +174,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         _burn(_account, _amount);
     }
 
-    function addWhitelist(address _address) external override onlyOwner {
-        whitelistedContracts[_address] = true;
-
-        emit WhitelistChanged(_address, true);
-    }
-
-    function removeWhitelist(address _address) external override onlyOwner {
-        whitelistedContracts[_address] = false;
-
-        emit WhitelistChanged(_address, false);
-    }
-
+    /// @inheritdoc IDebtToken
     function sendToPool(
         address _sender,
         address _poolAddress,
@@ -146,6 +187,7 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         _transfer(_sender, _poolAddress, _amount);
     }
 
+    /// @inheritdoc IDebtToken
     function returnFromPool(
         address _poolAddress,
         address _receiver,
@@ -160,28 +202,39 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
         _transfer(_poolAddress, _receiver, _amount);
     }
 
+    /**
+     * @notice Transfers debt tokens from caller to another account.
+     * @param _recipient The address of account to receive debt tokens.
+     * @param _amount The amount to transfer debt tokens.
+     */
     function transfer(
-        address recipient,
-        uint256 amount
+        address _recipient,
+        uint256 _amount
     )
         public
         override(IERC20, ERC20)
-        shouldTransferToValidRecipent(recipient)
+        shouldTransferToValidRecipent(_recipient)
         returns (bool)
     {
-        return super.transfer(recipient, amount);
+        return super.transfer(_recipient, _amount);
     }
 
+    /**
+     * @notice Transfers debt tokens from specified sender to another account.
+     * @param _sender The address of account that sends debt tokens.
+     * @param _recipient The address of account to receive debt tokens.
+     * @param _amount The amount to transfer debt tokens.
+     */
     function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
+        address _sender,
+        address _recipient,
+        uint256 _amount
     )
         public
         override(IERC20, ERC20)
-        shouldTransferToValidRecipent(recipient)
+        shouldTransferToValidRecipent(_recipient)
         returns (bool)
     {
-        return super.transferFrom(sender, recipient, amount);
+        return super.transferFrom(_sender, _recipient, _amount);
     }
 }
