@@ -14,6 +14,11 @@ import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ITRENStaking } from "./Interfaces/ITRENStaking.sol";
 import { IAdminContract } from "./Interfaces/IAdminContract.sol";
 
+/**
+ * @title FeeCollector contract
+ * @notice Handles the borrowing fee; controls the decaying refund and maintains
+ * its record that includes the refund balance.
+ */
 contract FeeCollector is
     IFeeCollector,
     UUPSUpgradeable,
@@ -22,20 +27,21 @@ contract FeeCollector is
 {
     using SafeERC20 for IERC20;
 
-    // Constants
-    // --------------------------------------------------------------------------------------------------------
-
+    /// @notice The contract name.
     string public constant NAME = "FeeCollector";
 
+    /// @notice The duration which the minimum fee is applied.
     uint256 public constant MIN_FEE_DAYS = 7;
-    uint256 public constant MIN_FEE_FRACTION = 0.038461538 * 1 ether; // (1/26) fee divided by 26
-        // weeks
-    uint256 public constant FEE_EXPIRATION_SECONDS = 175 * 1 days; // ~ 6 months, minus one week
-        // (MIN_FEE_DAYS)
 
-    // State
-    // ------------------------------------------------------------------------------------------------------------
+    /// @notice The minimum fee fraction, divided by 26 (1/26).
+    uint256 public constant MIN_FEE_FRACTION = 0.038461538 * 1 ether;
 
+    /// @notice The duration which the fee refund is expired.
+    /// ~ 6 months minus one week (MIN_FEE_DAYS)
+    uint256 public constant FEE_EXPIRATION_SECONDS = 175 * 1 days;
+
+    /// @notice The mapping from borrower address to the nested mapping from
+    /// collateral asset address to fee record struct
     mapping(address borrower => mapping(address asset => FeeRecord feeParams)) public feeRecords;
 
     // Modifiers
@@ -67,24 +73,18 @@ contract FeeCollector is
     // Initializer
     // ------------------------------------------------------------------------------------------------------
 
+    /**
+     * @dev Runs all the setup logic only once.
+     * @param initialOwner The address of initial owner.
+     */
     function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
     }
 
-    // Public/external methods
-    // ------------------------------------------------------------------------------------------
+    // ================= Public/External functions ================ //
 
-    /**
-     * Triggered when a trenBox is created and again whenever the borrower acquires additional
-     * loans.
-     * Collects the minimum fee to the platform, for which there is no refund; holds on to the
-     * remaining fees until
-     * debt is paid, liquidated, or expired.
-     *
-     * Attention: this method assumes that (debt token) _feeAmount has already been minted and
-     * transferred to this contract.
-     */
+    /// @inheritdoc IFeeCollector
     function increaseDebt(
         address _borrower,
         address _asset,
@@ -100,10 +100,7 @@ contract FeeCollector is
         _collectFee(_borrower, _asset, minFeeAmount + feeToCollect);
     }
 
-    /**
-     * Triggered when a trenBox is adjusted or closed (and the borrower has paid back/decreased his
-     * loan).
-     */
+    /// @inheritdoc IFeeCollector
     function decreaseDebt(
         address _borrower,
         address _asset,
@@ -116,9 +113,7 @@ contract FeeCollector is
         _decreaseDebt(_borrower, _asset, _paybackFraction);
     }
 
-    /**
-     * Triggered when a debt is paid in full.
-     */
+    /// @inheritdoc IFeeCollector
     function closeDebt(
         address _borrower,
         address _asset
@@ -130,10 +125,7 @@ contract FeeCollector is
         _decreaseDebt(_borrower, _asset, 1 ether);
     }
 
-    /**
-     * Simulates the refund due -if- trenBox would be closed at this moment (helper function used by
-     * the UI).
-     */
+    /// @inheritdoc IFeeCollector
     function simulateRefund(
         address _borrower,
         address _asset,
@@ -144,8 +136,13 @@ contract FeeCollector is
         override
         returns (uint256)
     {
-        require(_paybackFraction <= 1 ether, "Payback fraction cannot be higher than 1 (@ 10**18)");
-        require(_paybackFraction != 0, "Payback fraction cannot be zero");
+        if (_paybackFraction > 1 ether) {
+            revert FeeCollector__PaybackFractionHigherThanOne();
+        }
+        if (_paybackFraction == 0) {
+            revert FeeCollector__ZeroPaybackFraction();
+        }
+
         FeeRecord storage record = feeRecords[_borrower][_asset];
         if (record.amount == 0 || record.to < block.timestamp) {
             return 0;
@@ -160,11 +157,7 @@ contract FeeCollector is
         }
     }
 
-    /**
-     * Triggered when a trenBox is liquidated; in that case, all remaining fees are collected by the
-     * platform,
-     * and no refunds are generated.
-     */
+    /// @inheritdoc IFeeCollector
     function liquidateDebt(
         address _borrower,
         address _asset
@@ -179,9 +172,7 @@ contract FeeCollector is
         }
     }
 
-    /**
-     * Batch collect fees from an array of borrowers/assets.
-     */
+    /// @inheritdoc IFeeCollector
     function collectFees(
         address[] calldata _borrowers,
         address[] calldata _assets
@@ -212,6 +203,7 @@ contract FeeCollector is
         }
     }
 
+    /// @inheritdoc IFeeCollector
     function handleRedemptionFee(address _asset, uint256 _amount) external onlyTrenBoxManager {
         if (IAdminContract(adminContract).getRouteToTRENStaking()) {
             ITRENStaking(trenStaking).increaseFeeAsset(_asset, _amount);
@@ -219,17 +211,36 @@ contract FeeCollector is
         emit RedemptionFeeCollected(_asset, _amount);
     }
 
+    function authorizeUpgrade(address newImplementation) public {
+        _authorizeUpgrade(newImplementation);
+    }
+
+    // ================== View functions ================ //
+
+    /// @inheritdoc IFeeCollector
     function getProtocolRevenueDestination() public view override returns (address) {
         return IAdminContract(adminContract).getRouteToTRENStaking() ? trenStaking : treasuryAddress;
     }
 
-    // Helper & internal methods
-    // ----------------------------------------------------------------------------------------
+    // ================= Internal functions ================ //
 
+    /**
+     * @dev Decreases debt when a TrenBox is adjusted or closed, and the borrower
+     * has paid back or decreased his loan.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _paybackFraction The amount that the borrower pays back.
+     */
     function _decreaseDebt(address _borrower, address _asset, uint256 _paybackFraction) internal {
         uint256 NOW = block.timestamp;
-        require(_paybackFraction <= 1 ether, "Payback fraction cannot be higher than 1 (@ 10**18)");
-        require(_paybackFraction != 0, "Payback fraction cannot be zero");
+
+        if (_paybackFraction > 1 ether) {
+            revert FeeCollector__PaybackFractionHigherThanOne();
+        }
+        if (_paybackFraction == 0) {
+            revert FeeCollector__ZeroPaybackFraction();
+        }
+
         FeeRecord storage sRecord = feeRecords[_borrower][_asset];
         if (sRecord.amount == 0) {
             return;
@@ -260,6 +271,12 @@ contract FeeCollector is
         }
     }
 
+    /**
+     * @dev Creates or updates fee record parameters for a specific collateral asset.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _feeAmount The fee amount to collect.
+     */
     function _createOrUpdateFeeRecord(
         address _borrower,
         address _asset,
@@ -281,6 +298,13 @@ contract FeeCollector is
         }
     }
 
+    /**
+     * @dev Creates new fee record for a specific collateral asset.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _feeAmount The fee amount to add.
+     * @param _sRecord The storage to store new fee record.
+     */
     function _createFeeRecord(
         address _borrower,
         address _asset,
@@ -297,6 +321,13 @@ contract FeeCollector is
         emit FeeRecordUpdated(_borrower, _asset, from, to, _feeAmount);
     }
 
+    /**
+     * @dev Updates the existing fee record for a specific collateral asset.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _addedAmount The fee amount to update.
+     * @param _sRecord The storage to store updated fee record.
+     */
     function _updateFeeRecord(
         address _borrower,
         address _asset,
@@ -323,6 +354,12 @@ contract FeeCollector is
         return expiredAmount;
     }
 
+    /**
+     * @dev Closes the expired or liquidated fee record for a specific collateral asset.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _amount The stored fee amount.
+     */
     function _closeExpiredOrLiquidatedFeeRecord(
         address _borrower,
         address _asset,
@@ -335,6 +372,12 @@ contract FeeCollector is
         emit FeeRecordUpdated(_borrower, _asset, block.timestamp, 0, 0);
     }
 
+    /**
+     * @dev Calculates the expired fee amount at the time.
+     * @param _from The timestamp when the fee record is created.
+     * @param _to The timestamp when the fee record expires.
+     * @param _amount The amount of fee record.
+     */
     function _calcExpiredAmount(
         uint256 _from,
         uint256 _to,
@@ -359,24 +402,32 @@ contract FeeCollector is
         return expiredAmount;
     }
 
+    /**
+     * @dev Calculates new duration when fee record is updated.
+     * @param _remainingAmount The amount of refundable fee.
+     * @param _remainingTimeToLive The remaining duration until the refundable fee is all expired.
+     * @param _addedAmount The added amount to fee record.
+     */
     function _calcNewDuration(
-        uint256 remainingAmount,
-        uint256 remainingTimeToLive,
-        uint256 addedAmount
+        uint256 _remainingAmount,
+        uint256 _remainingTimeToLive,
+        uint256 _addedAmount
     )
         internal
         pure
         returns (uint256)
     {
-        uint256 prevWeight = remainingAmount * remainingTimeToLive;
-        uint256 nextWeight = addedAmount * FEE_EXPIRATION_SECONDS;
-        uint256 newDuration = (prevWeight + nextWeight) / (remainingAmount + addedAmount);
+        uint256 prevWeight = _remainingAmount * _remainingTimeToLive;
+        uint256 nextWeight = _addedAmount * FEE_EXPIRATION_SECONDS;
+        uint256 newDuration = (prevWeight + nextWeight) / (_remainingAmount + _addedAmount);
         return newDuration;
     }
 
     /**
-     * Transfers collected (debt token) fees to either the treasury or the TRENStaking contract,
-     * depending on a flag.
+     * @dev Transfers collected (debt token) fees to either the treasury or the staking contract.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _feeAmount The fee amount to collect.
      */
     function _collectFee(address _borrower, address _asset, uint256 _feeAmount) internal {
         if (_feeAmount != 0) {
@@ -389,15 +440,17 @@ contract FeeCollector is
         }
     }
 
+    /**
+     * @dev Refund the remaining fees to the borrower.
+     * @param _borrower The address of borrower.
+     * @param _asset The address of collateral asset.
+     * @param _refundAmount The fee amount to refund.
+     */
     function _refundFee(address _borrower, address _asset, uint256 _refundAmount) internal {
         if (_refundAmount != 0) {
             IERC20(debtToken).safeTransfer(_borrower, _refundAmount);
             emit FeeRefunded(_borrower, _asset, _refundAmount);
         }
-    }
-
-    function authorizeUpgrade(address newImplementation) public {
-        _authorizeUpgrade(newImplementation);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner { }
