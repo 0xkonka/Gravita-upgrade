@@ -36,8 +36,7 @@ import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
  *
  * A deposit that has experienced a series of liquidations is termed a "compounded deposit": each
  * liquidation depletes the deposit,
- * multiplying it by some factor in range ]0,1[
- *
+ * multiplying it by some factor in range [0,1]
  *
  * --- IMPLEMENTATION ---
  *
@@ -72,7 +71,6 @@ import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
  * receive new snapshots of the latest P and S.
  * Essentially, they make a fresh deposit that overwrites the old one.
  *
- *
  * --- SCALE FACTOR ---
  *
  * Since P is a running product in range ]0,1] that is always-decreasing, it should never reach 0
@@ -80,7 +78,7 @@ import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
  * Unfortunately, Solidity floor division always reaches 0, sooner or later.
  *
  * A series of liquidations that nearly empty the Pool (and thus each multiply P by a very small
- * number in range ]0,1[ ) may push P
+ * number in range [0,1]) may push P
  * to its 18 digit decimal limit, and round it to 0, when in fact the Pool hasn't been emptied: this
  * would break deposit tracking.
  *
@@ -119,7 +117,6 @@ import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
  * as 0, since it is now less than 1e-9'th of its initial value (e.g. a deposit of 1 billion debt
  * tokens has depleted to < 1 debt token).
  *
- *
  *  --- TRACKING DEPOSITOR'S COLLATERAL AMOUNT GAIN OVER SCALE CHANGES AND EPOCHS ---
  *
  * In the current epoch, the latest value of S is stored upon each scale change, and the mapping
@@ -156,13 +153,11 @@ import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
  * compounded
  * deposit is defined as being 0 once it has spanned more than one scale change.
  *
- *
  * --- UPDATING P WHEN A LIQUIDATION OCCURS ---
  *
  * Please see the implementation spec in the proof document, which closely follows on from the
  * compounded deposit / Collateral amount gain derivations:
  * https://github.com/liquity/liquity/blob/master/papers/Scalable_Reward_Distribution_with_Compounding_Stakes.pdf
- *
  *
  * --- TREN ISSUANCE TO STABILITY POOL DEPOSITORS ---
  *
@@ -178,58 +173,60 @@ import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
  * 'G' is the sum corresponding to TREN gains.
  * The product P (and snapshot P_t) is re-used, as the ratio P/P_t tracks a deposit's depletion due
  * to liquidations.
- *
  */
 contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase, IStabilityPool {
     using SafeERC20 for IERC20;
 
+    /// @notice The contract name.
     string public constant NAME = "StabilityPool";
 
-    // Tracker for debtToken held in the pool. Changes when users deposit/withdraw, and when TrenBox
-    // debt is offset.
+    /// @dev The tracker for debt tokens held in the pool. Changes when users deposit/withdraw,
+    /// and when TrenBox debt is offset.
     uint256 internal totalDebtTokenDeposits;
 
-    // totalColl.tokens and totalColl.amounts should be the same length and
-    // always be the same length as IAdminContract(adminContract).validCollaterals().
-    // Anytime a new collateral is added to AdminContract, both lists are lengthened
+    /// @dev totalColl.tokens and totalColl.amounts should be the same length and
+    /// always be the same length as IAdminContract(adminContract).validCollaterals().
+    /// Anytime a new collateral is added to AdminContract, both lists are lengthened.
     Colls internal totalColl;
 
+    /// @notice The mapping from depositor address to its deposit amount.
     mapping(address depositor => uint256 amount) public deposits;
 
-    /*
-     * depositSnapshots maintains an entry for each depositor
-     * that tracks P, S, G, scale, and epoch.
-     * depositor's snapshot is updated only when they
-     * deposit or withdraw from stability pool
+    /**
+     * @notice The mapping maintains an entry for each depositor that tracks P, S, G, scale,
+     * and epoch.
+     * @dev depositor's snapshot is updated only when they deposit or withdraw from stability pool.
      * depositSnapshots are used to allocate TREN rewards, calculate compoundedDepositAmount
-     * and to calculate how much Collateral amount the depositor is entitled to
+     * and to calculate how much Collateral amount the depositor is entitled to.
      */
     mapping(address depositor => Snapshots snapshot) public depositSnapshots;
 
-    /*  Product 'P': Running product by which to multiply an initial deposit, in order to find the
-    current compounded deposit,
-    * after a series of liquidations have occurred, each of which cancel some debt tokens debt with
-    the deposit.
+    /**
+     * @notice Product 'P': Running product by which to multiply an initial deposit, in order to
+     * find the current compounded deposit,
+     * after a series of liquidations have occurred, each of which cancel some debt tokens debt with
+     * the deposit.
      *
-     * During its lifetime, a deposit's value evolves from d_t to d_t * P / P_t , where P_t
+     * @dev During its lifetime, a deposit's value evolves from d_t to d_t * P / P_t , where P_t
      * is the snapshot of P taken at the instant the deposit was made. 18-digit decimal.
      */
     uint256 public P;
 
+    /// @notice The unit factor to be used in scale increment.
     uint256 public constant SCALE_FACTOR = 1e9;
 
-    // Each time the scale of P shifts by SCALE_FACTOR, the scale is incremented by 1
+    /// @notice Each time the scale of P shifts by SCALE_FACTOR, the scale is incremented by 1.
     uint128 public currentScale;
 
-    // With each offset that fully empties the Pool, the epoch is incremented by 1
+    /// @notice With each offset that fully empties the Pool, the epoch is incremented by 1.
     uint128 public currentEpoch;
 
-    /* Collateral amount Gain sum 'S': During its lifetime, each deposit d_t earns an Collateral
-    amount gain of ( d_t * [S - S_t] )/P_t,
+    /**
+     * @dev Collateral amount Gain sum 'S': During its lifetime, each deposit d_t earns
+     * an Collateral amount gain of ( d_t * [S - S_t] )/P_t,
      * where S_t is the depositor's snapshot of S taken at the time t when the deposit was made.
      *
      * The 'S' sums are stored in a nested mapping (epoch => scale => sum):
-     *
      * - The inner mapping records the (scale => sum)
      * - The middle mapping records (epoch => (scale => sum))
      * - The outer mapping records (collateralType => (epoch => (scale => sum)))
@@ -239,27 +236,57 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
             => mapping(uint128 collateralType => mapping(uint128 epoch => uint256 sum))
     ) public epochToScaleToSum;
 
-    /*
-    * Similarly, the sum 'G' is used to calculate TREN gains. During it's lifetime, each deposit d_t
-    earns a TREN gain of
-    *  ( d_t * [G - G_t] )/P_t, where G_t is the depositor's snapshot of G taken at time t when  the
-    deposit was made.
+    /**
+     * @dev Similarly, the sum 'G' is used to calculate TREN gains. During it's lifetime,
+     * each deposit d_t earns a TREN gain of
+     * ( d_t * [G - G_t] )/P_t, where G_t is the depositor's snapshot of G taken at time t
+     * when the deposit was made.
      *
-    *  TREN reward events occur are triggered by depositor operations (new deposit, topup,
-    withdrawal), and liquidations.
-    *  In each case, the TREN reward is issued (i.e. G is updated), before other state changes are
-    made.
+     * TREN reward events occur are triggered by depositor operations (new deposit, topup,
+     * withdrawal), and liquidations.
+     * In each case, the TREN reward is issued (i.e. G is updated), before other state changes are
+     * made.
      */
     mapping(uint128 epoch => mapping(uint128 scale => uint256 G)) public epochToScaleToG;
 
-    // Error tracker for the error correction in the TREN issuance calculation
+    /// @notice The tracker for the error correction in the TREN issuance calculation.
     uint256 public lastTRENError;
-    // Error trackers for the error correction in the offset calculation
+
+    /// @notice The trackers for the error correction in the offset calculation.
     uint256[] public lastAssetError_Offset;
+
+    /// @notice The tracker for the error correction in the calculation of debt token loss.
     uint256 public lastDebtTokenLossError_Offset;
+
+    // --- Modifiers ---
+
+    modifier onlyAdminContract() {
+        if (msg.sender != adminContract) {
+            revert StabilityPool__AdminContractOnly(msg.sender, adminContract);
+        }
+        _;
+    }
+
+    modifier onlyTrenBoxStorage() {
+        if (msg.sender != trenBoxStorage) {
+            revert StabilityPool__TrenBoxStorageOnly(msg.sender, trenBoxStorage);
+        }
+        _;
+    }
+
+    modifier onlyTrenBoxManager() {
+        if (msg.sender != trenBoxManager) {
+            revert StabilityPool__TrenBoxManagerOnly(msg.sender, trenBoxManager);
+        }
+        _;
+    }
 
     // --- Initializer ---
 
+    /**
+     * @dev Runs all the setup logic only once.
+     * @param initialOwner The address of initial owner.
+     */
     function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __ReentrancyGuard_init();
@@ -338,6 +365,15 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         return _getCompoundedStakeFromSnapshots(initialDeposit, depositSnapshots[_depositor]);
     }
 
+    /**
+     * @notice Returns the specific collateral gain for a specific depositor.
+     * @param _depositor The depositor address.
+     * @param _asset The address of collateral asset.
+     */
+    function S(address _depositor, address _asset) external view returns (uint256) {
+        return depositSnapshots[_depositor].S[_asset];
+    }
+
     // --- External Depositor Functions ---
 
     /// @inheritdoc IStabilityPool
@@ -402,7 +438,8 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         external
         onlyTrenBoxManager
     {
-        uint256 cachedTotalDebtTokenDeposits = totalDebtTokenDeposits; // cached to save an SLOAD
+        // cached to save an SLOAD
+        uint256 cachedTotalDebtTokenDeposits = totalDebtTokenDeposits;
         if (cachedTotalDebtTokenDeposits == 0 || _debtToOffset == 0) {
             return;
         }
@@ -412,16 +449,15 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
             _asset, _amountAdded, _debtToOffset, cachedTotalDebtTokenDeposits
         );
 
-        _updateRewardSumAndProduct(_asset, collGainPerUnitStaked, debtLossPerUnitStaked); // updates
-            // S and P
+        // updates S and P
+        _updateRewardSumAndProduct(_asset, collGainPerUnitStaked, debtLossPerUnitStaked);
         _moveOffsetCollAndDebt(_asset, _amountAdded, _debtToOffset);
     }
 
     /**
-     * @notice withdraw from the stability pool
-     * @param _amount debtToken amount to withdraw
-     * @param _assets an array of collaterals to be claimed.
-     * @return assets address of assets withdrawn, amount of asset withdrawn
+     * @dev Withdraws debt tokens from the stability pool.
+     * @param _amount The amount of debt tokens to withdraw
+     * @param _assets The array of collateral assets to be claimed.
      */
     function _withdrawFromSP(
         uint256 _amount,
@@ -456,6 +492,9 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
 
     // --- TREN issuance functions ---
 
+    /**
+     * @dev Triggers a TREN issuance shared between all depositors.
+     */
     function _triggerTRENIssuance() internal {
         if (communityIssuance != address(0)) {
             uint256 TRENIssuance = ICommunityIssuance(communityIssuance).issueTREN();
@@ -463,6 +502,10 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         }
     }
 
+    /**
+     * @dev Updates the sum of TREN gains.
+     * @param _TRENIssuance The TREN issuance.
+     */
     function _updateG(uint256 _TRENIssuance) internal {
         uint256 cachedTotalDebtTokenDeposits = totalDebtTokenDeposits; // cached to save an SLOAD
         /*
@@ -484,6 +527,20 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         emit GainsUpdated(newEpochToScaleToG, currentEpoch, currentScale);
     }
 
+    /**
+     * @dev Calculates the TREN-per-unit staked. Division uses a "feedback" error correction,
+     * to keep the cumulative error low in the running total G:
+     *
+     * 1) Form a numerator which compensates for the floor division error that occurred the last
+     * time this function was called.
+     * 2) Calculate "per-unit-staked" ratio.
+     * 3) Multiply the ratio back by its denominator, to reveal the current floor division error.
+     * 4) Store this error for use in the next correction when this function is called.
+     * 5) Note: static analysis tools complain about this "division before multiplication",
+     * however, it is intended.
+     * @param _TRENIssuance The TREN issuance.
+     * @param _totalDeposits The total depositors.
+     */
     function _computeTRENPerUnitStaked(
         uint256 _TRENIssuance,
         uint256 _totalDeposits
@@ -491,20 +548,6 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         internal
         returns (uint256)
     {
-        /*
-        * Calculate the TREN-per-unit staked.  Division uses a "feedback" error correction, to keep
-        the
-         * cumulative error low in the running total G:
-         *
-        * 1) Form a numerator which compensates for the floor division error that occurred the last
-        time this
-         * function was called.
-         * 2) Calculate "per-unit-staked" ratio.
-        * 3) Multiply the ratio back by its denominator, to reveal the current floor division error.
-         * 4) Store this error for use in the next correction when this function is called.
-        * 5) Note: static analysis tools complain about this "division before multiplication",
-        however, it is intended.
-         */
         uint256 TRENNumerator = (_TRENIssuance * DECIMAL_PRECISION) + lastTRENError;
         uint256 TRENPerUnitStaked = TRENNumerator / _totalDeposits;
         lastTRENError = TRENNumerator - (TRENPerUnitStaked * _totalDeposits);
@@ -514,22 +557,21 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     // --- Offset helper functions ---
 
     /**
-     * @notice Compute the debtToken and Collateral amount rewards. Uses a "feedback" error
+     * @dev Computes the debtToken and Collateral amount rewards. Uses a "feedback" error
      * correction, to keep
      * the cumulative error in the P and S state variables low:
      *
-     * @dev 1) Form numerators which compensate for the floor division errors that occurred the last
-     * time this
-     * function was called.
+     * 1) Form numerators which compensate for the floor division errors that occurred the last
+     * time this function was called.
      * 2) Calculate "per-unit-staked" ratios.
      * 3) Multiply each ratio back by its denominator, to reveal the current floor division error.
      * 4) Store these errors for use in the next correction when this function is called.
      * 5) Note: static analysis tools complain about this "division before multiplication", however,
      * it is intended.
-     * @param _asset Address of token
-     * @param _amountAdded amount as uint256
-     * @param _debtToOffset amount of debt to offset
-     * @param _totalDeposits How much user has deposited
+     * @param _asset The address of collateral asset.
+     * @param _amountAdded The amount of collateral asset to be added.
+     * @param _debtToOffset The amount of debt tokens to offset.
+     * @param _totalDeposits The total depositors.
      */
     function _computeRewardsPerUnitStaked(
         address _asset,
@@ -566,6 +608,12 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
             collateralNumerator - (collGainPerUnitStaked * _totalDeposits);
     }
 
+    /**
+     * @dev Updates S and P.
+     * @param _asset The address of collateral asset.
+     * @param _collGainPerUnitStaked The collateral gain per unit staked.
+     * @param _debtLossPerUnitStaked The debt loss per unit staked.
+     */
     function _updateRewardSumAndProduct(
         address _asset,
         uint256 _collGainPerUnitStaked,
@@ -639,13 +687,13 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     }
 
     /**
-     * @notice Internal function to move offset collateral and debt between pools.
-     * @dev Cancel the liquidated debtToken debt with the debtTokens in the stability pool,
-     * Burn the debt that was successfully offset. Collateral is moved from
+     * @dev Moves offset collateral and debt between pools.
+     * Cancels the liquidated debt with the debt tokens in the stability pool,
+     * Burns the debt that was successfully offset. Collateral is moved from
      * the TrenBoxStorage to this contract.
-     * @param _asset collateral address
-     * @param _amount amount as uint256
-     * @param _debtToOffset uint256
+     * @param _asset The address of collateral asset.
+     * @param _amount The amount of collateral asset.
+     * @param _debtToOffset The amount of debt tokens to offset.
      */
     function _moveOffsetCollAndDebt(
         address _asset,
@@ -669,15 +717,15 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     // --- Reward calculator functions for depositor ---
 
     /**
-     * @notice get gains on each possible asset by looping through
-     * @dev assets with _getGainFromSnapshots function
-     * @param initialDeposit Amount of initial deposit
-     * @param snapshots struct snapshots
-     * @param _assets ascending ordered array of assets to calculate and claim gains
+     * @dev Gets gains on each possible asset by looping through assets with
+     * _getGainFromSnapshots function.
+     * @param _initialDeposit The amount of initial deposit.
+     * @param _snapshots The snapshot storage.
+     * @param _assets The ascending ordered array of assets to calculate and claim gains.
      */
     function _calculateNewGains(
-        uint256 initialDeposit,
-        Snapshots storage snapshots,
+        uint256 _initialDeposit,
+        Snapshots storage _snapshots,
         address[] memory _assets
     )
         internal
@@ -685,17 +733,20 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         returns (uint256[] memory amounts)
     {
         uint256 assetsLen = _assets.length;
-        uniqueAddresses(_assets);
+        _uniqueAddresses(_assets);
         amounts = new uint256[](assetsLen);
         for (uint256 i = 0; i < assetsLen;) {
-            amounts[i] = _getGainFromSnapshots(initialDeposit, snapshots, _assets[i]);
+            amounts[i] = _getGainFromSnapshots(_initialDeposit, _snapshots, _assets[i]);
             unchecked {
                 ++i;
             }
         }
     }
 
-    function uniqueAddresses(address[] memory _assets) private pure {
+    /**
+     * @dev Checks if the asset list is in ascending order.
+     */
+    function _uniqueAddresses(address[] memory _assets) private pure {
         for (uint256 i = 0; i < _assets.length;) {
             for (uint256 j = i + 1; j < _assets.length;) {
                 if (_assets[i] == _assets[j]) {
@@ -712,83 +763,86 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     }
 
     /**
-     * @notice gets the gain in S for a given asset
-     * @dev for a user who deposited initialDeposit
-     * @param initialDeposit Amount of initialDeposit
-     * @param snapshots struct snapshots
-     * @param asset asset to gain snapshot
-     * @return uint256 the gain
+     * @dev Gets the gain in S for a given asset for a user who made initial deposit.
+     * Grabs the sum 'S' from the epoch at which the stake was made. The Collateral amount gain
+     * may span up to one scale change.
+     * If it does, the second portion of the Collateral amount gain is scaled by 1e9.
+     * If the gain spans no scale change, the second portion will be 0.
+     * @param _initialDeposit The amount of initial deposit.
+     * @param _snapshots The snapshot storage.
+     * @param _asset The collateral asset to gain snapshot.
      */
     function _getGainFromSnapshots(
-        uint256 initialDeposit,
-        Snapshots storage snapshots,
-        address asset
+        uint256 _initialDeposit,
+        Snapshots storage _snapshots,
+        address _asset
     )
         internal
         view
         returns (uint256)
     {
-        /*
-        * Grab the sum 'S' from the epoch at which the stake was made. The Collateral amount gain
-        may span up to one scale change.
-         * If it does, the second portion of the Collateral amount gain is scaled by 1e9.
-         * If the gain spans no scale change, the second portion will be 0.
-         */
-        uint256 S_Snapshot = snapshots.S[asset];
-        uint256 P_Snapshot = snapshots.P;
+        uint256 S_Snapshot = _snapshots.S[_asset];
+        uint256 P_Snapshot = _snapshots.P;
 
-        mapping(uint128 => uint256) storage scaleToSum = epochToScaleToSum[asset][snapshots.epoch];
-        uint256 firstPortion = scaleToSum[snapshots.scale] - S_Snapshot;
-        uint256 secondPortion = scaleToSum[snapshots.scale + 1] / SCALE_FACTOR;
+        mapping(uint128 => uint256) storage scaleToSum = epochToScaleToSum[_asset][_snapshots.epoch];
+        uint256 firstPortion = scaleToSum[_snapshots.scale] - S_Snapshot;
+        uint256 secondPortion = scaleToSum[_snapshots.scale + 1] / SCALE_FACTOR;
 
         uint256 assetGain =
-            (initialDeposit * (firstPortion + secondPortion)) / P_Snapshot / DECIMAL_PRECISION;
+            (_initialDeposit * (firstPortion + secondPortion)) / P_Snapshot / DECIMAL_PRECISION;
 
         return assetGain;
     }
 
+    /**
+     * @dev Gets the TREN gain for initial stake.
+     * Grabs the sum 'G' from the epoch at which the stake was made. The TREN gain may span up to
+     * one scale change.
+     * If it does, the second portion of the TREN gain is scaled by 1e9.
+     * If the gain spans no scale change, the second portion will be 0.
+     * @param _initialStake The amount of initial stake.
+     * @param _snapshots The snapshot storage.
+     */
     function _getTRENGainFromSnapshots(
-        uint256 initialStake,
-        Snapshots storage snapshots
+        uint256 _initialStake,
+        Snapshots storage _snapshots
     )
         internal
         view
         returns (uint256)
     {
-        /*
-        * Grab the sum 'G' from the epoch at which the stake was made. The TREN gain may span up to
-        one scale change.
-         * If it does, the second portion of the TREN gain is scaled by 1e9.
-         * If the gain spans no scale change, the second portion will be 0.
-         */
-        uint128 epochSnapshot = snapshots.epoch;
-        uint128 scaleSnapshot = snapshots.scale;
-        uint256 G_Snapshot = snapshots.G;
-        uint256 P_Snapshot = snapshots.P;
+        uint128 epochSnapshot = _snapshots.epoch;
+        uint128 scaleSnapshot = _snapshots.scale;
+        uint256 G_Snapshot = _snapshots.G;
+        uint256 P_Snapshot = _snapshots.P;
 
         uint256 firstPortion = epochToScaleToG[epochSnapshot][scaleSnapshot] - G_Snapshot;
         uint256 secondPortion = epochToScaleToG[epochSnapshot][scaleSnapshot + 1] / SCALE_FACTOR;
 
         uint256 TRENGain =
-            (initialStake * (firstPortion + secondPortion)) / P_Snapshot / DECIMAL_PRECISION;
+            (_initialStake * (firstPortion + secondPortion)) / P_Snapshot / DECIMAL_PRECISION;
 
         return TRENGain;
     }
 
     // --- Compounded deposit and compounded System stake ---
 
-    // Internal function, used to calculate compounded deposits and compounded stakes.
+    /**
+     * @dev Calculates the compounded deposits and compounded stakes.
+     * @param _initialStake The amount of initial stake.
+     * @param _snapshots The snapshot storage.
+     */
     function _getCompoundedStakeFromSnapshots(
-        uint256 initialStake,
-        Snapshots storage snapshots
+        uint256 _initialStake,
+        Snapshots storage _snapshots
     )
         internal
         view
         returns (uint256)
     {
-        uint256 snapshot_P = snapshots.P;
-        uint128 scaleSnapshot = snapshots.scale;
-        uint128 epochSnapshot = snapshots.epoch;
+        uint256 snapshot_P = _snapshots.P;
+        uint128 scaleSnapshot = _snapshots.scale;
+        uint128 epochSnapshot = _snapshots.epoch;
 
         // If stake was made before a pool-emptying event, then it has been fully cancelled with
         // debt -- so, return 0
@@ -806,9 +860,9 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
          * at least 1e-9 -- so return 0.
          */
         if (scaleDiff == 0) {
-            compoundedStake = (initialStake * P) / snapshot_P;
+            compoundedStake = (_initialStake * P) / snapshot_P;
         } else if (scaleDiff == 1) {
-            compoundedStake = (initialStake * P) / snapshot_P / SCALE_FACTOR;
+            compoundedStake = (_initialStake * P) / snapshot_P / SCALE_FACTOR;
         } else {
             compoundedStake = 0;
         }
@@ -824,7 +878,7 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
          *
          * Thus it's unclear whether this line is still really needed.
          */
-        if (compoundedStake < initialStake / 1e9) {
+        if (compoundedStake < _initialStake / 1e9) {
             return 0;
         }
 
@@ -833,8 +887,12 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
 
     // --- Sender functions for debtToken deposits
 
-    // Transfer the tokens from the user to the Stability Pool's address, and update its recorded
-    // deposits
+    /**
+     * @dev Transfers the tokens from the user to the Stability Pool, and update its
+     * recorded deposits.
+     * @param _address The depositor address.
+     * @param _amount The deposit amount.
+     */
     function _sendToStabilityPool(address _address, uint256 _amount) internal {
         IDebtToken(debtToken).sendToPool(_address, address(this), _amount);
         uint256 newTotalDeposits = totalDebtTokenDeposits + _amount;
@@ -843,63 +901,65 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     }
 
     /**
-     * @notice transfer collateral gains to the depositor
-     * @dev this function also unwraps wrapped assets
-     * before sending to depositor
-     * @param _to address
-     * @param assets array of address
-     * @param amounts array of uint256. Includes pending collaterals since that was added in
-     * previous steps
+     * @dev Transfers collateral gains to the depositor. This function also unwraps wrapped assets
+     * before sending to depositor.
+     * @param _to The depositor address to receive gains.
+     * @param _assets The address array of collateral assets.
+     * @param _amounts The amount array of collateral assets.
      */
     function _sendGainsToDepositor(
         address _to,
-        address[] memory assets,
-        uint256[] memory amounts
+        address[] memory _assets,
+        uint256[] memory _amounts
     )
         internal
     {
-        uint256 assetsLen = assets.length;
+        uint256 assetsLen = _assets.length;
 
-        if (assetsLen != amounts.length) {
+        if (assetsLen != _amounts.length) {
             revert StabilityPool__AssetsAndAmountsLengthMismatch();
         }
 
         for (uint256 i = 0; i < assetsLen;) {
-            uint256 amount = amounts[i];
+            uint256 amount = _amounts[i];
             if (amount == 0) {
                 unchecked {
                     ++i;
                 }
                 continue;
             }
-            address asset = assets[i];
+            address asset = _assets[i];
             // Assumes we're internally working only with the wrapped version of ERC20 tokens
             IERC20(asset).safeTransfer(_to, amount);
             unchecked {
                 ++i;
             }
         }
-        totalColl.amounts = _leftSubColls(totalColl, assets, amounts);
+        totalColl.amounts = _leftSubColls(totalColl, _assets, _amounts);
     }
 
-    // Send debt tokens to user and decrease deposits in Pool
-    function _sendToDepositor(address _depositor, uint256 debtTokenWithdrawal) internal {
-        if (debtTokenWithdrawal == 0) {
+    /**
+     * @dev Sends debt tokens to user and decrease deposits in Pool.
+     * @param _depositor The depositor address.
+     * @param _debtTokenWithdrawal The amount of debt tokens to withdraw.
+     */
+    function _sendToDepositor(address _depositor, uint256 _debtTokenWithdrawal) internal {
+        if (_debtTokenWithdrawal == 0) {
             return;
         }
-        IDebtToken(debtToken).returnFromPool(address(this), _depositor, debtTokenWithdrawal);
-        _decreaseDebtTokens(debtTokenWithdrawal);
+        IDebtToken(debtToken).returnFromPool(address(this), _depositor, _debtTokenWithdrawal);
+        _decreaseDebtTokens(_debtTokenWithdrawal);
     }
 
     // --- Stability Pool Deposit Functionality ---
 
     /**
-     * @notice updates deposit and snapshots internally
-     * @dev if _newValue is zero, delete snapshot for given _depositor and emit event
+     * @dev Updates deposit and snapshots internally.
+     * if _newValue is zero, delete snapshot for given _depositor and emit event
      * otherwise, add an entry or update existing entry for _depositor in the depositSnapshots
      * with current values for P, S, G, scale and epoch and then emit event.
-     * @param _depositor address
-     * @param _newValue uint256
+     * @param _depositor The depositor address
+     * @param _newValue The new deposit amount.
      */
     function _updateDepositAndSnapshots(address _depositor, uint256 _newValue) internal {
         deposits[_depositor] = _newValue;
@@ -943,10 +1003,10 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         emit DepositSnapshotUpdated(_depositor, currentP, currentG);
     }
 
-    function S(address _depositor, address _asset) external view returns (uint256) {
-        return depositSnapshots[_depositor].S[_asset];
-    }
-
+    /**
+     * @dev Pays out the TREN gains to the specific depositor.
+     * @param _depositor The depositor address.
+     */
     function _payOutTRENGains(address _depositor) internal {
         if (address(communityIssuance) != address(0)) {
             uint256 depositorTRENGain = getDepositorTRENGain(_depositor);
@@ -955,6 +1015,12 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         }
     }
 
+    /**
+     * @dev Returns the collateral balances left after sending gains to the depositors.
+     * @param _coll1 The total collateral before sending.
+     * @param _tokens The address array of collateral assets to send.
+     * @param _amounts The amount array of collateral assets to send.
+     */
     function _leftSubColls(
         Colls memory _coll1,
         address[] memory _tokens,
@@ -984,43 +1050,33 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         return _coll1.amounts;
     }
 
+    /**
+     * @dev Requires that a user has an initial deposit.
+     * @param _initialDeposit The amount of initial deposit.
+     */
     function _requireUserHasDeposit(uint256 _initialDeposit) internal pure {
         if (_initialDeposit == 0) {
             revert StabilityPool__UserHasNoDeposit();
         }
     }
 
+    /**
+     * @dev Requires that the amount is not zero.
+     * @param _amount The amount.
+     */
     function _requireNonZeroAmount(uint256 _amount) internal pure {
         if (_amount == 0) {
             revert StabilityPool__AmountMustBeNonZero();
         }
     }
 
-    // --- Modifiers ---
-
-    modifier onlyAdminContract() {
-        if (msg.sender != adminContract) {
-            revert StabilityPool__AdminContractOnly(msg.sender, adminContract);
-        }
-        _;
-    }
-
-    modifier onlyTrenBoxStorage() {
-        if (msg.sender != trenBoxStorage) {
-            revert StabilityPool__TrenBoxStorageOnly(msg.sender, trenBoxStorage);
-        }
-        _;
-    }
-
-    modifier onlyTrenBoxManager() {
-        if (msg.sender != trenBoxManager) {
-            revert StabilityPool__TrenBoxManagerOnly(msg.sender, trenBoxManager);
-        }
-        _;
-    }
-
     // --- Fallback function ---
 
+    /**
+     * @notice Receives the specific collateral amount from TrenBoxStorage contract.
+     * @param _asset The address of collateral asset.
+     * @param _amount The amount of collateral asset.
+     */
     function receivedERC20(address _asset, uint256 _amount) external override onlyTrenBoxStorage {
         uint256 collateralIndex = IAdminContract(adminContract).getIndex(_asset);
         uint256 newAssetBalance = totalColl.amounts[collateralIndex] + _amount;
