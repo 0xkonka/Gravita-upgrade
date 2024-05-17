@@ -15,7 +15,8 @@ import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol"
 import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 import { IDeposit } from "./Interfaces/IDeposit.sol";
 
-/// @title A contract storage of the collateral amount, debt and gas compensation for each
+/// @title TrenboxStorage
+/// @notice A contract storage of the collateral amount, debt and gas compensation for each
 /// TrenBox.
 contract TrenBoxStorage is
     OwnableUpgradeable,
@@ -91,6 +92,7 @@ contract TrenBoxStorage is
 
     // ------------------------------------------ Getters -----------------------------------------
 
+    /// @inheritdoc ITrenBoxStorage
     function getActiveCollateralBalance(address _collateral)
         external
         view
@@ -100,10 +102,12 @@ contract TrenBoxStorage is
         return collateralBalances[_collateral].active;
     }
 
+    /// @inheritdoc ITrenBoxStorage
     function getActiveDebtBalance(address _collateral) external view override returns (uint256) {
         return debtBalances[_collateral].active;
     }
 
+    /// @inheritdoc ITrenBoxStorage
     function getLiquidatedCollateralBalance(address _collateral)
         external
         view
@@ -113,6 +117,7 @@ contract TrenBoxStorage is
         return collateralBalances[_collateral].liquidated;
     }
 
+    /// @inheritdoc ITrenBoxStorage
     function getLiquidatedDebtBalance(address _collateral)
         external
         view
@@ -122,10 +127,12 @@ contract TrenBoxStorage is
         return debtBalances[_collateral].liquidated;
     }
 
+    /// @inheritdoc ITrenBoxStorage
     function getTotalDebtBalance(address _collateral) external view override returns (uint256) {
         return debtBalances[_collateral].active + debtBalances[_collateral].liquidated;
     }
 
+    /// @inheritdoc ITrenBoxStorage
     function getTotalCollateralBalance(address _collateral)
         external
         view
@@ -135,6 +142,7 @@ contract TrenBoxStorage is
         return collateralBalances[_collateral].active + collateralBalances[_collateral].liquidated;
     }
 
+    /// @inheritdoc ITrenBoxStorage
     function getClaimableCollateralBalance(address _collateral)
         external
         view
@@ -144,6 +152,7 @@ contract TrenBoxStorage is
         return collateralBalances[_collateral].claimable;
     }
 
+    /// @inheritdoc ITrenBoxStorage
     function getUserClaimableCollateralBalance(
         address _collateral,
         address _account
@@ -158,6 +167,8 @@ contract TrenBoxStorage is
 
     // ------------------------------------------ External functions ------------------------------
 
+    /// @inheritdoc ITrenBoxStorage
+    /// @dev Can only be called by BorrowerOperations contract
     function increaseActiveDebt(
         address _collateral,
         uint256 _amount
@@ -169,6 +180,8 @@ contract TrenBoxStorage is
         _updateActiveDebt(_collateral, _amount, true);
     }
 
+    /// @inheritdoc ITrenBoxStorage
+    /// @dev Can only be called by BorrowerOperations or TrenBoxManager or StabilityPool contracts
     function decreaseActiveDebt(
         address _collateral,
         uint256 _amount
@@ -180,6 +193,8 @@ contract TrenBoxStorage is
         _updateActiveDebt(_collateral, _amount, false);
     }
 
+    /// @inheritdoc ITrenBoxStorage
+    /// @dev Can only be called by TrenBoxManager contract
     function decreaseActiveBalancesAfterRedemption(
         address _collateral,
         uint256 _debtAmount,
@@ -193,6 +208,8 @@ contract TrenBoxStorage is
         _updateActiveCollateral(_collateral, _collAmount, false);
     }
 
+    /// @inheritdoc ITrenBoxStorage
+    /// @dev Can only be called by BorrowerOperations contract
     function increaseActiveCollateral(
         address _collateral,
         uint256 _amount
@@ -204,6 +221,8 @@ contract TrenBoxStorage is
         _updateActiveCollateral(_collateral, _amount, true);
     }
 
+    /// @inheritdoc ITrenBoxStorage
+    /// @dev Can only be called by TrenBoxManagerOperations contract
     function decreaseActiveCollateral(
         address _collateral,
         uint256 _amount
@@ -215,6 +234,8 @@ contract TrenBoxStorage is
         _updateActiveCollateral(_collateral, _amount, false);
     }
 
+    /// @inheritdoc ITrenBoxStorage
+    /// @dev Can only be called by TrenBoxManager contract
     function updateDebtAndCollateralBalances(
         address _collateral,
         uint256 _debtAmount,
@@ -246,6 +267,8 @@ contract TrenBoxStorage is
         emit LiquidatedCollateralBalanceUpdated(_collateral, newLiquidatedColl);
     }
 
+    /// @inheritdoc ITrenBoxStorage
+    /// @dev Can only be called by TrenBoxManager contract
     function updateUserAndEntireClaimableBalance(
         address _collateral,
         address _account,
@@ -259,6 +282,8 @@ contract TrenBoxStorage is
         _updateUserClaimableBalance(_collateral, _account, _amount);
     }
 
+    /// @inheritdoc ITrenBoxStorage
+    /// @dev Can only be called by TrenBoxManagerOperations contract
     function increaseClaimableCollateral(
         address _collateral,
         uint256 _amount
@@ -270,6 +295,8 @@ contract TrenBoxStorage is
         _updateClaimableCollateral(_collateral, _amount, true);
     }
 
+    /// @inheritdoc ITrenBoxStorage
+    /// @dev Can only be called by TrenBoxManagerOperations contract
     function updateUserClaimableBalance(
         address _collateral,
         address _account,
@@ -282,6 +309,8 @@ contract TrenBoxStorage is
         _updateUserClaimableBalance(_collateral, _account, _amount);
     }
 
+    /// @inheritdoc ITrenBoxStorage
+    /// @dev Can only be called by BorrowerOperations or TrenBoxManager or StabilityPool contract
     function sendCollateral(
         address _collateral,
         address _account,
@@ -306,6 +335,8 @@ contract TrenBoxStorage is
         emit CollateralSent(_account, _collateral, safetyTransferAmount);
     }
 
+    /// @inheritdoc ITrenBoxStorage
+    /// @dev Can only be called by BorrowerOperations contract
     function claimCollateral(
         address _collateral,
         address _account
