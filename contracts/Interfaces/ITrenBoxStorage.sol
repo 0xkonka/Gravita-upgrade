@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
+/**
+ * @title ITrenBoxStorage
+ * @notice Defines the basic interface for TrenBoxStorage contract.
+ */
 interface ITrenBoxStorage {
+    // ------------------------------------------ Structs -----------------------------------------
+
     /// @dev Struct for storing debt balances of a specific collateral asset.
     /// @param active The entire debt of all active TrenBoxes.
     /// @param liquidated The entire debt of all liquidated TrenBoxes.
@@ -20,6 +26,8 @@ interface ITrenBoxStorage {
         uint256 liquidated;
         uint256 claimable;
     }
+
+    // ------------------------------------------ Events ------------------------------------------
 
     /**
      * @dev Emitted when the active collateral balance is updated.
@@ -74,35 +82,39 @@ interface ITrenBoxStorage {
         address indexed _account, address indexed _collateral, uint256 _newBalance
     );
 
+    // ------------------------------------------ Custom Errors -----------------------------------
+
     /**
-     * @dev Error emitted when contract is not authorized.
+     * @dev Thrown when contract is not authorized.
      */
     error TrenBoxStorage__NotAuthorizedContract();
 
     /**
-     * @dev Error emitted when only TrenBoxManager is allowed.
+     * @dev Thrown when caller is not TrenBoxManager contract.
      */
     error TrenBoxStorage__TrenBoxManagerOnly();
 
     /**
-     * @dev Error emitted when only BorrowerOperations is allowed.
+     * @dev Thrown when caller is not BorrowerOperations contract.
      */
     error TrenBoxStorage__BorrowerOperationsOnly();
 
     /**
-     * @dev Error emitted when only BorrowerOperations or TrenBoxManager can perform an operation.
+     * @dev Thrown when caller is not BorrowerOperations nor TrenBoxManager contract.
      */
     error TrenBoxStorage__BorrowerOperationsOrTrenBoxManagerOnly();
 
     /**
-     * @dev Error emitted when only TrenBoxManagerOperations is allowed.
+     * @dev Thrown when caller is not TrenBoxManagerOperations contract.
      */
     error TrenBoxStorage__TrenBoxManagerOperationsOnly();
 
     /**
-     * @dev Error emitted when there is no claimable collateral available.
+     * @dev Thrown when there is no claimable collateral available.
      */
     error TrenBoxStorage__NoClaimableCollateral();
+
+    // ------------------------------------------ Functions ---------------------------------------
 
     /**
      * @notice Returns the active collateral balance for a specific collateral asset.
