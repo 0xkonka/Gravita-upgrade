@@ -20,6 +20,11 @@ import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 
+/**
+ * @title BorrowerOperations contract
+ * @notice Contains the basic operations by which borrowers interact with their TrenBoxes:
+ * TrenBox creation, collateral top-up / withdrawal, debt token issuance and repayment.
+ */
 contract BorrowerOperations is
     TrenBase,
     ReentrancyGuardUpgradeable,
@@ -28,17 +33,23 @@ contract BorrowerOperations is
 {
     using SafeERC20 for IERC20;
 
+    /// @notice The contract name.
     string public constant NAME = "BorrowerOperations";
 
     // --- Initializer ---
 
+    /**
+     * @dev Runs all the setup logic only once.
+     * @param initialOwner The address of initial owner.
+     */
     function initialize(address initialOwner) public initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
     }
 
-    // --- Borrower TrenBox Operations ---
+    // --- External/Public Functions ---
 
+    /// @inheritdoc IBorrowerOperations
     function openTrenBox(
         address _asset,
         uint256 _assetAmount,
@@ -116,8 +127,9 @@ contract BorrowerOperations is
             ITrenBoxManager(trenBoxManager).addTrenBoxOwnerToArray(vars.asset, msg.sender);
         emit TrenBoxCreated(vars.asset, msg.sender, vars.arrayIndex);
 
-        // Move the asset to the Active Pool, and mint the debtToken amount to the borrower
+        // Moves the collateral to the trenBox storage pool
         _trenBoxStorageAddColl(vars.asset, _assetAmount);
+        // Mints the debtToken amount to the borrower
         _withdrawDebtTokens(vars.asset, msg.sender, _debtTokenAmount, vars.netDebt);
 
         // Move the debtToken gas compensation to the TrenBoxStorage
@@ -136,7 +148,7 @@ contract BorrowerOperations is
         emit BorrowingFeePaid(vars.asset, msg.sender, vars.debtTokenFee);
     }
 
-    // Send collateral to a trenBox
+    /// @inheritdoc IBorrowerOperations
     function addColl(
         address _asset,
         uint256 _assetSent,
@@ -150,7 +162,7 @@ contract BorrowerOperations is
         _adjustTrenBox(_asset, _assetSent, msg.sender, 0, 0, false, _upperHint, _lowerHint);
     }
 
-    // Withdraw collateral from a trenBox
+    /// @inheritdoc IBorrowerOperations
     function withdrawColl(
         address _asset,
         uint256 _collWithdrawal,
@@ -164,8 +176,7 @@ contract BorrowerOperations is
         _adjustTrenBox(_asset, 0, msg.sender, _collWithdrawal, 0, false, _upperHint, _lowerHint);
     }
 
-    // Withdraw debt tokens from a trenBox: mint new debt tokens to the owner, and increase the
-    // trenBox's debt accordingly
+    /// @inheritdoc IBorrowerOperations
     function withdrawDebtTokens(
         address _asset,
         uint256 _debtTokenAmount,
@@ -179,8 +190,7 @@ contract BorrowerOperations is
         _adjustTrenBox(_asset, 0, msg.sender, 0, _debtTokenAmount, true, _upperHint, _lowerHint);
     }
 
-    // Repay debt tokens to a TrenBox: Burn the repaid debt tokens, and reduce the trenBox's debt
-    // accordingly or Close TrenBox if user has enough tokens at all
+    /// @inheritdoc IBorrowerOperations
     function repayDebtTokens(
         address _asset,
         uint256 _debtTokenAmount,
@@ -197,7 +207,7 @@ contract BorrowerOperations is
                     _asset, ITrenBoxManager(trenBoxManager).getTrenBoxDebt(_asset, msg.sender)
                 )
         ) {
-            closeTrenBox(_asset);
+            _closeTrenBox(_asset);
         } else {
             _adjustTrenBox(
                 _asset, 0, msg.sender, 0, _debtTokenAmount, false, _upperHint, _lowerHint
@@ -205,6 +215,7 @@ contract BorrowerOperations is
         }
     }
 
+    /// @inheritdoc IBorrowerOperations
     function adjustTrenBox(
         address _asset,
         uint256 _assetSent,
@@ -230,9 +241,35 @@ contract BorrowerOperations is
         );
     }
 
+    /// @inheritdoc IBorrowerOperations
+    function claimCollateral(address _asset) external override {
+        ITrenBoxStorage(trenBoxStorage).claimCollateral(_asset, msg.sender);
+    }
+
+    /// @inheritdoc IBorrowerOperations
+    function getCompositeDebt(
+        address _asset,
+        uint256 _debt
+    )
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return _getCompositeDebt(_asset, _debt);
+    }
+
     /**
-     * @dev _adjustTrenBox(): Alongside a debt change, this function can perform either a collateral
-     * top-up or a collateral withdrawal.
+     * @dev Alongside a debt change, this function can perform either a collateral top-up or
+     * a collateral withdrawal.
+     * @param _asset The address of collateral asset.
+     * @param _assetSent The amount of collateral asset to send.
+     * @param _borrower The borrower address.
+     * @param _collWithdrawal The amount of collateral asset to withdraw.
+     * @param _debtTokenChange The amount of debt token to withdraw or repay.
+     * @param _isDebtIncrease The flag to indicate if current operation is withdrawal or repayment.
+     * @param _upperHint Id of previous node for the new insert position.
+     * @param _lowerHint Id of next node for the new insert position.
      */
     function _adjustTrenBox(
         address _asset,
@@ -278,8 +315,8 @@ contract BorrowerOperations is
         // a borrowing fee
         if (_isDebtIncrease && !isRecoveryMode) {
             vars.debtTokenFee = _triggerBorrowingFee(vars.asset, _debtTokenChange);
-            vars.netDebtChange = vars.netDebtChange + vars.debtTokenFee; // The raw debt change
-                // includes the fee
+            // The raw debt change includes the fee
+            vars.netDebtChange = vars.netDebtChange + vars.debtTokenFee;
         }
 
         vars.debt = ITrenBoxManager(trenBoxManager).getTrenBoxDebt(vars.asset, _borrower);
@@ -358,7 +395,12 @@ contract BorrowerOperations is
         );
     }
 
-    function closeTrenBox(address _asset) internal {
+    /**
+     * @dev Allows borrowers to repay all debt, withdraw all their collateral,
+     * and close their trenBoxes.
+     * @param _asset The address of collateral asset.
+     */
+    function _closeTrenBox(address _asset) internal {
         _requireTrenBoxIsActive(_asset, msg.sender);
         uint256 price = IPriceFeed(priceFeed).fetchPrice(_asset);
         _requireNotInRecoveryMode(_asset, price);
@@ -397,13 +439,10 @@ contract BorrowerOperations is
     }
 
     /**
-     * Claim remaining collateral from a redemption or from a liquidation with ICR > MCR in Recovery
-     * Mode
+     * @dev Charges borrowing fee on the loan amount.
+     * @param _asset The address of collateral asset.
+     * @param _debtTokenAmount The loan amount.
      */
-    function claimCollateral(address _asset) external override {
-        ITrenBoxStorage(trenBoxStorage).claimCollateral(_asset, msg.sender);
-    }
-
     function _triggerBorrowingFee(
         address _asset,
         uint256 _debtTokenAmount
@@ -418,6 +457,11 @@ contract BorrowerOperations is
         return debtTokenFee;
     }
 
+    /**
+     * @dev Gets collateral change with flag to indicate if it's a top-up or withdrawal.
+     * @param _collReceived The amount of top-up collateral.
+     * @param _requestedCollWithdrawal The amount of collateral withdrawal.
+     */
     function _getCollChange(
         uint256 _collReceived,
         uint256 _requestedCollWithdrawal
@@ -434,7 +478,16 @@ contract BorrowerOperations is
         }
     }
 
-    // Update trenBox's coll and debt based on whether they increase or decrease
+    /**
+     * @dev Updates trenBox's collateral and debt balances based on whether they increase
+     * or decrease.
+     * @param _asset The address of collateral asset.
+     * @param _borrower The address of borrower.
+     * @param _collChange The amount of collateral change.
+     * @param _isCollIncrease The flag to indicate if it's a collateral top-up or withdrawal.
+     * @param _debtChange The amount of debt change.
+     * @param _isDebtIncrease The flag to indicate if it's a debt withdrawal or repayment.
+     */
     function _updateTrenBoxFromAdjustment(
         address _asset,
         address _borrower,
@@ -456,6 +509,16 @@ contract BorrowerOperations is
         return (newColl, newDebt);
     }
 
+    /**
+     * @dev Triggers actual collateral asset or debt token transfer from a trenBox adjustment.
+     * @param _asset The address of collateral asset.
+     * @param _borrower The address of borrower.
+     * @param _collChange The amount of collateral change.
+     * @param _isCollIncrease The flag to indicate if it's a collateral top-up or withdrawal.
+     * @param _debtTokenChange The amount of debt token change.
+     * @param _isDebtIncrease The flag to indicate if it's a debt withdrawal or repayment.
+     * @param _netDebtChange The amount of raw debt change including fee.
+     */
     function _moveTokensFromAdjustment(
         address _asset,
         address _borrower,
@@ -479,7 +542,12 @@ contract BorrowerOperations is
         }
     }
 
-    // Send asset to TrenBoxStorage and increase its recorded asset balance
+    /**
+     * @dev Sends specific collateral amount to TrenBoxStorage and increases its recorded
+     * asset balance.
+     * @param _asset The address of collateral asset.
+     * @param _amount The amount of collateral asset.
+     */
     function _trenBoxStorageAddColl(address _asset, uint256 _amount) internal {
         ITrenBoxStorage(trenBoxStorage).increaseActiveCollateral(_asset, _amount);
         IERC20(_asset).safeTransferFrom(
@@ -487,8 +555,14 @@ contract BorrowerOperations is
         );
     }
 
-    // Issue the specified amount of debt tokens to _account and increases the total active debt
-    // (_netDebtIncrease potentially includes a debtTokenFee)
+    /**
+     * @dev Issues the specific amount of debt tokens and increases the total active debt
+     * (_netDebtIncrease potentially includes a debtTokenFee).
+     * @param _asset The address of collateral asset.
+     * @param _account The address of trenBox owner.
+     * @param _debtTokenAmount The amount of total debt change.
+     * @param _netDebtIncrease The amount of net debt change.
+     */
     function _withdrawDebtTokens(
         address _asset,
         address _account,
@@ -506,7 +580,13 @@ contract BorrowerOperations is
         IDebtToken(debtToken).mint(_asset, _account, _debtTokenAmount);
     }
 
-    // Burn the specified amount of debt tokens from _account and decreases the total active debt
+    /**
+     * @dev Burns the specific amount of debt tokens and decreases the total active debt.
+     * @param _asset The address of collateral asset.
+     * @param _account The address of trenBox owner.
+     * @param _debtTokenAmount The amount of total debt change.
+     * @param _refund The refund amount of debt tokens.
+     */
     function _repayDebtTokens(
         address _asset,
         address _account,
@@ -525,6 +605,11 @@ contract BorrowerOperations is
 
     // --- 'Require' wrapper functions ---
 
+    /**
+     * @dev Requires singular collateral change.
+     * @param _collWithdrawal The amount of collateral withdrawal.
+     * @param _amountSent The amount of a top-up collateral.
+     */
     function _requireSingularCollChange(
         uint256 _collWithdrawal,
         uint256 _amountSent
@@ -537,6 +622,12 @@ contract BorrowerOperations is
         }
     }
 
+    /**
+     * @dev Requires non-zero adjustment in either collateral or debt balance.
+     * @param _collWithdrawal The amount of collateral withdrawal.
+     * @param _debtTokenChange The amount of total debt change.
+     * @param _assetSent The amount of a top-up collateral.
+     */
     function _requireNonZeroAdjustment(
         uint256 _collWithdrawal,
         uint256 _debtTokenChange,
@@ -550,6 +641,11 @@ contract BorrowerOperations is
         }
     }
 
+    /**
+     * @dev Requires that a trenBox is active.
+     * @param _asset The address of collateral asset.
+     * @param _borrower The address of borrower.
+     */
     function _requireTrenBoxIsActive(address _asset, address _borrower) internal view {
         uint256 status = ITrenBoxManager(trenBoxManager).getTrenBoxStatus(_asset, _borrower);
         if (status != 1) {
@@ -557,18 +653,35 @@ contract BorrowerOperations is
         }
     }
 
+    /**
+     * @dev Requires that the current operation is not in Recovery Mode.
+     * @param _asset The address of collateral asset.
+     * @param _price The price of collateral asset.
+     */
     function _requireNotInRecoveryMode(address _asset, uint256 _price) internal view {
         if (_checkRecoveryMode(_asset, _price)) {
             revert BorrowerOperations__OperationInRecoveryMode();
         }
     }
 
+    /**
+     * @dev Requires no collateral withdrawal in Recovery Mode.
+     * @param _collWithdrawal The amount of collateral withdrawal.
+     */
     function _requireNoCollWithdrawal(uint256 _collWithdrawal) internal pure {
         if (_collWithdrawal != 0) {
             revert BorrowerOperations__CollWithdrawalInRecoveryMode();
         }
     }
 
+    /**
+     * @dev Requires valid adjustment in respective modes.
+     * @param _asset The address of collateral asset.
+     * @param _isRecoveryMode The flag to indicate if current mode is Recovery Mode or not.
+     * @param _collWithdrawal The amount of collateral withdrawal.
+     * @param _isDebtIncrease The flag to indicate if current operation is withdrawal or repayment.
+     * @param _vars The struct variable to store adjustment parameters.
+     */
     function _requireValidAdjustmentInCurrentMode(
         address _asset,
         bool _isRecoveryMode,
@@ -614,36 +727,66 @@ contract BorrowerOperations is
         }
     }
 
+    /**
+     * @dev Requires an individual collateral ratio is above minimum collateral ratio.
+     * @param _asset The address of collateral asset.
+     * @param _newICR The new individual collateral ratio.
+     */
     function _requireICRisAboveMCR(address _asset, uint256 _newICR) internal view {
         if (_newICR < IAdminContract(adminContract).getMcr(_asset)) {
             revert BorrowerOperations__TrenBoxICRBelowMCR();
         }
     }
 
+    /**
+     * @dev Requires an individual collateral ratio is above critical collateral ratio.
+     * @param _asset The address of collateral asset.
+     * @param _newICR The new individual collateral ratio.
+     */
     function _requireICRisAboveCCR(address _asset, uint256 _newICR) internal view {
         if (_newICR < IAdminContract(adminContract).getCcr(_asset)) {
             revert BorrowerOperations__TrenBoxICRBelowCCR();
         }
     }
 
+    /**
+     * @dev Requires new individual collateral ratio is above old ratio.
+     * @param _newICR The new individual collateral ratio.
+     * @param _oldICR The old individual collateral ratio.
+     */
     function _requireNewICRisAboveOldICR(uint256 _newICR, uint256 _oldICR) internal pure {
         if (_newICR < _oldICR) {
             revert BorrowerOperations__TrenBoxNewICRBelowOldICR();
         }
     }
 
+    /**
+     * @dev Requires new total collateral ratio is above critical collateral ratio.
+     * @param _asset The address of collateral asset.
+     * @param _newTCR The new total collateral ratio.
+     */
     function _requireNewTCRisAboveCCR(address _asset, uint256 _newTCR) internal view {
         if (_newTCR < IAdminContract(adminContract).getCcr(_asset)) {
             revert BorrowerOperations__TrenBoxNewTCRBelowCCR();
         }
     }
 
+    /**
+     * @dev Requires that the net debt change is above minimum debt amount.
+     * @param _asset The address of collateral asset.
+     * @param _netDebt The amount of net debt change.
+     */
     function _requireAtLeastMinNetDebt(address _asset, uint256 _netDebt) internal view {
         if (_netDebt < IAdminContract(adminContract).getMinNetDebt(_asset)) {
             revert BorrowerOperations__TrenBoxNetDebtLessThanMin();
         }
     }
 
+    /**
+     * @dev Requires sufficient debt balance on repayment.
+     * @param _borrower The borrower address.
+     * @param _debtRepayment The repayment amount.
+     */
     function _requireSufficientDebtTokenBalance(
         address _borrower,
         uint256 _debtRepayment
@@ -658,8 +801,16 @@ contract BorrowerOperations is
 
     // --- ICR and TCR getters ---
 
-    // Compute the new collateral ratio, considering the change in coll and debt. Assumes 0 pending
-    // rewards.
+    /**
+     * @dev Computes the new nominal collateral ratio, considering the change in collateral
+     * and debt balances. Assumes 0 pending rewards.
+     * @param _coll The collateral balance.
+     * @param _debt The debt balance.
+     * @param _collChange The amount of collateral change.
+     * @param _isCollIncrease The flag to indicate whether the collateral balance increases or not.
+     * @param _debtChange The amount of debt change.
+     * @param _isDebtIncrease The flag to indicate if it's a debt withdrawal or repayment.
+     */
     function _getNewNominalICRFromTrenBoxChange(
         uint256 _coll,
         uint256 _debt,
@@ -680,8 +831,17 @@ contract BorrowerOperations is
         return newNICR;
     }
 
-    // Compute the new collateral ratio, considering the change in coll and debt. Assumes 0 pending
-    // rewards.
+    /**
+     * @dev Computes the new individual collateral ratio, considering the change in collateral and
+     * debt balances. Assumes 0 pending rewards.
+     * @param _coll The collateral balance.
+     * @param _debt The debt balance.
+     * @param _collChange The amount of collateral change.
+     * @param _isCollIncrease The flag to indicate whether the collateral balance increases or not.
+     * @param _debtChange The amount of debt change.
+     * @param _isDebtIncrease The flag to indicate if it's a debt withdrawal or repayment.
+     * @param _price The price of collateral asset.
+     */
     function _getNewICRFromTrenBoxChange(
         uint256 _coll,
         uint256 _debt,
@@ -703,6 +863,15 @@ contract BorrowerOperations is
         return newICR;
     }
 
+    /**
+     * @dev Computes new collateral and debt balances based on their changes.
+     * @param _coll The collateral balance.
+     * @param _debt The debt balance.
+     * @param _collChange The amount of collateral change.
+     * @param _isCollIncrease The flag to indicate whether the collateral balance increases or not.
+     * @param _debtChange The amount of debt change.
+     * @param _isDebtIncrease The flag to indicate if it's a debt withdrawal or repayment.
+     */
     function _getNewTrenBoxAmounts(
         uint256 _coll,
         uint256 _debt,
@@ -724,6 +893,15 @@ contract BorrowerOperations is
         return (newColl, newDebt);
     }
 
+    /**
+     * @dev Computes new total collateral ratio based on collateral and debt changes.
+     * @param _asset The address of collateral asset.
+     * @param _collChange The amount of collateral change.
+     * @param _isCollIncrease The flag to indicate whether the collateral balance increases or not.
+     * @param _debtChange The amount of debt change.
+     * @param _isDebtIncrease The flag to indicate if it's a debt withdrawal or repayment.
+     * @param _price The price of collateral asset.
+     */
     function _getNewTCRFromTrenBoxChange(
         address _asset,
         uint256 _collChange,
@@ -744,18 +922,6 @@ contract BorrowerOperations is
 
         uint256 newTCR = TrenMath._computeCR(totalColl, totalDebt, _price);
         return newTCR;
-    }
-
-    function getCompositeDebt(
-        address _asset,
-        uint256 _debt
-    )
-        external
-        view
-        override
-        returns (uint256)
-    {
-        return _getCompositeDebt(_asset, _debt);
     }
 
     function authorizeUpgrade(address newImplementation) public {
