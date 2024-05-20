@@ -1,5 +1,5 @@
 import { config as dotenvConfig } from "dotenv";
-import { AddressLike, BigNumberish, parseEther } from "ethers";
+import { AddressLike, BigNumberish, BytesLike, parseEther } from "ethers";
 import { resolve } from "path";
 
 import { NetworkName } from "./networks";
@@ -15,6 +15,7 @@ export interface Collateral {
   oracleAddress: AddressLike;
   oracleTimeoutMinutes: number;
   oracleIsEthIndexed: boolean;
+  oracleAdditionalData?: BytesLike;
   MCR: BigNumberish;
   CCR: BigNumberish;
   minNetDebt: BigNumberish;

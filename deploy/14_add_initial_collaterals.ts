@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import chalk from "chalk";
+import { ZeroHash } from "ethers";
 import type { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -108,7 +109,8 @@ async function addPriceFeedOracle(collateral: Collateral, hre: HardhatRuntimeEnv
       oracleProviderType,
       collateral.oracleTimeoutMinutes,
       collateral.oracleIsEthIndexed,
-      isFallback
+      isFallback,
+      collateral.oracleAdditionalData || ZeroHash
     );
 
     await setOracleTx.wait();

@@ -1,27 +1,49 @@
 import { expect } from "chai";
+import { BytesLike, ZeroHash } from "ethers";
 import { ethers } from "hardhat";
+
+import { MockPythPriceFeed } from "../../../../types";
+
+const PROVIDER_TYPE = {
+  Chainlink: 0,
+  API3: 1,
+  Pyth: 2,
+};
+
+type OracleOptions = {
+  providerType: (typeof PROVIDER_TYPE)[keyof typeof PROVIDER_TYPE];
+  timeoutSeconds: number;
+  isEthIndexed: boolean;
+  isFallback: boolean;
+  additionalData: BytesLike;
+};
+
+const DEFAULT_ORACLE_OPTIONS: OracleOptions = {
+  providerType: PROVIDER_TYPE.Chainlink,
+  timeoutSeconds: 3600,
+  isEthIndexed: false,
+  isFallback: false,
+  additionalData: ZeroHash,
+};
+
+const API3_ORACLE_OPTIONS: OracleOptions = {
+  providerType: PROVIDER_TYPE.API3,
+  timeoutSeconds: 7200,
+  isEthIndexed: false,
+  isFallback: true,
+  additionalData: ZeroHash,
+};
+
+const PYTH_ORACLE_OPTIONS: OracleOptions = {
+  providerType: PROVIDER_TYPE.Pyth,
+  timeoutSeconds: 7200,
+  isEthIndexed: false,
+  isFallback: true,
+  additionalData: "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
+};
 
 export default function shouldHaveFetchPrice(): void {
   beforeEach(async function () {
-    const providerType = {
-      Chainlink: 0,
-      API3: 1,
-    };
-
-    this.defaultOracleOptions = {
-      providerType: providerType.Chainlink,
-      timeoutSeconds: 3600,
-      isEthIndexed: false,
-      isFallback: false,
-    };
-
-    this.api3OracleOptions = {
-      providerType: providerType.API3,
-      timeoutSeconds: 7200,
-      isEthIndexed: false,
-      isFallback: true,
-    };
-
     this.owner = this.signers.deployer;
     this.timelockImpostor = this.signers.accounts[1];
 
@@ -51,10 +73,11 @@ export default function shouldHaveFetchPrice(): void {
         .setOracle(
           ethers.ZeroAddress,
           this.mockAggregatorAddress,
-          this.defaultOracleOptions.providerType,
-          this.defaultOracleOptions.timeoutSeconds,
-          this.defaultOracleOptions.isEthIndexed,
-          this.defaultOracleOptions.isFallback
+          DEFAULT_ORACLE_OPTIONS.providerType,
+          DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
+          DEFAULT_ORACLE_OPTIONS.isEthIndexed,
+          DEFAULT_ORACLE_OPTIONS.isFallback,
+          DEFAULT_ORACLE_OPTIONS.additionalData
         );
       await setETHtoUSDOracleTx.wait();
 
@@ -71,10 +94,11 @@ export default function shouldHaveFetchPrice(): void {
           .setOracle(
             this.erc20Address,
             this.mockAggregatorAddress,
-            this.defaultOracleOptions.providerType,
-            this.defaultOracleOptions.timeoutSeconds,
-            this.defaultOracleOptions.isEthIndexed,
-            this.defaultOracleOptions.isFallback
+            DEFAULT_ORACLE_OPTIONS.providerType,
+            DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
+            DEFAULT_ORACLE_OPTIONS.isEthIndexed,
+            DEFAULT_ORACLE_OPTIONS.isFallback,
+            DEFAULT_ORACLE_OPTIONS.additionalData
           );
 
         await setPrimaryOracleTx.wait();
@@ -84,10 +108,11 @@ export default function shouldHaveFetchPrice(): void {
           .setOracle(
             this.erc20Address,
             this.mockApi3Address,
-            this.api3OracleOptions.providerType,
-            this.api3OracleOptions.timeoutSeconds,
-            this.api3OracleOptions.isEthIndexed,
-            this.api3OracleOptions.isFallback
+            API3_ORACLE_OPTIONS.providerType,
+            API3_ORACLE_OPTIONS.timeoutSeconds,
+            API3_ORACLE_OPTIONS.isEthIndexed,
+            API3_ORACLE_OPTIONS.isFallback,
+            API3_ORACLE_OPTIONS.additionalData
           );
 
         await setFallbackOracleTx.wait();
@@ -113,10 +138,11 @@ export default function shouldHaveFetchPrice(): void {
           .setOracle(
             this.erc20Address,
             await mockAggregator.getAddress(),
-            this.defaultOracleOptions.providerType,
-            this.defaultOracleOptions.timeoutSeconds,
-            this.defaultOracleOptions.isEthIndexed,
-            this.defaultOracleOptions.isFallback
+            DEFAULT_ORACLE_OPTIONS.providerType,
+            DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
+            DEFAULT_ORACLE_OPTIONS.isEthIndexed,
+            DEFAULT_ORACLE_OPTIONS.isFallback,
+            DEFAULT_ORACLE_OPTIONS.additionalData
           );
         const price = await this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address);
         const roundData = await mockAggregator.latestRoundData();
@@ -138,10 +164,11 @@ export default function shouldHaveFetchPrice(): void {
           .setOracle(
             this.erc20Address,
             await mockAggregator.getAddress(),
-            this.defaultOracleOptions.providerType,
-            this.defaultOracleOptions.timeoutSeconds,
-            !this.defaultOracleOptions.isEthIndexed,
-            this.defaultOracleOptions.isFallback
+            DEFAULT_ORACLE_OPTIONS.providerType,
+            DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
+            !DEFAULT_ORACLE_OPTIONS.isEthIndexed,
+            DEFAULT_ORACLE_OPTIONS.isFallback,
+            DEFAULT_ORACLE_OPTIONS.additionalData
           );
 
         const ethUsdRoundData = await this.mockAggregator.latestRoundData();
@@ -181,10 +208,11 @@ export default function shouldHaveFetchPrice(): void {
           .setOracle(
             this.erc20Address,
             this.mockApi3Address,
-            this.api3OracleOptions.providerType,
-            this.api3OracleOptions.timeoutSeconds,
-            this.api3OracleOptions.isEthIndexed,
-            !this.api3OracleOptions.isFallback
+            API3_ORACLE_OPTIONS.providerType,
+            API3_ORACLE_OPTIONS.timeoutSeconds,
+            API3_ORACLE_OPTIONS.isEthIndexed,
+            !API3_ORACLE_OPTIONS.isFallback,
+            API3_ORACLE_OPTIONS.additionalData
           );
 
         await setPrimaryOracleTx.wait();
@@ -194,10 +222,11 @@ export default function shouldHaveFetchPrice(): void {
           .setOracle(
             this.erc20Address,
             this.mockAggregatorAddress,
-            this.defaultOracleOptions.providerType,
-            this.defaultOracleOptions.timeoutSeconds,
-            this.defaultOracleOptions.isEthIndexed,
-            !this.defaultOracleOptions.isFallback
+            DEFAULT_ORACLE_OPTIONS.providerType,
+            DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
+            DEFAULT_ORACLE_OPTIONS.isEthIndexed,
+            !DEFAULT_ORACLE_OPTIONS.isFallback,
+            DEFAULT_ORACLE_OPTIONS.additionalData
           );
 
         await setFallbackOracleTx.wait();
@@ -223,10 +252,11 @@ export default function shouldHaveFetchPrice(): void {
           .setOracle(
             this.erc20Address,
             await mockApi3.getAddress(),
-            this.api3OracleOptions.providerType,
-            this.api3OracleOptions.timeoutSeconds,
-            !this.api3OracleOptions.isEthIndexed,
-            !this.api3OracleOptions.isFallback
+            API3_ORACLE_OPTIONS.providerType,
+            API3_ORACLE_OPTIONS.timeoutSeconds,
+            !API3_ORACLE_OPTIONS.isEthIndexed,
+            !API3_ORACLE_OPTIONS.isFallback,
+            API3_ORACLE_OPTIONS.additionalData
           );
 
         const ethUsdRoundData = await this.mockAggregator.latestRoundData();
@@ -241,6 +271,111 @@ export default function shouldHaveFetchPrice(): void {
       it("should revert if price is zero", async function () {
         await this.mockAggregator.setPrice(0);
         await this.mockApi3.setValue(0);
+        await expect(
+          this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address)
+        ).to.be.revertedWithCustomError(
+          this.redeployedContracts.priceFeed,
+          "PriceFeed__InvalidOracleResponseError"
+        );
+      });
+    });
+
+    context("when Pyth oracle is primary oracle for asset", function () {
+      async function setPrice(mockPyth: MockPythPriceFeed, price: bigint, exponent: number = -8) {
+        mockPyth.getValidTimePeriod;
+
+        const now = Math.floor(Date.now() / 1000);
+        const pythPriceFeedData = await mockPyth.createPriceFeedUpdateData(
+          PYTH_ORACLE_OPTIONS.additionalData,
+          price,
+          224843971,
+          exponent,
+          price,
+          224843971,
+          now,
+          now - 1
+        );
+
+        const updatePriceOnPythMockTx = await mockPyth.updatePriceFeed(pythPriceFeedData);
+        await updatePriceOnPythMockTx.wait();
+      }
+
+      beforeEach(async function () {
+        const { mockPyth } = this.testContracts;
+        await setPrice(mockPyth, 100n);
+
+        const pythOracleAddress = await mockPyth.getAddress();
+
+        const setPrimaryOracleTx = await this.redeployedContracts.priceFeed
+          .connect(this.owner)
+          .setOracle(
+            this.erc20Address,
+            pythOracleAddress,
+            PYTH_ORACLE_OPTIONS.providerType,
+            PYTH_ORACLE_OPTIONS.timeoutSeconds,
+            PYTH_ORACLE_OPTIONS.isEthIndexed,
+            !PYTH_ORACLE_OPTIONS.isFallback,
+            PYTH_ORACLE_OPTIONS.additionalData
+          );
+
+        await setPrimaryOracleTx.wait();
+
+        const setFallbackOracleTx = await this.redeployedContracts.priceFeed
+          .connect(this.owner)
+          .setOracle(
+            this.erc20Address,
+            this.mockAggregatorAddress,
+            DEFAULT_ORACLE_OPTIONS.providerType,
+            DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
+            DEFAULT_ORACLE_OPTIONS.isEthIndexed,
+            !DEFAULT_ORACLE_OPTIONS.isFallback,
+            DEFAULT_ORACLE_OPTIONS.additionalData
+          );
+
+        await setFallbackOracleTx.wait();
+      });
+
+      it("should return fallback Chainlink oracle price when its set as fallback", async function () {
+        await setPrice(this.testContracts.mockPyth, 0n);
+
+        const price = await this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address);
+
+        const roundData = await this.mockAggregator.latestRoundData();
+        const expectedPrice = roundData[1] * 10n ** 10n;
+
+        expect(price).to.equal(expectedPrice);
+      });
+
+      it("should return Pyth oracle price", async function () {
+        const ethAmount = ethers.WeiPerEther;
+        const { mockPyth } = this.testContracts;
+        await setPrice(mockPyth, ethAmount, -18);
+
+        await this.redeployedContracts.priceFeed
+          .connect(this.timelockImpostor)
+          .setOracle(
+            this.erc20Address,
+            await mockPyth.getAddress(),
+            PYTH_ORACLE_OPTIONS.providerType,
+            PYTH_ORACLE_OPTIONS.timeoutSeconds,
+            true,
+            false,
+            PYTH_ORACLE_OPTIONS.additionalData
+          );
+
+        const ethUsdRoundData = await this.mockAggregator.latestRoundData();
+
+        const price = await this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address);
+        const priceAnswer = ethUsdRoundData[1];
+        const expectedPrice = priceAnswer * 10n ** 10n;
+
+        expect(price).to.be.equal(expectedPrice);
+      });
+
+      it("should revert if price is zero", async function () {
+        await setPrice(this.testContracts.mockPyth, 0n);
+        await this.mockAggregator.setPrice(0);
+
         await expect(
           this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address)
         ).to.be.revertedWithCustomError(

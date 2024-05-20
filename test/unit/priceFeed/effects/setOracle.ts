@@ -1,26 +1,46 @@
 import { expect } from "chai";
+import { BytesLike, ZeroHash } from "ethers";
+
+const PROVIDER_TYPE = {
+  Chainlink: 0,
+  API3: 1,
+  Pyth: 2,
+};
+
+type OracleOptions = {
+  providerType: (typeof PROVIDER_TYPE)[keyof typeof PROVIDER_TYPE];
+  timeoutSeconds: number;
+  isEthIndexed: boolean;
+  isFallback: boolean;
+  additionalData: BytesLike;
+};
+
+const DEFAULT_ORACLE_OPTIONS: OracleOptions = {
+  providerType: PROVIDER_TYPE.Chainlink,
+  timeoutSeconds: 3600,
+  isEthIndexed: false,
+  isFallback: false,
+  additionalData: ZeroHash,
+};
+
+const API3_ORACLE_OPTIONS: OracleOptions = {
+  providerType: PROVIDER_TYPE.API3,
+  timeoutSeconds: 7200,
+  isEthIndexed: false,
+  isFallback: true,
+  additionalData: ZeroHash,
+};
+
+const PYTH_ORACLE_OPTIONS: OracleOptions = {
+  providerType: PROVIDER_TYPE.Pyth,
+  timeoutSeconds: 7200,
+  isEthIndexed: false,
+  isFallback: false,
+  additionalData: "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
+};
 
 export default function shouldBehaveLikeCanSetOracle(): void {
   beforeEach(async function () {
-    const providerType = {
-      Chainlink: 0,
-      API3: 1,
-    };
-
-    this.defaultOracleOptions = {
-      providerType: providerType.Chainlink,
-      timeoutSeconds: 3600,
-      isEthIndexed: false,
-      isFallback: false,
-    };
-
-    this.api3OracleOptions = {
-      providerType: providerType.API3,
-      timeoutSeconds: 7200,
-      isEthIndexed: false,
-      isFallback: true,
-    };
-
     this.owner = this.signers.deployer;
     this.notOwner = this.signers.accounts[1];
     this.timelockImpostor = this.signers.accounts[2];
@@ -39,10 +59,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
           .setOracle(
             this.erc20Address,
             this.mockAggregatorAddress,
-            this.defaultOracleOptions.providerType,
-            this.defaultOracleOptions.timeoutSeconds,
-            this.defaultOracleOptions.isEthIndexed,
-            this.defaultOracleOptions.isFallback
+            DEFAULT_ORACLE_OPTIONS.providerType,
+            DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
+            DEFAULT_ORACLE_OPTIONS.isEthIndexed,
+            DEFAULT_ORACLE_OPTIONS.isFallback,
+            DEFAULT_ORACLE_OPTIONS.additionalData
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
@@ -58,10 +79,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
           .setOracle(
             this.erc20Address,
             this.mockApi3Address,
-            this.api3OracleOptions.providerType,
-            this.api3OracleOptions.timeoutSeconds,
-            this.api3OracleOptions.isEthIndexed,
-            this.api3OracleOptions.isFallback
+            API3_ORACLE_OPTIONS.providerType,
+            API3_ORACLE_OPTIONS.timeoutSeconds,
+            API3_ORACLE_OPTIONS.isEthIndexed,
+            API3_ORACLE_OPTIONS.isFallback,
+            API3_ORACLE_OPTIONS.additionalData
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
@@ -79,10 +101,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
           .setOracle(
             this.erc20Address,
             this.mockAggregatorAddress,
-            this.defaultOracleOptions.providerType,
-            this.defaultOracleOptions.timeoutSeconds,
-            this.defaultOracleOptions.isEthIndexed,
-            this.defaultOracleOptions.isFallback
+            DEFAULT_ORACLE_OPTIONS.providerType,
+            DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
+            DEFAULT_ORACLE_OPTIONS.isEthIndexed,
+            DEFAULT_ORACLE_OPTIONS.isFallback,
+            DEFAULT_ORACLE_OPTIONS.additionalData
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
@@ -100,10 +123,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
           .setOracle(
             this.erc20Address,
             this.mockAggregatorAddress,
-            this.defaultOracleOptions.providerType,
-            this.defaultOracleOptions.timeoutSeconds,
-            this.defaultOracleOptions.isEthIndexed,
-            this.defaultOracleOptions.isFallback
+            DEFAULT_ORACLE_OPTIONS.providerType,
+            DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
+            DEFAULT_ORACLE_OPTIONS.isEthIndexed,
+            DEFAULT_ORACLE_OPTIONS.isFallback,
+            DEFAULT_ORACLE_OPTIONS.additionalData
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
@@ -121,14 +145,72 @@ export default function shouldBehaveLikeCanSetOracle(): void {
           .setOracle(
             this.erc20Address,
             this.mockApi3Address,
-            this.api3OracleOptions.providerType,
-            this.api3OracleOptions.timeoutSeconds,
-            this.api3OracleOptions.isEthIndexed,
-            !this.api3OracleOptions.isFallback
+            API3_ORACLE_OPTIONS.providerType,
+            API3_ORACLE_OPTIONS.timeoutSeconds,
+            API3_ORACLE_OPTIONS.isEthIndexed,
+            !API3_ORACLE_OPTIONS.isFallback,
+            API3_ORACLE_OPTIONS.additionalData
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
         "PriceFeed__InvalidOracleResponseError"
+      );
+    });
+
+    it("should revert if pyth price is zero", async function () {
+      const now = Math.floor(Date.now() / 1000);
+      const { mockPyth } = this.testContracts;
+
+      const initialPythPriceFeedData = await mockPyth.createPriceFeedUpdateData(
+        PYTH_ORACLE_OPTIONS.additionalData,
+        0,
+        224843971,
+        -8,
+        0,
+        224843971,
+        now,
+        0
+      );
+      await mockPyth.updatePriceFeeds([initialPythPriceFeedData]);
+      const pythOracleAddress = await this.testContracts.mockPyth.getAddress();
+
+      await expect(
+        this.redeployedContracts.priceFeed
+          .connect(this.owner)
+          .setOracle(
+            this.erc20Address,
+            pythOracleAddress,
+            PYTH_ORACLE_OPTIONS.providerType,
+            PYTH_ORACLE_OPTIONS.timeoutSeconds,
+            PYTH_ORACLE_OPTIONS.isEthIndexed,
+            PYTH_ORACLE_OPTIONS.isFallback,
+            PYTH_ORACLE_OPTIONS.additionalData
+          )
+      ).to.be.revertedWithCustomError(
+        this.redeployedContracts.priceFeed,
+        "PriceFeed__InvalidOracleResponseError"
+      );
+    });
+
+    it("should revert when price feed id is not provided for pyth oracle", async function () {
+      const emptyPythPriceFeedId = ZeroHash;
+      const pythOracleAddress = await this.testContracts.mockPyth.getAddress();
+
+      await expect(
+        this.redeployedContracts.priceFeed
+          .connect(this.owner)
+          .setOracle(
+            this.erc20Address,
+            pythOracleAddress,
+            PYTH_ORACLE_OPTIONS.providerType,
+            PYTH_ORACLE_OPTIONS.timeoutSeconds,
+            PYTH_ORACLE_OPTIONS.isEthIndexed,
+            PYTH_ORACLE_OPTIONS.isFallback,
+            emptyPythPriceFeedId
+          )
+      ).to.be.revertedWithCustomError(
+        this.redeployedContracts.priceFeed,
+        "PriceFeed__MissingPythFeedId"
       );
     });
 
@@ -138,10 +220,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
         .setOracle(
           this.erc20Address,
           this.mockAggregatorAddress,
-          this.defaultOracleOptions.providerType,
-          this.defaultOracleOptions.timeoutSeconds,
-          this.defaultOracleOptions.isEthIndexed,
-          this.defaultOracleOptions.isFallback
+          DEFAULT_ORACLE_OPTIONS.providerType,
+          DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
+          DEFAULT_ORACLE_OPTIONS.isEthIndexed,
+          DEFAULT_ORACLE_OPTIONS.isFallback,
+          DEFAULT_ORACLE_OPTIONS.additionalData
         );
 
       const oracles = await this.redeployedContracts.priceFeed.oracles(this.erc20Address);
@@ -155,10 +238,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
         .setOracle(
           this.erc20Address,
           this.mockAggregatorAddress,
-          this.defaultOracleOptions.providerType,
-          this.defaultOracleOptions.timeoutSeconds,
-          this.defaultOracleOptions.isEthIndexed,
-          this.defaultOracleOptions.isFallback
+          DEFAULT_ORACLE_OPTIONS.providerType,
+          DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
+          DEFAULT_ORACLE_OPTIONS.isEthIndexed,
+          DEFAULT_ORACLE_OPTIONS.isFallback,
+          DEFAULT_ORACLE_OPTIONS.additionalData
         );
 
       // set fallback oracle
@@ -167,10 +251,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
         .setOracle(
           this.erc20Address,
           this.mockApi3Address,
-          this.api3OracleOptions.providerType,
-          this.api3OracleOptions.timeoutSeconds,
-          this.api3OracleOptions.isEthIndexed,
-          this.api3OracleOptions.isFallback
+          API3_ORACLE_OPTIONS.providerType,
+          API3_ORACLE_OPTIONS.timeoutSeconds,
+          API3_ORACLE_OPTIONS.isEthIndexed,
+          API3_ORACLE_OPTIONS.isFallback,
+          API3_ORACLE_OPTIONS.additionalData
         );
       const fallback = await this.redeployedContracts.priceFeed.fallbacks(this.erc20Address);
       expect(fallback.oracleAddress).to.equal(this.mockApi3Address);
@@ -185,10 +270,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
         .setOracle(
           this.erc20Address,
           this.mockAggregatorAddress,
-          this.defaultOracleOptions.providerType,
-          this.defaultOracleOptions.timeoutSeconds,
-          this.defaultOracleOptions.isEthIndexed,
-          this.defaultOracleOptions.isFallback
+          DEFAULT_ORACLE_OPTIONS.providerType,
+          DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
+          DEFAULT_ORACLE_OPTIONS.isEthIndexed,
+          DEFAULT_ORACLE_OPTIONS.isFallback,
+          DEFAULT_ORACLE_OPTIONS.additionalData
         );
 
       // set fallback oracle as api3
@@ -197,10 +283,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
         .setOracle(
           this.erc20Address,
           this.mockApi3Address,
-          this.api3OracleOptions.providerType,
-          this.api3OracleOptions.timeoutSeconds,
-          this.api3OracleOptions.isEthIndexed,
-          this.api3OracleOptions.isFallback
+          API3_ORACLE_OPTIONS.providerType,
+          API3_ORACLE_OPTIONS.timeoutSeconds,
+          API3_ORACLE_OPTIONS.isEthIndexed,
+          API3_ORACLE_OPTIONS.isFallback,
+          API3_ORACLE_OPTIONS.additionalData
         );
 
       // set timelock
@@ -218,10 +305,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
           .setOracle(
             this.erc20Address,
             this.mockApi3Address,
-            this.api3OracleOptions.providerType,
-            this.api3OracleOptions.timeoutSeconds,
-            this.api3OracleOptions.isEthIndexed,
-            !this.api3OracleOptions.isFallback
+            API3_ORACLE_OPTIONS.providerType,
+            API3_ORACLE_OPTIONS.timeoutSeconds,
+            API3_ORACLE_OPTIONS.isEthIndexed,
+            !API3_ORACLE_OPTIONS.isFallback,
+            API3_ORACLE_OPTIONS.additionalData
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
@@ -237,10 +325,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
           .setOracle(
             this.erc20Address,
             this.mockApi3Address,
-            this.api3OracleOptions.providerType,
-            this.api3OracleOptions.timeoutSeconds,
-            this.api3OracleOptions.isEthIndexed,
-            !this.api3OracleOptions.isFallback
+            API3_ORACLE_OPTIONS.providerType,
+            API3_ORACLE_OPTIONS.timeoutSeconds,
+            API3_ORACLE_OPTIONS.isEthIndexed,
+            !API3_ORACLE_OPTIONS.isFallback,
+            API3_ORACLE_OPTIONS.additionalData
           )
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.priceFeed,
@@ -254,10 +343,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
         .setOracle(
           this.erc20Address,
           this.mockApi3Address,
-          this.api3OracleOptions.providerType,
-          this.api3OracleOptions.timeoutSeconds,
-          this.api3OracleOptions.isEthIndexed,
-          !this.api3OracleOptions.isFallback
+          API3_ORACLE_OPTIONS.providerType,
+          API3_ORACLE_OPTIONS.timeoutSeconds,
+          API3_ORACLE_OPTIONS.isEthIndexed,
+          !API3_ORACLE_OPTIONS.isFallback,
+          API3_ORACLE_OPTIONS.additionalData
         );
       const oracle = await this.redeployedContracts.priceFeed.oracles(this.erc20Address);
       expect(oracle.oracleAddress).to.equal(this.mockApi3Address);
@@ -269,10 +359,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
         .setOracle(
           this.erc20Address,
           this.mockAggregatorAddress,
-          this.defaultOracleOptions.providerType,
-          this.defaultOracleOptions.timeoutSeconds,
-          this.defaultOracleOptions.isEthIndexed,
-          !this.defaultOracleOptions.isFallback
+          DEFAULT_ORACLE_OPTIONS.providerType,
+          DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
+          DEFAULT_ORACLE_OPTIONS.isEthIndexed,
+          !DEFAULT_ORACLE_OPTIONS.isFallback,
+          DEFAULT_ORACLE_OPTIONS.additionalData
         );
       const fallback = await this.redeployedContracts.priceFeed.fallbacks(this.erc20Address);
       expect(fallback.oracleAddress).to.equal(this.mockAggregatorAddress);
