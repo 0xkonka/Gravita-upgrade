@@ -1227,6 +1227,10 @@ contract TrenBoxManagerOperations is
         return singleRedemption;
     }
 
+    /**
+     * @notice Set a new redemption softening parameter
+     * @param _redemptionSofteningParam The new number of redemption softening parameter.
+     */
     function setRedemptionSofteningParam(uint256 _redemptionSofteningParam) public {
         if (msg.sender != timelockAddress) {
             revert TrenBoxManagerOperations__NotTimelock();
