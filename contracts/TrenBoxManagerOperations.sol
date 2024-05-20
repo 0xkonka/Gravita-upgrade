@@ -18,34 +18,40 @@ import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 import { ITrenBoxManagerOperations } from "./Interfaces/ITrenBoxManagerOperations.sol";
 import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 
+/// @title TrenBoxManagerOperations
+/// @notice A contract with main operation functionality such as redemption, redistribution and
+/// liquidation.
 contract TrenBoxManagerOperations is
     ITrenBoxManagerOperations,
     UUPSUpgradeable,
     ReentrancyGuardUpgradeable,
     TrenBase
 {
+    /// @notice The contract name.
     string public constant NAME = "TrenBoxManagerOperations";
-    uint256 public constant PERCENTAGE_PRECISION = 10_000;
-    uint256 public constant BATCH_SIZE_LIMIT = 25;
 
+    /// @notice The percentage divider.
+    uint256 public constant PERCENTAGE_PRECISION = 10_000;
+    /// @notice The array limit.
+    uint256 public constant BATCH_SIZE_LIMIT = 25;
+    /// @notice The redemption softening peram.
     uint256 public redemptionSofteningParam;
 
-    // Initializer
-    // ------------------------------------------------------------------------------------------------------
+    // ------------------------------------- Initializer ------------------------------------------
 
+    /**
+     * @dev Runs all the setup logic only once.
+     * @param initialOwner The address of initial owner.
+     */
     function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
         __ReentrancyGuard_init();
     }
 
-    // Liquidation external functions
-    // -----------------------------------------------------------------------------------
+    // -------------------------------- Liquidation external functions ----------------------------
 
-    /**
-     * @notice Single liquidation function.
-     * Closes the trenBox if its ICR is lower than the minimum collateral ratio.
-     */
+    /// @inheritdoc ITrenBoxManagerOperations
     function liquidate(address _asset, address _borrower) external override {
         if (!ITrenBoxManager(trenBoxManager).isTrenBoxActive(_asset, _borrower)) {
             revert TrenBoxManagerOperations__TrenBoxNotActive();
@@ -55,11 +61,7 @@ contract TrenBoxManagerOperations is
         batchLiquidateTrenBoxes(_asset, borrowers);
     }
 
-    /**
-     * @notice Liquidate a sequence of trenBoxes.
-     * Closes a maximum number of n under-collateralized TrenBoxes,
-     * starting from the one with the lowest collateral ratio in the system, and moving upwards.
-     */
+    /// @inheritdoc ITrenBoxManagerOperations
     function liquidateTrenBoxes(address _asset, uint256 _n) external override nonReentrant {
         LocalVariables_OuterLiquidationFunction memory vars;
         LiquidationTotals memory totals;
@@ -67,7 +69,6 @@ contract TrenBoxManagerOperations is
         vars.debtTokenInStabPool = IStabilityPool(stabilityPool).getTotalDebtTokenDeposits();
         vars.recoveryModeAtStart = _checkRecoveryMode(_asset, vars.price);
 
-        // Perform the appropriate liquidation sequence - tally the values, and obtain their totals
         if (vars.recoveryModeAtStart) {
             totals = _getTotalsFromLiquidateTrenBoxesSequence_RecoveryMode(
                 _asset, vars.price, vars.debtTokenInStabPool, _n, false
@@ -120,9 +121,7 @@ contract TrenBoxManagerOperations is
         );
     }
 
-    /**
-     * @notice Attempt to liquidate a custom list of trenBoxes provided by the caller.
-     */
+    /// @inheritdoc ITrenBoxManagerOperations
     function batchLiquidateTrenBoxes(
         address _asset,
         address[] memory _trenBoxArray
@@ -200,6 +199,8 @@ contract TrenBoxManagerOperations is
      * @notice Redistribute (liquidate by protocol) a sequence of low-value trenBoxes.
      * Closes a maximum number of _trenBoxes under-collateralized TrenBoxes,
      * starting from the one with the lowest collateral ratio in the system, and moving upwards.
+     * @param _asset The address of collateral asset.
+     * @param _trenBoxes The list of TrenBoxes that should be redistributed.
      */
     function redistributeTrenBoxes(
         address _asset,
@@ -246,9 +247,9 @@ contract TrenBoxManagerOperations is
         );
     }
 
-    // Redemption external functions
-    // ------------------------------------------------------------------------------------
+    // -------------------------------- Redemption external functions -----------------------------
 
+    /// @inheritdoc ITrenBoxManagerOperations
     function redeemCollateral(
         address _asset,
         uint256 _debtTokenAmount,
@@ -277,7 +278,6 @@ contract TrenBoxManagerOperations is
             currentBorrower = _firstRedemptionHint;
         } else {
             currentBorrower = ISortedTrenBoxes(sortedTrenBoxes).getLast(_asset);
-            // Find the first trenBox with ICR >= MCR
             while (
                 currentBorrower != address(0)
                     && ITrenBoxManager(trenBoxManager).getCurrentICR(
@@ -314,7 +314,7 @@ contract TrenBoxManagerOperations is
 
             if (singleRedemption.cancelledPartial) break; // Partial redemption was cancelled
                 // (out-of-date hint, or new net debt < minimum), therefore we could not redeem from
-                // the last trenBox
+                // the last TrenBox
 
             totals.totalDebtToRedeem = totals.totalDebtToRedeem + singleRedemption.debtLot;
             totals.totalCollDrawn = totals.totalCollDrawn + singleRedemption.collLot;
@@ -326,14 +326,10 @@ contract TrenBoxManagerOperations is
             revert TrenBoxManagerOperations__UnableToRedeemAnyAmount();
         }
 
-        // Decay the baseRate due to time passed, and then increase it according to the size of this
-        // redemption.
-        // Use the saved total GRAI supply value, from before it was reduced by the redemption.
         ITrenBoxManager(trenBoxManager).updateBaseRateFromRedemption(
             _asset, totals.totalCollDrawn, totals.price, totals.totalDebtTokenSupplyAtStart
         );
 
-        // Calculate the collateral fee
         totals.collFee =
             ITrenBoxManager(trenBoxManager).getRedemptionFee(_asset, totals.totalCollDrawn);
 
@@ -352,30 +348,9 @@ contract TrenBoxManagerOperations is
         );
     }
 
-    // Hint helper functions
-    // --------------------------------------------------------------------------------------------
+    // ------------------------------------- Hint helper functions --------------------------------
 
-    /**
-     * @notice getRedemptionHints() - Helper function for finding the right hints to pass to
-     * redeemCollateral().
-     *
-     * It simulates a redemption of `_debtTokenAmount` to figure out where the redemption sequence
-     * will start and what state the final TrenBox of the sequence will end up in.
-     *
-     * Returns three hints:
-     *  - `firstRedemptionHint` is the address of the first TrenBox with ICR >= MCR (i.e. the first
-     *      TrenBox that will be redeemed).
-     *  - `partialRedemptionHintNICR` is the final nominal ICR of the last TrenBox of the sequence
-     *      after being hit by partial redemption, or zero in case of no partial redemption.
-     *  - `truncatedDebtTokenAmount` is the maximum amount that can be redeemed out of the the
-     *      provided `_debtTokenAmount`. This can be lower than `_debtTokenAmount` when redeeming
-     *      the full amount would leave the last TrenBox of the redemption sequence with less net
-     * debt
-     *      than the minimum allowed value (i.e. IAdminContract(adminContract).MIN_NET_DEBT()).
-     *
-     * The number of TrenBoxes to consider for redemption can be capped by passing a non-zero value
-     * as `_maxIterations`, while passing zero will leave it uncapped.
-     */
+    /// @inheritdoc ITrenBoxManagerOperations
     function getRedemptionHints(
         address _asset,
         uint256 _debtTokenAmount,
@@ -391,7 +366,7 @@ contract TrenBoxManagerOperations is
             uint256 truncatedDebtTokenAmount
         )
     {
-        HintHelperLocalVars memory vars = HintHelperLocalVars({
+        LocalVariables_HintHelper memory vars = LocalVariables_HintHelper({
             asset: _asset,
             debtTokenAmount: _debtTokenAmount,
             price: _price,
@@ -466,20 +441,7 @@ contract TrenBoxManagerOperations is
         truncatedDebtTokenAmount = _debtTokenAmount - remainingDebt;
     }
 
-    /**
-     * @notice getApproxHint() - return address of a TrenBox that is, on average, (length /
-     * numTrials)
-     * positions away in the sortedTrenBoxes list from the correct insert position of the TrenBox
-     * to be inserted.
-     *
-     * Note: The output address is worst-case O(n) positions away from the correct insert position,
-     * however, the function is probabilistic.
-     * Input can be tuned to guarantee results to a high degree of confidence,
-     * e.g:
-     * Submitting numTrials = k * sqrt(length), with k = 15 makes it very, very likely that the
-     * ouput
-     * address will be <= sqrt(length) positions away from the correct insert position.
-     */
+    /// @inheritdoc ITrenBoxManagerOperations
     function getApproxHint(
         address _asset,
         uint256 _CR,
@@ -526,6 +488,7 @@ contract TrenBoxManagerOperations is
         }
     }
 
+    /// @inheritdoc ITrenBoxManagerOperations
     function computeNominalCR(
         uint256 _coll,
         uint256 _debt
@@ -538,14 +501,13 @@ contract TrenBoxManagerOperations is
         return TrenMath._computeNominalCR(_coll, _debt);
     }
 
-    // Liquidation internal/helper functions
-    // ----------------------------------------------------------------------------
+    // ------------------------------------- Internal functions -----------------------------------
 
     /**
-     * @notice This function is used when the batch liquidation sequence starts during Recovery
+     * @dev This function is used when the batch liquidation sequence starts during Recovery
      * Mode.
      * However, it handles the case where the system *leaves* Recovery Mode, part way
-     * through the liquidation sequence
+     * through the liquidation sequence.
      */
     function _getTotalFromBatchLiquidate_RecoveryMode(
         address _asset,
@@ -578,7 +540,7 @@ contract TrenBoxManagerOperations is
             vars.ICR = ITrenBoxManager(trenBoxManager).getCurrentICR(_asset, vars.user, _price);
 
             if (!vars.backToNormalMode) {
-                // Skip this trenBox if ICR is greater than MCR and Stability Pool is empty
+                // Skip this TrenBox if ICR is greater than MCR and Stability Pool is empty
                 if (
                     vars.ICR >= IAdminContract(adminContract).getMcr(_asset)
                         && vars.remainingDebtTokenInStabPool == 0
@@ -633,6 +595,10 @@ contract TrenBoxManagerOperations is
         }
     }
 
+    /**
+     * @dev This function is used when the batch liquidation sequence starts during Normal
+     * Mode.
+     */
     function _getTotalsFromBatchLiquidate_NormalMode(
         address _asset,
         uint256 _price,
@@ -668,6 +634,9 @@ contract TrenBoxManagerOperations is
         }
     }
 
+    /**
+     * @dev Adds liquidation values to total value of all TrenBoxes.
+     */
     function _addLiquidationValuesToTotals(
         LiquidationTotals memory oldTotals,
         LiquidationValues memory singleLiquidation
@@ -740,6 +709,9 @@ contract TrenBoxManagerOperations is
         }
     }
 
+    /**
+     * @dev Attempt to liquidated single TrenBox during Normal Mode.
+     */
     function _liquidateNormalMode(
         address _asset,
         address _borrower,
@@ -801,6 +773,9 @@ contract TrenBoxManagerOperations is
         return singleLiquidation;
     }
 
+    /**
+     * @dev Attempt to liquidated single TrenBox during Recovery Mode.
+     */
     function _liquidateRecoveryMode(
         address _asset,
         address _borrower,
@@ -816,7 +791,7 @@ contract TrenBoxManagerOperations is
         LocalVariables_InnerSingleLiquidateFunction memory vars;
         if (ITrenBoxManager(trenBoxManager).getTrenBoxOwnersCount(_asset) <= 1) {
             return singleLiquidation;
-        } // don't liquidate if last trenBox
+        } // don't liquidate if last TrenBox
         (
             singleLiquidation.entireTrenBoxDebt,
             singleLiquidation.entireTrenBoxColl,
@@ -944,7 +919,7 @@ contract TrenBoxManagerOperations is
     }
 
     /**
-     * @notice This function is used when the liquidateTrenBoxes sequence starts during Recovery
+     * @dev This function is used when the liquidateTrenBoxes sequence starts during Recovery
      * Mode.
      * However, it handles the case where the system *leaves* Recovery Mode, part way
      * through the liquidation sequence
@@ -1053,7 +1028,7 @@ contract TrenBoxManagerOperations is
     }
 
     /**
-     * @notice In a full liquidation, returns the values for a trenBox's coll and debt to be offset,
+     * @dev In a full liquidation, returns the values for a TrenBox's coll and debt to be offset,
      * and coll and debt to be redistributed to active trenBoxes.
      */
     function _getOffsetAndRedistributionVals(
@@ -1075,11 +1050,11 @@ contract TrenBoxManagerOperations is
              * Offset as much debt & collateral as possible against the Stability Pool, and
              * redistribute the remainder between all active trenBoxes.
              *
-             * If the trenBox's debt is larger than the deposited debt token in the Stability Pool:
+             * If the TrenBox's debt is larger than the deposited debt token in the Stability Pool:
              *
-             * - Offset an amount of the trenBox's debt equal to the debt token in the
+             * - Offset an amount of the TrenBox's debt equal to the debt token in the
              * Stability Pool
-             * - Send a fraction of the trenBox's collateral to the Stability Pool, equal to the
+             * - Send a fraction of the TrenBox's collateral to the Stability Pool, equal to the
              * fraction of its offset debt
              */
             debtToOffset = TrenMath._min(_debt, _debtTokenInStabPool);
@@ -1095,7 +1070,7 @@ contract TrenBoxManagerOperations is
     }
 
     /**
-     * @dev Get its offset coll/debt and coll gas comp, and close the trenBox.
+     * @dev Get its offset coll/debt and coll gas comp, and close the TrenBox.
      */
     function _getCappedOffsetVals(
         address _asset,
@@ -1123,6 +1098,9 @@ contract TrenBoxManagerOperations is
         singleLiquidation.collToRedistribute = 0;
     }
 
+    /**
+     *  @dev Checks if its Recovery mode or no by comparing current TCR to CCR.
+     */
     function _checkPotentialRecoveryMode(
         address _asset,
         uint256 _entireSystemColl,
@@ -1137,9 +1115,11 @@ contract TrenBoxManagerOperations is
         return TCR < IAdminContract(adminContract).getCcr(_asset);
     }
 
-    // Redemption internal/helper functions
-    // -----------------------------------------------------------------------------
+    // -------------------------------- Redemption internal/helper functions ----------------------
 
+    /**
+     * @dev Checks that all redemption requirements are met.
+     */
     function _validateRedemptionRequirements(
         address _asset,
         uint256 _maxFeePercentage,
@@ -1174,8 +1154,10 @@ contract TrenBoxManagerOperations is
         }
     }
 
-    /// @notice Redeem as much collateral as possible from _borrower's trenBox in exchange for GRAI
-    /// up to _maxDebtTokenAmount
+    /**
+     * @dev Redeem as much collateral as possible from _borrower's TrenBox in exchange for trenUSD
+     * up to _maxDebtTokenAmount.
+     */
     function _redeemCollateralFromTrenBox(
         address _asset,
         address _borrower,
@@ -1192,7 +1174,7 @@ contract TrenBoxManagerOperations is
         uint256 trenBoxColl = ITrenBoxManager(trenBoxManager).getTrenBoxColl(_asset, _borrower);
 
         // Determine the remaining amount (lot) to be redeemed, capped by the entire debt of the
-        // trenBox minus the liquidation reserve
+        // TrenBox minus the liquidation reserve
         singleRedemption.debtLot = TrenMath._min(
             _maxDebtTokenAmount,
             trenBoxDebt - IAdminContract(adminContract).getDebtTokenGasCompensation(_asset)
@@ -1205,7 +1187,7 @@ contract TrenBoxManagerOperations is
         singleRedemption.collLot =
             (singleRedemption.collLot * redemptionSofteningParam) / PERCENTAGE_PRECISION;
 
-        // Decrease the debt and collateral of the current trenBox according to the debt token lot
+        // Decrease the debt and collateral of the current TrenBox according to the debt token lot
         // and corresponding coll to send
 
         uint256 newDebt = trenBoxDebt - singleRedemption.debtLot;
@@ -1245,6 +1227,10 @@ contract TrenBoxManagerOperations is
         return singleRedemption;
     }
 
+    /**
+     * @notice Set a new redemption softening parameter
+     * @param _redemptionSofteningParam The new number of redemption softening parameter.
+     */
     function setRedemptionSofteningParam(uint256 _redemptionSofteningParam) public {
         if (msg.sender != timelockAddress) {
             revert TrenBoxManagerOperations__NotTimelock();
