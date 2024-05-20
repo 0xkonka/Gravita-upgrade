@@ -20,6 +20,8 @@ import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 import { IUniswapRouterV3 } from "./Interfaces/IUniswapRouterV3.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
 
+/// @title FlashLoan
+/// @notice This contract provides functionality for executing flash loans.
 contract FlashLoan is
     IFlashLoan,
     ReentrancyGuardUpgradeable,
@@ -27,15 +29,24 @@ contract FlashLoan is
     ConfigurableAddresses,
     UUPSUpgradeable
 {
+    /// @notice The name of contract.
     string public constant NAME = "FlashLoan";
 
+    /// @notice The denominator to calculate fee percentage.
     uint256 public constant FEE_DENOMINATOR = 1000;
 
+    /// @notice The address of Swap Router contract.
     IUniswapRouterV3 public swapRouter;
+    /// @notice The address of Stable Coin contract.
     address public stableCoin;
 
+    /// @notice The index that setup is initialized or not.
     bool public isSetupInitialized;
 
+    // ------------------------------------------ Initializer -------------------------------------
+
+    /// @dev Sets an intiial owner for the contract.
+    /// @param initialOwner The address of initial owner.
     function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
@@ -43,6 +54,11 @@ contract FlashLoan is
 
     // ------------------------------------------ Set functions -----------------------------------
 
+    /**
+     * @notice Sets addresses for stableCoin and swapRouter contracts.
+     * @param _stableCoin The address of Stable Coin contract.
+     * @param _swapRouter The address of Swap Router contract.
+     */
     function setInternalAddresses(address _stableCoin, address _swapRouter) external onlyOwner {
         if (isSetupInitialized) revert FlashLoan__SetupIsInitialized();
         if (_stableCoin == address(0) || _swapRouter == address(0)) {
@@ -58,7 +74,7 @@ contract FlashLoan is
 
     // ------------------------------------------ External functions ------------------------------
 
-    // Get a simple flash loan of trenUSD
+    /// @inheritdoc IFlashLoan
     function flashLoan(uint256 _amount) external nonReentrant {
         if (IAdminContract(adminContract).getFlashLoanMinNetDebt() > _amount) {
             revert FlashLoan__AmountBeyondMin();
@@ -85,6 +101,11 @@ contract FlashLoan is
         emit FlashLoanExecuted(msg.sender, _amount, fee);
     }
 
+    /**
+     * @notice Executes a flash loan specifically to repay a debt on the provided asset.
+     * @param _asset The address of the asset for which the debt is to be repaid.
+     * @dev This function initiates a flash loan transaction to repay a debt on the specified asset.
+     */
     function flashLoanForRepay(address _asset) external nonReentrant {
         if (!IAdminContract(adminContract).getIsActive(_asset)) {
             revert FlashLoan__CollateralIsNotActive();
@@ -102,7 +123,7 @@ contract FlashLoan is
 
         IBorrowerOperations(borrowerOperations).repayDebtTokens(
             _asset, netDebt, address(0), address(0)
-        ); // TODO: push borr address
+        );
 
         uint256 collAmountIn = IERC20(_asset).balanceOf(address(this));
         uint256 debtTokensToGet = netDebt + fee;
@@ -120,6 +141,10 @@ contract FlashLoan is
         emit FlashLoanExecuted(msg.sender, netDebt, fee);
     }
 
+    /**
+     * @notice Gets the current flash loan rate.
+     * @return The flash loan fee rate.
+     */
     function getFlashLoanRate() external view returns (uint256) {
         return IAdminContract(adminContract).getFlashLoanFee();
     }
@@ -132,25 +157,42 @@ contract FlashLoan is
 
     // ------------------------------------------ Private functions -------------------------------
 
+    /**
+     * @dev Calculates the fee for a given loan amount.
+     * @param _amount The amount of the loan.
+     * @return The calculated fee for the loan amount.
+     */
     function calculateFee(uint256 _amount) private view returns (uint256) {
         uint256 _feeRate = IAdminContract(adminContract).getFlashLoanFee();
         return (_amount * _feeRate) / FEE_DENOMINATOR;
     }
 
+    /// @dev Sends the collected fees to the fee collector.
     function sendFeeToCollector() private {
         address collector = IFeeCollector(feeCollector).getProtocolRevenueDestination();
         uint256 feeAmount = IDebtToken(debtToken).balanceOf(address(this));
         IDebtToken(debtToken).transfer(collector, feeAmount);
     }
 
+    /// @dev Mints the specified amount of debt tokens.
+    /// @param _amount The amount of debt tokens to mint.
     function mintTokens(uint256 _amount) private {
         IDebtToken(debtToken).mintFromWhitelistedContract(_amount);
     }
 
+    /// @dev Burns the specified amount of debt tokens.
+    /// @param _amount The amount of debt tokens to burn.
     function burnTokens(uint256 _amount) private {
         IDebtToken(debtToken).burnFromWhitelistedContract(_amount);
     }
 
+    /**
+     * @dev Swaps as little as possible of one token for `amountOut` of another along the specified
+     * path (reversed).
+     * @param _tokenIn The address of input collateral.
+     * @param _collAmountIn The amount of collateral which will be swapped.
+     * @param _debtAmountOut The amount of trenUSD which will (should) be received.
+     */
     function swapTokens(address _tokenIn, uint256 _collAmountIn, uint256 _debtAmountOut) private {
         // Approve swapRouter to spend amountInMaximum
         IERC20(_tokenIn).approve(address(swapRouter), _collAmountIn);
