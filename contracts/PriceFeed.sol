@@ -6,6 +6,9 @@ import { OwnableUpgradeable } from
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+import { IPyth } from "@pythnetwork/pyth-sdk-solidity/IPyth.sol";
+import { PythStructs } from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
+
 import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 
 import { IPriceFeed, ChainlinkAggregatorV3Interface } from "./Interfaces/IPriceFeed.sol";
@@ -52,7 +55,8 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
         ProviderType _type,
         uint256 _timeoutSeconds,
         bool _isEthIndexed,
-        bool _isFallback
+        bool _isFallback,
+        bytes32 _additionalData
     )
         external
         override
@@ -66,12 +70,18 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
         if (decimals == 0) {
             revert PriceFeed__InvalidDecimalsError();
         }
+
+        if (_type == ProviderType.Pyth && _additionalData == bytes32(0)) {
+            revert PriceFeed__MissingPythFeedId();
+        }
+
         OracleRecord memory newOracle = OracleRecord({
             oracleAddress: _oracle,
             providerType: _type,
             timeoutSeconds: _timeoutSeconds,
             decimals: decimals,
-            isEthIndexed: _isEthIndexed
+            isEthIndexed: _isEthIndexed,
+            additionalData: _additionalData
         });
         uint256 price = _fetchOracleScaledPrice(newOracle);
         if (price == 0) {
@@ -118,6 +128,8 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
             return ChainlinkAggregatorV3Interface(_oracle).decimals();
         } else if (ProviderType.API3 == _type) {
             return 18;
+        } else if (ProviderType.Pyth == _type) {
+            return 18;
         }
         return 0;
     }
@@ -129,17 +141,24 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
     function _fetchOracleScaledPrice(OracleRecord memory oracle) internal view returns (uint256) {
         uint256 oraclePrice = 0;
         uint256 priceTimestamp = 0;
+
         if (oracle.oracleAddress == address(0)) {
             revert PriceFeed__UnknownAssetError();
         }
+
         if (ProviderType.Chainlink == oracle.providerType) {
             (oraclePrice, priceTimestamp) = _fetchChainlinkOracleResponse(oracle.oracleAddress);
         } else if (ProviderType.API3 == oracle.providerType) {
             (oraclePrice, priceTimestamp) = _fetchAPI3OracleResponse(oracle.oracleAddress);
+        } else if (ProviderType.Pyth == oracle.providerType) {
+            (oraclePrice, priceTimestamp) =
+                _fetchPythOracleResponse(oracle.oracleAddress, oracle.additionalData);
         }
+
         if (oraclePrice != 0 && !_isStalePrice(priceTimestamp, oracle.timeoutSeconds)) {
             return _scalePriceByDigits(oraclePrice, oracle.decimals);
         }
+
         return 0;
     }
 
@@ -184,6 +203,26 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
             price = 0;
             timestamp = 0;
         }
+    }
+
+    /**
+     * @dev Fetches the price and its updated timestamp from Pyth oracle.
+     * @param _oracleAddress The address of Pyth oracle.
+     */
+    function _fetchPythOracleResponse(
+        address _oracleAddress,
+        bytes32 _priceFeedId
+    )
+        internal
+        view
+        returns (uint256 price, uint256 timestamp)
+    {
+        IPyth pythOracle = IPyth(_oracleAddress);
+        PythStructs.Price memory pythResponse = pythOracle.getPriceUnsafe(_priceFeedId);
+
+        timestamp = pythResponse.publishTime;
+        price = (uint256(uint64(pythResponse.price)) * (10 ** 18))
+            / (10 ** uint8(uint32(-1 * pythResponse.expo)));
     }
 
     /**

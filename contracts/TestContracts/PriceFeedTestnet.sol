@@ -28,7 +28,8 @@ contract PriceFeedTestnet is IPriceFeed {
         ProviderType _type,
         uint256 _timeoutMinutes,
         bool _isEthIndexed,
-        bool _isFallback
+        bool _isFallback,
+        bytes32 _additionalData
     )
         external
         override

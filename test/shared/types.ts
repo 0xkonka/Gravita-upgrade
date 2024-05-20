@@ -13,6 +13,7 @@ import type {
   FeeCollector,
   FlashLoan,
   IPriceFeed,
+  MockPythPriceFeed,
   PriceFeed,
   PriceFeedL2,
   PriceFeedTestnet,
@@ -382,6 +383,7 @@ export interface TestContracts {
   erc20_with_6_decimals: ERC20Test;
   mockAggregator: MockAggregator;
   mockApi3: MockApi3Proxy;
+  mockPyth: MockPythPriceFeed;
   priceFeedTestnet: PriceFeedTestnet;
   flashLoanTester: FlashLoanTester;
   mockRouter: MockUniswapRouterV3;

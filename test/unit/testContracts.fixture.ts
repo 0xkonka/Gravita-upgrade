@@ -12,6 +12,8 @@ import type {
   MockAggregator__factory,
   MockApi3Proxy,
   MockApi3Proxy__factory,
+  MockPythPriceFeed,
+  MockPythPriceFeed__factory,
   MockUniswapRouterV3,
   MockUniswapRouterV3__factory,
   TrenMathTester,
@@ -121,6 +123,32 @@ export async function loadTestFixture(): Promise<{
   )) as MockApi3Proxy;
   await mockApi3.waitForDeployment();
 
+  const MockPythPriceFeedFactory: MockPythPriceFeed__factory = (await ethers.getContractFactory(
+    "MockPythPriceFeed"
+  )) as MockPythPriceFeed__factory;
+
+  type PythDeployArgs = Parameters<typeof MockPythPriceFeedFactory.deploy>;
+  const pythArgs: PythDeployArgs = [];
+
+  const mockPyth: MockPythPriceFeed = (await MockPythPriceFeedFactory.connect(deployer).deploy(
+    ...pythArgs
+  )) as MockPythPriceFeed;
+  await mockPyth.waitForDeployment();
+
+  const now = Math.floor(Date.now() / 1000);
+
+  const initialPythPriceFeedData = await mockPyth.createPriceFeedUpdateData(
+    "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
+    1,
+    224843971,
+    -8,
+    1,
+    224843971,
+    now,
+    0
+  );
+  await mockPyth.updatePriceFeeds([initialPythPriceFeedData]);
+
   const TrenMathTesterFactory: TrenMathTester__factory = (await ethers.getContractFactory(
     "TrenMathTester"
   )) as TrenMathTester__factory;
@@ -144,6 +172,7 @@ export async function loadTestFixture(): Promise<{
       erc20_with_6_decimals,
       mockAggregator,
       mockApi3,
+      mockPyth,
       priceFeedTestnet,
       flashLoanTester,
       mockRouter,
