@@ -155,8 +155,6 @@ contract TrenBoxManager is
             || getCurrentICR(_asset, nextTrenBox, _price) < IAdminContract(adminContract).getMcr(_asset);
     }
 
-    // Return the nominal collateral ratio (ICR) of a given TrenBox, without the price. Takes a
-    // trenBox's pending coll and debt rewards from redistributions into account.
     function getNominalICR(
         address _asset,
         address _borrower
@@ -172,8 +170,6 @@ contract TrenBoxManager is
         return NICR;
     }
 
-    // Return the current collateral ratio (ICR) of a given TrenBox. Takes a trenBox's pending coll
-    // and debt rewards from redistributions into account.
     function getCurrentICR(
         address _asset,
         address _borrower,
@@ -189,7 +185,6 @@ contract TrenBoxManager is
         return ICR;
     }
 
-    // Get the borrower's pending accumulated asset reward, earned by their stake
     function getPendingAssetReward(
         address _asset,
         address _borrower
@@ -209,7 +204,6 @@ contract TrenBoxManager is
         return pendingAssetReward;
     }
 
-    // Get the borrower's pending accumulated debt token reward, earned by their stake
     function getPendingDebtTokenReward(
         address _asset,
         address _borrower
@@ -327,8 +321,80 @@ contract TrenBoxManager is
         return _calcRedemptionRate(_asset, _calcDecayedBaseRate(_asset));
     }
 
+    function getTrenBoxFromTrenBoxOwnersArray(
+        address _asset,
+        uint256 _index
+    )
+        external
+        view
+        override
+        returns (address)
+    {
+        return trenBoxOwners[_asset][_index];
+    }
+
+    function getNetDebt(address _asset, uint256 _debt) external view returns (uint256) {
+        return _getNetDebt(_asset, _debt);
+    }
+
+    // --- TrenBox property getters
+    // --------------------------------------------------------------------------------------
+
+    function getTrenBoxOwnersCount(address _asset) external view override returns (uint256) {
+        return trenBoxOwners[_asset].length;
+    }
+
+    function getTrenBoxStatus(
+        address _asset,
+        address _borrower
+    )
+        public
+        view
+        override
+        returns (uint256)
+    {
+        return uint256(TrenBoxes[_borrower][_asset].status);
+    }
+
+    function getTrenBoxStake(
+        address _asset,
+        address _borrower
+    )
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return TrenBoxes[_borrower][_asset].stake;
+    }
+
+    function getTrenBoxDebt(
+        address _asset,
+        address _borrower
+    )
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return TrenBoxes[_borrower][_asset].debt;
+    }
+
+    function getTrenBoxColl(
+        address _asset,
+        address _borrower
+    )
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return TrenBoxes[_borrower][_asset].coll;
+    }
+
     // Called by Tren contracts
     // ------------------------------------------------------------------------------------
+
     function addTrenBoxOwnerToArray(
         address _asset,
         address _borrower
@@ -462,8 +528,6 @@ contract TrenBoxManager is
         return _applyPendingRewards(_asset, _borrower);
     }
 
-    // Move a TrenBox's pending debt and collateral rewards from distributions, from liquidated
-    // to active TrenBoxStorage
     function movePendingTrenBoxRewardsFromLiquidatedToActive(
         address _asset,
         uint256 _debt,
@@ -476,7 +540,6 @@ contract TrenBoxManager is
         _movePendingTrenBoxRewardsFromLiquidatedToActive(_asset, _debt, _assetAmount);
     }
 
-    // Update borrower's snapshots of L_Colls and L_Debts to reflect the current values
     function updateTrenBoxRewardSnapshots(
         address _asset,
         address _borrower
@@ -642,6 +705,90 @@ contract TrenBoxManager is
         }
     }
 
+    // --- TrenBox property setters, called by Tren's
+    // BorrowerOperations/VMRedemptions/VMLiquidations ---------------
+
+    function setTrenBoxStatus(
+        address _asset,
+        address _borrower,
+        uint256 _num
+    )
+        external
+        override
+        onlyBorrowerOperations
+    {
+        TrenBoxes[_borrower][_asset].status = Status(_num);
+    }
+
+    function increaseTrenBoxColl(
+        address _asset,
+        address _borrower,
+        uint256 _collIncrease
+    )
+        external
+        override
+        onlyBorrowerOperations
+        returns (uint256 newColl)
+    {
+        TrenBox storage trenBox = TrenBoxes[_borrower][_asset];
+        newColl = trenBox.coll + _collIncrease;
+        trenBox.coll = newColl;
+    }
+
+    function decreaseTrenBoxColl(
+        address _asset,
+        address _borrower,
+        uint256 _collDecrease
+    )
+        external
+        override
+        onlyBorrowerOperations
+        returns (uint256 newColl)
+    {
+        TrenBox storage trenBox = TrenBoxes[_borrower][_asset];
+        newColl = trenBox.coll - _collDecrease;
+        trenBox.coll = newColl;
+    }
+
+    function increaseTrenBoxDebt(
+        address _asset,
+        address _borrower,
+        uint256 _debtIncrease
+    )
+        external
+        override
+        onlyBorrowerOperations
+        returns (uint256 newDebt)
+    {
+        TrenBox storage trenBox = TrenBoxes[_borrower][_asset];
+        newDebt = trenBox.debt + _debtIncrease;
+        trenBox.debt = newDebt;
+    }
+
+    function decreaseTrenBoxDebt(
+        address _asset,
+        address _borrower,
+        uint256 _debtDecrease
+    )
+        external
+        override
+        onlyBorrowerOperations
+        returns (uint256)
+    {
+        TrenBox storage trenBox = TrenBoxes[_borrower][_asset];
+        uint256 oldDebt = trenBox.debt;
+        if (_debtDecrease == 0) {
+            return oldDebt; // no changes
+        }
+        uint256 paybackFraction = (_debtDecrease * 1 ether) / oldDebt;
+        uint256 newDebt = oldDebt - _debtDecrease;
+        trenBox.debt = newDebt;
+        if (paybackFraction != 0) {
+            IFeeCollector(feeCollector).decreaseDebt(_borrower, _asset, paybackFraction);
+        }
+        return newDebt;
+    }
+
     // Internal functions
     // ---------------------------------------------------------------------------------------------
 
@@ -664,6 +811,8 @@ contract TrenBoxManager is
         );
     }
 
+    // Move a TrenBox's pending debt and collateral rewards from distributions, from liquidated
+    // to active TrenBoxStorage
     function _movePendingTrenBoxRewardsFromLiquidatedToActive(
         address _asset,
         uint256 _debtTokenAmount,
@@ -723,6 +872,7 @@ contract TrenBoxManager is
         );
     }
 
+    // Update borrower's snapshots of L_Colls and L_Debts to reflect the current values
     function _updateTrenBoxRewardSnapshots(address _asset, address _borrower) internal {
         uint256 liquidatedColl = L_Colls[_asset];
         uint256 liquidatedDebt = L_Debts[_asset];
@@ -878,161 +1028,6 @@ contract TrenBoxManager is
 
     function _minutesPassedSinceLastFeeOp(address _asset) internal view returns (uint256) {
         return (block.timestamp - lastFeeOperationTime[_asset]) / SECONDS_IN_ONE_MINUTE;
-    }
-
-    // --- TrenBox property getters
-    // --------------------------------------------------------------------------------------
-
-    function getTrenBoxStatus(
-        address _asset,
-        address _borrower
-    )
-        public
-        view
-        override
-        returns (uint256)
-    {
-        return uint256(TrenBoxes[_borrower][_asset].status);
-    }
-
-    function getTrenBoxStake(
-        address _asset,
-        address _borrower
-    )
-        external
-        view
-        override
-        returns (uint256)
-    {
-        return TrenBoxes[_borrower][_asset].stake;
-    }
-
-    function getTrenBoxDebt(
-        address _asset,
-        address _borrower
-    )
-        external
-        view
-        override
-        returns (uint256)
-    {
-        return TrenBoxes[_borrower][_asset].debt;
-    }
-
-    function getTrenBoxColl(
-        address _asset,
-        address _borrower
-    )
-        external
-        view
-        override
-        returns (uint256)
-    {
-        return TrenBoxes[_borrower][_asset].coll;
-    }
-
-    function getTrenBoxOwnersCount(address _asset) external view override returns (uint256) {
-        return trenBoxOwners[_asset].length;
-    }
-
-    function getTrenBoxFromTrenBoxOwnersArray(
-        address _asset,
-        uint256 _index
-    )
-        external
-        view
-        override
-        returns (address)
-    {
-        return trenBoxOwners[_asset][_index];
-    }
-
-    function getNetDebt(address _asset, uint256 _debt) external view returns (uint256) {
-        return _getNetDebt(_asset, _debt);
-    }
-
-    // --- TrenBox property setters, called by Tren's
-    // BorrowerOperations/VMRedemptions/VMLiquidations ---------------
-
-    function setTrenBoxStatus(
-        address _asset,
-        address _borrower,
-        uint256 _num
-    )
-        external
-        override
-        onlyBorrowerOperations
-    {
-        TrenBoxes[_borrower][_asset].status = Status(_num);
-    }
-
-    function increaseTrenBoxColl(
-        address _asset,
-        address _borrower,
-        uint256 _collIncrease
-    )
-        external
-        override
-        onlyBorrowerOperations
-        returns (uint256 newColl)
-    {
-        TrenBox storage trenBox = TrenBoxes[_borrower][_asset];
-        newColl = trenBox.coll + _collIncrease;
-        trenBox.coll = newColl;
-    }
-
-    function decreaseTrenBoxColl(
-        address _asset,
-        address _borrower,
-        uint256 _collDecrease
-    )
-        external
-        override
-        onlyBorrowerOperations
-        returns (uint256 newColl)
-    {
-        TrenBox storage trenBox = TrenBoxes[_borrower][_asset];
-        newColl = trenBox.coll - _collDecrease;
-        trenBox.coll = newColl;
-    }
-
-    function increaseTrenBoxDebt(
-        address _asset,
-        address _borrower,
-        uint256 _debtIncrease
-    )
-        external
-        override
-        onlyBorrowerOperations
-        returns (uint256 newDebt)
-    {
-        TrenBox storage trenBox = TrenBoxes[_borrower][_asset];
-        newDebt = trenBox.debt + _debtIncrease;
-        trenBox.debt = newDebt;
-    }
-
-    function decreaseTrenBoxDebt(
-        address _asset,
-        address _borrower,
-        uint256 _debtDecrease
-    )
-        external
-        override
-        onlyBorrowerOperations
-        returns (uint256)
-    {
-        TrenBox storage trenBox = TrenBoxes[_borrower][_asset];
-        uint256 oldDebt = trenBox.debt;
-        if (_debtDecrease == 0) {
-            return oldDebt; // no changes
-        }
-        uint256 paybackFraction = (_debtDecrease * 1 ether) / oldDebt;
-        uint256 newDebt = oldDebt - _debtDecrease;
-        trenBox.debt = newDebt;
-        if (paybackFraction != 0) {
-            IFeeCollector(feeCollector).decreaseDebt(_borrower, _asset, paybackFraction);
-        }
-        return newDebt;
     }
 
     function authorizeUpgrade(address newImplementation) public {
