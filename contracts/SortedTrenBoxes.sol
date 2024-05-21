@@ -110,14 +110,7 @@ contract SortedTrenBoxes is
         __UUPSUpgradeable_init();
     }
 
-    /*
-     * @dev Add a node to the list
-     * @param _id Node's id
-     * @param _NICR Node's NICR
-     * @param _prevId Id of previous node for the insert position
-     * @param _nextId Id of next node for the insert position
-     */
-
+    /// @inheritdoc ISortedTrenBoxes
     function insert(
         address _asset,
         address _id,
@@ -130,6 +123,89 @@ contract SortedTrenBoxes is
         onlyBorrowerOperationsOrTrenBoxManager
     {
         _insert(_asset, _id, _NICR, _prevId, _nextId);
+    }
+
+    function remove(address _asset, address _id) external override onlyTrenBoxManager {
+        _remove(_asset, _id);
+    }
+
+    function reInsert(
+        address _asset,
+        address _id,
+        uint256 _newNICR,
+        address _prevId,
+        address _nextId
+    )
+        external
+        override
+        onlyBorrowerOperationsOrTrenBoxManager
+    {
+        if (!contains(_asset, _id)) {
+            revert SortedTrenBoxes__ListDoesNotContainNode();
+        }
+
+        if (_newNICR == 0) {
+            revert SortedTrenBoxes__NICRMustBeGreaterThanZero();
+        }
+
+        _remove(_asset, _id);
+        _insert(_asset, _id, _newNICR, _prevId, _nextId);
+    }
+
+    function contains(address _asset, address _id) public view override returns (bool) {
+        return trenBoxes[_asset].nodes[_id].exists;
+    }
+
+    function isEmpty(address _asset) public view override returns (bool) {
+        return trenBoxes[_asset].size == 0;
+    }
+
+    function getSize(address _asset) external view override returns (uint256) {
+        return trenBoxes[_asset].size;
+    }
+
+    function getFirst(address _asset) external view override returns (address) {
+        return trenBoxes[_asset].head;
+    }
+
+    function getLast(address _asset) external view override returns (address) {
+        return trenBoxes[_asset].tail;
+    }
+
+    function getNext(address _asset, address _id) external view override returns (address) {
+        return trenBoxes[_asset].nodes[_id].nextId;
+    }
+
+    function getPrev(address _asset, address _id) external view override returns (address) {
+        return trenBoxes[_asset].nodes[_id].prevId;
+    }
+
+    function validInsertPosition(
+        address _asset,
+        uint256 _NICR,
+        address _prevId,
+        address _nextId
+    )
+        external
+        view
+        override
+        returns (bool)
+    {
+        return _validInsertPosition(_asset, _NICR, _prevId, _nextId);
+    }
+
+    function findInsertPosition(
+        address _asset,
+        uint256 _NICR,
+        address _prevId,
+        address _nextId
+    )
+        external
+        view
+        override
+        returns (address, address)
+    {
+        return _findInsertPosition(_asset, _NICR, _prevId, _nextId);
     }
 
     function _insert(
@@ -187,10 +263,6 @@ contract SortedTrenBoxes is
         emit NodeAdded(_asset, _id, _NICR);
     }
 
-    function remove(address _asset, address _id) external override onlyTrenBoxManager {
-        _remove(_asset, _id);
-    }
-
     /*
      * @dev Remove a node from the list
      * @param _id Node's id
@@ -199,7 +271,7 @@ contract SortedTrenBoxes is
         TrenBoxesList storage assetData = trenBoxes[_asset];
 
         if (!_contains(assetData, _id)) {
-            revert SortedTrenBoxer__ListDoesNotContainNode();
+            revert SortedTrenBoxes__ListDoesNotContainNode();
         }
 
         Node storage node = assetData.nodes[_id];
@@ -236,43 +308,6 @@ contract SortedTrenBoxes is
         emit NodeRemoved(_asset, _id);
     }
 
-    /*
-     * @dev Re-insert the node at a new position, based on its new NICR
-     * @param _id Node's id
-     * @param _newNICR Node's new NICR
-     * @param _prevId Id of previous node for the new insert position
-     * @param _nextId Id of next node for the new insert position
-     */
-    function reInsert(
-        address _asset,
-        address _id,
-        uint256 _newNICR,
-        address _prevId,
-        address _nextId
-    )
-        external
-        override
-        onlyBorrowerOperationsOrTrenBoxManager
-    {
-        if (!contains(_asset, _id)) {
-            revert SortedTrenBoxer__ListDoesNotContainNode();
-        }
-
-        if (_newNICR == 0) {
-            revert SortedTrenBoxes__NICRMustBeGreaterThanZero();
-        }
-
-        _remove(_asset, _id);
-        _insert(_asset, _id, _newNICR, _prevId, _nextId);
-    }
-
-    /*
-     * @dev Checks if the list contains a node
-     */
-    function contains(address _asset, address _id) public view override returns (bool) {
-        return trenBoxes[_asset].nodes[_id].exists;
-    }
-
     function _contains(
         TrenBoxesList storage _dataAsset,
         address _id
@@ -282,70 +317,6 @@ contract SortedTrenBoxes is
         returns (bool)
     {
         return _dataAsset.nodes[_id].exists;
-    }
-
-    /*
-     * @dev Checks if the list is empty
-     */
-    function isEmpty(address _asset) public view override returns (bool) {
-        return trenBoxes[_asset].size == 0;
-    }
-
-    /*
-     * @dev Returns the current size of the list
-     */
-    function getSize(address _asset) external view override returns (uint256) {
-        return trenBoxes[_asset].size;
-    }
-
-    /*
-     * @dev Returns the first node in the list (node with the largest NICR)
-     */
-    function getFirst(address _asset) external view override returns (address) {
-        return trenBoxes[_asset].head;
-    }
-
-    /*
-     * @dev Returns the last node in the list (node with the smallest NICR)
-     */
-    function getLast(address _asset) external view override returns (address) {
-        return trenBoxes[_asset].tail;
-    }
-
-    /*
-     * @dev Returns the next node (with a smaller NICR) in the list for a given node
-     * @param _id Node's id
-     */
-    function getNext(address _asset, address _id) external view override returns (address) {
-        return trenBoxes[_asset].nodes[_id].nextId;
-    }
-
-    /*
-     * @dev Returns the previous node (with a larger NICR) in the list for a given node
-     * @param _id Node's id
-     */
-    function getPrev(address _asset, address _id) external view override returns (address) {
-        return trenBoxes[_asset].nodes[_id].prevId;
-    }
-
-    /*
-    * @dev Check if a pair of nodes is a valid insertion point for a new node with the given NICR
-     * @param _NICR Node's NICR
-     * @param _prevId Id of previous node for the insert position
-     * @param _nextId Id of next node for the insert position
-     */
-    function validInsertPosition(
-        address _asset,
-        uint256 _NICR,
-        address _prevId,
-        address _nextId
-    )
-        external
-        view
-        override
-        returns (bool)
-    {
-        return _validInsertPosition(_asset, _NICR, _prevId, _nextId);
     }
 
     function _validInsertPosition(
@@ -450,26 +421,6 @@ contract SortedTrenBoxes is
         }
 
         return (prevId, nextId);
-    }
-
-    /*
-     * @dev Find the insert position for a new node with the given NICR
-     * @param _NICR Node's NICR
-     * @param _prevId Id of previous node for the insert position
-     * @param _nextId Id of next node for the insert position
-     */
-    function findInsertPosition(
-        address _asset,
-        uint256 _NICR,
-        address _prevId,
-        address _nextId
-    )
-        external
-        view
-        override
-        returns (address, address)
-    {
-        return _findInsertPosition(_asset, _NICR, _prevId, _nextId);
     }
 
     function _findInsertPosition(
