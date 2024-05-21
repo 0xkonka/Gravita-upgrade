@@ -64,6 +64,16 @@ interface ITrenBoxManager {
         uint128 arrayIndex;
     }
 
+    /**
+     * @dev Struct for storing the collateral and debt token snapshots for a given active TrenBox.
+     * @param asset The snapshot of collateral asset.
+     * @param debt The snapshot of debt token.
+     */
+    struct RewardSnapshot {
+        uint256 asset;
+        uint256 debt;
+    }
+
     // Events
     // -----------------------------------------------------------------------------------------------------------
 

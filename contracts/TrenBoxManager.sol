@@ -17,6 +17,11 @@ import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 import { IFeeCollector } from "./Interfaces/IFeeCollector.sol";
 import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 
+/**
+ * @title TrenBoxManager
+ * @notice Contains functionality for liquidations, redistributions, redemptions, and the state
+ * of each TrenBox.
+ */
 contract TrenBoxManager is
     ITrenBoxManager,
     UUPSUpgradeable,
@@ -24,75 +29,63 @@ contract TrenBoxManager is
     TrenBase
 {
     // Constants
-    // ------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------
 
+    /// @notice The contract name.
     string public constant NAME = "TrenBoxManager";
-
+    /// @notice The number of seconds in one minute.
     uint256 public constant SECONDS_IN_ONE_MINUTE = 60;
-    /*
-     * Half-life of 12h. 12h = 720 min
-     * (1/2) = d^720 => d = (1/2)^(1/720)
-     */
+    /// @dev Half-life of 12h. 12h = 720 min, (1/2) = d^720 => d = (1/2)^(1/720)
     uint256 public constant MINUTE_DECAY_FACTOR = 999_037_758_833_783_000;
-
-    /*
-    * BETA: 18 digit decimal. Parameter by which to divide the redeemed fraction, in order to calc
-    the new base rate from a redemption.
-     * Corresponds to (1 / ALPHA) in the white paper.
-     */
+    /// @notice BETA: 18 digit decimal. Parameter by which to divide the redeemed fraction, to
+    /// calc the new base rate from a redemption. Corresponds to (1 / ALPHA) in the white paper.
     uint256 public constant BETA = 2;
 
-    // Structs
-    // --------------------------------------------------------------------------------------------------------
-
-    // Object containing the asset and debt token snapshots for a given active trenBox
-    struct RewardSnapshot {
-        uint256 asset;
-        uint256 debt;
-    }
-
     // State
-    // ----------------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------
 
+    /// @notice The mapping from collateral asset to redemption base rate.
     mapping(address collateral => uint256 rate) public baseRate;
-
-    // The timestamp of the latest fee operation (redemption or new debt token issuance)
+    /// @notice The mapping from collateral asset to the timestamp of the latest fee operation
+    /// (redemption or new debt token issuance)
     mapping(address collateral => uint256 feeOpeartionTimestamp) public lastFeeOperationTime;
-
+    /// @notice The mapping from borrower address to the TrenBox for a specific collateral asset.
     mapping(address borrower => mapping(address collateral => TrenBox)) public TrenBoxes;
-
+    /// @notice The mapping from collateral asset to the total debt tokens staked.
     mapping(address collateral => uint256 totalStake) public totalStakes;
-
-    // Snapshot of the value of totalStakes, taken immediately after the latest liquidation
+    /// @notice The snapshot of total staked amount, taken immediately after the latest liquidation.
     mapping(address collateral => uint256 totalStake) public totalStakesSnapshot;
-
-    // Snapshot of the total collateral in TrenBoxStorage, immediately after the
-    // latest liquidation.
+    /// @notice The snapshot of the total collateral in TrenBoxStorage, immediately after the
+    /// latest liquidation.
     mapping(address collateral => uint256 totalCollateral) public totalCollateralSnapshot;
 
-    /*
-    * L_Colls and L_Debts track the sums of accumulated liquidation rewards per unit staked. During
-    its lifetime, each stake earns:
+    /// @notice The collateral sums of accumulated liquidation rewards per unit staked.
+    mapping(address collateral => uint256 accumulatedRewards) public L_Colls;
+    /// @notice The debt sums of accumulated liquidation rewards per unit staked.
+    mapping(address collateral => uint256 accumulatedRewards) public L_Debts;
+
+    /**
+     * @dev L_Colls and L_Debts track the sums of accumulated liquidation rewards per unit staked.
+     * During its lifetime, each stake earns:
      *
      * An asset gain of ( stake * [L_Colls - L_Colls(0)] )
      * A debt increase of ( stake * [L_Debts - L_Debts(0)] )
      *
-    * Where L_Colls(0) and L_Debts(0) are snapshots of L_Colls and L_Debts for the active TrenBox
-    taken at the instant the stake was made
+     * Where L_Colls(0) and L_Debts(0) are snapshots of L_Colls and L_Debts for the active TrenBox
+     * taken at the instant the stake was made.
      */
-    mapping(address collateral => uint256 accumulatedRewards) public L_Colls;
-    mapping(address collateral => uint256 accumulatedRewards) public L_Debts;
 
-    // Map addresses with active trenBoxes to their RewardSnapshot
+    /// @notice The mapping from borrowers with active TrenBoxes to their reward snapshots.
     mapping(address borrower => mapping(address collateral => RewardSnapshot)) public
         rewardSnapshots;
 
-    // Array of all active trenBox addresses - used to to compute an approximate hint off-chain, for
-    // the sorted list insertion
+    /// @notice The array of all active TrenBox addresses.
+    /// @dev Used to compute an approximate hint off-chain for the sorted list insertion.
     mapping(address collateral => address[] owners) public trenBoxOwners;
 
-    // Error trackers for the trenBox redistribution calculation
+    /// @notice The mapping to track the error in collateral redistribution calculation.
     mapping(address collateral => uint256 collateralError) public lastCollError_Redistribution;
+    /// @notice The mapping to track the error in debt redistribution calculation.
     mapping(address collateral => uint256 debtError) public lastDebtError_Redistribution;
 
     // Modifiers
@@ -122,6 +115,10 @@ contract TrenBoxManager is
     // Initializer
     // ------------------------------------------------------------------------------------------------------
 
+    /**
+     * @dev Runs all the setup logic only once.
+     * @param initialOwner The address of initial owner.
+     */
     function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
 
@@ -132,6 +129,7 @@ contract TrenBoxManager is
     // External/public functions
     // --------------------------------------------------------------------------------------
 
+    /// @inheritdoc ITrenBoxManager
     function isValidFirstRedemptionHint(
         address _asset,
         address _firstRedemptionHint,
@@ -155,6 +153,7 @@ contract TrenBoxManager is
             || getCurrentICR(_asset, nextTrenBox, _price) < IAdminContract(adminContract).getMcr(_asset);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getNominalICR(
         address _asset,
         address _borrower
@@ -170,6 +169,7 @@ contract TrenBoxManager is
         return NICR;
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getCurrentICR(
         address _asset,
         address _borrower,
@@ -185,6 +185,7 @@ contract TrenBoxManager is
         return ICR;
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getPendingAssetReward(
         address _asset,
         address _borrower
@@ -204,6 +205,7 @@ contract TrenBoxManager is
         return pendingAssetReward;
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getPendingDebtTokenReward(
         address _asset,
         address _borrower
@@ -222,6 +224,7 @@ contract TrenBoxManager is
         return (stake * rewardPerUnitStaked) / DECIMAL_PRECISION;
     }
 
+    /// @inheritdoc ITrenBoxManager
     function hasPendingRewards(
         address _asset,
         address _borrower
@@ -237,6 +240,7 @@ contract TrenBoxManager is
         return (rewardSnapshots[_borrower][_asset].asset < L_Colls[_asset]);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getEntireDebtAndColl(
         address _asset,
         address _borrower
@@ -253,6 +257,7 @@ contract TrenBoxManager is
         coll = trenBox.coll + pendingCollReward;
     }
 
+    /// @inheritdoc ITrenBoxManager
     function isTrenBoxActive(
         address _asset,
         address _borrower
@@ -265,10 +270,12 @@ contract TrenBoxManager is
         return getTrenBoxStatus(_asset, _borrower) == uint256(Status.active);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getTCR(address _asset, uint256 _price) external view override returns (uint256) {
         return _getTCR(_asset, _price);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function checkRecoveryMode(
         address _asset,
         uint256 _price
@@ -281,10 +288,12 @@ contract TrenBoxManager is
         return _checkRecoveryMode(_asset, _price);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getBorrowingRate(address _asset) external view override returns (uint256) {
         return IAdminContract(adminContract).getBorrowingFee(_asset);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getBorrowingFee(
         address _asset,
         uint256 _debt
@@ -297,10 +306,12 @@ contract TrenBoxManager is
         return (IAdminContract(adminContract).getBorrowingFee(_asset) * _debt) / DECIMAL_PRECISION;
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getRedemptionFee(address _asset, uint256 _assetDraw) public view returns (uint256) {
         return _calcRedemptionFee(getRedemptionRate(_asset), _assetDraw);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getRedemptionFeeWithDecay(
         address _asset,
         uint256 _assetDraw
@@ -313,14 +324,17 @@ contract TrenBoxManager is
         return _calcRedemptionFee(getRedemptionRateWithDecay(_asset), _assetDraw);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getRedemptionRate(address _asset) public view override returns (uint256) {
         return _calcRedemptionRate(_asset, baseRate[_asset]);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getRedemptionRateWithDecay(address _asset) public view override returns (uint256) {
         return _calcRedemptionRate(_asset, _calcDecayedBaseRate(_asset));
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getTrenBoxFromTrenBoxOwnersArray(
         address _asset,
         uint256 _index
@@ -333,6 +347,7 @@ contract TrenBoxManager is
         return trenBoxOwners[_asset][_index];
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getNetDebt(address _asset, uint256 _debt) external view returns (uint256) {
         return _getNetDebt(_asset, _debt);
     }
@@ -340,10 +355,12 @@ contract TrenBoxManager is
     // --- TrenBox property getters
     // --------------------------------------------------------------------------------------
 
+    /// @inheritdoc ITrenBoxManager
     function getTrenBoxOwnersCount(address _asset) external view override returns (uint256) {
         return trenBoxOwners[_asset].length;
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getTrenBoxStatus(
         address _asset,
         address _borrower
@@ -356,6 +373,7 @@ contract TrenBoxManager is
         return uint256(TrenBoxes[_borrower][_asset].status);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getTrenBoxStake(
         address _asset,
         address _borrower
@@ -368,6 +386,7 @@ contract TrenBoxManager is
         return TrenBoxes[_borrower][_asset].stake;
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getTrenBoxDebt(
         address _asset,
         address _borrower
@@ -380,6 +399,7 @@ contract TrenBoxManager is
         return TrenBoxes[_borrower][_asset].debt;
     }
 
+    /// @inheritdoc ITrenBoxManager
     function getTrenBoxColl(
         address _asset,
         address _borrower
@@ -395,6 +415,7 @@ contract TrenBoxManager is
     // Called by Tren contracts
     // ------------------------------------------------------------------------------------
 
+    /// @inheritdoc ITrenBoxManager
     function addTrenBoxOwnerToArray(
         address _asset,
         address _borrower
@@ -411,6 +432,7 @@ contract TrenBoxManager is
         return index;
     }
 
+    /// @inheritdoc ITrenBoxManager
     function executeFullRedemption(
         address _asset,
         address _borrower,
@@ -433,6 +455,7 @@ contract TrenBoxManager is
         emit TrenBoxUpdated(_asset, _borrower, 0, 0, 0, TrenBoxManagerOperation.redeemCollateral);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function executePartialRedemption(
         address _asset,
         address _borrower,
@@ -470,6 +493,7 @@ contract TrenBoxManager is
         );
     }
 
+    /// @inheritdoc ITrenBoxManager
     function finalizeRedemption(
         address _asset,
         address _receiver,
@@ -496,6 +520,7 @@ contract TrenBoxManager is
         ITrenBoxStorage(trenBoxStorage).sendCollateral(_asset, _receiver, collToSendToRedeemer);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function updateBaseRateFromRedemption(
         address _asset,
         uint256 _assetDrawn,
@@ -516,6 +541,7 @@ contract TrenBoxManager is
         _updateLastFeeOpTime(_asset);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function applyPendingRewards(
         address _asset,
         address _borrower
@@ -528,6 +554,7 @@ contract TrenBoxManager is
         return _applyPendingRewards(_asset, _borrower);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function movePendingTrenBoxRewardsFromLiquidatedToActive(
         address _asset,
         uint256 _debt,
@@ -540,6 +567,7 @@ contract TrenBoxManager is
         _movePendingTrenBoxRewardsFromLiquidatedToActive(_asset, _debt, _assetAmount);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function updateTrenBoxRewardSnapshots(
         address _asset,
         address _borrower
@@ -551,6 +579,7 @@ contract TrenBoxManager is
         return _updateTrenBoxRewardSnapshots(_asset, _borrower);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function updateStakeAndTotalStakes(
         address _asset,
         address _borrower
@@ -563,6 +592,7 @@ contract TrenBoxManager is
         return _updateStakeAndTotalStakes(_asset, _borrower);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function removeStake(
         address _asset,
         address _borrower
@@ -574,6 +604,7 @@ contract TrenBoxManager is
         return _removeStake(_asset, _borrower);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function redistributeDebtAndColl(
         address _asset,
         uint256 _debt,
@@ -630,6 +661,7 @@ contract TrenBoxManager is
         ITrenBoxStorage(trenBoxStorage).updateDebtAndCollateralBalances(_asset, _debt, _coll, false);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function updateSystemSnapshots_excludeCollRemainder(
         address _asset,
         uint256 _collRemainder
@@ -645,6 +677,7 @@ contract TrenBoxManager is
         emit SystemSnapshotsUpdated(_asset, totalStakesCached, _totalCollateralSnapshot);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function closeTrenBox(
         address _asset,
         address _borrower
@@ -656,6 +689,7 @@ contract TrenBoxManager is
         return _closeTrenBox(_asset, _borrower, Status.closedByOwner);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function closeTrenBoxLiquidation(
         address _asset,
         address _borrower
@@ -671,6 +705,7 @@ contract TrenBoxManager is
         );
     }
 
+    /// @inheritdoc ITrenBoxManager
     function closeTrenBoxRedistribution(
         address _asset,
         address _borrower,
@@ -687,6 +722,7 @@ contract TrenBoxManager is
         IDebtToken(debtToken).burn(trenBoxStorage, _debtTokenGasCompensation);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function sendGasCompensation(
         address _asset,
         address _liquidator,
@@ -708,6 +744,7 @@ contract TrenBoxManager is
     // --- TrenBox property setters, called by Tren's
     // BorrowerOperations/VMRedemptions/VMLiquidations ---------------
 
+    /// @inheritdoc ITrenBoxManager
     function setTrenBoxStatus(
         address _asset,
         address _borrower,
@@ -720,6 +757,7 @@ contract TrenBoxManager is
         TrenBoxes[_borrower][_asset].status = Status(_num);
     }
 
+    /// @inheritdoc ITrenBoxManager
     function increaseTrenBoxColl(
         address _asset,
         address _borrower,
@@ -735,6 +773,7 @@ contract TrenBoxManager is
         trenBox.coll = newColl;
     }
 
+    /// @inheritdoc ITrenBoxManager
     function decreaseTrenBoxColl(
         address _asset,
         address _borrower,
@@ -750,6 +789,7 @@ contract TrenBoxManager is
         trenBox.coll = newColl;
     }
 
+    /// @inheritdoc ITrenBoxManager
     function increaseTrenBoxDebt(
         address _asset,
         address _borrower,
@@ -765,6 +805,7 @@ contract TrenBoxManager is
         trenBox.debt = newDebt;
     }
 
+    /// @inheritdoc ITrenBoxManager
     function decreaseTrenBoxDebt(
         address _asset,
         address _borrower,
@@ -792,6 +833,14 @@ contract TrenBoxManager is
     // Internal functions
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * @dev Burns redeemed debt tokens, sends collateral to redeemer and moves collateral from
+     * active collateral pool to claimable collateral pool.
+     * @param _asset The address of collateral asset.
+     * @param _borrower The borrower address.
+     * @param _debtTokenAmount The amount of debt tokens redeemed.
+     * @param _assetAmount The amount of collateral asset to draw.
+     */
     function _redeemCloseTrenBox(
         address _asset,
         address _borrower,
@@ -801,8 +850,7 @@ contract TrenBoxManager is
         internal
     {
         IDebtToken(debtToken).burn(trenBoxStorage, _debtTokenAmount);
-        // Update TrenBoxStorage, and send collateral to account and move collateral from active
-        // collateral pool to claimable collateral pool
+
         ITrenBoxStorage(trenBoxStorage).decreaseActiveBalancesAfterRedemption(
             _asset, _debtTokenAmount, _assetAmount
         );
@@ -811,8 +859,13 @@ contract TrenBoxManager is
         );
     }
 
-    // Move a TrenBox's pending debt and collateral rewards from distributions, from liquidated
-    // to active TrenBoxStorage
+    /**
+     * @dev Moves a TrenBox's pending debt and collateral rewards from liquidations
+     * to TrenBoxStorage contract.
+     * @param _asset The address of collateral asset.
+     * @param _debtTokenAmount The pending rewards of debt tokens.
+     * @param _assetAmount The pending rewards of collateral asset.
+     */
     function _movePendingTrenBoxRewardsFromLiquidatedToActive(
         address _asset,
         uint256 _debtTokenAmount,
@@ -825,6 +878,11 @@ contract TrenBoxManager is
         );
     }
 
+    /**
+     * @dev Gets current collateral and debt balances of a specific TrenBox.
+     * @param _asset The address of collateral asset.
+     * @param _borrower The borrower address.
+     */
     function _getCurrentTrenBoxAmounts(
         address _asset,
         address _borrower
@@ -840,7 +898,12 @@ contract TrenBoxManager is
         debt = trenBox.debt + pendingDebtReward;
     }
 
-    // Add the borrowers's coll and debt rewards earned from redistributions, to their TrenBox
+    /**
+     * @dev Adds the borrowers's collateral and debt rewards earned from redistributions &
+     * liquidations to their TrenBoxes.
+     * @param _asset The address of collateral asset.
+     * @param _borrower The borrower address.
+     */
     function _applyPendingRewards(address _asset, address _borrower) internal {
         if (!hasPendingRewards(_asset, _borrower)) {
             return;
@@ -872,7 +935,11 @@ contract TrenBoxManager is
         );
     }
 
-    // Update borrower's snapshots of L_Colls and L_Debts to reflect the current values
+    /**
+     * @dev Updates the borrower's snapshots of L_Colls and L_Debts to reflect the current values
+     * @param _asset The address of collateral asset.
+     * @param _borrower The borrower address.
+     */
     function _updateTrenBoxRewardSnapshots(address _asset, address _borrower) internal {
         uint256 liquidatedColl = L_Colls[_asset];
         uint256 liquidatedDebt = L_Debts[_asset];
@@ -882,13 +949,22 @@ contract TrenBoxManager is
         emit TrenBoxSnapshotsUpdated(_asset, liquidatedColl, liquidatedDebt);
     }
 
+    /**
+     * @dev Removes the borrower's stake amount from total staked amount.
+     * @param _asset The address of collateral asset.
+     * @param _borrower The borrower address.
+     */
     function _removeStake(address _asset, address _borrower) internal {
         TrenBox storage trenBox = TrenBoxes[_borrower][_asset];
         totalStakes[_asset] -= trenBox.stake;
         trenBox.stake = 0;
     }
 
-    // Update borrower's stake based on their latest collateral value
+    /**
+     * @dev Updates the borrower's stake based on their latest collateral value.
+     * @param _asset The address of collateral asset.
+     * @param _borrower The borrower address.
+     */
     function _updateStakeAndTotalStakes(
         address _asset,
         address _borrower
@@ -906,8 +982,12 @@ contract TrenBoxManager is
         return newStake;
     }
 
-    // Calculate a new stake based on the snapshots of the totalStakes and totalCollateral taken at
-    // the last liquidation
+    /**
+     * @dev Calculates a new stake based on the snapshots of the totalStakes and totalCollateral
+     * taken at the last liquidation.
+     * @param _asset The address of collateral asset.
+     * @param _coll The balance of collateral asset.
+     */
     function _computeNewStake(
         address _asset,
         uint256 _coll
@@ -933,8 +1013,14 @@ contract TrenBoxManager is
         }
     }
 
-    function _closeTrenBox(address _asset, address _borrower, Status closedStatus) internal {
-        assert(closedStatus != Status.nonExistent && closedStatus != Status.active);
+    /**
+     * @dev Closes a TrenBox.
+     * @param _asset The address of collateral asset.
+     * @param _borrower The borrower address.
+     * @param _closedStatus The closed status.
+     */
+    function _closeTrenBox(address _asset, address _borrower, Status _closedStatus) internal {
+        assert(_closedStatus != Status.nonExistent && _closedStatus != Status.active);
 
         uint256 TrenBoxOwnersArrayLength = trenBoxOwners[_asset].length;
         if (TrenBoxOwnersArrayLength <= 1 || ISortedTrenBoxes(sortedTrenBoxes).getSize(_asset) <= 1)
@@ -943,7 +1029,7 @@ contract TrenBoxManager is
         }
 
         TrenBox storage trenBox = TrenBoxes[_borrower][_asset];
-        trenBox.status = closedStatus;
+        trenBox.status = _closedStatus;
         trenBox.coll = 0;
         trenBox.debt = 0;
 
@@ -955,10 +1041,16 @@ contract TrenBoxManager is
         ISortedTrenBoxes(sortedTrenBoxes).remove(_asset, _borrower);
     }
 
+    /**
+     * @dev Removes a specific TrenBox's owner.
+     * @param _asset The address of collateral asset.
+     * @param _borrower The borrower address.
+     * @param _TrenBoxOwnersArrayLength The number of owners.
+     */
     function _removeTrenBoxOwner(
         address _asset,
         address _borrower,
-        uint256 TrenBoxOwnersArrayLength
+        uint256 _TrenBoxOwnersArrayLength
     )
         internal
     {
@@ -966,7 +1058,7 @@ contract TrenBoxManager is
         assert(trenBox.status != Status.nonExistent && trenBox.status != Status.active);
 
         uint128 index = trenBox.arrayIndex;
-        uint256 length = TrenBoxOwnersArrayLength;
+        uint256 length = _TrenBoxOwnersArrayLength;
         uint256 idxLast = length - 1;
 
         assert(index <= idxLast);
@@ -981,6 +1073,11 @@ contract TrenBoxManager is
         trenBoxAssetOwners.pop();
     }
 
+    /**
+     * @dev Calculates the redemption rate.
+     * @param _asset The address of collateral asset.
+     * @param _baseRate The base redemption rate.
+     */
     function _calcRedemptionRate(
         address _asset,
         uint256 _baseRate
@@ -995,6 +1092,11 @@ contract TrenBoxManager is
         );
     }
 
+    /**
+     * @dev Calculates the redemption fee on the amount to draw.
+     * @param _redemptionRate The redemption rate.
+     * @param _assetDraw The collateral amount to draw.
+     */
     function _calcRedemptionFee(
         uint256 _redemptionRate,
         uint256 _assetDraw
@@ -1010,22 +1112,33 @@ contract TrenBoxManager is
         return redemptionFee;
     }
 
+    /**
+     * @dev Updates the last fee operation time only if time passed >= decay interval. This
+     * prevents base rate griefing.
+     * @param _asset The address of collateral asset.
+     */
     function _updateLastFeeOpTime(address _asset) internal {
         uint256 timePassed = block.timestamp - lastFeeOperationTime[_asset];
         if (timePassed >= SECONDS_IN_ONE_MINUTE) {
-            // Update the last fee operation time only if time passed >= decay interval. This
-            // prevents base rate griefing.
             lastFeeOperationTime[_asset] = block.timestamp;
             emit LastFeeOpTimeUpdated(_asset, block.timestamp);
         }
     }
 
+    /**
+     * @dev Calculates the decayed base rate for a specific collateral asset.
+     * @param _asset The address of collateral asset.
+     */
     function _calcDecayedBaseRate(address _asset) internal view returns (uint256) {
         uint256 minutesPassed = _minutesPassedSinceLastFeeOp(_asset);
         uint256 decayFactor = TrenMath._decPow(MINUTE_DECAY_FACTOR, minutesPassed);
         return (baseRate[_asset] * decayFactor) / DECIMAL_PRECISION;
     }
 
+    /**
+     * @dev Calculates the minutes passed from last fee operation.
+     * @param _asset The address of collateral asset.
+     */
     function _minutesPassedSinceLastFeeOp(address _asset) internal view returns (uint256) {
         return (block.timestamp - lastFeeOperationTime[_asset]) / SECONDS_IN_ONE_MINUTE;
     }
