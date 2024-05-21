@@ -24,6 +24,7 @@ __metadata:
     "@openzeppelin/contracts-upgradeable": "npm:^5.0.2"
     "@openzeppelin/hardhat-upgrades": "npm:^3.0.5"
     "@primitivefi/hardhat-dodoc": "npm:^0.2.3"
+    "@pythnetwork/pyth-sdk-solidity": "npm:^3.1.0"
     "@trivago/prettier-plugin-sort-imports": "npm:^4.3.0"
     "@typechain/ethers-v6": "npm:^0.5.1"
     "@typechain/hardhat": "npm:^9.1.0"
@@ -1601,6 +1602,13 @@ __metadata:
     hardhat: ^2.6.4
     squirrelly: ^8.0.8
   checksum: 10/0db4f31bf0fbcf3dbce5a58e5570e5bb915247d9fafecc0239bfeb50fda20d6fd76c16bae704b092714d81a42ee378f63b50a51c06423638d536325e5be2f1a9
+  languageName: node
+  linkType: hard
+
+"@pythnetwork/pyth-sdk-solidity@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@pythnetwork/pyth-sdk-solidity@npm:3.1.0"
+  checksum: 10/d0417a1a2e25049e98314655f6b048f679aea692343a51ff5e75f22d9e4d48182efb8cef31bc18604760c3b8c7c21fc21e875b2d17e96df569d0af017f32047e
   languageName: node
   linkType: hard
 

@@ -34,7 +34,8 @@ interface IPriceFeed {
      */
     enum ProviderType {
         Chainlink,
-        API3
+        API3,
+        Pyth
     }
 
     /**
@@ -44,6 +45,7 @@ interface IPriceFeed {
      * @param timeoutSeconds The maximum period that lasts a stale price.
      * @param decimals The decimal precision of price oracle.
      * @param isEthIndexed The flag to indicate whether to fetch price based on ETH.
+     * @param additionalData The additional data required by the specific oracle type.
      */
     struct OracleRecord {
         address oracleAddress;
@@ -51,6 +53,7 @@ interface IPriceFeed {
         uint256 timeoutSeconds;
         uint256 decimals;
         bool isEthIndexed;
+        bytes32 additionalData;
     }
 
     /// @dev Error emitted when setting up fallback oracle without no existing primary oracle.
@@ -68,6 +71,9 @@ interface IPriceFeed {
 
     /// @dev Error emitted when returning oracle address for unknown asset.
     error PriceFeed__UnknownAssetError();
+
+    /// @dev Error emitted when the price feed is missing Pyth feed id.
+    error PriceFeed__MissingPythFeedId();
 
     /**
      * @dev Emitted when new oracle for a specific asset is registered.
@@ -101,6 +107,7 @@ interface IPriceFeed {
      * @param _timeoutSeconds The maximum period that lasts a stale price.
      * @param _isEthIndexed The flag to indicate whether to fetch price based on ETH.
      * @param _isFallback The flag to indicate whether to set as fallback oracle.
+     * @param _additionalData The additional data required by the oracle provider.
      */
     function setOracle(
         address _token,
@@ -108,7 +115,8 @@ interface IPriceFeed {
         ProviderType _type,
         uint256 _timeoutSeconds,
         bool _isEthIndexed,
-        bool _isFallback
+        bool _isFallback,
+        bytes32 _additionalData
     )
         external;
 }
