@@ -67,7 +67,7 @@ export default function shouldBehaveLikeCanRemove(): void {
 
       await expect(
         sortedTrenBoxes.connect(this.trenBoxManagerImpostor).remove(wETH.address, user1)
-      ).to.be.revertedWithCustomError(sortedTrenBoxes, "SortedTrenBoxer__ListDoesNotContainNode");
+      ).to.be.revertedWithCustomError(sortedTrenBoxes, "SortedTrenBoxes__ListDoesNotContainNode");
     });
   });
 

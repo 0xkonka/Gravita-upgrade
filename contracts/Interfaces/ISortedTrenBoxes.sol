@@ -6,6 +6,34 @@ pragma solidity ^0.8.23;
  * @notice Defines the basic interface for SortedTrenBoxes contract.
  */
 interface ISortedTrenBoxes {
+    // --- Structs ---
+
+    /**
+     * @dev Struct for storing Node information.
+     * @param exists The existence indicator.
+     * @param nextId The Id of next Node (smaller NICR) in the list.
+     * @param prevId The Id of previous Node (larger NICR) in the list.
+     */
+    struct Node {
+        bool exists;
+        address nextId;
+        address prevId;
+    }
+
+    /**
+     * @dev Struct for storing Node list.
+     * @param head The head of the list. Also the Node in the list with the largest NICR.
+     * @param tail The tail of the list. Also the Node in the list with the smallest NICR.
+     * @param size The current size of the list.
+     * @param nodes The mapping from depositor address to its Node in the list.
+     */
+    struct TrenBoxesList {
+        address head;
+        address tail;
+        uint256 size;
+        mapping(address depositor => Node node) nodes;
+    }
+
     // --- Events ---
 
     /**

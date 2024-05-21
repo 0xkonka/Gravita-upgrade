@@ -11,70 +11,56 @@ import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol"
 import { ISortedTrenBoxes } from "./Interfaces/ISortedTrenBoxes.sol";
 import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 
-/*
-* A sorted doubly linked list with nodes sorted in descending order.
-*
-* Nodes map to active TrenBoxes in the system - the ID property is the address of a TrenBox owner.
-* Nodes are ordered according to their current nominal individual collateral ratio (NICR),
-* which is like the ICR but without the price, i.e., just collateral / debt.
-*
-* The list optionally accepts insert position hints.
-*
-* NICRs are computed dynamically at runtime, and not stored on the Node. This is because NICRs of
-active TrenBoxes
-* change dynamically as liquidation events occur.
-*
-* The list relies on the fact that liquidation events preserve ordering: a liquidation decreases the
-NICRs of all active TrenBoxes,
-* but maintains their order. A node inserted based on current NICR will maintain the correct
-position,
-* relative to it's peers, as rewards accumulate, as long as it's raw collateral and debt have not
-* changed.
-* Thus, Nodes remain sorted by current NICR.
-*
-* Nodes need only be re-inserted upon a TrenBox operation - when the owner adds or removes
-collateral
-or debt
-* to their position.
-*
-* The list is a modification of the following audited SortedDoublyLinkedList:
-* https://github.com/livepeer/protocol/blob/master/contracts/libraries/SortedDoublyLL.sol
-*
-*
-* Changes made in the Gravita implementation:
-*
-* - Keys have been removed from nodes
-*
-* - Ordering checks for insertion are performed by comparing an NICR argument to the current NICR,
-calculated at runtime.
-*   The list relies on the property that ordering by ICR is maintained as the ETH:USD price varies.
-*
-* - Public functions with parameters have been made internal to save gas, and given an external
-wrapper function for external access
-*/
+/**
+ * @title SortedTrenBoxes
+ * @notice A sorted doubly linked list with nodes sorted in descending order.
+ *
+ * Nodes map to active TrenBoxes in the system - the ID property is the address of a TrenBox owner.
+ * Nodes are ordered according to their current nominal individual collateral ratio (NICR),
+ * which is like the ICR but without the price, i.e., just collateral / debt.
+ *
+ * The list optionally accepts insert position hints.
+ *
+ * @dev NICRs are computed dynamically at runtime, and not stored on the Node. This is because
+ * NICRs of active TrenBoxes change dynamically as liquidation events occur.
+ *
+ * The list relies on the fact that liquidation events preserve ordering: a liquidation decreases
+ * the NICRs of all active TrenBoxes, but maintains their order.
+ * A node inserted based on current NICR will maintain the correct position,
+ * relative to it's peers, as rewards accumulate, as long as it's raw collateral and debt have not
+ * changed.
+ * Thus, Nodes remain sorted by current NICR.
+ *
+ * Nodes need only be re-inserted upon a TrenBox operation - when the owner adds or removes
+ * collateral or debt to their position.
+ *
+ * The list is a modification of the following audited SortedDoublyLinkedList:
+ * https://github.com/livepeer/protocol/blob/master/contracts/libraries/SortedDoublyLL.sol
+ *
+ * Changes made in the Gravita implementation:
+ *
+ * - Keys have been removed from nodes
+ *
+ * - Ordering checks for insertion are performed by comparing an NICR argument to the current NICR,
+ * calculated at runtime.
+ *   The list relies on the property that ordering by ICR is maintained as the ETH:USD price varies.
+ *
+ * - Public functions with parameters have been made internal to save gas, and given an external
+ * wrapper function for external access
+ */
 contract SortedTrenBoxes is
     OwnableUpgradeable,
     UUPSUpgradeable,
     ISortedTrenBoxes,
     ConfigurableAddresses
 {
+    /// @notice The contract name.
     string public constant NAME = "SortedTrenBoxes";
-
-    struct Node {
-        bool exists;
-        address nextId; // Id of next node (smaller NICR) in the list
-        address prevId; // Id of previous node (larger NICR) in the list
-    }
-
-    struct TrenBoxesList {
-        address head; // Head of the list. Also the node in the list with the largest NICR
-        address tail; // Tail of the list. Also the node in the list with the smallest NICR
-        uint256 size; // Current size of the list
-        mapping(address depositor => Node node) nodes; // Track the corresponding ids for each node
-            // in the list
-    }
-
+    /// @notice The mapping from collateral asset to its Node list.
     mapping(address collateral => TrenBoxesList orderedList) public trenBoxes;
+
+    // Modifiers
+    // ------------------------------------------------------------------------------------------------------
 
     modifier onlyTrenBoxManager() {
         if (msg.sender != trenBoxManager) {
@@ -104,11 +90,20 @@ contract SortedTrenBoxes is
         _;
     }
 
-    // --- Initializer ---
+    // Initializer
+    // ------------------------------------------------------------------------------------------------------
+
+    /**
+     * @dev Runs all the setup logic only once.
+     * @param initialOwner The address of initial owner.
+     */
     function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
         __UUPSUpgradeable_init();
     }
+
+    // External/public functions
+    // --------------------------------------------------------------------------------------
 
     /// @inheritdoc ISortedTrenBoxes
     function insert(
@@ -125,10 +120,12 @@ contract SortedTrenBoxes is
         _insert(_asset, _id, _NICR, _prevId, _nextId);
     }
 
+    /// @inheritdoc ISortedTrenBoxes
     function remove(address _asset, address _id) external override onlyTrenBoxManager {
         _remove(_asset, _id);
     }
 
+    /// @inheritdoc ISortedTrenBoxes
     function reInsert(
         address _asset,
         address _id,
@@ -152,34 +149,42 @@ contract SortedTrenBoxes is
         _insert(_asset, _id, _newNICR, _prevId, _nextId);
     }
 
+    /// @inheritdoc ISortedTrenBoxes
     function contains(address _asset, address _id) public view override returns (bool) {
         return trenBoxes[_asset].nodes[_id].exists;
     }
 
+    /// @inheritdoc ISortedTrenBoxes
     function isEmpty(address _asset) public view override returns (bool) {
         return trenBoxes[_asset].size == 0;
     }
 
+    /// @inheritdoc ISortedTrenBoxes
     function getSize(address _asset) external view override returns (uint256) {
         return trenBoxes[_asset].size;
     }
 
+    /// @inheritdoc ISortedTrenBoxes
     function getFirst(address _asset) external view override returns (address) {
         return trenBoxes[_asset].head;
     }
 
+    /// @inheritdoc ISortedTrenBoxes
     function getLast(address _asset) external view override returns (address) {
         return trenBoxes[_asset].tail;
     }
 
+    /// @inheritdoc ISortedTrenBoxes
     function getNext(address _asset, address _id) external view override returns (address) {
         return trenBoxes[_asset].nodes[_id].nextId;
     }
 
+    /// @inheritdoc ISortedTrenBoxes
     function getPrev(address _asset, address _id) external view override returns (address) {
         return trenBoxes[_asset].nodes[_id].prevId;
     }
 
+    /// @inheritdoc ISortedTrenBoxes
     function validInsertPosition(
         address _asset,
         uint256 _NICR,
@@ -194,6 +199,7 @@ contract SortedTrenBoxes is
         return _validInsertPosition(_asset, _NICR, _prevId, _nextId);
     }
 
+    /// @inheritdoc ISortedTrenBoxes
     function findInsertPosition(
         address _asset,
         uint256 _NICR,
@@ -208,6 +214,17 @@ contract SortedTrenBoxes is
         return _findInsertPosition(_asset, _NICR, _prevId, _nextId);
     }
 
+    // Internal functions
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * @dev Adds a new Node to the list.
+     * @param _asset The address of collateral asset.
+     * @param _id The Node's id.
+     * @param _NICR The Node's NICR.
+     * @param _prevId The Id of previous node for the insert position.
+     * @param _nextId The Id of next node for the insert position.
+     */
     function _insert(
         address _asset,
         address _id,
@@ -263,9 +280,10 @@ contract SortedTrenBoxes is
         emit NodeAdded(_asset, _id, _NICR);
     }
 
-    /*
-     * @dev Remove a node from the list
-     * @param _id Node's id
+    /**
+     * @dev Removes a Node from the list.
+     * @param _asset The address of collateral asset.
+     * @param _id The Node's id.
      */
     function _remove(address _asset, address _id) internal {
         TrenBoxesList storage assetData = trenBoxes[_asset];
@@ -308,6 +326,11 @@ contract SortedTrenBoxes is
         emit NodeRemoved(_asset, _id);
     }
 
+    /**
+     * @dev Checks if the list contains a Node.
+     * @param _dataAsset The Node list.
+     * @param _id The Node's id.
+     */
     function _contains(
         TrenBoxesList storage _dataAsset,
         address _id
@@ -319,6 +342,14 @@ contract SortedTrenBoxes is
         return _dataAsset.nodes[_id].exists;
     }
 
+    /**
+     * @dev Checks if a pair of Nodes is a valid insertion point for
+     * a new Node with the given NICR.
+     * @param _asset The address of collateral asset.
+     * @param _NICR The Node's NICR.
+     * @param _prevId The Id of previous Node for the insert position.
+     * @param _nextId The Id of next Node for the insert position.
+     */
     function _validInsertPosition(
         address _asset,
         uint256 _NICR,
@@ -349,11 +380,11 @@ contract SortedTrenBoxes is
         }
     }
 
-    /*
-     * @dev Descend the list (larger NICRs to smaller NICRs) to find a valid insert position
-     * @param _trenBoxManager TrenBoxManager contract, passed in as param to save SLOAD’s
-     * @param _NICR Node's NICR
-     * @param _startId Id of node to start descending the list from
+    /**
+     * @dev Descends the list (larger NICRs to smaller NICRs) to find a valid insert position.
+     * @param _asset The address of collateral asset.
+     * @param _NICR The Node's NICR.
+     * @param _startId The Id of Node to start descending the list from.
      */
     function _descendList(
         address _asset,
@@ -386,11 +417,11 @@ contract SortedTrenBoxes is
         return (prevId, nextId);
     }
 
-    /*
-     * @dev Ascend the list (smaller NICRs to larger NICRs) to find a valid insert position
-     * @param _trenBoxManager TrenBoxManager contract, passed in as param to save SLOAD’s
-     * @param _NICR Node's NICR
-     * @param _startId Id of node to start ascending the list from
+    /**
+     * @dev Ascends the list (smaller NICRs to larger NICRs) to find a valid insert position
+     * @param _asset The address of collateral asset.
+     * @param _NICR The Node's NICR.
+     * @param _startId The Id of Node to start ascending the list from.
      */
     function _ascendList(
         address _asset,
@@ -423,6 +454,13 @@ contract SortedTrenBoxes is
         return (prevId, nextId);
     }
 
+    /**
+     * @dev Finds the insert position for a new Node with the given NICR.
+     * @param _asset The address of collateral asset.
+     * @param _NICR The Node's NICR.
+     * @param _prevId The Id of previous node for the insert position.
+     * @param _nextId The Id of next node for the insert position.
+     */
     function _findInsertPosition(
         address _asset,
         uint256 _NICR,
