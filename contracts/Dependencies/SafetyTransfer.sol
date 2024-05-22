@@ -1,14 +1,19 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 import { IERC20Decimals } from "../Interfaces/IERC20Decimals.sol";
 
 library SafetyTransfer {
+    /// @dev Error emitted when the specific token is ETH or zero address.
     error EthUnsupportedError();
+    /// @dev Error emitted when the amount for decimal correction is invalid.
     error InvalidAmountError();
 
-    //_amount is in ether (1e18) and we want to convert it to the token decimal
+    /**
+     * @dev Converts the amount in ether (1e18) to the specific token decimal.
+     * @param _token The token address to get the decimal of.
+     * @param _amount The amount for decimal correction.
+     */
     function decimalsCorrection(address _token, uint256 _amount) internal view returns (uint256) {
         if (_token == address(0)) {
             revert EthUnsupportedError();
