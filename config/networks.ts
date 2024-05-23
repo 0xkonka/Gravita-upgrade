@@ -51,6 +51,10 @@ export enum NetworkName {
   // FANTOM
   FANTOM_MAINNET = "fantom-mainnet",
   FANTOM_TESTNET = "fantom-testnet",
+
+  // Tenderly Virtual Testnet
+  TENDERLY_MAINNET = "tenderly-mainnet",
+  TENDERLY_MODE = "tenderly-mode",
 }
 
 export interface Network {
@@ -139,6 +143,18 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   [NetworkName.FANTOM_TESTNET]: {
     chainId: 4_002,
     url: `https://rpc.testnet.fantom.network`,
+    isTestnet: true,
+  },
+
+  // Tenderly Virtual Testnet
+  [NetworkName.TENDERLY_MAINNET]: {
+    chainId: 1771,
+    url: `https://virtual.mainnet.rpc.tenderly.co/${getApiKeyForNetwork(NetworkName.TENDERLY_MAINNET)}`,
+    isTestnet: true,
+  },
+  [NetworkName.TENDERLY_MODE]: {
+    chainId: 34443,
+    url: `https://virtual.mode.rpc.tenderly.co/${getApiKeyForNetwork(NetworkName.TENDERLY_MODE)}`,
     isTestnet: true,
   },
 } as const;
