@@ -9,6 +9,9 @@ import type { HardhatUserConfig } from "hardhat/config";
 import type { HttpNetworkAccountsUserConfig, NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";
 
+import * as tenderly from "@tenderly/hardhat-tenderly";
+tenderly.setup({ automaticVerifications: true });
+
 import { API_KEYS } from "./config/api-keys";
 import { NETWORKS, Network, NetworkName } from "./config/networks";
 import "./tasks";
@@ -125,6 +128,11 @@ const config: HardhatUserConfig = {
     },
     // Mainnet and Testnet configs
     ...getAllNetworkConfigs(),
+  },
+  tenderly: {
+    // https://docs.tenderly.co/account/projects/account-project-slug
+    project: "tren-finance",
+    username: "tren-finance",
   },
   paths: {
     artifacts: "./artifacts",
