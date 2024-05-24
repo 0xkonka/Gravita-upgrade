@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 uint256 constant DECIMAL_PRECISION = 1 ether;
@@ -7,17 +6,17 @@ uint256 constant DECIMAL_PRECISION = 1 ether;
 library TrenMath {
     uint256 internal constant EXPONENT_CAP = 525_600_000;
 
-    /* Precision for Nominal ICR (independent of price). Rationale for the value:
+    /**
+     * @dev The precision for Nominal ICR (independent of price).
+     * Rationale for the value:
      *
      * - Making it “too high” could lead to overflows.
-    * - Making it “too low” could lead to an ICR equal to zero, due to truncation from Solidity
-    floor division.
+     * - Making it “too low” could lead to an ICR equal to zero, due to truncation from Solidity
+     * floor division.
      *
-    * This value of 1e20 is chosen for safety: the NICR will only overflow for numerator > ~1e39
-    ETH,
-    * and will only truncate to 0 if the denominator is at least 1e20 times greater than the
-    numerator.
-     *
+     * This value of 1e20 is chosen for safety: the NICR will only overflow for numerator > ~1e39
+     * ETH, and will only truncate to 0 if the denominator is at least 1e20 times greater than
+     * the numerator.
      */
     uint256 internal constant NICR_PRECISION = 1e20;
 
@@ -29,8 +28,8 @@ library TrenMath {
         return (_a >= _b) ? _a : _b;
     }
 
-    /*
-     * Multiply two decimal numbers and use normal rounding rules:
+    /**
+     * @dev Multiply two decimal numbers and use normal rounding rules:
      * -round product up if 19'th mantissa digit >= 5
      * -round product down if 19'th mantissa digit < 5
      *
@@ -42,8 +41,8 @@ library TrenMath {
         decProd = (prod_xy + (DECIMAL_PRECISION / 2)) / DECIMAL_PRECISION;
     }
 
-    /*
-     * _decPow: Exponentiation function for 18-digit decimal base, and integer exponent n.
+    /**
+     * @dev Exponentiation function for 18-digit decimal base, and integer exponent n.
      *
      * Uses the efficient "exponentiation by squaring" algorithm. O(log(n)) complexity.
      *
@@ -54,13 +53,12 @@ library TrenMath {
      * The exponent is capped to avoid reverting due to overflow. The cap 525600000 equals
      * "minutes in 1000 years": 60 * 24 * 365 * 1000
      *
-    * If a period of > 1000 years is ever used as an exponent in either of the above functions, the
-    result will be
-     * negligibly different from just passing the cap, since:
+     * If a period of > 1000 years is ever used as an exponent in either of the above functions,
+     * the result will be negligibly different from just passing the cap, since:
      *
      * In function 1), the decayed base rate will be 0 for 1000 years or > 1000 years
-    * In function 2), the difference in tokens issued at 1000 years and any time > 1000 years, will
-    be negligible
+     * In function 2), the difference in tokens issued at 1000 years and any time > 1000 years,
+     * will be negligible.
      */
     function _decPow(uint256 _base, uint256 _minutes) internal pure returns (uint256) {
         if (_minutes > EXPONENT_CAP) {
