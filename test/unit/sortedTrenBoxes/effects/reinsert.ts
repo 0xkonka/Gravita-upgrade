@@ -57,7 +57,7 @@ export default function shouldBehaveLikeCanReInsert(): void {
         sortedTrenBoxes
           .connect(this.impostor)
           .reInsert(wETH.address, user1, this.newNICR, prevId, nextId)
-      ).to.be.revertedWithCustomError(sortedTrenBoxes, "SortedTrenBoxer__ListDoesNotContainNode");
+      ).to.be.revertedWithCustomError(sortedTrenBoxes, "SortedTrenBoxes__ListDoesNotContainNode");
     });
   });
 
