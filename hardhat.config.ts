@@ -14,7 +14,7 @@ import { API_KEYS } from "./config/api-keys";
 import { NETWORKS, Network, NetworkName } from "./config/networks";
 import "./tasks";
 
-tenderly.setup({ automaticVerifications: true });
+tenderly.setup({ automaticVerifications: false });
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
