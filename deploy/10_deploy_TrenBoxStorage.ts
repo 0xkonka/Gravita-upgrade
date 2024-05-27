@@ -1,10 +1,9 @@
-import type { AddressLike } from "ethers";
 import type { DeployFunction, DeployResult } from "hardhat-deploy/types";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { preDeploy } from "../utils/contracts";
 import { generateSalt } from "../utils/misc";
-import { isLocalhostNetwork } from "../utils/networks";
+import { shouldVerifyContracts } from "../utils/networks";
 import { verifyContract } from "../utils/verify";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -32,8 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const deployResult: DeployResult = await deterministicDeploy.deploy();
 
-  // You don't want to verify on localhost
-  if (isLocalhostNetwork(chainId) === false) {
+  if (shouldVerifyContracts(chainId)) {
     const contractPath = `contracts/TrenBoxStorage.sol:TrenBoxStorage`;
     await verifyContract({
       contractPath: contractPath,

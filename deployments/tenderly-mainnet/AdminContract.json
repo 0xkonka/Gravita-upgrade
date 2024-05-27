@@ -137,11 +137,6 @@
     },
     {
       "inputs": [],
-      "name": "AdminContract__CollateralAlreadyInitialized",
-      "type": "error"
-    },
-    {
-      "inputs": [],
       "name": "AdminContract__CollateralDoesNotExist",
       "type": "error"
     },
@@ -258,22 +253,22 @@
       "inputs": [
         {
           "internalType": "string",
-          "name": "parameter",
+          "name": "_parameter",
           "type": "string"
         },
         {
           "internalType": "uint256",
-          "name": "valueEntered",
+          "name": "_valueEntered",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "minValue",
+          "name": "_minValue",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "maxValue",
+          "name": "_maxValue",
           "type": "uint256"
         }
       ],
@@ -302,13 +297,13 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "oldBorrowingFee",
+          "name": "_oldBorrowingFee",
           "type": "uint256"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newBorrowingFee",
+          "name": "_newBorrowingFee",
           "type": "uint256"
         }
       ],
@@ -321,13 +316,13 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "oldCCR",
+          "name": "_oldCCR",
           "type": "uint256"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newCCR",
+          "name": "_newCCR",
           "type": "uint256"
         }
       ],
@@ -353,13 +348,13 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "oldFee",
+          "name": "_oldFee",
           "type": "uint256"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newFee",
+          "name": "_newFee",
           "type": "uint256"
         }
       ],
@@ -372,13 +367,13 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "oldMaxDebt",
+          "name": "_oldMaxDebt",
           "type": "uint256"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newMaxDebt",
+          "name": "_newMaxDebt",
           "type": "uint256"
         }
       ],
@@ -391,13 +386,13 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "oldMinDebt",
+          "name": "_oldMinDebt",
           "type": "uint256"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newMinDebt",
+          "name": "_newMinDebt",
           "type": "uint256"
         }
       ],
@@ -423,13 +418,13 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "oldMCR",
+          "name": "_oldMCR",
           "type": "uint256"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newMCR",
+          "name": "_newMCR",
           "type": "uint256"
         }
       ],
@@ -442,13 +437,13 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "oldMinNet",
+          "name": "_oldMinNet",
           "type": "uint256"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newMinNet",
+          "name": "_newMinNet",
           "type": "uint256"
         }
       ],
@@ -461,13 +456,13 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "oldMintCap",
+          "name": "_oldMintCap",
           "type": "uint256"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newMintCap",
+          "name": "_newMintCap",
           "type": "uint256"
         }
       ],
@@ -499,13 +494,13 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "oldPercentDiv",
+          "name": "_oldPercentDiv",
           "type": "uint256"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newPercentDiv",
+          "name": "_newPercentDiv",
           "type": "uint256"
         }
       ],
@@ -537,13 +532,13 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "oldRedemptionFeeFloor",
+          "name": "_oldRedemptionFeeFloor",
           "type": "uint256"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newRedemptionFeeFloor",
+          "name": "_newRedemptionFeeFloor",
           "type": "uint256"
         }
       ],
@@ -1270,7 +1265,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "borrowingFee",
+          "name": "_borrowingFee",
           "type": "uint256"
         }
       ],
@@ -1288,7 +1283,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "newCCR",
+          "name": "_newCCR",
           "type": "uint256"
         }
       ],
@@ -1306,37 +1301,37 @@
         },
         {
           "internalType": "uint256",
-          "name": "borrowingFee",
+          "name": "_borrowingFee",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "ccr",
+          "name": "_ccr",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "mcr",
+          "name": "_mcr",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "minNetDebt",
+          "name": "_minNetDebt",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "mintCap",
+          "name": "_mintCap",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "percentDivisor",
+          "name": "_percentDivisor",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "redemptionFeeFloor",
+          "name": "_redemptionFeeFloor",
           "type": "uint256"
         }
       ],
@@ -1398,7 +1393,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "newMCR",
+          "name": "_newMCR",
           "type": "uint256"
         }
       ],
@@ -1442,7 +1437,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "minNetDebt",
+          "name": "_minNetDebt",
           "type": "uint256"
         }
       ],
@@ -1460,7 +1455,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "mintCap",
+          "name": "_mintCap",
           "type": "uint256"
         }
       ],
@@ -1478,7 +1473,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "percentDivisor",
+          "name": "_percentDivisor",
           "type": "uint256"
         }
       ],
@@ -1514,7 +1509,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "redemptionFeeFloor",
+          "name": "_redemptionFeeFloor",
           "type": "uint256"
         }
       ],
@@ -1708,7 +1703,7 @@
       "type": "constructor"
     }
   ],
-  "transactionHash": "0xf40eefb6e5036c4746213d96f0018d33f105b2b4d1a2535ac95390e7d99bc563",
+  "transactionHash": "0xe5e828540eff5e312608a74f146204f23f511b6f1b20961de5bf3abfb948b8ff",
   "receipt": {
     "to": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
     "from": "0x19E733F20aAdaB8996f7895ACBD04f746BF4Aac1",
@@ -1716,13 +1711,13 @@
     "transactionIndex": 0,
     "gasUsed": "773466",
     "logsBloom": "0x00000000000000000000000000000000400000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000001000000000000000000000000000000000000024000000000000000000800000000800000000000000000000000400000000000000000000800000000000000000000004080000001000000800000000000000400000000000000000000000000000000000000000000100000000000000022000000000000000000000000002000000404004000000000000020000000000000000000000008000000000000000000000000000000000000000000",
-    "blockHash": "0x92701cf5ea77487611fd30421f7ab0341d344a681be89e4f784eac3e951106df",
-    "transactionHash": "0xf40eefb6e5036c4746213d96f0018d33f105b2b4d1a2535ac95390e7d99bc563",
+    "blockHash": "0x2683394c3db190db4e7ea09e24b4ba1b5e62ecb2fc7bb3915562198450a71c3e",
+    "transactionHash": "0xe5e828540eff5e312608a74f146204f23f511b6f1b20961de5bf3abfb948b8ff",
     "logs": [
       {
         "transactionIndex": 0,
-        "blockNumber": 19861091,
-        "transactionHash": "0xf40eefb6e5036c4746213d96f0018d33f105b2b4d1a2535ac95390e7d99bc563",
+        "blockNumber": 19960126,
+        "transactionHash": "0xe5e828540eff5e312608a74f146204f23f511b6f1b20961de5bf3abfb948b8ff",
         "address": "0xAF0e56d4490b9B019eBD67Bc2f6f79282Bf66561",
         "topics": [
           "0xbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b",
@@ -1730,12 +1725,12 @@
         ],
         "data": "0x",
         "logIndex": 0,
-        "blockHash": "0x92701cf5ea77487611fd30421f7ab0341d344a681be89e4f784eac3e951106df"
+        "blockHash": "0x2683394c3db190db4e7ea09e24b4ba1b5e62ecb2fc7bb3915562198450a71c3e"
       },
       {
         "transactionIndex": 0,
-        "blockNumber": 19861091,
-        "transactionHash": "0xf40eefb6e5036c4746213d96f0018d33f105b2b4d1a2535ac95390e7d99bc563",
+        "blockNumber": 19960126,
+        "transactionHash": "0xe5e828540eff5e312608a74f146204f23f511b6f1b20961de5bf3abfb948b8ff",
         "address": "0xAF0e56d4490b9B019eBD67Bc2f6f79282Bf66561",
         "topics": [
           "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
@@ -1744,34 +1739,34 @@
         ],
         "data": "0x",
         "logIndex": 1,
-        "blockHash": "0x92701cf5ea77487611fd30421f7ab0341d344a681be89e4f784eac3e951106df"
+        "blockHash": "0x2683394c3db190db4e7ea09e24b4ba1b5e62ecb2fc7bb3915562198450a71c3e"
       },
       {
         "transactionIndex": 0,
-        "blockNumber": 19861091,
-        "transactionHash": "0xf40eefb6e5036c4746213d96f0018d33f105b2b4d1a2535ac95390e7d99bc563",
+        "blockNumber": 19960126,
+        "transactionHash": "0xe5e828540eff5e312608a74f146204f23f511b6f1b20961de5bf3abfb948b8ff",
         "address": "0xAF0e56d4490b9B019eBD67Bc2f6f79282Bf66561",
         "topics": [
           "0xc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d2"
         ],
         "data": "0x0000000000000000000000000000000000000000000000000000000000000001",
         "logIndex": 2,
-        "blockHash": "0x92701cf5ea77487611fd30421f7ab0341d344a681be89e4f784eac3e951106df"
+        "blockHash": "0x2683394c3db190db4e7ea09e24b4ba1b5e62ecb2fc7bb3915562198450a71c3e"
       },
       {
         "transactionIndex": 0,
-        "blockNumber": 19861091,
-        "transactionHash": "0xf40eefb6e5036c4746213d96f0018d33f105b2b4d1a2535ac95390e7d99bc563",
+        "blockNumber": 19960126,
+        "transactionHash": "0xe5e828540eff5e312608a74f146204f23f511b6f1b20961de5bf3abfb948b8ff",
         "address": "0xAF0e56d4490b9B019eBD67Bc2f6f79282Bf66561",
         "topics": [
           "0x7e644d79422f17c01e4894b5f4f588d331ebfa28653d42ae832dc59e38c9798f"
         ],
         "data": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000008c8a0e3124a3c784b5b5e91ee516f78c85292993",
         "logIndex": 3,
-        "blockHash": "0x92701cf5ea77487611fd30421f7ab0341d344a681be89e4f784eac3e951106df"
+        "blockHash": "0x2683394c3db190db4e7ea09e24b4ba1b5e62ecb2fc7bb3915562198450a71c3e"
       }
     ],
-    "blockNumber": 19861091,
+    "blockNumber": 19960126,
     "cumulativeGasUsed": "773466",
     "status": 1,
     "byzantium": true

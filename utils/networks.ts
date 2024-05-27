@@ -2,13 +2,25 @@
 import { NETWORKS } from "../config/networks";
 
 /**
+ * Checks if the contracts should be verified.
+ *
+ * @param chainId - The chain ID of the network.
+ * @returns A boolean indicating whether the contracts should be verified.
+ */
+export function shouldVerifyContracts(chainId: string): boolean {
+  const isTenderlyVirtualTestnet = chainId === "1771" || chainId === "34443";
+
+  return !isLocalhostNetwork(chainId) && !isTenderlyVirtualTestnet;
+}
+
+/**
  * Checks if the network is a localhost network.
  *
  * @param chainId - The chain ID of the network.
  * @returns A boolean indicating whether the network is a localhost network.
  */
 export function isLocalhostNetwork(chainId: string): boolean {
-  return chainId === "31337" || chainId === "1337" || chainId === "1771";
+  return chainId === "31337" || chainId === "1337";
 }
 
 /**

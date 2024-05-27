@@ -4,7 +4,7 @@ import type { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { preDeploy } from "../utils/contracts";
 import { generateSalt } from "../utils/misc";
-import { isLocalhostNetwork } from "../utils/networks";
+import { shouldVerifyContracts } from "../utils/networks";
 import { verifyContract } from "../utils/verify";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -26,8 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  // You don't want to verify on localhost
-  if (isLocalhostNetwork(chainId) === false) {
+  if (shouldVerifyContracts(chainId)) {
     const contractPath = `contracts/DebtToken.sol:DebtToken`;
     await verifyContract({
       contractPath: contractPath,

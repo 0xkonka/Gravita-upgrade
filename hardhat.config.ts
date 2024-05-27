@@ -1,6 +1,7 @@
 import "@nomicfoundation/hardhat-foundry";
 import "@nomicfoundation/hardhat-toolbox";
 import "@primitivefi/hardhat-dodoc";
+import * as tenderly from "@tenderly/hardhat-tenderly";
 import { config as dotenvConfig } from "dotenv";
 import "hardhat-contract-sizer";
 import "hardhat-deploy";
@@ -12,6 +13,8 @@ import { resolve } from "path";
 import { API_KEYS } from "./config/api-keys";
 import { NETWORKS, Network, NetworkName } from "./config/networks";
 import "./tasks";
+
+tenderly.setup({ automaticVerifications: true });
 
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(__dirname, dotenvConfigPath) });
@@ -163,6 +166,10 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: "types",
     target: "ethers-v6",
+  },
+  tenderly: {
+    project: "tren-finance",
+    username: "tren-finance",
   },
 };
 

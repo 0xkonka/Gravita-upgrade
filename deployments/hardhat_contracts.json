@@ -517,7 +517,7 @@
           ]
         },
         "DebtToken": {
-          "address": "0xAD525A54D2a761dFa921353512FF145f2B5B37fd",
+          "address": "0x284401E5523d3941fa492774f229A984D6897da4",
           "abi": [
             {
               "inputs": [
@@ -534,7 +534,7 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "caller",
+                  "name": "_caller",
                   "type": "address"
                 }
               ],
@@ -545,7 +545,7 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "caller",
+                  "name": "_caller",
                   "type": "address"
                 }
               ],
@@ -581,7 +581,7 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "collateral",
+                  "name": "_collateral",
                   "type": "address"
                 }
               ],
@@ -592,7 +592,7 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "notWhitelistedContract",
+                  "name": "_notWhitelistedContract",
                   "type": "address"
                 }
               ],
@@ -828,7 +828,7 @@
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
                   "name": "_asset",
                   "type": "address"
@@ -836,7 +836,7 @@
                 {
                   "indexed": false,
                   "internalType": "bool",
-                  "name": "state",
+                  "name": "_state",
                   "type": "bool"
                 }
               ],
@@ -866,44 +866,25 @@
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "borrowerOperations",
+                  "name": "_borrowerOperations",
                   "type": "address"
                 },
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "stabilityPool",
+                  "name": "_stabilityPool",
                   "type": "address"
                 },
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "trenBoxManager",
+                  "name": "_trenBoxManager",
                   "type": "address"
                 }
               ],
               "name": "ProtocolContractsAddressesSet",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "_user",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "TokenBalanceUpdated",
               "type": "event"
             },
             {
@@ -935,15 +916,15 @@
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "_whitelisted",
+                  "name": "_address",
                   "type": "address"
                 },
                 {
                   "indexed": false,
                   "internalType": "bool",
-                  "name": "whitelisted",
+                  "name": "_whitelisted",
                   "type": "bool"
                 }
               ],
@@ -1178,7 +1159,7 @@
                 },
                 {
                   "internalType": "bool",
-                  "name": "status",
+                  "name": "_status",
                   "type": "bool"
                 }
               ],
@@ -1462,12 +1443,12 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "recipient",
+                  "name": "_recipient",
                   "type": "address"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "amount",
+                  "name": "_amount",
                   "type": "uint256"
                 }
               ],
@@ -1486,17 +1467,17 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "_sender",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "recipient",
+                  "name": "_recipient",
                   "type": "address"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "amount",
+                  "name": "_amount",
                   "type": "uint256"
                 }
               ],
@@ -1554,199 +1535,6 @@
                 }
               ],
               "stateMutability": "view",
-              "type": "function"
-            }
-          ]
-        },
-        "PriceFeedTestnet": {
-          "address": "0x801ba2542E3Df1648DAb65Dc785d3eF87Ac9877e",
-          "abi": [
-            {
-              "inputs": [],
-              "name": "PriceFeed__ExistingOracleRequired",
-              "type": "error"
-            },
-            {
-              "inputs": [],
-              "name": "PriceFeed__InvalidDecimalsError",
-              "type": "error"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "token",
-                  "type": "address"
-                }
-              ],
-              "name": "PriceFeed__InvalidOracleResponseError",
-              "type": "error"
-            },
-            {
-              "inputs": [],
-              "name": "PriceFeed__TimelockOnlyError",
-              "type": "error"
-            },
-            {
-              "inputs": [],
-              "name": "PriceFeed__UnknownAssetError",
-              "type": "error"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "token",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "oracleAddress",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "bool",
-                  "name": "isEthIndexed",
-                  "type": "bool"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "bool",
-                  "name": "isFallback",
-                  "type": "bool"
-                }
-              ],
-              "name": "NewOracleRegistered",
-              "type": "event"
-            },
-            {
-              "inputs": [],
-              "name": "NAME",
-              "outputs": [
-                {
-                  "internalType": "string",
-                  "name": "",
-                  "type": "string"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_asset",
-                  "type": "address"
-                }
-              ],
-              "name": "fetchPrice",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_asset",
-                  "type": "address"
-                }
-              ],
-              "name": "getPrice",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "asset",
-                  "type": "address"
-                }
-              ],
-              "name": "prices",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "price",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_token",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_oracle",
-                  "type": "address"
-                },
-                {
-                  "internalType": "enum IPriceFeed.ProviderType",
-                  "name": "_type",
-                  "type": "uint8"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_timeoutMinutes",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bool",
-                  "name": "_isEthIndexed",
-                  "type": "bool"
-                },
-                {
-                  "internalType": "bool",
-                  "name": "_isFallback",
-                  "type": "bool"
-                }
-              ],
-              "name": "setOracle",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_asset",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_price",
-                  "type": "uint256"
-                }
-              ],
-              "name": "setPrice",
-              "outputs": [],
-              "stateMutability": "nonpayable",
               "type": "function"
             }
           ]
@@ -1916,8 +1704,8 @@
             }
           ]
         },
-        "AdminContract_Implementation": {
-          "address": "0x6557630204c61E37558fB7008366D8f903e632ce",
+        "PriceFeed_Implementation": {
+          "address": "0x2386280F5C7E914CA666974CB85aAE22c7D15bdF",
           "abi": [
             {
               "inputs": [
@@ -1932,7 +1720,1782 @@
             },
             {
               "inputs": [],
-              "name": "AdminContract__CollateralAlreadyInitialized",
+              "name": "ConfigurableAddresses__CommunityIssuanceZeroAddress",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "ConfigurableAddresses__LengthMismatch",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "ConfigurableAddresses__SetupIsInitialized",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "ConfigurableAddresses__TRENStakingZeroAddress",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "position",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "address_",
+                  "type": "address"
+                }
+              ],
+              "name": "ConfigurableAddresses__ZeroAddresses",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                }
+              ],
+              "name": "ERC1967InvalidImplementation",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "ERC1967NonPayable",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "FailedInnerCall",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "InvalidInitialization",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "NotInitializing",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "owner",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnableInvalidOwner",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnableUnauthorizedAccount",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "PriceFeed__ExistingOracleRequired",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "PriceFeed__InvalidDecimalsError",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                }
+              ],
+              "name": "PriceFeed__InvalidOracleResponseError",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "PriceFeed__MissingPythFeedId",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "PriceFeed__TimelockOnlyError",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "PriceFeed__UnknownAssetError",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "UUPSUnauthorizedCallContext",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "slot",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "UUPSUnsupportedProxiableUUID",
+              "type": "error"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint64",
+                  "name": "version",
+                  "type": "uint64"
+                }
+              ],
+              "name": "Initialized",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "_oracleAddress",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bool",
+                  "name": "_isEthIndexed",
+                  "type": "bool"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bool",
+                  "name": "_isFallback",
+                  "type": "bool"
+                }
+              ],
+              "name": "NewOracleRegistered",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "previousOwner",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnershipTransferred",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                }
+              ],
+              "name": "Upgraded",
+              "type": "event"
+            },
+            {
+              "inputs": [],
+              "name": "NAME",
+              "outputs": [
+                {
+                  "internalType": "string",
+                  "name": "",
+                  "type": "string"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "TARGET_DIGITS",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "UPGRADE_INTERFACE_VERSION",
+              "outputs": [
+                {
+                  "internalType": "string",
+                  "name": "",
+                  "type": "string"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "adminContract",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                }
+              ],
+              "name": "authorizeUpgrade",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "borrowerOperations",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "communityIssuance",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "debtToken",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                }
+              ],
+              "name": "fallbacks",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "oracleAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "enum IPriceFeed.ProviderType",
+                  "name": "providerType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "timeoutSeconds",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "decimals",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "isEthIndexed",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "additionalData",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "feeCollector",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                }
+              ],
+              "name": "fetchPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "flashLoanAddress",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "initialOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "initialize",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "isAddressSetupInitialized",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                }
+              ],
+              "name": "oracles",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "oracleAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "enum IPriceFeed.ProviderType",
+                  "name": "providerType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "timeoutSeconds",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "decimals",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "isEthIndexed",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "additionalData",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "priceFeed",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "proxiableUUID",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "renounceOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "_addresses",
+                  "type": "address[]"
+                }
+              ],
+              "name": "setAddresses",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_communityIssuance",
+                  "type": "address"
+                }
+              ],
+              "name": "setCommunityIssuance",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_oracle",
+                  "type": "address"
+                },
+                {
+                  "internalType": "enum IPriceFeed.ProviderType",
+                  "name": "_type",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_timeoutSeconds",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "_isEthIndexed",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "_isFallback",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "_additionalData",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "setOracle",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_trenStaking",
+                  "type": "address"
+                }
+              ],
+              "name": "setTRENStaking",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "sortedTrenBoxes",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "stabilityPool",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "timelockAddress",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "transferOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "treasuryAddress",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "trenBoxManager",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "trenBoxManagerOperations",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "trenBoxStorage",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "trenStaking",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "upgradeToAndCall",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            }
+          ]
+        },
+        "PriceFeed_Proxy": {
+          "address": "0x51b30B873BB494266EEf92686aC334584FeCaD4e",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_logic",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "_data",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "previousAdmin",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "AdminChanged",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                }
+              ],
+              "name": "BeaconUpgraded",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                }
+              ],
+              "name": "Upgraded",
+              "type": "event"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "fallback"
+            },
+            {
+              "inputs": [],
+              "name": "admin",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "changeAdmin",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "implementation",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "implementation_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                }
+              ],
+              "name": "upgradeTo",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "upgradeToAndCall",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
+            }
+          ]
+        },
+        "PriceFeed": {
+          "address": "0x51b30B873BB494266EEf92686aC334584FeCaD4e",
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "previousAdmin",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "AdminChanged",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                }
+              ],
+              "name": "BeaconUpgraded",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                }
+              ],
+              "name": "Upgraded",
+              "type": "event"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "fallback"
+            },
+            {
+              "inputs": [],
+              "name": "admin",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newAdmin",
+                  "type": "address"
+                }
+              ],
+              "name": "changeAdmin",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "implementation",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "implementation_",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                }
+              ],
+              "name": "upgradeTo",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "data",
+                  "type": "bytes"
+                }
+              ],
+              "name": "upgradeToAndCall",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                }
+              ],
+              "name": "AddressEmptyCode",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "ConfigurableAddresses__CommunityIssuanceZeroAddress",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "ConfigurableAddresses__LengthMismatch",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "ConfigurableAddresses__SetupIsInitialized",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "ConfigurableAddresses__TRENStakingZeroAddress",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "position",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "address_",
+                  "type": "address"
+                }
+              ],
+              "name": "ConfigurableAddresses__ZeroAddresses",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                }
+              ],
+              "name": "ERC1967InvalidImplementation",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "ERC1967NonPayable",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "FailedInnerCall",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "InvalidInitialization",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "NotInitializing",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "owner",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnableInvalidOwner",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnableUnauthorizedAccount",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "PriceFeed__ExistingOracleRequired",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "PriceFeed__InvalidDecimalsError",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                }
+              ],
+              "name": "PriceFeed__InvalidOracleResponseError",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "PriceFeed__MissingPythFeedId",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "PriceFeed__TimelockOnlyError",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "PriceFeed__UnknownAssetError",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "UUPSUnauthorizedCallContext",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "slot",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "UUPSUnsupportedProxiableUUID",
+              "type": "error"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "uint64",
+                  "name": "version",
+                  "type": "uint64"
+                }
+              ],
+              "name": "Initialized",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "_oracleAddress",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bool",
+                  "name": "_isEthIndexed",
+                  "type": "bool"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bool",
+                  "name": "_isFallback",
+                  "type": "bool"
+                }
+              ],
+              "name": "NewOracleRegistered",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "previousOwner",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnershipTransferred",
+              "type": "event"
+            },
+            {
+              "inputs": [],
+              "name": "NAME",
+              "outputs": [
+                {
+                  "internalType": "string",
+                  "name": "",
+                  "type": "string"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "TARGET_DIGITS",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "UPGRADE_INTERFACE_VERSION",
+              "outputs": [
+                {
+                  "internalType": "string",
+                  "name": "",
+                  "type": "string"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "adminContract",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newImplementation",
+                  "type": "address"
+                }
+              ],
+              "name": "authorizeUpgrade",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "borrowerOperations",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "communityIssuance",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "debtToken",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                }
+              ],
+              "name": "fallbacks",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "oracleAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "enum IPriceFeed.ProviderType",
+                  "name": "providerType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "timeoutSeconds",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "decimals",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "isEthIndexed",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "additionalData",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "feeCollector",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                }
+              ],
+              "name": "fetchPrice",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "flashLoanAddress",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "initialOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "initialize",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "isAddressSetupInitialized",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                }
+              ],
+              "name": "oracles",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "oracleAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "enum IPriceFeed.ProviderType",
+                  "name": "providerType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "timeoutSeconds",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "decimals",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "isEthIndexed",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "additionalData",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "priceFeed",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "proxiableUUID",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "renounceOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "_addresses",
+                  "type": "address[]"
+                }
+              ],
+              "name": "setAddresses",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_communityIssuance",
+                  "type": "address"
+                }
+              ],
+              "name": "setCommunityIssuance",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_oracle",
+                  "type": "address"
+                },
+                {
+                  "internalType": "enum IPriceFeed.ProviderType",
+                  "name": "_type",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_timeoutSeconds",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "_isEthIndexed",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "_isFallback",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "_additionalData",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "setOracle",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_trenStaking",
+                  "type": "address"
+                }
+              ],
+              "name": "setTRENStaking",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "sortedTrenBoxes",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "stabilityPool",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "timelockAddress",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "transferOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "treasuryAddress",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "trenBoxManager",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "trenBoxManagerOperations",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "trenBoxStorage",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "trenStaking",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_logic",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "admin_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "_data",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "constructor"
+            }
+          ]
+        },
+        "AdminContract_Implementation": {
+          "address": "0x6557630204c61E37558fB7008366D8f903e632ce",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                }
+              ],
+              "name": "AddressEmptyCode",
               "type": "error"
             },
             {
@@ -2053,22 +3616,22 @@
               "inputs": [
                 {
                   "internalType": "string",
-                  "name": "parameter",
+                  "name": "_parameter",
                   "type": "string"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "valueEntered",
+                  "name": "_valueEntered",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "minValue",
+                  "name": "_minValue",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "maxValue",
+                  "name": "_maxValue",
                   "type": "uint256"
                 }
               ],
@@ -2097,13 +3660,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldBorrowingFee",
+                  "name": "_oldBorrowingFee",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newBorrowingFee",
+                  "name": "_newBorrowingFee",
                   "type": "uint256"
                 }
               ],
@@ -2116,13 +3679,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldCCR",
+                  "name": "_oldCCR",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newCCR",
+                  "name": "_newCCR",
                   "type": "uint256"
                 }
               ],
@@ -2148,13 +3711,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldFee",
+                  "name": "_oldFee",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newFee",
+                  "name": "_newFee",
                   "type": "uint256"
                 }
               ],
@@ -2167,13 +3730,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldMaxDebt",
+                  "name": "_oldMaxDebt",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newMaxDebt",
+                  "name": "_newMaxDebt",
                   "type": "uint256"
                 }
               ],
@@ -2186,13 +3749,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldMinDebt",
+                  "name": "_oldMinDebt",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newMinDebt",
+                  "name": "_newMinDebt",
                   "type": "uint256"
                 }
               ],
@@ -2218,13 +3781,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldMCR",
+                  "name": "_oldMCR",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newMCR",
+                  "name": "_newMCR",
                   "type": "uint256"
                 }
               ],
@@ -2237,13 +3800,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldMinNet",
+                  "name": "_oldMinNet",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newMinNet",
+                  "name": "_newMinNet",
                   "type": "uint256"
                 }
               ],
@@ -2256,13 +3819,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldMintCap",
+                  "name": "_oldMintCap",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newMintCap",
+                  "name": "_newMintCap",
                   "type": "uint256"
                 }
               ],
@@ -2294,13 +3857,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldPercentDiv",
+                  "name": "_oldPercentDiv",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newPercentDiv",
+                  "name": "_newPercentDiv",
                   "type": "uint256"
                 }
               ],
@@ -2332,13 +3895,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldRedemptionFeeFloor",
+                  "name": "_oldRedemptionFeeFloor",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newRedemptionFeeFloor",
+                  "name": "_newRedemptionFeeFloor",
                   "type": "uint256"
                 }
               ],
@@ -3078,7 +4641,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "borrowingFee",
+                  "name": "_borrowingFee",
                   "type": "uint256"
                 }
               ],
@@ -3096,7 +4659,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "newCCR",
+                  "name": "_newCCR",
                   "type": "uint256"
                 }
               ],
@@ -3114,37 +4677,37 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "borrowingFee",
+                  "name": "_borrowingFee",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "ccr",
+                  "name": "_ccr",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "mcr",
+                  "name": "_mcr",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "minNetDebt",
+                  "name": "_minNetDebt",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "mintCap",
+                  "name": "_mintCap",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "percentDivisor",
+                  "name": "_percentDivisor",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "redemptionFeeFloor",
+                  "name": "_redemptionFeeFloor",
                   "type": "uint256"
                 }
               ],
@@ -3206,7 +4769,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "newMCR",
+                  "name": "_newMCR",
                   "type": "uint256"
                 }
               ],
@@ -3250,7 +4813,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "minNetDebt",
+                  "name": "_minNetDebt",
                   "type": "uint256"
                 }
               ],
@@ -3268,7 +4831,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "mintCap",
+                  "name": "_mintCap",
                   "type": "uint256"
                 }
               ],
@@ -3286,7 +4849,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "percentDivisor",
+                  "name": "_percentDivisor",
                   "type": "uint256"
                 }
               ],
@@ -3322,7 +4885,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "redemptionFeeFloor",
+                  "name": "_redemptionFeeFloor",
                   "type": "uint256"
                 }
               ],
@@ -3802,11 +5365,6 @@
             },
             {
               "inputs": [],
-              "name": "AdminContract__CollateralAlreadyInitialized",
-              "type": "error"
-            },
-            {
-              "inputs": [],
               "name": "AdminContract__CollateralDoesNotExist",
               "type": "error"
             },
@@ -3923,22 +5481,22 @@
               "inputs": [
                 {
                   "internalType": "string",
-                  "name": "parameter",
+                  "name": "_parameter",
                   "type": "string"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "valueEntered",
+                  "name": "_valueEntered",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "minValue",
+                  "name": "_minValue",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "maxValue",
+                  "name": "_maxValue",
                   "type": "uint256"
                 }
               ],
@@ -3967,13 +5525,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldBorrowingFee",
+                  "name": "_oldBorrowingFee",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newBorrowingFee",
+                  "name": "_newBorrowingFee",
                   "type": "uint256"
                 }
               ],
@@ -3986,13 +5544,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldCCR",
+                  "name": "_oldCCR",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newCCR",
+                  "name": "_newCCR",
                   "type": "uint256"
                 }
               ],
@@ -4018,13 +5576,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldFee",
+                  "name": "_oldFee",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newFee",
+                  "name": "_newFee",
                   "type": "uint256"
                 }
               ],
@@ -4037,13 +5595,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldMaxDebt",
+                  "name": "_oldMaxDebt",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newMaxDebt",
+                  "name": "_newMaxDebt",
                   "type": "uint256"
                 }
               ],
@@ -4056,13 +5614,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldMinDebt",
+                  "name": "_oldMinDebt",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newMinDebt",
+                  "name": "_newMinDebt",
                   "type": "uint256"
                 }
               ],
@@ -4088,13 +5646,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldMCR",
+                  "name": "_oldMCR",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newMCR",
+                  "name": "_newMCR",
                   "type": "uint256"
                 }
               ],
@@ -4107,13 +5665,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldMinNet",
+                  "name": "_oldMinNet",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newMinNet",
+                  "name": "_newMinNet",
                   "type": "uint256"
                 }
               ],
@@ -4126,13 +5684,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldMintCap",
+                  "name": "_oldMintCap",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newMintCap",
+                  "name": "_newMintCap",
                   "type": "uint256"
                 }
               ],
@@ -4164,13 +5722,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldPercentDiv",
+                  "name": "_oldPercentDiv",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newPercentDiv",
+                  "name": "_newPercentDiv",
                   "type": "uint256"
                 }
               ],
@@ -4202,13 +5760,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "oldRedemptionFeeFloor",
+                  "name": "_oldRedemptionFeeFloor",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "newRedemptionFeeFloor",
+                  "name": "_newRedemptionFeeFloor",
                   "type": "uint256"
                 }
               ],
@@ -4935,7 +6493,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "borrowingFee",
+                  "name": "_borrowingFee",
                   "type": "uint256"
                 }
               ],
@@ -4953,7 +6511,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "newCCR",
+                  "name": "_newCCR",
                   "type": "uint256"
                 }
               ],
@@ -4971,37 +6529,37 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "borrowingFee",
+                  "name": "_borrowingFee",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "ccr",
+                  "name": "_ccr",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "mcr",
+                  "name": "_mcr",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "minNetDebt",
+                  "name": "_minNetDebt",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "mintCap",
+                  "name": "_mintCap",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "percentDivisor",
+                  "name": "_percentDivisor",
                   "type": "uint256"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "redemptionFeeFloor",
+                  "name": "_redemptionFeeFloor",
                   "type": "uint256"
                 }
               ],
@@ -5063,7 +6621,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "newMCR",
+                  "name": "_newMCR",
                   "type": "uint256"
                 }
               ],
@@ -5107,7 +6665,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "minNetDebt",
+                  "name": "_minNetDebt",
                   "type": "uint256"
                 }
               ],
@@ -5125,7 +6683,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "mintCap",
+                  "name": "_mintCap",
                   "type": "uint256"
                 }
               ],
@@ -5143,7 +6701,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "percentDivisor",
+                  "name": "_percentDivisor",
                   "type": "uint256"
                 }
               ],
@@ -5179,7 +6737,7 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "redemptionFeeFloor",
+                  "name": "_redemptionFeeFloor",
                   "type": "uint256"
                 }
               ],
@@ -5375,7 +6933,7 @@
           ]
         },
         "BorrowerOperations_Implementation": {
-          "address": "0x471303d6b047A809d40884D4fFe3E9C02af81e45",
+          "address": "0xc282DcC98e51BBFf4AA91E374d4a92623830565f",
           "abi": [
             {
               "inputs": [
@@ -5437,11 +6995,6 @@
             {
               "inputs": [],
               "name": "BorrowerOperations__OperationInRecoveryMode",
-              "type": "error"
-            },
-            {
-              "inputs": [],
-              "name": "BorrowerOperations__RepayLargerThanTrenBoxDebt",
               "type": "error"
             },
             {
@@ -5711,7 +7264,7 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "arrayIndex",
+                  "name": "_arrayIndex",
                   "type": "uint256"
                 }
               ],
@@ -5748,13 +7301,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "stake",
+                  "name": "_stake",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "enum IBorrowerOperations.BorrowerOperation",
-                  "name": "operation",
+                  "name": "_operation",
                   "type": "uint8"
                 }
               ],
@@ -6403,7 +7956,7 @@
           ]
         },
         "BorrowerOperations_Proxy": {
-          "address": "0x31bEEee3CF731B1A4Cc4649504518DA3782c242e",
+          "address": "0x624Ed8afca083C07EB4aA4265374A1a6e5f964F6",
           "abi": [
             {
               "inputs": [
@@ -6552,7 +8105,7 @@
           ]
         },
         "BorrowerOperations": {
-          "address": "0x31bEEee3CF731B1A4Cc4649504518DA3782c242e",
+          "address": "0x624Ed8afca083C07EB4aA4265374A1a6e5f964F6",
           "abi": [
             {
               "anonymous": false,
@@ -6737,11 +8290,6 @@
             {
               "inputs": [],
               "name": "BorrowerOperations__OperationInRecoveryMode",
-              "type": "error"
-            },
-            {
-              "inputs": [],
-              "name": "BorrowerOperations__RepayLargerThanTrenBoxDebt",
               "type": "error"
             },
             {
@@ -7011,7 +8559,7 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "arrayIndex",
+                  "name": "_arrayIndex",
                   "type": "uint256"
                 }
               ],
@@ -7048,13 +8596,13 @@
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "stake",
+                  "name": "_stake",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "enum IBorrowerOperations.BorrowerOperation",
-                  "name": "operation",
+                  "name": "_operation",
                   "type": "uint8"
                 }
               ],
@@ -7693,7 +9241,7 @@
           ]
         },
         "FeeCollector_Implementation": {
-          "address": "0x12d2bd84C3D518b1818AFE61e5238DF50e9858c1",
+          "address": "0x5EDbeBe311abD315912b0ADd9Cc055477c34a25E",
           "abi": [
             {
               "inputs": [
@@ -7783,12 +9331,12 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "_sender",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected",
+                  "name": "_expected",
                   "type": "address"
                 }
               ],
@@ -7799,17 +9347,17 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "_sender",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected1",
+                  "name": "_expected1",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected2",
+                  "name": "_expected2",
                   "type": "address"
                 }
               ],
@@ -7818,23 +9366,28 @@
             },
             {
               "inputs": [],
-              "name": "FeeCollector__InvalidTRENStakingAddress",
+              "name": "FeeCollector__PaybackFractionHigherThanOne",
               "type": "error"
             },
             {
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "_sender",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected",
+                  "name": "_expected",
                   "type": "address"
                 }
               ],
               "name": "FeeCollector__TrenBoxManagerOnly",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "FeeCollector__ZeroPaybackFraction",
               "type": "error"
             },
             {
@@ -7900,27 +9453,27 @@
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "borrower",
+                  "name": "_borrower",
                   "type": "address"
                 },
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "asset",
+                  "name": "_asset",
                   "type": "address"
                 },
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "collector",
+                  "name": "_collector",
                   "type": "address"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "amount",
+                  "name": "_amount",
                   "type": "uint256"
                 }
               ],
@@ -7931,33 +9484,33 @@
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "borrower",
+                  "name": "_borrower",
                   "type": "address"
                 },
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "asset",
+                  "name": "_asset",
                   "type": "address"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "from",
+                  "name": "_from",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "to",
+                  "name": "_to",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "amount",
+                  "name": "_amount",
                   "type": "uint256"
                 }
               ],
@@ -7968,21 +9521,21 @@
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "borrower",
+                  "name": "_borrower",
                   "type": "address"
                 },
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "asset",
+                  "name": "_asset",
                   "type": "address"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "amount",
+                  "name": "_amount",
                   "type": "uint256"
                 }
               ],
@@ -8025,15 +9578,15 @@
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "asset",
+                  "name": "_asset",
                   "type": "address"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "amount",
+                  "name": "_amount",
                   "type": "uint256"
                 }
               ],
@@ -8652,7 +10205,7 @@
           ]
         },
         "FeeCollector_Proxy": {
-          "address": "0x953B34DD9dE4D78E372112d2b91DfDe67bEC77E5",
+          "address": "0x05793c925Ba734678D8dd8488Ee253734aAc0EF2",
           "abi": [
             {
               "inputs": [
@@ -8801,7 +10354,7 @@
           ]
         },
         "FeeCollector": {
-          "address": "0x953B34DD9dE4D78E372112d2b91DfDe67bEC77E5",
+          "address": "0x05793c925Ba734678D8dd8488Ee253734aAc0EF2",
           "abi": [
             {
               "anonymous": false,
@@ -9014,12 +10567,12 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "_sender",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected",
+                  "name": "_expected",
                   "type": "address"
                 }
               ],
@@ -9030,17 +10583,17 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "_sender",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected1",
+                  "name": "_expected1",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected2",
+                  "name": "_expected2",
                   "type": "address"
                 }
               ],
@@ -9049,23 +10602,28 @@
             },
             {
               "inputs": [],
-              "name": "FeeCollector__InvalidTRENStakingAddress",
+              "name": "FeeCollector__PaybackFractionHigherThanOne",
               "type": "error"
             },
             {
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "_sender",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected",
+                  "name": "_expected",
                   "type": "address"
                 }
               ],
               "name": "FeeCollector__TrenBoxManagerOnly",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "FeeCollector__ZeroPaybackFraction",
               "type": "error"
             },
             {
@@ -9131,27 +10689,27 @@
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "borrower",
+                  "name": "_borrower",
                   "type": "address"
                 },
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "asset",
+                  "name": "_asset",
                   "type": "address"
                 },
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "collector",
+                  "name": "_collector",
                   "type": "address"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "amount",
+                  "name": "_amount",
                   "type": "uint256"
                 }
               ],
@@ -9162,33 +10720,33 @@
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "borrower",
+                  "name": "_borrower",
                   "type": "address"
                 },
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "asset",
+                  "name": "_asset",
                   "type": "address"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "from",
+                  "name": "_from",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "to",
+                  "name": "_to",
                   "type": "uint256"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "amount",
+                  "name": "_amount",
                   "type": "uint256"
                 }
               ],
@@ -9199,21 +10757,21 @@
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "borrower",
+                  "name": "_borrower",
                   "type": "address"
                 },
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "asset",
+                  "name": "_asset",
                   "type": "address"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "amount",
+                  "name": "_amount",
                   "type": "uint256"
                 }
               ],
@@ -9256,15 +10814,15 @@
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "asset",
+                  "name": "_asset",
                   "type": "address"
                 },
                 {
                   "indexed": false,
                   "internalType": "uint256",
-                  "name": "amount",
+                  "name": "_amount",
                   "type": "uint256"
                 }
               ],
@@ -9873,7 +11431,7 @@
           ]
         },
         "SortedTrenBoxes_Implementation": {
-          "address": "0x88f440A5E0BdAAC01bc8029E26651CAD27120356",
+          "address": "0x5dA6F400bD28193288A718509C444e958AF1f2B9",
           "abi": [
             {
               "inputs": [
@@ -9977,11 +11535,6 @@
             },
             {
               "inputs": [],
-              "name": "SortedTrenBoxer__ListDoesNotContainNode",
-              "type": "error"
-            },
-            {
-              "inputs": [],
               "name": "SortedTrenBoxes__CallerMustBeBorrowerOperationsOrTrenBoxManager",
               "type": "error"
             },
@@ -9998,6 +11551,11 @@
             {
               "inputs": [],
               "name": "SortedTrenBoxes__ListAlreadyContainsNode",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "SortedTrenBoxes__ListDoesNotContainNode",
               "type": "error"
             },
             {
@@ -10810,7 +12368,7 @@
           ]
         },
         "SortedTrenBoxes_Proxy": {
-          "address": "0xDC68844b2C1D2389ec569a573d7BbdBeea30eA90",
+          "address": "0x1dcf51782Ed013dE0c8f5bC29B5a6640Ec337120",
           "abi": [
             {
               "inputs": [
@@ -10959,7 +12517,7 @@
           ]
         },
         "SortedTrenBoxes": {
-          "address": "0xDC68844b2C1D2389ec569a573d7BbdBeea30eA90",
+          "address": "0x1dcf51782Ed013dE0c8f5bC29B5a6640Ec337120",
           "abi": [
             {
               "anonymous": false,
@@ -11186,11 +12744,6 @@
             },
             {
               "inputs": [],
-              "name": "SortedTrenBoxer__ListDoesNotContainNode",
-              "type": "error"
-            },
-            {
-              "inputs": [],
               "name": "SortedTrenBoxes__CallerMustBeBorrowerOperationsOrTrenBoxManager",
               "type": "error"
             },
@@ -11207,6 +12760,11 @@
             {
               "inputs": [],
               "name": "SortedTrenBoxes__ListAlreadyContainsNode",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "SortedTrenBoxes__ListDoesNotContainNode",
               "type": "error"
             },
             {
@@ -12009,7 +13567,7 @@
           ]
         },
         "StabilityPool_Implementation": {
-          "address": "0x88B56f4B02b0Db5d423bf9d060e99d27F331575b",
+          "address": "0x7A99b010AE56999e4b01a90A665024587E686ad0",
           "abi": [
             {
               "inputs": [
@@ -12142,12 +13700,12 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "_sender",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected",
+                  "name": "_expected",
                   "type": "address"
                 }
               ],
@@ -12178,7 +13736,7 @@
               "inputs": [
                 {
                   "internalType": "uint256",
-                  "name": "debtLoss",
+                  "name": "_debtLoss",
                   "type": "uint256"
                 }
               ],
@@ -12194,12 +13752,12 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "_sender",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected",
+                  "name": "_expected",
                   "type": "address"
                 }
               ],
@@ -12210,12 +13768,12 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "_sender",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected",
+                  "name": "_expected",
                   "type": "address"
                 }
               ],
@@ -12258,44 +13816,6 @@
               ],
               "name": "UUPSUnsupportedProxiableUUID",
               "type": "error"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "_asset",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "_to",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "AssetSent",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "newAddress",
-                  "type": "address"
-                }
-              ],
-              "name": "CommunityIssuanceAddressChanged",
-              "type": "event"
             },
             {
               "anonymous": false,
@@ -12486,25 +14006,6 @@
               "inputs": [
                 {
                   "indexed": false,
-                  "internalType": "uint256",
-                  "name": "_newSystemStake",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "_depositor",
-                  "type": "address"
-                }
-              ],
-              "name": "StakeChanged",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
                   "internalType": "address",
                   "name": "_asset",
                   "type": "address"
@@ -12529,25 +14030,6 @@
                 }
               ],
               "name": "SumUpdated",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "_P",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "_G",
-                  "type": "uint256"
-                }
-              ],
-              "name": "SystemSnapshotUpdated",
               "type": "event"
             },
             {
@@ -13439,7 +14921,7 @@
           ]
         },
         "StabilityPool_Proxy": {
-          "address": "0xf398661f226783080d44C8F31731DD42A52679C7",
+          "address": "0x5448d60b5853EA6fB844E53a2b1bd4Df7F29351C",
           "abi": [
             {
               "inputs": [
@@ -13588,7 +15070,7 @@
           ]
         },
         "StabilityPool": {
-          "address": "0xf398661f226783080d44C8F31731DD42A52679C7",
+          "address": "0x5448d60b5853EA6fB844E53a2b1bd4Df7F29351C",
           "abi": [
             {
               "anonymous": false,
@@ -13844,12 +15326,12 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "_sender",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected",
+                  "name": "_expected",
                   "type": "address"
                 }
               ],
@@ -13880,7 +15362,7 @@
               "inputs": [
                 {
                   "internalType": "uint256",
-                  "name": "debtLoss",
+                  "name": "_debtLoss",
                   "type": "uint256"
                 }
               ],
@@ -13896,12 +15378,12 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "_sender",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected",
+                  "name": "_expected",
                   "type": "address"
                 }
               ],
@@ -13912,12 +15394,12 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "sender",
+                  "name": "_sender",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "expected",
+                  "name": "_expected",
                   "type": "address"
                 }
               ],
@@ -13960,44 +15442,6 @@
               ],
               "name": "UUPSUnsupportedProxiableUUID",
               "type": "error"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "_asset",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "_to",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "AssetSent",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "newAddress",
-                  "type": "address"
-                }
-              ],
-              "name": "CommunityIssuanceAddressChanged",
-              "type": "event"
             },
             {
               "anonymous": false,
@@ -14188,25 +15632,6 @@
               "inputs": [
                 {
                   "indexed": false,
-                  "internalType": "uint256",
-                  "name": "_newSystemStake",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "_depositor",
-                  "type": "address"
-                }
-              ],
-              "name": "StakeChanged",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
                   "internalType": "address",
                   "name": "_asset",
                   "type": "address"
@@ -14231,25 +15656,6 @@
                 }
               ],
               "name": "SumUpdated",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "_P",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "_G",
-                  "type": "uint256"
-                }
-              ],
-              "name": "SystemSnapshotUpdated",
               "type": "event"
             },
             {
@@ -19805,7 +21211,7 @@
           ]
         },
         "TrenBoxManagerOperations_Implementation": {
-          "address": "0x8c2D729291F77B656BCa690FaEdc84a81029b966",
+          "address": "0x3116B2D6130B5cAB37C817d59B4555B99d6736e2",
           "abi": [
             {
               "inputs": [
@@ -20920,7 +22326,7 @@
           ]
         },
         "TrenBoxManagerOperations_Proxy": {
-          "address": "0xF7F6D0a3af2dFD1968F4698076B50C6120334DeB",
+          "address": "0x3Bd9218AA411b8361475A1E7A0A15A4939Af17A9",
           "abi": [
             {
               "inputs": [
@@ -21069,7 +22475,7 @@
           ]
         },
         "TrenBoxManagerOperations": {
-          "address": "0xF7F6D0a3af2dFD1968F4698076B50C6120334DeB",
+          "address": "0x3Bd9218AA411b8361475A1E7A0A15A4939Af17A9",
           "abi": [
             {
               "anonymous": false,
@@ -31114,7 +32520,7 @@
           ]
         },
         "BorrowerOperations_Implementation": {
-          "address": "0x471303d6b047A809d40884D4fFe3E9C02af81e45",
+          "address": "0xEE3F235306f0Adfe38f0B53f541d52814ABA5B21",
           "abi": [
             {
               "inputs": [
