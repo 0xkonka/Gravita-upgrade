@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.23;
 
 /**
@@ -30,12 +29,15 @@ interface IPriceFeed {
     /**
      * @dev Enum for storing provider type for price feed.
      * @param Chainlink The chainlink price feed.
-     * @param API3 The The api3 price feed.
+     * @param API3 The api3 price feed.
+     * @param Pyth The pyth price feed.
+     * @param Redstone The redstone price feed.
      */
     enum ProviderType {
         Chainlink,
         API3,
-        Pyth
+        Pyth,
+        Redstone
     }
 
     /**

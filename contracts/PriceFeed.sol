@@ -146,7 +146,10 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
             revert PriceFeed__UnknownAssetError();
         }
 
-        if (ProviderType.Chainlink == oracle.providerType) {
+        if (
+            ProviderType.Chainlink == oracle.providerType
+                || ProviderType.Redstone == oracle.providerType
+        ) {
             (oraclePrice, priceTimestamp) = _fetchChainlinkOracleResponse(oracle.oracleAddress);
         } else if (ProviderType.API3 == oracle.providerType) {
             (oraclePrice, priceTimestamp) = _fetchAPI3OracleResponse(oracle.oracleAddress);
