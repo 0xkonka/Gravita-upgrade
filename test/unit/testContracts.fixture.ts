@@ -149,6 +149,11 @@ export async function loadTestFixture(): Promise<{
   );
   await mockPyth.updatePriceFeeds([initialPythPriceFeedData]);
 
+  const mockRedstone: MockAggregator = (await MockAggregatorFactory.connect(deployer).deploy(
+    ...aggregatorArgs
+  )) as MockAggregator;
+  await mockRedstone.waitForDeployment();
+
   const TrenMathTesterFactory: TrenMathTester__factory = (await ethers.getContractFactory(
     "TrenMathTester"
   )) as TrenMathTester__factory;
@@ -173,6 +178,7 @@ export async function loadTestFixture(): Promise<{
       mockAggregator,
       mockApi3,
       mockPyth,
+      mockRedstone,
       priceFeedTestnet,
       flashLoanTester,
       mockRouter,

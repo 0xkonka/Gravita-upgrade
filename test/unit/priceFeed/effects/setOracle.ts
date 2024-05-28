@@ -5,6 +5,7 @@ const PROVIDER_TYPE = {
   Chainlink: 0,
   API3: 1,
   Pyth: 2,
+  Redstone: 3
 };
 
 type OracleOptions = {
@@ -39,16 +40,25 @@ const PYTH_ORACLE_OPTIONS: OracleOptions = {
   additionalData: "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
 };
 
+const REDSTONE_ORACLE_OPTIONS: OracleOptions = {
+  providerType: PROVIDER_TYPE.Redstone,
+  timeoutSeconds: 3600,
+  isEthIndexed: false,
+  isFallback: true,
+  additionalData: ZeroHash,
+};
+
 export default function shouldBehaveLikeCanSetOracle(): void {
   beforeEach(async function () {
     this.owner = this.signers.deployer;
     this.notOwner = this.signers.accounts[1];
     this.timelockImpostor = this.signers.accounts[2];
 
-    const { mockAggregator, mockApi3 } = this.testContracts;
+    const { mockAggregator, mockApi3, mockRedstone } = this.testContracts;
     this.erc20Address = await this.testContracts.erc20.getAddress();
     this.mockAggregatorAddress = await mockAggregator.getAddress();
     this.mockApi3Address = await mockApi3.getAddress();
+    this.mockRedstone = await mockRedstone.getAddress();
   });
 
   context("when the oracle is first set", function () {
@@ -358,15 +368,15 @@ export default function shouldBehaveLikeCanSetOracle(): void {
         .connect(this.timelockImpostor)
         .setOracle(
           this.erc20Address,
-          this.mockAggregatorAddress,
-          DEFAULT_ORACLE_OPTIONS.providerType,
-          DEFAULT_ORACLE_OPTIONS.timeoutSeconds,
-          DEFAULT_ORACLE_OPTIONS.isEthIndexed,
-          !DEFAULT_ORACLE_OPTIONS.isFallback,
-          DEFAULT_ORACLE_OPTIONS.additionalData
+          this.mockRedstone,
+          REDSTONE_ORACLE_OPTIONS.providerType,
+          REDSTONE_ORACLE_OPTIONS.timeoutSeconds,
+          REDSTONE_ORACLE_OPTIONS.isEthIndexed,
+          REDSTONE_ORACLE_OPTIONS.isFallback,
+          REDSTONE_ORACLE_OPTIONS.additionalData
         );
       const fallback = await this.redeployedContracts.priceFeed.fallbacks(this.erc20Address);
-      expect(fallback.oracleAddress).to.equal(this.mockAggregatorAddress);
+      expect(fallback.oracleAddress).to.equal(this.mockRedstone);
     });
   });
 }

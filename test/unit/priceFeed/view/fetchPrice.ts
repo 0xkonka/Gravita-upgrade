@@ -8,6 +8,7 @@ const PROVIDER_TYPE = {
   Chainlink: 0,
   API3: 1,
   Pyth: 2,
+  Redstone: 3
 };
 
 type OracleOptions = {
@@ -42,6 +43,14 @@ const PYTH_ORACLE_OPTIONS: OracleOptions = {
   additionalData: "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
 };
 
+const REDSTONE_ORACLE_OPTIONS: OracleOptions = {
+  providerType: PROVIDER_TYPE.Redstone,
+  timeoutSeconds: 3600,
+  isEthIndexed: false,
+  isFallback: true,
+  additionalData: ZeroHash,
+};
+
 export default function shouldHaveFetchPrice(): void {
   beforeEach(async function () {
     this.owner = this.signers.deployer;
@@ -49,9 +58,11 @@ export default function shouldHaveFetchPrice(): void {
 
     this.mockAggregator = this.testContracts.mockAggregator;
     this.mockApi3 = this.testContracts.mockApi3;
+    this.mockRedstone = this.testContracts.mockRedstone;
     this.erc20Address = await this.testContracts.erc20.getAddress();
     this.mockAggregatorAddress = await this.mockAggregator.getAddress();
     this.mockApi3Address = await this.mockApi3.getAddress();
+    this.mockRedstoneAddress = await this.mockRedstone.getAddress();
   });
 
   context("for unknown asset", function () {
@@ -376,6 +387,120 @@ export default function shouldHaveFetchPrice(): void {
         await setPrice(this.testContracts.mockPyth, 0n);
         await this.mockAggregator.setPrice(0);
 
+        await expect(
+          this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address)
+        ).to.be.revertedWithCustomError(
+          this.redeployedContracts.priceFeed,
+          "PriceFeed__InvalidOracleResponseError"
+        );
+      });
+    });
+
+    context("when Redstone oracle is primary oracle for asset", function () {
+      beforeEach(async function () {
+        const setPrimaryOracleTx = await this.redeployedContracts.priceFeed
+          .connect(this.owner)
+          .setOracle(
+            this.erc20Address,
+            this.mockRedstoneAddress,
+            REDSTONE_ORACLE_OPTIONS.providerType,
+            REDSTONE_ORACLE_OPTIONS.timeoutSeconds,
+            REDSTONE_ORACLE_OPTIONS.isEthIndexed,
+            !REDSTONE_ORACLE_OPTIONS.isFallback,
+            REDSTONE_ORACLE_OPTIONS.additionalData
+          );
+
+        await setPrimaryOracleTx.wait();
+
+        const setFallbackOracleTx = await this.redeployedContracts.priceFeed
+          .connect(this.owner)
+          .setOracle(
+            this.erc20Address,
+            this.mockApi3Address,
+            API3_ORACLE_OPTIONS.providerType,
+            API3_ORACLE_OPTIONS.timeoutSeconds,
+            API3_ORACLE_OPTIONS.isEthIndexed,
+            API3_ORACLE_OPTIONS.isFallback,
+            API3_ORACLE_OPTIONS.additionalData
+          );
+
+        await setFallbackOracleTx.wait();
+      });
+
+      it("should return erc20 oracle price, decimal < 18", async function () {
+        const price = await this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address);
+
+        const roundData = await this.mockRedstone.latestRoundData();
+        const priceFeedAnswer = roundData[1];
+
+        const expectedPrice = priceFeedAnswer * 10n ** 10n;
+
+        expect(price).to.be.equal(expectedPrice);
+      });
+
+      it("should return different scaled price, decimal > 18", async function () {
+        const { mockRedstone } = this.testContracts;
+
+        await mockRedstone.setDecimals(20);
+        await this.redeployedContracts.priceFeed
+          .connect(this.timelockImpostor)
+          .setOracle(
+            this.erc20Address,
+            await mockRedstone.getAddress(),
+            REDSTONE_ORACLE_OPTIONS.providerType,
+            REDSTONE_ORACLE_OPTIONS.timeoutSeconds,
+            REDSTONE_ORACLE_OPTIONS.isEthIndexed,
+            !REDSTONE_ORACLE_OPTIONS.isFallback,
+            REDSTONE_ORACLE_OPTIONS.additionalData
+          );
+        const price = await this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address);
+        const roundData = await mockRedstone.latestRoundData();
+        const priceFeedAnswer = roundData[1];
+
+        const expectedPrice = priceFeedAnswer / 10n ** 2n;
+
+        expect(price).to.be.equal(expectedPrice);
+      });
+
+      it("should return ETH-indexed oracle price", async function () {
+        // set ERC20/ETH indexed oracle
+        const ethAmount = ethers.WeiPerEther;
+        const { mockRedstone } = this.testContracts;
+        await mockRedstone.setPrice(ethAmount);
+        await mockRedstone.setDecimals(18);
+        await this.redeployedContracts.priceFeed
+          .connect(this.timelockImpostor)
+          .setOracle(
+            this.erc20Address,
+            await mockRedstone.getAddress(),
+            REDSTONE_ORACLE_OPTIONS.providerType,
+            REDSTONE_ORACLE_OPTIONS.timeoutSeconds,
+            !REDSTONE_ORACLE_OPTIONS.isEthIndexed,
+            REDSTONE_ORACLE_OPTIONS.isFallback,
+            REDSTONE_ORACLE_OPTIONS.additionalData
+          );
+
+        const ethUsdRoundData = await this.mockRedstone.latestRoundData();
+
+        const price = await this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address);
+        const priceAnswer = ethUsdRoundData[1];
+        const expectedPrice = priceAnswer * 10n ** 10n;
+
+        expect(price).to.be.equal(expectedPrice);
+      });
+
+      it("should return fallback oracle price", async function () {
+        await this.mockRedstone.setPrice(0);
+        const price = await this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address);
+
+        const [expectedPrice] = await this.mockApi3.read();
+
+        expect(price).to.equal(expectedPrice);
+      });
+
+      it("should revert if price is zero", async function () {
+        await this.mockRedstone.setPrice(0);
+        await this.mockApi3.setValue(0);
         await expect(
           this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address)
         ).to.be.revertedWithCustomError(

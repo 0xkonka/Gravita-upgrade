@@ -124,7 +124,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
      * @param _type The provider type.
      */
     function _fetchDecimals(address _oracle, ProviderType _type) internal view returns (uint8) {
-        if (ProviderType.Chainlink == _type) {
+        if (ProviderType.Chainlink == _type || ProviderType.Redstone == _type) {
             return ChainlinkAggregatorV3Interface(_oracle).decimals();
         } else if (ProviderType.API3 == _type) {
             return 18;

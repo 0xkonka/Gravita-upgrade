@@ -384,6 +384,7 @@ export interface TestContracts {
   mockAggregator: MockAggregator;
   mockApi3: MockApi3Proxy;
   mockPyth: MockPythPriceFeed;
+  mockRedstone: MockAggregator;
   priceFeedTestnet: PriceFeedTestnet;
   flashLoanTester: FlashLoanTester;
   mockRouter: MockUniswapRouterV3;
