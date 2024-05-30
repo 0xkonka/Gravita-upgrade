@@ -104,7 +104,7 @@ async function addPriceFeedOracle(collateral: Collateral, hre: HardhatRuntimeEnv
     const setOracleTx = await priceFeed.setOracle(
       collateral.address,
       collateral.oracleAddress,
-      collateral.oracleProvider || 0,
+      collateral.oracleProviderType || 0,
       collateral.oracleTimeoutMinutes,
       collateral.oracleIsEthIndexed,
       collateral.isFallback || false,

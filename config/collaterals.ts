@@ -13,7 +13,7 @@ export interface Collateral {
   decimals: BigNumberish;
   borrowingFee: BigNumberish;
   oracleAddress: AddressLike;
-  oracleProvider?: number;
+  oracleProviderType?: number;
   oracleTimeoutMinutes: number;
   oracleIsEthIndexed: boolean;
   isFallback?: boolean;
