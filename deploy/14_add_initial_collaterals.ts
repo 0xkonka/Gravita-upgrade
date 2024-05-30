@@ -101,15 +101,13 @@ async function addPriceFeedOracle(collateral: Collateral, hre: HardhatRuntimeEnv
   const oracleRecord = await priceFeed.oracles(collateral.address);
 
   if (oracleRecord.decimals === 0n) {
-    const oracleProviderType = 0;
-    const isFallback = false;
     const setOracleTx = await priceFeed.setOracle(
       collateral.address,
       collateral.oracleAddress,
-      oracleProviderType,
+      collateral.oracleProvider || 0,
       collateral.oracleTimeoutMinutes,
       collateral.oracleIsEthIndexed,
-      isFallback,
+      collateral.isFallback || false,
       collateral.oracleAdditionalData || ZeroHash
     );
 
