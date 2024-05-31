@@ -4,6 +4,12 @@ import { resolve } from "path";
 
 import { NetworkName } from "./networks";
 
+export enum ORACLE_PROVIDER_TYPE {
+  Chainlink = 0,
+  API3 = 1,
+  Pyth = 2,
+}
+
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || "./.env";
 dotenvConfig({ path: resolve(process.cwd(), dotenvConfigPath) });
 
@@ -13,8 +19,10 @@ export interface Collateral {
   decimals: BigNumberish;
   borrowingFee: BigNumberish;
   oracleAddress: AddressLike;
+  oracleProviderType?: ORACLE_PROVIDER_TYPE;
   oracleTimeoutMinutes: number;
   oracleIsEthIndexed: boolean;
+  isFallback?: boolean;
   oracleAdditionalData?: BytesLike;
   MCR: BigNumberish;
   CCR: BigNumberish;

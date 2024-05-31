@@ -4,7 +4,12 @@ import { ZeroHash } from "ethers";
 import type { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { COLLATERALS, Collateral, LOCAL_NETWORK_COLLATERALS } from "../config/collaterals";
+import {
+  COLLATERALS,
+  Collateral,
+  LOCAL_NETWORK_COLLATERALS,
+  ORACLE_PROVIDER_TYPE,
+} from "../config/collaterals";
 import { PriceFeed, PriceFeedL2 } from "../types";
 import { isLayer2Network, isLocalhostNetwork } from "../utils/networks";
 
@@ -101,15 +106,13 @@ async function addPriceFeedOracle(collateral: Collateral, hre: HardhatRuntimeEnv
   const oracleRecord = await priceFeed.oracles(collateral.address);
 
   if (oracleRecord.decimals === 0n) {
-    const oracleProviderType = 0;
-    const isFallback = false;
     const setOracleTx = await priceFeed.setOracle(
       collateral.address,
       collateral.oracleAddress,
-      oracleProviderType,
+      collateral.oracleProviderType || ORACLE_PROVIDER_TYPE.Chainlink,
       collateral.oracleTimeoutMinutes,
       collateral.oracleIsEthIndexed,
-      isFallback,
+      collateral.isFallback || false,
       collateral.oracleAdditionalData || ZeroHash
     );
 
