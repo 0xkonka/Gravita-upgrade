@@ -126,6 +126,12 @@ export type GetCompositeDebtArgs = {
   overrideBorrowerOperations?: BorrowerOperations;
 };
 
+export type GetTrenBoxStatusArgs = {
+  asset: AddressLike;
+  borrowers: AddressLike[];
+  overrideTrenBoxManager?: TrenBoxManager;
+};
+
 export type GetOpenTrenBoxTotalDebtArgs = GetCompositeDebtArgs & {
   overrideTrenBoxManager?: TrenBoxManager;
 };
@@ -356,6 +362,7 @@ export interface TestUtils {
   getNetBorrowingAmount(args: GetNetBorrowingAmountArgs): Promise<bigint>;
   getOpenTrenBoxTotalDebt(args: GetOpenTrenBoxTotalDebtArgs): Promise<bigint>;
   getCompositeDebt: (args: GetCompositeDebtArgs) => Promise<bigint>;
+  getTrenBoxStatuses: (args: GetTrenBoxStatusArgs) => Promise<bigint[]>;
   getActualDebtFromCompositeDebt: (args: GetActualDebtFromCompositeDebtArgs) => Promise<bigint>;
   setupCollateralForTests: (args: SetupCollateralForTestsArgs) => Promise<void>;
   connectRedeployedContracts: (args: ConnectRedeployedContractArgs) => Promise<void>;
