@@ -11,6 +11,7 @@ import { getAddressesForSetAddresses } from "./getAddressesForSetAddresses";
 import { getCompositeDebt } from "./getCompositeDebt";
 import { getNetBorrowingAmount } from "./getNetBorrowingAmount";
 import { getOpenTrenBoxTotalDebt } from "./getOpenTrenBoxTotalDebt";
+import { getTrenBoxStatuses } from "./getTrenBoxStatuses";
 import { liquidate } from "./liquidate";
 import { liquidateTrenBoxes } from "./liquidateTrenBoxes";
 import { openTrenBox } from "./openTrenBox";
@@ -32,6 +33,7 @@ export function setupUtils(context: Context): TestUtils {
     getAddressesForSetAddresses: getAddressesForSetAddresses(context),
     getNetBorrowingAmount: getNetBorrowingAmount(context),
     getCompositeDebt: getCompositeDebt(context),
+    getTrenBoxStatuses: getTrenBoxStatuses(context),
     getOpenTrenBoxTotalDebt: getOpenTrenBoxTotalDebt(context),
     getActualDebtFromCompositeDebt: getActualDebtFromCompositeDebt(context),
     openTrenBox: openTrenBox(context),
