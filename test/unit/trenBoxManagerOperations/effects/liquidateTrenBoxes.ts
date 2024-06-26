@@ -137,7 +137,7 @@ export default function shouldBehaveLikeLiquidateTrenBoxes(): void {
         this.signers.accounts[2],
         this.signers.accounts[3],
         this.signers.accounts[4],
-        this.signers.accounts[5]
+        this.signers.accounts[5],
       ];
       this.liquidator = this.signers.accounts[5];
 
