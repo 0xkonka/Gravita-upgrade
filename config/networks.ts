@@ -28,13 +28,7 @@ export enum NetworkName {
   ETHEREUM_MAINNET = "ethereum-mainnet",
   ETHEREUM_SEPOLIA = "ethereum-sepolia",
 
-  // BINANCE SMART CHAIN
-  BSC = "bsc",
-  BSC_TESTNET = "bsc-testnet",
-
-  // POLYGON
-  POLYGON_MAINNET = "polygon-mainnet",
-  POLYGON_MUMBAI = "polygon-mumbai",
+  MODE_MAINNET = "mode-mainnet",
 
   // OPTIMISM
   OPTIMISM_MAINNET = "optimism-mainnet",
@@ -43,6 +37,18 @@ export enum NetworkName {
   // ARBITRUM
   ARBITRUM_MAINNET = "arbitrum-mainnet",
   ARBITRUM_SEPOLIA = "arbitrum-sepolia",
+
+  // BASE
+  BASE_MAINNET = "base-mainnet",
+  BASE_SEPOLIA = "base-sepolia",
+
+  // BINANCE SMART CHAIN
+  BSC = "bsc-mainnet",
+  BSC_TESTNET = "bsc-testnet",
+
+  // POLYGON
+  POLYGON_MAINNET = "polygon-mainnet",
+  POLYGON_MUMBAI = "polygon-mumbai",
 
   // AVALANCHE
   AVALANCHE_MAINNET = "avalanche-mainnet",
@@ -72,26 +78,11 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
     isTestnet: true,
   },
 
-  // BINANCE SMART CHAIN
-  [NetworkName.BSC]: {
-    chainId: 56,
-    url: "https://bsc-dataseed1.defibit.io/",
-  },
-  [NetworkName.BSC_TESTNET]: {
-    chainId: 97,
-    url: "https://data-seed-prebsc-2-s1.binance.org:8545/",
-    isTestnet: true,
-  },
-
-  // MATIC/POLYGON
-  [NetworkName.POLYGON_MAINNET]: {
-    chainId: 137,
-    url: `https://polygon-mainnet.g.alchemy.com/v2/${getApiKeyForNetwork(NetworkName.POLYGON_MAINNET)}`,
-  },
-  [NetworkName.POLYGON_MUMBAI]: {
-    chainId: 80_001,
-    url: `https://polygon-mumbai.g.alchemy.com/v2/${getApiKeyForNetwork(NetworkName.POLYGON_MUMBAI)}`,
-    isTestnet: true,
+  // MODE
+  [NetworkName.MODE_MAINNET]: {
+    chainId: 34443,
+    url: `https://mode.gateway.tenderly.co/${getApiKeyForNetwork(NetworkName.MODE_MAINNET)}`,
+    isLayer2: true,
   },
 
   // OPTIMISM
@@ -120,6 +111,19 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
     isLayer2: true,
   },
 
+  // ARBITRUM
+  [NetworkName.BASE_MAINNET]: {
+    chainId: 8453,
+    url: `https://base-mainnet.g.alchemy.com/v2/${getApiKeyForNetwork(NetworkName.BASE_MAINNET)}`,
+    isLayer2: true,
+  },
+  [NetworkName.BASE_SEPOLIA]: {
+    chainId: 84532,
+    url: `https://base-sepolia.g.alchemy.com/v2/${getApiKeyForNetwork(NetworkName.BASE_SEPOLIA)}`,
+    isTestnet: true,
+    isLayer2: true,
+  },
+
   // AVALANCHE
   [NetworkName.AVALANCHE_MAINNET]: {
     chainId: 43_114,
@@ -139,6 +143,28 @@ export const NETWORKS: { readonly [key in NetworkName]: Network } = {
   [NetworkName.FANTOM_TESTNET]: {
     chainId: 4_002,
     url: `https://rpc.testnet.fantom.network`,
+    isTestnet: true,
+  },
+
+  // BINANCE SMART CHAIN
+  [NetworkName.BSC]: {
+    chainId: 56,
+    url: "https://bsc-dataseed1.defibit.io/",
+  },
+  [NetworkName.BSC_TESTNET]: {
+    chainId: 97,
+    url: "https://data-seed-prebsc-2-s1.binance.org:8545/",
+    isTestnet: true,
+  },
+
+  // MATIC/POLYGON
+  [NetworkName.POLYGON_MAINNET]: {
+    chainId: 137,
+    url: `https://polygon-mainnet.g.alchemy.com/v2/${getApiKeyForNetwork(NetworkName.POLYGON_MAINNET)}`,
+  },
+  [NetworkName.POLYGON_MUMBAI]: {
+    chainId: 80_001,
+    url: `https://polygon-mumbai.g.alchemy.com/v2/${getApiKeyForNetwork(NetworkName.POLYGON_MUMBAI)}`,
     isTestnet: true,
   },
 } as const;
