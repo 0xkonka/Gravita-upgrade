@@ -194,14 +194,9 @@ interface ITrenBoxManagerOperations {
      * @param _asset The address of collateral asset.
      * @param _redistributedDebt The redistributed amount of debt.
      * @param _redistributedCool The redistributed amount of collateral.
-     * @param _totalDebtTokenGasCompensation The total amount of gas compensation, expressed in
-     * trenUSD.
      */
     event Redistribution(
-        address indexed _asset,
-        uint256 _redistributedDebt,
-        uint256 _redistributedCool,
-        uint256 _totalDebtTokenGasCompensation
+        address indexed _asset, uint256 _redistributedDebt, uint256 _redistributedCool
     );
 
     /**

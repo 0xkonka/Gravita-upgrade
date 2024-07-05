@@ -240,10 +240,7 @@ contract TrenBoxManagerOperations is
         );
 
         emit Redistribution(
-            _asset,
-            totals.totalDebtInSequence,
-            totals.totalCollInSequence - totals.totalCollToClaim,
-            totals.totalDebtTokenGasCompensation
+            _asset, totals.totalDebtInSequence, totals.totalCollInSequence - totals.totalCollToClaim
         );
     }
 
