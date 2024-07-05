@@ -193,10 +193,10 @@ interface ITrenBoxManagerOperations {
      * @dev Emitted when the TrenBox is redistributed.
      * @param _asset The address of collateral asset.
      * @param _redistributedDebt The redistributed amount of debt.
-     * @param _redistributedCool The redistributed amount of collateral.
+     * @param _redistributedColl The redistributed amount of collateral.
      */
     event Redistribution(
-        address indexed _asset, uint256 _redistributedDebt, uint256 _redistributedCool
+        address indexed _asset, uint256 _redistributedDebt, uint256 _redistributedColl
     );
 
     /**
