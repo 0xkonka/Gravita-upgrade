@@ -28,8 +28,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log(`Adding collaterals on ${network.name} network`);
     const collaterals = COLLATERALS[network.name as keyof typeof COLLATERALS] ?? [];
     for (const collateral of collaterals) {
-      await addPriceFeedOracle(collateral, hre);
-      await addCollateral(collateral, hre);
+      if (collateral.batch === 1) {
+        await addPriceFeedOracle(collateral, hre);
+        await addCollateral(collateral, hre);
+      }
     }
   }
 };

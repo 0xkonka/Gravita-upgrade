@@ -23,6 +23,7 @@ export interface Collateral {
   oracleTimeoutMinutes: number;
   oracleIsEthIndexed: boolean;
   isFallback?: boolean;
+  batch?: number;
   oracleAdditionalData?: BytesLike;
   MCR: BigNumberish;
   CCR: BigNumberish;
@@ -420,9 +421,10 @@ export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
   "mode-mainnet": [
     {
       name: "MODE",
+      batch: 1,
       address: "0xDfc7C877a950e49D2610114102175A06C2e3167a",
       decimals: 18,
-      borrowingFee: parseEther("0.01"), // to be added
+      borrowingFee: parseEther("0.01"),
       oracleAddress: "0xA2aa501b19aff244D90cc15a4Cf739D2725B5729",
       oracleTimeoutMinutes: 1440,
       oracleIsEthIndexed: false,
@@ -432,13 +434,14 @@ export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
       CCR: parseEther("1.95"),
       minNetDebt: parseEther("500"), // to be added
       gasCompensation: parseEther("200"), // to be added
-      mintCap: parseEther("50000"), // to be added
+      mintCap: parseEther("25000"),
     },
     {
       name: "wETH",
+      batch: 1,
       address: "0x4200000000000000000000000000000000000006",
       decimals: 18,
-      borrowingFee: parseEther("0.01"), // to be added
+      borrowingFee: parseEther("0.005"),
       oracleAddress: "0xA2aa501b19aff244D90cc15a4Cf739D2725B5729",
       oracleTimeoutMinutes: 1440,
       oracleIsEthIndexed: false,
@@ -448,45 +451,31 @@ export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
       CCR: parseEther("1.5"),
       minNetDebt: parseEther("500"), // to be added
       gasCompensation: parseEther("200"), // to be added
-      mintCap: parseEther("100000"), // to be added
+      mintCap: parseEther("75000"),
     },
     {
-      name: "ionWETH",
-      address: "0x71ef7EDa2Be775E5A7aa8afD02C45F059833e9d2",
+      name: "ezETH",
+      batch: 1,
+      address: "0x2416092f143378750bb29b79eD961ab195CcEea5",
       decimals: 18,
-      borrowingFee: parseEther("0.01"), // to be added
-      oracleAddress: "", // to be added
-      oracleTimeoutMinutes: 1440,
-      oracleIsEthIndexed: false,
-      oracleProviderType: ORACLE_PROVIDER_TYPE.Pyth,
-      oracleAdditionalData: "0x9d4294bbcd1174d6f2003ec365831e64cc31d9f6f15a2b85399db8d5000960f6",
-      MCR: parseEther("1.55"),
-      CCR: parseEther("1.95"),
-      minNetDebt: parseEther("500"), // to be added
-      gasCompensation: parseEther("200"), // to be added
-      mintCap: parseEther("25000"), // to be added
-    },
-    {
-      name: "M-BTC",
-      address: "0x59889b7021243dB5B1e065385F918316cD90D46c",
-      decimals: 18,
-      borrowingFee: parseEther("0.01"), // to be added
+      borrowingFee: parseEther("0.0075"),
       oracleAddress: "0xA2aa501b19aff244D90cc15a4Cf739D2725B5729",
       oracleTimeoutMinutes: 1440,
       oracleIsEthIndexed: false,
       oracleProviderType: ORACLE_PROVIDER_TYPE.Pyth,
-      oracleAdditionalData: "0x6665073f5bc307b97e68654ff11f3d8875abd6181855814d23ab01b8085c0906",
+      oracleAdditionalData: "0x06c217a791f5c4f988b36629af4cb88fad827b2485400a358f3b02886b54de92",
       MCR: parseEther("1.25"),
       CCR: parseEther("1.65"),
       minNetDebt: parseEther("500"), // to be added
       gasCompensation: parseEther("200"), // to be added
-      mintCap: parseEther("100000"), // to be added
+      mintCap: parseEther("50000"),
     },
     {
       name: "weETH.mode",
+      batch: 1,
       address: "0x04C0599Ae5A44757c0af6F9eC3b93da8976c150A",
       decimals: 18,
-      borrowingFee: parseEther("0.01"), // to be added
+      borrowingFee: parseEther("0.0075"),
       oracleAddress: "0xA2aa501b19aff244D90cc15a4Cf739D2725B5729",
       oracleTimeoutMinutes: 1440,
       oracleIsEthIndexed: false,
@@ -496,29 +485,31 @@ export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
       CCR: parseEther("1.65"),
       minNetDebt: parseEther("500"), // to be added
       gasCompensation: parseEther("200"), //  to be added
-      mintCap: parseEther("75000"), // to be added
+      mintCap: parseEther("25000"),
     },
     {
-      name: "KIM-LP",
-      address: "0x812D54D483bF049980Af7ceB57DBf77Fa186d063",
+      name: "ionWETH",
+      batch: 2,
+      address: "0x71ef7EDa2Be775E5A7aa8afD02C45F059833e9d2",
       decimals: 18,
-      borrowingFee: parseEther("0.01"), // to be added
+      borrowingFee: parseEther("0.0075"),
       oracleAddress: "", // to be added
       oracleTimeoutMinutes: 1440,
       oracleIsEthIndexed: false,
       oracleProviderType: ORACLE_PROVIDER_TYPE.Pyth,
       oracleAdditionalData: "0x9d4294bbcd1174d6f2003ec365831e64cc31d9f6f15a2b85399db8d5000960f6",
-      MCR: parseEther("1.25"),
-      CCR: parseEther("1.65"),
+      MCR: parseEther("1.45"),
+      CCR: parseEther("1.85"),
       minNetDebt: parseEther("500"), // to be added
       gasCompensation: parseEther("200"), // to be added
-      mintCap: parseEther("25000"), // to be added
+      mintCap: parseEther("25000"),
     },
     {
       name: "ionUSDT",
+      batch: 2,
       address: "0x94812F2eEa03A49869f95e1b5868C6f3206ee3D3",
       decimals: 6,
-      borrowingFee: parseEther("0.01"), // to be added
+      borrowingFee: parseEther("0.0075"),
       oracleAddress: "", // to be added
       oracleTimeoutMinutes: 1440,
       oracleIsEthIndexed: false,
@@ -528,13 +519,14 @@ export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
       CCR: parseEther("1.65"),
       minNetDebt: parseEther("500"), // to be added
       gasCompensation: parseEther("200"), // to be added
-      mintCap: parseEther("25000"), // to be added
+      mintCap: parseEther("25000"),
     },
     {
       name: "ionUSDC",
+      batch: 2,
       address: "0x2BE717340023C9e14C1Bb12cb3ecBcfd3c3fB038",
       decimals: 6,
-      borrowingFee: parseEther("0.01"), // to be added
+      borrowingFee: parseEther("0.0075"),
       oracleAddress: "", // to be added
       oracleTimeoutMinutes: 1440,
       oracleIsEthIndexed: false,
@@ -544,13 +536,99 @@ export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
       CCR: parseEther("1.65"),
       minNetDebt: parseEther("500"), // to be added
       gasCompensation: parseEther("200"), // to be added
-      mintCap: parseEther("25000"), // to be added
+      mintCap: parseEther("25000"),
+    },
+    {
+      name: "ionezETH",
+      batch: 2,
+      address: "0x59e710215d45F584f44c0FEe83DA6d43D762D857",
+      decimals: 18,
+      borrowingFee: parseEther("0.01"),
+      oracleAddress: "",
+      oracleTimeoutMinutes: 1440,
+      oracleIsEthIndexed: false,
+      oracleProviderType: ORACLE_PROVIDER_TYPE.Pyth,
+      oracleAdditionalData: "0x06c217a791f5c4f988b36629af4cb88fad827b2485400a358f3b02886b54de92",
+      MCR: parseEther("1.55"),
+      CCR: parseEther("1.95"),
+      minNetDebt: parseEther("500"), // to be added
+      gasCompensation: parseEther("200"), // to be added
+      mintCap: parseEther("15000"),
+    },
+    {
+      name: "ionweETH.mode",
+      batch: 2,
+      address: "0xA0D844742B4abbbc43d8931a6Edb00C56325aA18",
+      decimals: 18,
+      borrowingFee: parseEther("0.01"),
+      oracleAddress: "",
+      oracleTimeoutMinutes: 1440,
+      oracleIsEthIndexed: false,
+      oracleProviderType: ORACLE_PROVIDER_TYPE.Pyth,
+      oracleAdditionalData: "0x9ee4e7c60b940440a261eb54b6d8149c23b580ed7da3139f7f08f4ea29dad395",
+      MCR: parseEther("1.55"),
+      CCR: parseEther("1.95"),
+      minNetDebt: parseEther("500"), // to be added
+      gasCompensation: parseEther("200"), //  to be added
+      mintCap: parseEther("10000"),
+    },
+    {
+      name: "ionM-BTC",
+      batch: 3,
+      address: "0x19F245782b1258cf3e11Eda25784A378cC18c108",
+      decimals: 18,
+      borrowingFee: parseEther("0.01"),
+      oracleAddress: "",
+      oracleTimeoutMinutes: 1440,
+      oracleIsEthIndexed: false,
+      oracleProviderType: ORACLE_PROVIDER_TYPE.Pyth,
+      oracleAdditionalData: "0x6665073f5bc307b97e68654ff11f3d8875abd6181855814d23ab01b8085c0906",
+      MCR: parseEther("1.8"),
+      CCR: parseEther("2.2"),
+      minNetDebt: parseEther("500"), // to be added
+      gasCompensation: parseEther("200"), // to be added
+      mintCap: parseEther("25000"),
+    },
+    {
+      name: "lMBTC",
+      batch: 3,
+      address: "0x59dd441184024a77fd17e68f07E242622806c256",
+      decimals: 18,
+      borrowingFee: parseEther("0.01"),
+      oracleAddress: "",
+      oracleTimeoutMinutes: 1440,
+      oracleIsEthIndexed: false,
+      oracleProviderType: ORACLE_PROVIDER_TYPE.Pyth,
+      oracleAdditionalData: "0x6665073f5bc307b97e68654ff11f3d8875abd6181855814d23ab01b8085c0906",
+      MCR: parseEther("1.8"),
+      CCR: parseEther("2.2"),
+      minNetDebt: parseEther("500"), // to be added
+      gasCompensation: parseEther("200"), // to be added
+      mintCap: parseEther("25000"),
+    },
+    {
+      name: "KIM-LP",
+      batch: 4,
+      address: "0x812D54D483bF049980Af7ceB57DBf77Fa186d063",
+      decimals: 18,
+      borrowingFee: parseEther("0.0075"),
+      oracleAddress: "", // to be added
+      oracleTimeoutMinutes: 1440,
+      oracleIsEthIndexed: false,
+      oracleProviderType: ORACLE_PROVIDER_TYPE.Pyth,
+      oracleAdditionalData: "0x9d4294bbcd1174d6f2003ec365831e64cc31d9f6f15a2b85399db8d5000960f6",
+      MCR: parseEther("1.25"),
+      CCR: parseEther("1.65"),
+      minNetDebt: parseEther("500"), // to be added
+      gasCompensation: parseEther("200"), // to be added
+      mintCap: parseEther("25000"),
     },
     {
       name: "lETH",
+      batch: 4,
       address: "0xe855B8018C22A05F84724e93693caf166912aDD5",
       decimals: 18,
-      borrowingFee: parseEther("0.01"), // to be added
+      borrowingFee: parseEther("0.01"),
       oracleAddress: "", // to be added
       oracleTimeoutMinutes: 1440,
       oracleIsEthIndexed: false,
@@ -560,13 +638,14 @@ export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
       CCR: parseEther("2.2"),
       minNetDebt: parseEther("500"), // to be added
       gasCompensation: parseEther("200"), // to be added
-      mintCap: parseEther("25000"), // to be added
+      mintCap: parseEther("25000"),
     },
     {
       name: "ironETH",
+      batch: 4,
       address: "0x9c29a8eC901DBec4fFf165cD57D4f9E03D4838f7",
       decimals: 18,
-      borrowingFee: parseEther("0.01"), // to be added
+      borrowingFee: parseEther("0.01"),
       oracleAddress: "0xA2aa501b19aff244D90cc15a4Cf739D2725B5729",
       oracleTimeoutMinutes: 1440,
       oracleIsEthIndexed: false,
@@ -576,23 +655,24 @@ export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
       CCR: parseEther("2.2"),
       minNetDebt: parseEther("500"), // to be added
       gasCompensation: parseEther("200"), // to be added
-      mintCap: parseEther("25000"), // to be added
+      mintCap: parseEther("15000"),
     },
     {
       name: "fWETH(ezETH)-5",
+      batch: 4,
       address: "0xb93B53CA8a51A78348a9B22718ca7fe77D13B900",
       decimals: 18,
-      borrowingFee: parseEther("0.01"), // to be added
+      borrowingFee: parseEther("0.01"),
       oracleAddress: "", // to be added
       oracleTimeoutMinutes: 1440,
       oracleIsEthIndexed: false,
       oracleProviderType: ORACLE_PROVIDER_TYPE.Pyth,
       oracleAdditionalData: "0x9d4294bbcd1174d6f2003ec365831e64cc31d9f6f15a2b85399db8d5000960f6",
-      MCR: parseEther("2.5"),
-      CCR: parseEther("2.9"),
+      MCR: parseEther("1.8"),
+      CCR: parseEther("2.2"),
       minNetDebt: parseEther("500"), // to be added
       gasCompensation: parseEther("200"), // to be added
-      mintCap: parseEther("25000"), // to be added
+      mintCap: parseEther("10000"),
     },
   ],
 } as const;
