@@ -222,10 +222,6 @@ export type SetupProtocolCommands =
       args: BatchLiquidateTrenBoxesArgs;
     }
   | {
-      action: "closeTrenBox";
-      args: CloseTrenBoxArgs;
-    }
-  | {
       action: "approve";
       args: {
         from: HardhatEthersSigner;
@@ -345,14 +341,6 @@ export type RedeemCollateralArgs = {
 };
 export type RedeemCollateralResult = ContractTransactionResponse;
 
-export type CloseTrenBoxArgs = {
-  from?: HardhatEthersSigner;
-  asset: ERC20 | AddressLike;
-  overrideBorrowerOperations?: BorrowerOperations;
-};
-
-export type CloseTrenBoxResult = ContractTransactionResponse;
-
 export interface TestUtils {
   revertToInitialSnapshot: () => Promise<void>;
   getAddressesForSetAddresses: (
@@ -382,7 +370,6 @@ export interface TestUtils {
     args: BatchLiquidateTrenBoxesArgs
   ) => Promise<BatchLiquidateTrenBoxesResult>;
   redeemCollateral: (args: RedeemCollateralArgs) => Promise<RedeemCollateralResult>;
-  closeTrenBox: (args: CloseTrenBoxArgs) => Promise<CloseTrenBoxResult>;
 }
 
 export interface TestContracts {
