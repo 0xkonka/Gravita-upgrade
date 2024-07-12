@@ -34,18 +34,4 @@ export default function shouldBehaveLikeCanSetMintCap(): void {
       ).to.be.revertedWithCustomError(this.contracts.adminContract, "AdminContract__OnlyOwner");
     });
   });
-
-  context("when modifying mint cap on inactive collateral", function () {
-    it.skip("should revert", async function () {
-      const collateralAddress = ethers.ZeroAddress;
-      const mintCap = ethers.parseEther("10000");
-
-      await expect(
-        this.contracts.adminContract.setMintCap(collateralAddress, mintCap)
-      ).to.be.revertedWithCustomError(
-        this.contracts.adminContract,
-        "AdminContract__CollateralNotConfigured"
-      );
-    });
-  });
 }

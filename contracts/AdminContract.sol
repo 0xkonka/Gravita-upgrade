@@ -161,7 +161,6 @@ contract AdminContract is
             revert AdminContract__CollateralExists();
         }
 
-        // require(_decimals == DEFAULT_DECIMALS, "collaterals must have the default decimals");
         validCollateral.push(_collateral);
         collateralParams[_collateral] = CollateralParams({
             index: validCollateral.length - 1,
@@ -196,6 +195,7 @@ contract AdminContract is
         external
         override
         onlyTimelock
+        exists(_collateral)
     {
         collateralParams[_collateral].active = true;
         setBorrowingFee(_collateral, _borrowingFee);
@@ -208,7 +208,14 @@ contract AdminContract is
     }
 
     /// @inheritdoc IAdminContract
-    function setIsActive(address _collateral, bool _active) external onlyTimelock {
+    function setIsActive(
+        address _collateral,
+        bool _active
+    )
+        external
+        onlyTimelock
+        exists(_collateral)
+    {
         CollateralParams storage collParams = collateralParams[_collateral];
         collParams.active = _active;
     }
