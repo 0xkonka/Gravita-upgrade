@@ -226,7 +226,7 @@ export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
       address: "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee",
       decimals: 18,
       borrowingFee: parseEther("0.01"), // to be added
-      oracleAddress: "0x5c9C449BbC9a6075A2c061dF312a35fd1E05fF22",
+      oracleAddress: "0xdDb6F90fFb4d3257dd666b69178e5B3c5Bf41136",
       oracleTimeoutMinutes: 1440,
       oracleIsEthIndexed: false,
       MCR: parseEther("1.1"),
@@ -413,6 +413,76 @@ export const COLLATERALS: { readonly [key in NetworkName]?: Collateral[] } = {
       oracleIsEthIndexed: false,
       MCR: parseEther("1.8"),
       CCR: parseEther("2.2"),
+      minNetDebt: parseEther("1000"), // to be added
+      gasCompensation: parseEther("200"), // to be added
+      mintCap: parseEther("1000000"), // to be added
+    },
+    {
+      name: "DC_wstETH",
+      address: "0xC329400492c6ff2438472D4651Ad17389fCb843a",
+      decimals: 18,
+      borrowingFee: parseEther("0.01"), // to be added
+      oracleAddress: "0xCfE54B5cD566aB89272946F602D76Ea879CAb4a8",
+      oracleTimeoutMinutes: 1440,
+      oracleIsEthIndexed: false,
+      MCR: parseEther("1.25"),
+      CCR: parseEther("1.65"),
+      minNetDebt: parseEther("1000"), // to be added
+      gasCompensation: parseEther("200"), // to be added
+      mintCap: parseEther("1000000"), // to be added
+    },
+    {
+      name: "DC_sUSDe",
+      address: "0xFF3BC18cCBd5999CE63E788A1c250a88626aD099",
+      decimals: 18,
+      borrowingFee: parseEther("0.01"), // to be added
+      oracleAddress: "0xb99D174ED06c83588Af997c8859F93E83dD4733f",
+      oracleTimeoutMinutes: 1440,
+      oracleIsEthIndexed: false,
+      MCR: parseEther("1.25"),
+      CCR: parseEther("1.65"),
+      minNetDebt: parseEther("1000"), // to be added
+      gasCompensation: parseEther("200"), // to be added
+      mintCap: parseEther("1000000"), // to be added
+    },
+    {
+      name: "DC_ENA",
+      address: "0xe39B5f5638a209c1A6b6cDFfE5d37F7Ac99fCC84",
+      decimals: 18,
+      borrowingFee: parseEther("0.01"), // to be added
+      oracleAddress: "",  // to be added
+      oracleTimeoutMinutes: 1440,
+      oracleIsEthIndexed: false,
+      MCR: parseEther("1.55"),
+      CCR: parseEther("1.95"),
+      minNetDebt: parseEther("1000"), // to be added
+      gasCompensation: parseEther("200"), // to be added
+      mintCap: parseEther("1000000"), // to be added
+    },
+    {
+      name: "DC_mETH",
+      address: "0x475D3Eb031d250070B63Fa145F0fCFC5D97c304a",
+      decimals: 18,
+      borrowingFee: parseEther("0.01"), // to be added
+      oracleAddress: "",  // to be added
+      oracleTimeoutMinutes: 1440,
+      oracleIsEthIndexed: false,
+      MCR: parseEther("1.25"),
+      CCR: parseEther("1.65"),
+      minNetDebt: parseEther("1000"), // to be added
+      gasCompensation: parseEther("200"), // to be added
+      mintCap: parseEther("1000000"), // to be added
+    },
+    {
+      name: "apxETH",
+      address: "0x9Ba021B0a9b958B5E75cE9f6dff97C7eE52cb3E6",
+      decimals: 18,
+      borrowingFee: parseEther("0.01"), // to be added
+      oracleAddress: "0x19219BC90F48DeE4d5cF202E09c438FAacFd8Bea",
+      oracleTimeoutMinutes: 1440,
+      oracleIsEthIndexed: false,
+      MCR: parseEther("1.55"),
+      CCR: parseEther("1.95"),
       minNetDebt: parseEther("1000"), // to be added
       gasCompensation: parseEther("200"), // to be added
       mintCap: parseEther("1000000"), // to be added
