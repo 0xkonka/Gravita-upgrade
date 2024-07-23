@@ -687,15 +687,9 @@ contract TrenBoxManagerOperations is
             vars.ICR = ITrenBoxManager(trenBoxManager).getCurrentICR(_asset, vars.user, _price);
 
             if (vars.ICR < IAdminContract(adminContract).getMcr(_asset)) {
-                if (_fullRedistribution) {
-                    singleLiquidation = _liquidateNormalMode(
-                        _asset, vars.user, vars.remainingDebtTokenInStabPool, true
-                    );
-                } else {
-                    singleLiquidation = _liquidateNormalMode(
-                        _asset, vars.user, vars.remainingDebtTokenInStabPool, false
-                    );
-                }
+                singleLiquidation = _liquidateNormalMode(
+                    _asset, vars.user, vars.remainingDebtTokenInStabPool, _fullRedistribution
+                );
 
                 vars.remainingDebtTokenInStabPool =
                     vars.remainingDebtTokenInStabPool - singleLiquidation.debtToOffset;
@@ -965,27 +959,15 @@ contract TrenBoxManagerOperations is
                 uint256 TCR =
                     TrenMath._computeCR(vars.entireSystemColl, vars.entireSystemDebt, vars.price);
 
-                if (_fullRedistribution) {
-                    singleLiquidation = _liquidateRecoveryMode(
-                        _asset,
-                        vars.user,
-                        vars.ICR,
-                        vars.remainingDebtTokenInStabPool,
-                        TCR,
-                        vars.price,
-                        true
-                    );
-                } else {
-                    singleLiquidation = _liquidateRecoveryMode(
-                        _asset,
-                        vars.user,
-                        vars.ICR,
-                        vars.remainingDebtTokenInStabPool,
-                        TCR,
-                        vars.price,
-                        false
-                    );
-                }
+                singleLiquidation = _liquidateRecoveryMode(
+                    _asset,
+                    vars.user,
+                    vars.ICR,
+                    vars.remainingDebtTokenInStabPool,
+                    TCR,
+                    vars.price,
+                    _fullRedistribution
+                );
 
                 // Update aggregate trackers
                 vars.remainingDebtTokenInStabPool =
@@ -1003,15 +985,9 @@ contract TrenBoxManagerOperations is
             } else if (
                 vars.backToNormalMode && vars.ICR < IAdminContract(adminContract).getMcr(_asset)
             ) {
-                if (_fullRedistribution) {
-                    singleLiquidation = _liquidateNormalMode(
-                        _asset, vars.user, vars.remainingDebtTokenInStabPool, true
-                    );
-                } else {
-                    singleLiquidation = _liquidateNormalMode(
-                        _asset, vars.user, vars.remainingDebtTokenInStabPool, false
-                    );
-                }
+                singleLiquidation = _liquidateNormalMode(
+                    _asset, vars.user, vars.remainingDebtTokenInStabPool, _fullRedistribution
+                );
 
                 vars.remainingDebtTokenInStabPool =
                     vars.remainingDebtTokenInStabPool - singleLiquidation.debtToOffset;
