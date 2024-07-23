@@ -239,6 +239,8 @@ contract TrenBoxManagerOperations is
             0
         );
 
+        ITrenBoxManager(trenBoxManager).updateSystemSnapshots_excludeCollRemainder(_asset, 0);
+
         emit Redistribution(
             _asset,
             totals.totalDebtInSequence,
