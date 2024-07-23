@@ -19,6 +19,7 @@ import { IFlashLoanReceiver } from "./Interfaces/IFlashLoanReceiver.sol";
 import { ITrenBoxManager } from "./Interfaces/ITrenBoxManager.sol";
 import { IUniswapRouterV3 } from "./Interfaces/IUniswapRouterV3.sol";
 import { IDebtToken } from "./Interfaces/IDebtToken.sol";
+import { IERC20Decimals } from "./Interfaces/IERC20Decimals.sol";
 
 /// @title FlashLoan
 /// @notice This contract provides functionality for executing flash loans.
@@ -135,7 +136,6 @@ contract FlashLoan is
         }
 
         burnTokens(netDebt);
-
         sendFeeToCollector();
 
         emit FlashLoanExecuted(msg.sender, netDebt, fee);
@@ -189,36 +189,64 @@ contract FlashLoan is
     /**
      * @dev Swaps as little as possible of one token for `amountOut` of another along the specified
      * path (reversed).
-     * @param _tokenIn The address of input collateral.
+     * @param _collTokenIn The address of input collateral.
      * @param _collAmountIn The amount of collateral which will be swapped.
      * @param _debtAmountOut The amount of trenUSD which will (should) be received.
      */
-    function swapTokens(address _tokenIn, uint256 _collAmountIn, uint256 _debtAmountOut) private {
+    function swapTokens(
+        address _collTokenIn,
+        uint256 _collAmountIn,
+        uint256 _debtAmountOut
+    )
+        private
+    {
         // Approve swapRouter to spend amountInMaximum
-        IERC20(_tokenIn).approve(address(swapRouter), _collAmountIn);
+        IERC20(_collTokenIn).approve(address(swapRouter), _collAmountIn);
 
-        // The tokenIn/tokenOut field is the shared token between the two pools used in the multiple
-        // pool swap. In this case stable coin is the "shared" token.
-        // For an exactOutput swap, the first swap that occurs is the swap which returns the
-        // eventual desired token.
-        // In this case, our desired output token is debtToken so that swap happpens first, and is
-        // encoded in the path accordingly.
-        IUniswapRouterV3.ExactOutputParams memory params = IUniswapRouterV3.ExactOutputParams({
-            path: abi.encodePacked(address(debtToken), uint24(3000), stableCoin, uint24(3000), _tokenIn),
-            recipient: address(this),
-            deadline: block.timestamp,
-            amountOut: _debtAmountOut,
-            amountInMaximum: _collAmountIn
-        });
+        uint256 amountIn;
 
-        // Executes the swap, returning the amountIn actually spent.
-        uint256 amountIn = swapRouter.exactOutput(params);
+        if (IERC20Decimals(_collTokenIn).decimals() == 6) {
+            IUniswapRouterV3.ExactOutputSingleParams memory params = IUniswapRouterV3
+                .ExactOutputSingleParams({
+                tokenIn: _collTokenIn,
+                tokenOut: debtToken,
+                fee: 3000,
+                recipient: address(this),
+                deadline: block.timestamp,
+                amountOut: _debtAmountOut,
+                amountInMaximum: _collAmountIn,
+                sqrtPriceLimitX96: 0
+            });
+
+            // Executes the swap, returning the amountIn actually spent.
+            amountIn = swapRouter.exactOutputSingle(params);
+        } else {
+            // The tokenIn/tokenOut field is the shared token between the two pools used in the
+            // multiple
+            // pool swap. In this case stable coin is the "shared" token.
+            // For an exactOutput swap, the first swap that occurs is the swap which returns the
+            // eventual desired token.
+            // In this case, our desired output token is debtToken so that swap happpens first, and
+            // is
+            // encoded in the path accordingly.
+            IUniswapRouterV3.ExactOutputParams memory params = IUniswapRouterV3.ExactOutputParams({
+                path: abi.encodePacked(
+                    address(debtToken), uint24(3000), stableCoin, uint24(3000), _collTokenIn
+                ),
+                recipient: address(this),
+                deadline: block.timestamp,
+                amountOut: _debtAmountOut,
+                amountInMaximum: _collAmountIn
+            });
+
+            amountIn = swapRouter.exactOutput(params);
+        }
 
         // If the swap did not require the full _collAmountIn to achieve the exact amountOut then we
         // refund msg.sender and approve the router to spend 0.
         if (amountIn < _collAmountIn) {
-            IERC20(_tokenIn).approve(address(swapRouter), 0);
-            IERC20(_tokenIn).transfer(msg.sender, _collAmountIn - amountIn);
+            IERC20(_collTokenIn).approve(address(swapRouter), 0);
+            IERC20(_collTokenIn).transfer(msg.sender, _collAmountIn - amountIn);
         }
     }
 }
