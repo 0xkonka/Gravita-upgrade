@@ -122,9 +122,7 @@ contract FlashLoan is
 
         uint256 fee = calculateFee(netDebt);
 
-        IBorrowerOperations(borrowerOperations).repayDebtTokens(
-            _asset, netDebt, address(0), address(0)
-        );
+        IBorrowerOperations(borrowerOperations).repayDebtTokensWithFlashloan(_asset, msg.sender);
 
         uint256 collAmountIn = IERC20(_asset).balanceOf(address(this));
         uint256 debtTokensToGet = netDebt + fee;
