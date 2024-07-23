@@ -843,8 +843,8 @@ contract TrenBoxManagerOperations is
 
             // If 100% < ICR < MCR, offset as much as possible, and redistribute the remainder
         } else if (
-            (_ICR > IAdminContract(adminContract)._100pct())
-                && (_ICR < IAdminContract(adminContract).getMcr(_asset))
+            _ICR > IAdminContract(adminContract)._100pct()
+                && _ICR < IAdminContract(adminContract).getMcr(_asset)
         ) {
             ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsFromLiquidatedToActive(
                 _asset, vars.pendingDebtReward, vars.pendingCollReward
@@ -877,7 +877,7 @@ contract TrenBoxManagerOperations is
              * The remainder due to the capped rate will be claimable as collateral surplus.
              */
         } else if (
-            (_ICR >= IAdminContract(adminContract).getMcr(_asset)) && (_ICR < _TCR)
+            _ICR >= IAdminContract(adminContract).getMcr(_asset) && _ICR < _TCR
                 && (singleLiquidation.entireTrenBoxDebt <= _debtTokenInStabPool)
         ) {
             ITrenBoxManager(trenBoxManager).movePendingTrenBoxRewardsFromLiquidatedToActive(
