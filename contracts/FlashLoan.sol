@@ -7,7 +7,7 @@ import { ReentrancyGuardUpgradeable } from
     "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import { ConfigurableAddresses } from "./Dependencies/ConfigurableAddresses.sol";
 
@@ -30,6 +30,8 @@ contract FlashLoan is
     ConfigurableAddresses,
     UUPSUpgradeable
 {
+    using SafeERC20 for IERC20;
+
     /// @notice The name of contract.
     string public constant NAME = "FlashLoan";
 
@@ -244,7 +246,7 @@ contract FlashLoan is
         // refund msg.sender and approve the router to spend 0.
         if (amountIn < _collAmountIn) {
             IERC20(_collTokenIn).approve(address(swapRouter), 0);
-            IERC20(_collTokenIn).transfer(msg.sender, _collAmountIn - amountIn);
+            IERC20(_collTokenIn).safeTransfer(msg.sender, _collAmountIn - amountIn);
         }
     }
 }
