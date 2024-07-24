@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity =0.8.23;
 
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -400,10 +400,10 @@ contract TrenBoxManagerOperations is
             uint256 currentTrenBoxNetDebt = _getNetDebt(
                 vars.asset,
                 ITrenBoxManager(trenBoxManager).getTrenBoxDebt(vars.asset, currentTrenBoxBorrower)
-                    + ITrenBoxManager(trenBoxManager).getPendingDebtTokenReward(
-                        vars.asset, currentTrenBoxBorrower
-                    )
-            );
+            )
+                + ITrenBoxManager(trenBoxManager).getPendingDebtTokenReward(
+                    vars.asset, currentTrenBoxBorrower
+                );
 
             if (currentTrenBoxNetDebt <= remainingDebt) {
                 remainingDebt = remainingDebt - currentTrenBoxNetDebt;
