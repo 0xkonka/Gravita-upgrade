@@ -166,9 +166,9 @@ contract FeeCollector is
         override
         onlyTrenBoxManager
     {
-        FeeRecord memory mRecord = feeRecords[_borrower][_asset];
-        if (mRecord.amount != 0) {
-            _closeExpiredOrLiquidatedFeeRecord(_borrower, _asset, mRecord.amount);
+        uint256 mRecord = feeRecords[_borrower][_asset].amount;
+        if (mRecord != 0) {
+            _closeExpiredOrLiquidatedFeeRecord(_borrower, _asset, mRecord);
         }
     }
 
