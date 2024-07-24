@@ -33,6 +33,9 @@ contract FeeCollector is
     /// @notice The duration which the minimum fee is applied.
     uint256 public constant MIN_FEE_DAYS = 7;
 
+    /// @notice The denominator value used in fee calculations.
+    uint256 public constant DENOMINATOR = 1 ether;
+
     /// @notice The minimum fee fraction, divided by 26 (1/26).
     uint256 public constant MIN_FEE_FRACTION = 0.038461538 * 1 ether;
 
@@ -94,7 +97,7 @@ contract FeeCollector is
         override
         onlyBorrowerOperations
     {
-        uint256 minFeeAmount = (MIN_FEE_FRACTION * _feeAmount) / 1 ether;
+        uint256 minFeeAmount = (MIN_FEE_FRACTION * _feeAmount) / DENOMINATOR;
         uint256 refundableFeeAmount = _feeAmount - minFeeAmount;
         uint256 feeToCollect = _createOrUpdateFeeRecord(_borrower, _asset, refundableFeeAmount);
         _collectFee(_borrower, _asset, minFeeAmount + feeToCollect);
@@ -122,7 +125,7 @@ contract FeeCollector is
         override
         onlyBorrowerOperationsOrTrenBoxManager
     {
-        _decreaseDebt(_borrower, _asset, 1 ether);
+        _decreaseDebt(_borrower, _asset, DENOMINATOR);
     }
 
     /// @inheritdoc IFeeCollector
@@ -136,7 +139,7 @@ contract FeeCollector is
         override
         returns (uint256)
     {
-        if (_paybackFraction > 1 ether) {
+        if (_paybackFraction > DENOMINATOR) {
             revert FeeCollector__PaybackFractionHigherThanOne();
         }
         if (_paybackFraction == 0) {
@@ -153,7 +156,7 @@ contract FeeCollector is
             return record.amount - expiredAmount;
         } else {
             // calc refund amount proportional to the payment
-            return ((record.amount - expiredAmount) * _paybackFraction) / 1 ether;
+            return ((record.amount - expiredAmount) * _paybackFraction) / DENOMINATOR;
         }
     }
 
@@ -234,7 +237,7 @@ contract FeeCollector is
     function _decreaseDebt(address _borrower, address _asset, uint256 _paybackFraction) internal {
         uint256 NOW = block.timestamp;
 
-        if (_paybackFraction > 1 ether) {
+        if (_paybackFraction > DENOMINATOR) {
             revert FeeCollector__PaybackFractionHigherThanOne();
         }
         if (_paybackFraction == 0) {
@@ -261,7 +264,7 @@ contract FeeCollector is
             } else {
                 // refund amount proportional to the payment
                 uint256 refundAmount =
-                    ((sRecord.amount - expiredAmount) * _paybackFraction) / 1 ether;
+                    ((sRecord.amount - expiredAmount) * _paybackFraction) / DENOMINATOR;
                 _refundFee(_borrower, _asset, refundAmount);
                 uint256 updatedAmount = sRecord.amount - expiredAmount - refundAmount;
                 sRecord.amount = updatedAmount;
