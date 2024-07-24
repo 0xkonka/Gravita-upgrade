@@ -71,8 +71,7 @@ contract BorrowerOperations is
         vars.price = IPriceFeed(priceFeed).fetchPrice(vars.asset);
         bool isRecoveryMode = _checkRecoveryMode(vars.asset, vars.price);
 
-        uint256 status = ITrenBoxManager(trenBoxManager).getTrenBoxStatus(vars.asset, msg.sender);
-        if (status == 1) {
+        if (ITrenBoxManager(trenBoxManager).isTrenBoxActive(_asset, msg.sender)) {
             revert BorrowerOperations__TrenBoxIsActive();
         }
 
@@ -647,8 +646,7 @@ contract BorrowerOperations is
      * @param _borrower The address of borrower.
      */
     function _requireTrenBoxIsActive(address _asset, address _borrower) internal view {
-        uint256 status = ITrenBoxManager(trenBoxManager).getTrenBoxStatus(_asset, _borrower);
-        if (status != 1) {
+        if (!ITrenBoxManager(trenBoxManager).isTrenBoxActive(_asset, _borrower)) {
             revert BorrowerOperations__TrenBoxNotExistOrClosed();
         }
     }
