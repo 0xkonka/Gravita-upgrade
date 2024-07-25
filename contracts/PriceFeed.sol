@@ -173,9 +173,12 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
     )
         internal
         view
-        returns (bool)
+        returns (bool isStalePrice)
     {
-        return block.timestamp - _priceTimestamp > _oracleTimeoutSeconds;
+        bool isPriceTimeouted = block.timestamp - _priceTimestamp > _oracleTimeoutSeconds;
+        bool isPriceInFuture = _priceTimestamp > block.timestamp;
+
+        isStalePrice = isPriceTimeouted || isPriceInFuture;
     }
 
     /**
@@ -222,7 +225,7 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
 
         timestamp = pythResponse.publishTime;
 
-        if(pythResponse.expo >= 0) {
+        if (pythResponse.expo >= 0) {
             price = (uint256(uint64(pythResponse.price)) * (10 ** 18))
                 * (10 ** uint8(uint32(pythResponse.expo)));
         } else {
