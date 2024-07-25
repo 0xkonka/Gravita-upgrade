@@ -112,6 +112,7 @@ contract TRENStaking is
         address asset;
 
         checkDebtTokenGain();
+        _updateUserDebtTokenFeeSnapshot(msg.sender);
 
         for (uint256 i = 0; i < assetsList.length;) {
             asset = assetsList[i];
@@ -120,7 +121,7 @@ contract TRENStaking is
                 checkAssetGain(asset);
             }
 
-            _updateUserSnapshots(asset, msg.sender);
+            _updateUserAssetsFeeSnapshot(asset, msg.sender);
 
             unchecked {
                 ++i;
@@ -145,13 +146,14 @@ contract TRENStaking is
         address asset;
 
         checkDebtTokenGain();
+        _updateUserDebtTokenFeeSnapshot(msg.sender);
 
         for (uint256 i = 0; i < assetsList.length;) {
             asset = assetsList[i];
 
             checkAssetGain(asset);
 
-            _updateUserSnapshots(asset, msg.sender);
+            _updateUserAssetsFeeSnapshot(asset, msg.sender);
 
             unchecked {
                 ++i;
@@ -264,11 +266,16 @@ contract TRENStaking is
         emit SentAssetFeeToTreasury(_asset, _amount);
     }
 
-    function _updateUserSnapshots(address _asset, address _user) private {
+    function _updateUserAssetsFeeSnapshot(address _asset, address _user) private {
         snapshots[_user].assetsFeeSnapshot[_asset] = assetsFee[_asset];
+
+        emit StakerAssetsFeeSnapshotUpdated(_user, assetsFee[_asset]);
+    }
+
+    function _updateUserDebtTokenFeeSnapshot(address _user) private {
         snapshots[_user].debtTokenFeeSnapshot = totalDebtTokenFee;
 
-        emit StakerSnapshotsUpdated(_user, assetsFee[_asset], totalDebtTokenFee);
+        emit StakerDebtTokenFeeSnapshotUpdated(_user, totalDebtTokenFee);
     }
 
     function calculateFeePerTRENStaked(uint256 _feeAmount) private view returns (uint256) {

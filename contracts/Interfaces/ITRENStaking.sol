@@ -25,7 +25,8 @@ interface ITRENStaking {
     event TotalDebtTokenFeeUpdated(uint256 _amount);
     event TotalTRENStakedUpdated(uint256 _totalTRENStaked);
     event SentAsset(address indexed _asset, address indexed _account, uint256 _amount);
-    event StakerSnapshotsUpdated(address _staker, uint256 _feeAsset, uint256 _feeDebtToken);
+    event StakerAssetsFeeSnapshotUpdated(address _staker, uint256 _feeAsset);
+    event StakerDebtTokenFeeSnapshotUpdated(address _staker, uint256 _feeDebtToken);
 
     function increaseFeeAsset(address _asset, uint256 _feeAsset) external;
     function increaseFeeDebtToken(uint256 _TRENFee) external;
