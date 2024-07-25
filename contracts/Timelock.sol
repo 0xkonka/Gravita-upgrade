@@ -69,7 +69,7 @@ contract Timelock {
         _;
     }
 
-    modifier OnlyAdmin() {
+    modifier onlyAdmin() {
         if (msg.sender != admin) {
             revert Timelock__OnlyAdmin();
         }
@@ -128,7 +128,7 @@ contract Timelock {
         uint256 eta
     )
         external
-        OnlyAdmin
+        onlyAdmin
         returns (bytes32)
     {
         if (eta < block.timestamp + delay || eta > block.timestamp + delay + GRACE_PERIOD) {
@@ -153,7 +153,7 @@ contract Timelock {
         uint256 eta
     )
         external
-        OnlyAdmin
+        onlyAdmin
     {
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
         if (!queuedTransactions[txHash]) {
@@ -173,7 +173,7 @@ contract Timelock {
     )
         external
         payable
-        OnlyAdmin
+        onlyAdmin
         returns (bytes memory)
     {
         if (target == address(0)) {
