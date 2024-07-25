@@ -24,8 +24,9 @@ interface IWstETH {
  * single-source-of-truth queries)
  */
 contract WstEth2UsdPriceAggregator is AggregatorV3Interface {
-    error stEthZeroPrice();
-    error stEthPerTokenZero();
+    error WstEth2UsdPriceAggregator__stEthZeroPrice();
+    error WstEth2UsdPriceAggregator__stEthPerTokenZero();
+    error WstEth2UsdPriceAggregator__InitializedWithAddressZero();
 
     int256 internal constant PRECISION = 1 ether;
 
@@ -33,6 +34,10 @@ contract WstEth2UsdPriceAggregator is AggregatorV3Interface {
     AggregatorV3Interface public immutable stETH2USDAggregator;
 
     constructor(address _wstETHAddress, address _stETH2USDAggregatorAddress) {
+        if (_wstETHAddress == address(0) || _stETH2USDAggregatorAddress == address(0)) {
+            revert WstEth2UsdPriceAggregator__InitializedWithAddressZero();
+        }
+
         wstETH = IWstETH(_wstETHAddress);
         stETH2USDAggregator = AggregatorV3Interface(_stETH2USDAggregatorAddress);
     }
@@ -91,12 +96,12 @@ contract WstEth2UsdPriceAggregator is AggregatorV3Interface {
 
     function _stETH2wstETH(int256 stETHValue) internal view returns (int256) {
         if (stETHValue == 0) {
-            revert stEthZeroPrice();
+            revert WstEth2UsdPriceAggregator__stEthZeroPrice();
         }
 
         int256 multiplier = int256(wstETH.stEthPerToken());
         if (multiplier == 0) {
-            revert stEthPerTokenZero();
+            revert WstEth2UsdPriceAggregator__stEthPerTokenZero();
         }
         // wstETH.stEthPerToken() response has 18-digit precision, hence we need the denominator
         // below
