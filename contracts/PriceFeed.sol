@@ -221,8 +221,14 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
         PythStructs.Price memory pythResponse = pythOracle.getPriceUnsafe(_priceFeedId);
 
         timestamp = pythResponse.publishTime;
-        price = (uint256(uint64(pythResponse.price)) * (10 ** 18))
-            / (10 ** uint8(uint32(-1 * pythResponse.expo)));
+
+        if(pythResponse.expo >= 0) {
+            price = (uint256(uint64(pythResponse.price)) * (10 ** 18))
+                * (10 ** uint8(uint32(pythResponse.expo)));
+        } else {
+            price = (uint256(uint64(pythResponse.price)) * (10 ** 18))
+                / (10 ** uint8(uint32(-1 * pythResponse.expo)));
+        }
     }
 
     /**
