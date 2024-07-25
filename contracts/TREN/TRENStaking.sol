@@ -109,17 +109,14 @@ contract TRENStaking is
         if (_TRENamount == 0) revert TRENStaking__InvalidAmount(0);
 
         uint256 currentStake = stakes[msg.sender];
-        uint256 assetLength = assetsList.length;
         address asset;
 
-        for (uint256 i = 0; i < assetLength;) {
+        checkDebtTokenGain();
+
+        for (uint256 i = 0; i < assetsList.length;) {
             asset = assetsList[i];
 
             if (currentStake != 0) {
-                if (i == 0) {
-                    checkDebtTokenGain();
-                }
-
                 checkAssetGain(asset);
             }
 
@@ -145,15 +142,12 @@ contract TRENStaking is
         uint256 currentStake = stakes[msg.sender];
         if (currentStake == 0) revert TRENStaking__InvalidStakeAmount(0);
 
-        uint256 assetLength = assetsList.length;
         address asset;
 
-        for (uint256 i = 0; i < assetLength;) {
-            asset = assetsList[i];
+        checkDebtTokenGain();
 
-            if (i == 0) {
-                checkDebtTokenGain();
-            }
+        for (uint256 i = 0; i < assetsList.length;) {
+            asset = assetsList[i];
 
             checkAssetGain(asset);
 
