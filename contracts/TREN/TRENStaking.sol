@@ -225,12 +225,30 @@ contract TRENStaking is
     }
 
     // ------------------------------------------ Private functions ------------------------------
+    function checkDebtTokenGain() private {
+        uint256 debtTokenGain = _getPendingDebtTokenGain(msg.sender);
+        if (debtTokenGain != 0) {
+            _sendAsset(msg.sender, debtToken, debtTokenGain);
+            emit StakingDebtTokenGainWithdrawn(msg.sender, debtTokenGain);
+        }
+    }
 
-    function _updateUserSnapshots(address _asset, address _user) private {
-        snapshots[_user].assetsFeeSnapshot[_asset] = assetsFee[_asset];
-        snapshots[_user].debtTokenFeeSnapshot = totalDebtTokenFee;
+    function checkAssetGain(address _asset) private {
+        uint256 assetGain = _getPendingAssetGain(_asset, msg.sender);
+        if (assetGain != 0) {
+            _sendAssetGainToUser(_asset, assetGain);
+            emit StakingAssetGainWithdrawn(msg.sender, _asset, assetGain);
+        }
+    }
 
-        emit StakerSnapshotsUpdated(_user, assetsFee[_asset], totalDebtTokenFee);
+    function _getPendingDebtTokenGain(address _user) private view returns (uint256) {
+        uint256 debtTokenFeeSnapshot = snapshots[_user].debtTokenFeeSnapshot;
+        return (stakes[_user] * (totalDebtTokenFee - debtTokenFeeSnapshot)) / DECIMAL_PRECISION;
+    }
+
+    function _getPendingAssetGain(address _asset, address _user) private view returns (uint256) {
+        uint256 assetFeeSnapshot = snapshots[_user].assetsFeeSnapshot[_asset];
+        return (stakes[_user] * (assetsFee[_asset] - assetFeeSnapshot)) / DECIMAL_PRECISION;
     }
 
     function _sendAssetGainToUser(address _asset, uint256 _assetGain) private {
@@ -240,6 +258,10 @@ contract TRENStaking is
         emit SentAsset(_asset, msg.sender, _assetGain);
     }
 
+    function _sendAsset(address _receiver, address _asset, uint256 _amount) private {
+        IERC20(_asset).safeTransfer(_receiver, _amount);
+    }
+
     function sendToTreasury(address _asset, uint256 _amount) private {
         _sendAsset(treasury, _asset, _amount);
         sentAssetFeeToTreasury[_asset] += _amount;
@@ -247,37 +269,14 @@ contract TRENStaking is
         emit SentAssetFeeToTreasury(_asset, _amount);
     }
 
-    function checkDebtTokenGain() private {
-        uint256 debtTokenGain = _getPendingDebtTokenGain(msg.sender);
-        if (debtTokenGain != 0) {
-            _sendAsset(msg.sender, debtToken, debtTokenGain);
-            emit StakingDebtTokenGainWithdrawn(msg.sender, debtTokenGain);
-        }
-    }
+    function _updateUserSnapshots(address _asset, address _user) private {
+        snapshots[_user].assetsFeeSnapshot[_asset] = assetsFee[_asset];
+        snapshots[_user].debtTokenFeeSnapshot = totalDebtTokenFee;
 
-    function _sendAsset(address _receiver, address _asset, uint256 _amount) private {
-        IERC20(_asset).safeTransfer(_receiver, _amount);
-    }
-
-    function checkAssetGain(address _asset) private {
-        uint256 assetGain = _getPendingDebtTokenGain(msg.sender);
-        if (assetGain != 0) {
-            _sendAssetGainToUser(_asset, assetGain);
-            emit StakingAssetGainWithdrawn(msg.sender, _asset, assetGain);
-        }
+        emit StakerSnapshotsUpdated(_user, assetsFee[_asset], totalDebtTokenFee);
     }
 
     function calculateFeePerTRENStaked(uint256 _feeAmount) private view returns (uint256) {
         return (_feeAmount * DECIMAL_PRECISION) / totalTRENStaked;
-    }
-
-    function _getPendingAssetGain(address _asset, address _user) private view returns (uint256) {
-        uint256 assetFeeSnapshot = snapshots[_user].assetsFeeSnapshot[_asset];
-        return (stakes[_user] * (assetsFee[_asset] - assetFeeSnapshot)) / DECIMAL_PRECISION;
-    }
-
-    function _getPendingDebtTokenGain(address _user) private view returns (uint256) {
-        uint256 debtTokenFeeSnapshot = snapshots[_user].debtTokenFeeSnapshot;
-        return (stakes[_user] * (totalDebtTokenFee - debtTokenFeeSnapshot)) / DECIMAL_PRECISION;
     }
 }
