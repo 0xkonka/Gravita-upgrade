@@ -3,24 +3,34 @@ import { ethers } from "hardhat";
 
 export default function shouldBehaveLikeCanSetAddresses(): void {
   context("when called by owner", function () {
+    beforeEach(async function () {
+      const owner = this.signers.deployer;
+
+      const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
+      const debtToken = await DebtTokenFactory.deploy(owner);
+      await debtToken.waitForDeployment();
+
+      this.redeployedContracts.debtToken = debtToken;
+    });
+
     it("should correctly set new addresses", async function () {
       const newBorrowerOperationsAddress = this.signers.accounts[1].address;
       const newStabilityPoolAddress = this.signers.accounts[2].address;
       const newTrenBoxManagerAddress = this.signers.accounts[3].address;
 
-      await this.contracts.debtToken.setAddresses(
+      await this.redeployedContracts.debtToken.setAddresses(
         newBorrowerOperationsAddress,
         newStabilityPoolAddress,
         newTrenBoxManagerAddress
       );
 
-      expect(await this.contracts.debtToken.stabilityPoolAddress()).to.be.equal(
+      expect(await this.redeployedContracts.debtToken.stabilityPoolAddress()).to.be.equal(
         newStabilityPoolAddress
       );
-      expect(await this.contracts.debtToken.borrowerOperationsAddress()).to.be.equal(
+      expect(await this.redeployedContracts.debtToken.borrowerOperationsAddress()).to.be.equal(
         newBorrowerOperationsAddress
       );
-      expect(await this.contracts.debtToken.trenBoxManagerAddress()).to.be.equal(
+      expect(await this.redeployedContracts.debtToken.trenBoxManagerAddress()).to.be.equal(
         newTrenBoxManagerAddress
       );
     });
@@ -31,13 +41,13 @@ export default function shouldBehaveLikeCanSetAddresses(): void {
       const newTrenBoxManagerAddress = this.signers.accounts[3].address;
 
       await expect(
-        this.contracts.debtToken.setAddresses(
+        this.redeployedContracts.debtToken.setAddresses(
           newBorrowerOperationsAddress,
           newStabilityPoolAddress,
           newTrenBoxManagerAddress
         )
       )
-        .to.emit(this.contracts.debtToken, "ProtocolContractsAddressesSet")
+        .to.emit(this.redeployedContracts.debtToken, "ProtocolContractsAddressesSet")
         .withArgs(newBorrowerOperationsAddress, newStabilityPoolAddress, newTrenBoxManagerAddress);
     });
 

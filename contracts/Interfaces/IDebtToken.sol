@@ -43,9 +43,16 @@ interface IDebtToken is IERC20 {
     error DebtToken__MintBlockedForCollateral(address _collateral);
 
     /**
-     * @dev Error emitted when zero address is set.
+     * @dev Error emitted when zero address is set as BorrowerOperations, StabilityPool
+     * or TrenBoxManager.
      */
     error DebtToken__InvalidAddressToConnect();
+
+    /**
+     * @dev Error emitted when BorrowerOperations, StabilityPool or TrenBoxManager addresses
+     * are already connected.
+     */
+    error DebtToken__AddressesAlreadyConnected();
 
     /**
      * @dev Error emitted when the recipient address is zero address.
