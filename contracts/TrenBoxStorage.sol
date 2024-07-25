@@ -464,7 +464,7 @@ contract TrenBoxStorage is
      * @return The boolean value indicating whether the operation succeeded.
      */
     function isStabilityPool(address _account) private view returns (bool) {
-        return (_account == stabilityPool);
+        return _account == stabilityPool;
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner { }
