@@ -36,6 +36,9 @@ abstract contract ConfigurableAddresses is OwnableUpgradeable {
     error ConfigurableAddresses__TRENStakingZeroAddress();
     error ConfigurableAddresses__LengthMismatch();
 
+    event CommunityIssuanceAddressSet(address _communityIssuance);
+    event TRENStakingAddressSet(address _trenStaking);
+
     // Dependency setters
     // -----------------------------------------------------------------------------------------------
 
@@ -79,6 +82,8 @@ abstract contract ConfigurableAddresses is OwnableUpgradeable {
             revert ConfigurableAddresses__CommunityIssuanceZeroAddress();
         }
         communityIssuance = _communityIssuance;
+
+        emit CommunityIssuanceAddressSet(communityIssuance);
     }
 
     function setTRENStaking(address _trenStaking) public onlyOwner {
@@ -86,5 +91,7 @@ abstract contract ConfigurableAddresses is OwnableUpgradeable {
             revert ConfigurableAddresses__TRENStakingZeroAddress();
         }
         trenStaking = _trenStaking;
+
+        emit TRENStakingAddressSet(trenStaking);
     }
 }
