@@ -54,10 +54,11 @@ contract TRENStaking is
 
     modifier isPaused(address _token, uint256 _amount) {
         if (paused()) {
-            sendToTreasury(_token, _amount);
             revert TRENStaking__StakingOnPause();
+        } else {
+            sendToTreasury(_token, _amount);
+            _;
         }
-        _;
     }
 
     // ------------------------------------------ Initializer -------------------------------------
