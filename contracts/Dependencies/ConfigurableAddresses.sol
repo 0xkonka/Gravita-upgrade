@@ -23,6 +23,8 @@ abstract contract ConfigurableAddresses is OwnableUpgradeable {
 
     bool public isAddressSetupInitialized;
 
+    uint256 public constant MAX_LENGTH = 13;
+
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
@@ -46,11 +48,11 @@ abstract contract ConfigurableAddresses is OwnableUpgradeable {
         if (isAddressSetupInitialized) {
             revert ConfigurableAddresses__SetupIsInitialized();
         }
-        if (_addresses.length != 13) {
+        if (_addresses.length != MAX_LENGTH) {
             revert ConfigurableAddresses__LengthMismatch();
         }
 
-        for (uint256 i = 0; i < 13;) {
+        for (uint256 i = 0; i < MAX_LENGTH;) {
             if (_addresses[i] == address(0)) {
                 revert ConfigurableAddresses__ZeroAddresses(i, _addresses[i]);
             }
