@@ -80,6 +80,8 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
             revert LockedTREN__TotalSupplyLessThanClaimed();
         }
 
+        assignedTRENTokens = assignedTRENTokens - (vestingRule.totalSupply - newTotalSupply);
+
         sendTRENTokenToEntity(_entity);
 
         vestingRule.totalSupply = newTotalSupply;
