@@ -38,7 +38,7 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
         trenToken = IERC20(_trenAddress);
     }
 
-    function addEntityVesting(address _entity, uint256 _totalSupply) public onlyOwner {
+    function addEntityVesting(address _entity, uint256 _vestedTokenAmount) public onlyOwner {
         if (_entity == address(0)) {
             revert LockedTREN__InvalidAddress();
         }
@@ -47,23 +47,20 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
             revert LockedTREN__AlreadyHaveVestingRule();
         }
 
-        assignedTRENTokens += _totalSupply;
+        assignedTRENTokens += _vestedTokenAmount;
 
         entitiesVesting[_entity] = Rule(
             block.timestamp,
-            _totalSupply,
+            _vestedTokenAmount,
             block.timestamp + SIX_MONTHS,
             block.timestamp + TWO_YEARS,
             0
         );
 
-        trenToken.safeTransferFrom(msg.sender, address(this), _totalSupply);
+        trenToken.safeTransferFrom(msg.sender, address(this), _vestedTokenAmount);
 
         emit AddEntityVesting(
-            _entity,
-            _totalSupply,
-            block.timestamp + SIX_MONTHS,
-            block.timestamp + TWO_YEARS
+            _entity, _vestedTokenAmount, block.timestamp + SIX_MONTHS, block.timestamp + TWO_YEARS
         );
     }
 
