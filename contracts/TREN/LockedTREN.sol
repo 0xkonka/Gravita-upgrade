@@ -119,7 +119,7 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
 
     function getClaimableTREN(address _entity) public view returns (uint256 claimable) {
         Rule memory entityRule = entitiesVesting[_entity];
-        claimable = 0;
+        claimable;
 
         if (entityRule.startVestingDate > block.timestamp) return claimable;
 
