@@ -62,8 +62,8 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
         emit AddEntityVesting(
             _entity,
             _totalSupply,
-            entitiesVesting[_entity].startVestingDate,
-            entitiesVesting[_entity].endVestingDate
+            block.timestamp + SIX_MONTHS,
+            block.timestamp + TWO_YEARS
         );
     }
 
