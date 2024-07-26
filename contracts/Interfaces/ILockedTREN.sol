@@ -13,6 +13,7 @@ interface ILockedTREN {
     error LockedTREN__NotHaveVestingRule();
     error LockedTREN__InvalidAddress();
     error LockedTREN__AlreadyHaveVestingRule();
+    error LockedTREN__NewValueMustBeLower();
     error LockedTREN__TotalSupplyLessThanClaimed();
 
     event AddEntityVesting(

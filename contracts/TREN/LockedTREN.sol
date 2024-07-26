@@ -72,12 +72,15 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
         onlyOwner
         entityRuleExists(_entity)
     {
-        sendTRENTokenToEntity(_entity);
         Rule storage vestingRule = entitiesVesting[_entity];
-
+        if (newTotalSupply >= vestingRule.totalSupply) {
+            revert LockedTREN__NewValueMustBeLower();
+        }
         if (newTotalSupply <= vestingRule.claimed) {
             revert LockedTREN__TotalSupplyLessThanClaimed();
         }
+
+        sendTRENTokenToEntity(_entity);
 
         vestingRule.totalSupply = newTotalSupply;
     }
