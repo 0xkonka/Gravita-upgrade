@@ -87,7 +87,7 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
 
     function removeEntityVesting(address _entity) public onlyOwner entityRuleExists(_entity) {
         sendTRENTokenToEntity(_entity);
-        Rule memory vestingRule = entitiesVesting[_entity];
+        Rule storage vestingRule = entitiesVesting[_entity];
 
         assignedTRENTokens = assignedTRENTokens - (vestingRule.totalSupply - vestingRule.claimed);
 
