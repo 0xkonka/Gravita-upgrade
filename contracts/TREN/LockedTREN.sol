@@ -49,13 +49,13 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
 
         assignedTRENTokens += _vestedTokenAmount;
 
-        entitiesVesting[_entity] = Rule(
-            block.timestamp,
-            _vestedTokenAmount,
-            block.timestamp + SIX_MONTHS,
-            block.timestamp + TWO_YEARS,
-            0
-        );
+        entitiesVesting[_entity] = Rule({
+            createdDate: block.timestamp,
+            totalSupply: _vestedTokenAmount,
+            startVestingDate: block.timestamp + SIX_MONTHS,
+            endVestingDate: block.timestamp + TWO_YEARS,
+            claimed: 0
+        });
 
         trenToken.safeTransferFrom(msg.sender, address(this), _vestedTokenAmount);
 
