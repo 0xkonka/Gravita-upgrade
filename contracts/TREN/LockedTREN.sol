@@ -28,7 +28,7 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
         _;
     }
 
-    function initialize() public initializer {
+    function initialize() public {
         address initialOwner = _msgSender();
 
         __Ownable_init(initialOwner);
