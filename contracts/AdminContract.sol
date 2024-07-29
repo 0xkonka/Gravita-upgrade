@@ -142,7 +142,7 @@ contract AdminContract is
      * all subsequent config/setters will need to go through the timelocks.
      */
     function setSetupIsInitialized() external onlyTimelock {
-        if(isSetupInitialized) {
+        if (isSetupInitialized) {
             revert AdminContract__AlreadyInitialized();
         }
 
