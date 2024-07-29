@@ -292,8 +292,8 @@ export default function shouldHaveFetchPrice(): void {
           exponent,
           price,
           224843971,
-          now,
-          now - 1
+          now - 1,
+          now - 10
         );
 
         const updatePriceOnPythMockTx = await mockPyth.updatePriceFeed(pythPriceFeedData);

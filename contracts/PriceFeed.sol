@@ -221,17 +221,22 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
         view
         returns (uint256 price, uint256 timestamp)
     {
-        IPyth pythOracle = IPyth(_oracleAddress);
-        PythStructs.Price memory pythResponse = pythOracle.getPriceUnsafe(_priceFeedId);
+        try IPyth(_oracleAddress).getPrice(_priceFeedId) returns (
+            PythStructs.Price memory pythResponse
+        ) {
+            timestamp = pythResponse.publishTime;
 
-        timestamp = pythResponse.publishTime;
-
-        if (pythResponse.expo >= 0) {
-            price = (uint256(uint64(pythResponse.price)) * (10 ** 18))
-                * (10 ** uint8(uint32(pythResponse.expo)));
-        } else {
-            price = (uint256(uint64(pythResponse.price)) * (10 ** 18))
-                / (10 ** uint8(uint32(-1 * pythResponse.expo)));
+            if (pythResponse.expo >= 0) {
+                price = (uint256(uint64(pythResponse.price)) * (10 ** 18))
+                    * (10 ** uint8(uint32(pythResponse.expo)));
+            } else {
+                price = (uint256(uint64(pythResponse.price)) * (10 ** 18))
+                    / (10 ** uint8(uint32(-1 * pythResponse.expo)));
+            }
+        } catch {
+            // If call to Pyth aggregator reverts, return a zero response
+            price = 0;
+            timestamp = 0;
         }
     }
 
