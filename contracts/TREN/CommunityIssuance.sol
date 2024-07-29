@@ -124,7 +124,9 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable {
         uint256 totalIssuance = issuance + totalTRENIssued;
 
         if (totalIssuance > maxPoolSupply) {
-            issuance = maxPoolSupply - totalTRENIssued;
+            unchecked {
+                issuance = maxPoolSupply - totalTRENIssued;
+            }
             totalIssuance = maxPoolSupply;
         }
 
