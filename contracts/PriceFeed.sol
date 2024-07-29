@@ -128,10 +128,10 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
             return ChainlinkAggregatorV3Interface(_oracle).decimals();
         } else if (ProviderType.API3 == _type) {
             return 18;
-        } else if (ProviderType.Pyth == _type) {
+        } else {
+            // (ProviderType.Pyth == _type)
             return 18;
         }
-        return 0;
     }
 
     /**
@@ -150,7 +150,8 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
             (oraclePrice, priceTimestamp) = _fetchChainlinkOracleResponse(oracle.oracleAddress);
         } else if (ProviderType.API3 == oracle.providerType) {
             (oraclePrice, priceTimestamp) = _fetchAPI3OracleResponse(oracle.oracleAddress);
-        } else if (ProviderType.Pyth == oracle.providerType) {
+        } else {
+            // (ProviderType.Pyth == oracle.providerType)
             (oraclePrice, priceTimestamp) =
                 _fetchPythOracleResponse(oracle.oracleAddress, oracle.additionalData);
         }
