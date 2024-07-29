@@ -348,7 +348,7 @@ contract AdminContract is
         exists(_collateral)
         returns (uint256)
     {
-        return (collateralParams[_collateral].index);
+        return collateralParams[_collateral].index;
     }
 
     /// @inheritdoc IAdminContract
