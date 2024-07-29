@@ -111,14 +111,14 @@ contract TRENStaking is
         uint256 currentStake = stakes[msg.sender];
         address asset;
 
-        checkDebtTokenGain();
+        _checkDebtTokenGain();
         _updateUserDebtTokenFeeSnapshot(msg.sender);
 
         for (uint256 i = 0; i < assetsList.length;) {
             asset = assetsList[i];
 
             if (currentStake != 0) {
-                checkAssetGain(asset);
+                _checkAssetGain(asset);
             }
 
             _updateUserAssetsFeeSnapshot(asset, msg.sender);
@@ -145,13 +145,13 @@ contract TRENStaking is
 
         address asset;
 
-        checkDebtTokenGain();
+        _checkDebtTokenGain();
         _updateUserDebtTokenFeeSnapshot(msg.sender);
 
         for (uint256 i = 0; i < assetsList.length;) {
             asset = assetsList[i];
 
-            checkAssetGain(asset);
+            _checkAssetGain(asset);
 
             _updateUserAssetsFeeSnapshot(asset, msg.sender);
 
@@ -222,7 +222,7 @@ contract TRENStaking is
     }
 
     // ------------------------------------------ Private functions ------------------------------
-    function checkDebtTokenGain() private {
+    function _checkDebtTokenGain() private {
         uint256 debtTokenGain = _getPendingDebtTokenGain(msg.sender);
         if (debtTokenGain != 0) {
             _sendAsset(msg.sender, debtToken, debtTokenGain);
@@ -230,7 +230,7 @@ contract TRENStaking is
         }
     }
 
-    function checkAssetGain(address _asset) private {
+    function _checkAssetGain(address _asset) private {
         uint256 assetGain = _getPendingAssetGain(_asset, msg.sender);
         if (assetGain != 0) {
             _sendAssetGainToUser(_asset, assetGain);
