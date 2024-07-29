@@ -59,6 +59,11 @@ interface IAdminContract {
     );
 
     /**
+     * @dev Error emitted when the AdminContract is already initialized.
+     */
+    error AdminContract__AlreadyInitialized();
+
+    /**
      * @dev Error emitted when the caller is not owner.
      */
     error AdminContract__OnlyOwner();
