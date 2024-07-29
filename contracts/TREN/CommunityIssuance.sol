@@ -76,6 +76,8 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable {
             revert CommunityIssuance__InvalidAdminContract();
         }
         adminContract = _adminContract;
+
+        emit AdminContractAddressSet(_adminContract);
     }
 
     function addFundToStabilityPool(uint256 _assignedSupply) external override isController {
