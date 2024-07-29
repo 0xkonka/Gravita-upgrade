@@ -166,6 +166,12 @@ interface IAdminContract {
      */
     event FlashLoanMaxDebtChanged(uint256 _oldMaxDebt, uint256 _newMaxDebt);
 
+    /**
+     * @dev Emmited after deployment to indicate that the setup is initialized with all initial
+     * collaterals
+     */
+    event SetupInitialized();
+
     /// @notice Returns decimal precision, 1 ether.
     function DECIMAL_PRECISION() external pure returns (uint256);
 

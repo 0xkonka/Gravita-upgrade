@@ -37,13 +37,13 @@ contract AdminContract is
     uint256 public constant BORROWING_FEE_DEFAULT = 0.005 * 1e18;
 
     /// @notice The default critical collateral ratio, 150%.
-    uint256 public constant CCR_DEFAULT = 1.5 * 1e18 ;
+    uint256 public constant CCR_DEFAULT = 1.5 * 1e18;
 
     /// @notice The default minimum collateral ratio, 110%.
     uint256 public constant MCR_DEFAULT = 1.1 * 1e18;
 
     /// @notice The default minimum amount of debt token to mint.
-    uint256 public constant MIN_NET_DEBT_DEFAULT = 2_000 * 1e18;
+    uint256 public constant MIN_NET_DEBT_DEFAULT = 2000 * 1e18;
 
     /// @notice The default mint cap, 1 million trenUSD.
     uint256 public constant MINT_CAP_DEFAULT = 1_000_000 * 1e18;
