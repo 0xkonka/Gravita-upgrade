@@ -31,28 +31,28 @@ contract AdminContract is
     string public constant NAME = "AdminContract";
 
     /// @notice The scaled number which means 100 percent, 1e18 == 100%.
-    uint256 public constant _100pct = 1 ether;
+    uint256 public constant _100pct = 1e18;
 
     /// @notice The default borrowing fee, 0.5%.
-    uint256 public constant BORROWING_FEE_DEFAULT = 0.005 ether;
+    uint256 public constant BORROWING_FEE_DEFAULT = 0.005 * 1e18;
 
     /// @notice The default critical collateral ratio, 150%.
-    uint256 public constant CCR_DEFAULT = 1.5 ether;
+    uint256 public constant CCR_DEFAULT = 1.5 * 1e18 ;
 
     /// @notice The default minimum collateral ratio, 110%.
-    uint256 public constant MCR_DEFAULT = 1.1 ether;
+    uint256 public constant MCR_DEFAULT = 1.1 * 1e18;
 
     /// @notice The default minimum amount of debt token to mint.
-    uint256 public constant MIN_NET_DEBT_DEFAULT = 2000 ether;
+    uint256 public constant MIN_NET_DEBT_DEFAULT = 2_000 * 1e18;
 
     /// @notice The default mint cap, 1 million trenUSD.
-    uint256 public constant MINT_CAP_DEFAULT = 1_000_000 ether;
+    uint256 public constant MINT_CAP_DEFAULT = 1_000_000 * 1e18;
 
     /// @notice The default liquidation fee, dividing by 200 yields 0.5%.
     uint256 public constant PERCENT_DIVISOR_DEFAULT = 200;
 
     /// @notice The default floor of redemption fee, 0.5%.
-    uint256 public constant REDEMPTION_FEE_FLOOR_DEFAULT = 0.005 ether;
+    uint256 public constant REDEMPTION_FEE_FLOOR_DEFAULT = 0.005 * 1e18;
 
     /// @notice The default block timestamp for redemption.
     uint256 public constant REDEMPTION_BLOCK_TIMESTAMP_DEFAULT = type(uint256).max;
