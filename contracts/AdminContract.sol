@@ -77,7 +77,7 @@ contract AdminContract is
     bool public isSetupInitialized;
 
     /// @notice If true, collected fees go to stakers; if false, to the treasury.
-    bool public routeToTRENStaking = false;
+    bool public routeToTRENStaking;
 
     // Modifiers
     // --------------------------------------------------------------------------------------------------------
