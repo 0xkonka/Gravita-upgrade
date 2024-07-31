@@ -51,12 +51,6 @@ contract AdminContract is
     /// @notice The default liquidation fee, dividing by 200 yields 0.5%.
     uint256 public constant PERCENT_DIVISOR_DEFAULT = 200;
 
-    /// @notice The default floor of redemption fee, 0.5%.
-    uint256 public constant REDEMPTION_FEE_FLOOR_DEFAULT = 0.005 ether;
-
-    /// @notice The default block timestamp for redemption.
-    uint256 public constant REDEMPTION_BLOCK_TIMESTAMP_DEFAULT = type(uint256).max;
-
     // State
     // ------------------------------------------------------------------------------------------------------------
 
@@ -172,9 +166,7 @@ contract AdminContract is
             debtTokenGasCompensation: _debtTokenGasCompensation,
             minNetDebt: MIN_NET_DEBT_DEFAULT,
             mintCap: MINT_CAP_DEFAULT,
-            percentDivisor: PERCENT_DIVISOR_DEFAULT,
-            redemptionFeeFloor: REDEMPTION_FEE_FLOOR_DEFAULT,
-            redemptionBlockTimestamp: REDEMPTION_BLOCK_TIMESTAMP_DEFAULT
+            percentDivisor: PERCENT_DIVISOR_DEFAULT
         });
 
         emit CollateralAdded(_collateral);
@@ -190,8 +182,7 @@ contract AdminContract is
         uint256 _mcr,
         uint256 _minNetDebt,
         uint256 _mintCap,
-        uint256 _percentDivisor,
-        uint256 _redemptionFeeFloor
+        uint256 _percentDivisor
     )
         external
         override
@@ -204,7 +195,6 @@ contract AdminContract is
         setMinNetDebt(_collateral, _minNetDebt);
         setMintCap(_collateral, _mintCap);
         setPercentDivisor(_collateral, _percentDivisor);
-        setRedemptionFeeFloor(_collateral, _redemptionFeeFloor);
     }
 
     /// @inheritdoc IAdminContract
@@ -299,35 +289,6 @@ contract AdminContract is
         uint256 oldPercent = collParams.percentDivisor;
         collParams.percentDivisor = _percentDivisor;
         emit PercentDivisorChanged(oldPercent, _percentDivisor);
-    }
-
-    /// @inheritdoc IAdminContract
-    function setRedemptionFeeFloor(
-        address _collateral,
-        uint256 _redemptionFeeFloor
-    )
-        public
-        override
-        onlyTimelock
-        safeCheck("Redemption Fee Floor", _collateral, _redemptionFeeFloor, 0.001 ether, 0.1 ether)
-    {
-        CollateralParams storage collParams = collateralParams[_collateral];
-        uint256 oldRedemptionFeeFloor = collParams.redemptionFeeFloor;
-        collParams.redemptionFeeFloor = _redemptionFeeFloor;
-        emit RedemptionFeeFloorChanged(oldRedemptionFeeFloor, _redemptionFeeFloor);
-    }
-
-    /// @inheritdoc IAdminContract
-    function setRedemptionBlockTimestamp(
-        address _collateral,
-        uint256 _blockTimestamp
-    )
-        external
-        override
-        onlyTimelock
-    {
-        collateralParams[_collateral].redemptionBlockTimestamp = _blockTimestamp;
-        emit RedemptionBlockTimestampChanged(_collateral, _blockTimestamp);
     }
 
     /// @inheritdoc IAdminContract
@@ -445,21 +406,6 @@ contract AdminContract is
     /// @inheritdoc IAdminContract
     function getBorrowingFee(address _collateral) external view override returns (uint256) {
         return collateralParams[_collateral].borrowingFee;
-    }
-
-    /// @inheritdoc IAdminContract
-    function getRedemptionFeeFloor(address _collateral) external view override returns (uint256) {
-        return collateralParams[_collateral].redemptionFeeFloor;
-    }
-
-    /// @inheritdoc IAdminContract
-    function getRedemptionBlockTimestamp(address _collateral)
-        external
-        view
-        override
-        returns (uint256)
-    {
-        return collateralParams[_collateral].redemptionBlockTimestamp;
     }
 
     /// @inheritdoc IAdminContract

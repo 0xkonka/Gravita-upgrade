@@ -104,24 +104,4 @@ abstract contract TrenBase is OwnableUpgradeable, ConfigurableAddresses {
         uint256 TCR = _getTCR(_asset, _price);
         return TCR < IAdminContract(adminContract).getCcr(_asset);
     }
-
-    /**
-     * @dev Requires that the redemption fee percentage is less than max percentage.
-     * @param _fee The redemption fee amount.
-     * @param _amount The collateral amount to draw.
-     * @param _maxFeePercentage The max fee percentage.
-     */
-    function _requireUserAcceptsFee(
-        uint256 _fee,
-        uint256 _amount,
-        uint256 _maxFeePercentage
-    )
-        internal
-        view
-    {
-        uint256 feePercentage = (_fee * IAdminContract(adminContract).DECIMAL_PRECISION()) / _amount;
-        if (feePercentage > _maxFeePercentage) {
-            revert TrenBase__FeeExceededMax(feePercentage, _maxFeePercentage);
-        }
-    }
 }

@@ -15,7 +15,6 @@ interface ITrenBoxManager {
      * @param active The active status.
      * @param closedByOwner The closed status by owner.
      * @param closedByLiquidation The closed status by liquidation.
-     * @param closedByRedemption The closed status by redemption.
      * @param closedByRedistribution The closed status by redistribution.
      */
     enum Status {
@@ -23,7 +22,6 @@ interface ITrenBoxManager {
         active,
         closedByOwner,
         closedByLiquidation,
-        closedByRedemption,
         closedByRedistribution
     }
 
@@ -34,14 +32,12 @@ interface ITrenBoxManager {
      * under normal mode.
      * @param liquidateInRecoveryMode The operation that closes the TrenBox by liquidation
      * under recovery mode.
-     * @param redeemCollateral The operation that redeems the collateral by redemption.
      * @param redistributeCollateral The operation that closes the TrenBox by redistribution.
      */
     enum TrenBoxManagerOperation {
         applyPendingRewards,
         liquidateInNormalMode,
         liquidateInRecoveryMode,
-        redeemCollateral,
         redistributeCollateral
     }
 
@@ -76,13 +72,6 @@ interface ITrenBoxManager {
 
     // Events
     // -----------------------------------------------------------------------------------------------------------
-
-    /**
-     * @dev Emitted when the base rate is updated by redemption.
-     * @param _asset The address of collateral asset.
-     * @param _baseRate The new base rate.
-     */
-    event BaseRateUpdated(address indexed _asset, uint256 _baseRate);
 
     /**
      * @dev Emitted when the timestamp of last fee operation is updated.
@@ -153,9 +142,6 @@ interface ITrenBoxManager {
     // Custom Errors
     // ----------------------------------------------------------------------------------------------------
 
-    /// @dev Error emitted when the redemption fee is bigger than the drawn amount.
-    error TrenBoxManager__FeeBiggerThanAssetDraw();
-
     /// @dev Error emitted when there is only one or zero TrenBox.
     error TrenBoxManager__OnlyOneTrenBox();
 
@@ -171,21 +157,6 @@ interface ITrenBoxManager {
 
     // Functions
     // --------------------------------------------------------------------------------------------------------
-
-    /**
-     * @notice Returns whether it is the first redemption for a specific borrower.
-     * @param _asset The address of collateral asset.
-     * @param _firstRedemptionHint The borrower address to check.
-     * @param _price The price of collateral asset.
-     */
-    function isValidFirstRedemptionHint(
-        address _asset,
-        address _firstRedemptionHint,
-        uint256 _price
-    )
-        external
-        view
-        returns (bool);
 
     /**
      * @notice Returns the nominal collateral ratio (ICR) of a given TrenBox without the price.
@@ -299,38 +270,6 @@ interface ITrenBoxManager {
         returns (uint256);
 
     /**
-     * @notice Returns the redemption fee amount for a given collateral amount.
-     * @param _asset The address of collateral asset.
-     * @param _assetDraw The amount of collateral asset to draw.
-     */
-    function getRedemptionFee(address _asset, uint256 _assetDraw) external view returns (uint256);
-
-    /**
-     * @notice Returns the redemption fee amount with decay for a given collateral amount.
-     * @param _asset The address of collateral asset.
-     * @param _assetDraw The amount of collateral asset to draw.
-     */
-    function getRedemptionFeeWithDecay(
-        address _asset,
-        uint256 _assetDraw
-    )
-        external
-        view
-        returns (uint256);
-
-    /**
-     * @notice Returns the redemption rate for a specific collateral asset.
-     * @param _asset The address of collateral asset.
-     */
-    function getRedemptionRate(address _asset) external view returns (uint256);
-
-    /**
-     * @notice Returns the redemption rate with decay for a specific collateral asset.
-     * @param _asset The address of collateral asset.
-     */
-    function getRedemptionRateWithDecay(address _asset) external view returns (uint256);
-
-    /**
      * @notice Returns the TrenBox owner based on array index.
      * @param _asset The address of collateral asset.
      * @param _index The array index.
@@ -395,67 +334,6 @@ interface ITrenBoxManager {
     )
         external
         returns (uint256 index);
-
-    /**
-     * @notice Executes full redemption for a specific TrenBox.
-     * @param _asset The address of collateral asset.
-     * @param _borrower The borrower address.
-     * @param _newColl The new collateral balance to update.
-     */
-    function executeFullRedemption(address _asset, address _borrower, uint256 _newColl) external;
-
-    /**
-     * @notice Executes partial redemption for a specific TrenBox.
-     * @param _asset The address of collateral asset.
-     * @param _borrower The borrower address.
-     * @param _newDebt The new debt balance to update.
-     * @param _newColl The new collateral balance to update.
-     * @param _newNICR The new nominal collateral ratio.
-     * @param _upperPartialRedemptionHint Id of previous node for the new insert position.
-     * @param _lowerPartialRedemptionHint Id of next node for the new insert position.
-     */
-    function executePartialRedemption(
-        address _asset,
-        address _borrower,
-        uint256 _newDebt,
-        uint256 _newColl,
-        uint256 _newNICR,
-        address _upperPartialRedemptionHint,
-        address _lowerPartialRedemptionHint
-    )
-        external;
-
-    /**
-     * @notice Finalizes redemption for a specific TrenBox.
-     * @param _asset The address of collateral asset.
-     * @param _receiver The redeemer address.
-     * @param _debtToRedeem The amount of debt tokens to redeem.
-     * @param _assetFeeAmount The amount of redemption fee.
-     * @param _assetRedeemedAmount The amount of redeemed collateral.
-     */
-    function finalizeRedemption(
-        address _asset,
-        address _receiver,
-        uint256 _debtToRedeem,
-        uint256 _assetFeeAmount,
-        uint256 _assetRedeemedAmount
-    )
-        external;
-
-    /**
-     * @notice Updates redemption base rate.
-     * @param _asset The address of collateral asset.
-     * @param _assetDrawn The amount of collateral asset to draw.
-     * @param _price The price of collateral asset.
-     * @param _totalDebtTokenSupply The total supply of debt tokens.
-     */
-    function updateBaseRateFromRedemption(
-        address _asset,
-        uint256 _assetDrawn,
-        uint256 _price,
-        uint256 _totalDebtTokenSupply
-    )
-        external;
 
     /**
      * @notice Adds the pending debt and collateral rewards to the TrenBox.
