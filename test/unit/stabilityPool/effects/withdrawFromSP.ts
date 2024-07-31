@@ -31,47 +31,51 @@ export default function shouldBehaveLikeCanWithdrawFromSP(): void {
         },
       ],
     });
+    const assetAddress = await erc20.getAddress();
+    const assetAmount = ethers.parseUnits("100", 30);
+
+    await this.utils.setupProtocolForTests({
+      commands: this.users.map((user: HardhatEthersSigner) => {
+        return {
+          action: "openTrenBox",
+          args: {
+            asset: assetAddress,
+            assetAmount,
+            from: user,
+          },
+        };
+      }),
+    });
   });
 
-  context("withdraw from stability pool", function () {
-    context("when user has sufficient debtToken balance", function () {
-      this.beforeEach(async function () {
-        const { erc20 } = this.testContracts;
-        const assetAddress = await erc20.getAddress();
-        const assetAmount = ethers.parseUnits("100", 30);
+  context("when user has sufficient debtToken balance", function () {
+    this.beforeEach(async function () {
+      const { erc20 } = this.testContracts;
+      const assetAddress = await erc20.getAddress();
 
-        await this.utils.setupProtocolForTests({
-          commands: this.users.map((user: HardhatEthersSigner) => {
-            return {
-              action: "openTrenBox",
-              args: {
-                asset: assetAddress,
-                assetAmount,
-                from: user,
-              },
-            };
-          }),
-        });
-
-        await this.utils.setupProtocolForTests({
-          commands: this.users.map((user: HardhatEthersSigner) => {
-            return {
-              action: "provideToStabilityPool",
-              args: {
-                from: user,
-                assets: [assetAddress],
-                amount: 100n,
-              },
-            };
-          }),
-        });
+      await this.utils.setupProtocolForTests({
+        commands: this.users.map((user: HardhatEthersSigner) => {
+          return {
+            action: "provideToStabilityPool",
+            args: {
+              from: user,
+              assets: [assetAddress],
+              amount: 100n,
+            },
+          };
+        }),
       });
+    });
+
+    context("when the time of withdrawal has passed", function () {
       it("should withdraw from Stability Pool", async function () {
         const { erc20 } = this.testContracts;
         const assetAddress = await erc20.getAddress();
 
         const totalDebtTokenDepositsBefore =
           await this.contracts.stabilityPool.getTotalDebtTokenDeposits();
+
+        await ethers.provider.send("evm_increaseTime", [7 * 24 * 60 * 60]);
 
         await this.utils.setupProtocolForTests({
           commands: this.users.map((user: HardhatEthersSigner) => {
@@ -96,6 +100,8 @@ export default function shouldBehaveLikeCanWithdrawFromSP(): void {
         const { erc20 } = this.testContracts;
         const assetAddress = await erc20.getAddress();
 
+        await ethers.provider.send("evm_increaseTime", [7 * 24 * 60 * 60]);
+
         const withdrawFromSPTx = await this.utils.withdrawFromStabilityPool({
           from: this.users[0],
           assets: [assetAddress],
@@ -116,9 +122,43 @@ export default function shouldBehaveLikeCanWithdrawFromSP(): void {
       });
     });
 
-    it("when user has insufficient debtToken balance", async function () {
+    context("when the time of withdrawal has not passed", function () {
+      it("should revert with custom error StabilityPool__ShouldWaitFor7DaysAfterDeposit", async function () {
+        const { erc20 } = this.testContracts;
+        const assetAddress = await erc20.getAddress();
+
+        const withdrawFromSPTx = this.utils.withdrawFromStabilityPool({
+          from: this.users[0],
+          assets: [assetAddress],
+          amount: 50n,
+        });
+
+        await expect(withdrawFromSPTx).to.be.revertedWithCustomError(
+          this.contracts.stabilityPool,
+          "StabilityPool__ShouldWaitFor7DaysAfterDeposit"
+        );
+
+        await ethers.provider.send("evm_increaseTime", [7 * 23 * 60 * 60]);
+
+        const withdrawFromSPTx2 = this.utils.withdrawFromStabilityPool({
+          from: this.users[0],
+          assets: [assetAddress],
+          amount: 50n,
+        });
+
+        await expect(withdrawFromSPTx2).to.be.revertedWithCustomError(
+          this.contracts.stabilityPool,
+          "StabilityPool__ShouldWaitFor7DaysAfterDeposit"
+        );
+      });
+    });
+  });
+
+  context("when user has sufficient debtToken balance", function () {
+    it("should revert with custom error StabilityPool__UserHasNoDeposit", async function () {
       const { erc20 } = this.testContracts;
       const assetAddress = await erc20.getAddress();
+
       await expect(
         this.utils.setupProtocolForTests({
           commands: [

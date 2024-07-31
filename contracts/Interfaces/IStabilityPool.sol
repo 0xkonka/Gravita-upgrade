@@ -139,6 +139,9 @@ interface IStabilityPool is IDeposit {
     /// @dev Error emitted when the asset list is not in ascending order.
     error StabilityPool__ArrayNotInAscendingOrder();
 
+    /// @dev Error emitted when the user should wait for 7 days after deposit.
+    error StabilityPool__ShouldWaitFor7DaysAfterDeposit();
+
     /**
      * @dev Error emitted when the debt loss per unit staked is not less than
      * decimal precision.

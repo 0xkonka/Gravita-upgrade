@@ -202,6 +202,11 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     mapping(address depositor => Snapshots snapshot) public depositSnapshots;
 
     /**
+     * @notice The mapping maintains the timestamp of the latest deposit for each depositor.
+     */
+    mapping(address depositor => uint256 timestamp) public depositTimestamp;
+
+    /**
      * @notice Product 'P': Running product by which to multiply an initial deposit, in order to
      * find the current compounded deposit,
      * after a series of liquidations have occurred, each of which cancel some debt tokens debt with
@@ -214,6 +219,9 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
 
     /// @notice The unit factor to be used in scale increment.
     uint256 public constant SCALE_FACTOR = 1e9;
+
+    /// @notice The time locked period for withdrawal from the stability pool.
+    uint256 public constant TIME_LOCKED_PERIOD = 7 days;
 
     /// @notice Each time the scale of P shifts by SCALE_FACTOR, the scale is incremented by 1.
     uint128 public currentScale;
@@ -419,6 +427,8 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
 
         // send any collateral gains accrued to the depositor
         _sendGainsToDepositor(msg.sender, gainAssets, gainAmounts);
+
+        depositTimestamp[msg.sender] = block.timestamp;
     }
 
     /// @inheritdoc IStabilityPool
@@ -468,6 +478,8 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     {
         uint256 initialDeposit = deposits[msg.sender];
         _requireUserHasDeposit(initialDeposit);
+
+        openForWithdrawal(msg.sender);
 
         _triggerTRENIssuance();
 
@@ -1091,6 +1103,13 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         uint256 newAssetBalance = totalColl.amounts[collateralIndex] + _amount;
         totalColl.amounts[collateralIndex] = newAssetBalance;
         emit StabilityPoolAssetBalanceUpdated(_asset, newAssetBalance);
+    }
+
+    function openForWithdrawal(address _depositor) public view {
+        uint256 timeDiff = block.timestamp - depositTimestamp[_depositor];
+        if (timeDiff <= TIME_LOCKED_PERIOD) {
+            revert StabilityPool__ShouldWaitFor7DaysAfterDeposit();
+        }
     }
 
     function authorizeUpgrade(address newImplementation) public {
