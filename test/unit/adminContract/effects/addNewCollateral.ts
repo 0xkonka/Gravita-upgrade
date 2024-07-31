@@ -162,40 +162,6 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
       expect(percentDivisor).to.be.equal(percentDivisorDefault);
     });
 
-    it("should set redemptionFeeFloor to REDEMPTION_FEE_FLOOR_DEFAULT", async function () {
-      const { testCollateral } = this.collaterals.notAdded;
-
-      await this.contracts.adminContract.addNewCollateral(
-        testCollateral.address,
-        testCollateral.gasCompensation
-      );
-
-      const redemptionFeeFloor = await this.contracts.adminContract.getRedemptionFeeFloor(
-        testCollateral.address
-      );
-      const redemptionFeeFloorDefault =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
-
-      expect(redemptionFeeFloor).to.be.equal(redemptionFeeFloorDefault);
-    });
-
-    it("should set redemptionBlockTimestamp to REDEMPTION_BLOCK_TIMESTAMP_DEFAULT", async function () {
-      const { testCollateral } = this.collaterals.notAdded;
-
-      const expectedRedemptionBlockTimestamp =
-        await this.contracts.adminContract.REDEMPTION_BLOCK_TIMESTAMP_DEFAULT();
-
-      await this.contracts.adminContract.addNewCollateral(
-        testCollateral.address,
-        testCollateral.gasCompensation
-      );
-
-      const redemptionBlockTimestamp =
-        await this.contracts.adminContract.getRedemptionBlockTimestamp(testCollateral.address);
-
-      expect(redemptionBlockTimestamp).to.be.equal(expectedRedemptionBlockTimestamp);
-    });
-
     it("should add collateral to StabilityPool", async function () {
       const { testCollateral } = this.collaterals.notAdded;
       await this.contracts.adminContract.addNewCollateral(

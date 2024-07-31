@@ -7,8 +7,6 @@ import shouldBehaveLikeCanSetMinNetDebt from "./effects/setMinNetDebt";
 import shouldBehaveLikeCanSetMinimumCollateralRatio from "./effects/setMinimumCollateralRatio";
 import shouldBehaveLikeCanSetMintCap from "./effects/setMintCap";
 import shouldBehaveLikeCanSetPercentDivisor from "./effects/setPercentDivisor";
-import shouldBehaveLikeCanSetRedemptionBlockTimestamp from "./effects/setRedemptionBlockTimestamp";
-import shouldBehaveLikeCanSetRedemptionFeeFloor from "./effects/setRedemptionFeeFloor";
 import shouldHavePublicConstant from "./view/constants";
 import shouldHaveGetBorrowingFee from "./view/getBorrowingFee";
 import shouldHaveGetCCR from "./view/getCriticalCollateralRate";
@@ -20,8 +18,6 @@ import shouldHaveGetMinNetDebt from "./view/getMinNetDebt";
 import shouldHaveGetMCR from "./view/getMinimalCollateralRate";
 import shouldHaveGetMintCap from "./view/getMintCap";
 import shouldHaveGetPercentDivisor from "./view/getPercentDivisor";
-import shouldHaveGetRedemptionBlockTimestamp from "./view/getRedemptionBlockTimestamp";
-import shouldHaveGetRedemptionFeeFloor from "./view/getRedemptionFeeFloor";
 import shouldHaveGetTotalAssetDebt from "./view/getTotalAssetDebt";
 import shouldHaveValidCollateral from "./view/getValidCollateral";
 import shouldHaveIsSetupInitialized from "./view/isSetupInitialized";
@@ -79,14 +75,6 @@ export function shouldBehaveLikeAdminContractContract(): void {
       shouldHaveGetBorrowingFee();
     });
 
-    describe("#getRedemptionFeeFloor", function () {
-      shouldHaveGetRedemptionFeeFloor();
-    });
-
-    describe("#getRedemptionBlockTimestamp", function () {
-      shouldHaveGetRedemptionBlockTimestamp();
-    });
-
     describe("#getMintCap", function () {
       shouldHaveGetMintCap();
     });
@@ -119,14 +107,6 @@ export function shouldBehaveLikeAdminContractContract(): void {
 
     describe("#setPercentDivisor", function () {
       shouldBehaveLikeCanSetPercentDivisor();
-    });
-
-    describe("#setRedemptionFeeFloor", function () {
-      shouldBehaveLikeCanSetRedemptionFeeFloor();
-    });
-
-    describe("#setRedemptionBlockTimestamp", function () {
-      shouldBehaveLikeCanSetRedemptionBlockTimestamp();
     });
 
     describe("#addNewCollateral", function () {

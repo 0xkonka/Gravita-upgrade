@@ -63,14 +63,6 @@ export function setupProtocolForTests(context: Context) {
             overrideStabilityPool: overrides?.stabilityPool,
           });
           break;
-        case "redeemCollateral":
-          await context.utils.redeemCollateral({
-            ...command.args,
-            overrideTrenBoxManagerOperations: overrides?.trenBoxManagerOperations,
-            overridePriceFeed: overrides?.priceFeed,
-            overrideSortedTrenBoxes: overrides?.sortedTrenBoxes,
-          });
-          break;
         case "liquidate":
           await context.utils.liquidate({
             ...command.args,

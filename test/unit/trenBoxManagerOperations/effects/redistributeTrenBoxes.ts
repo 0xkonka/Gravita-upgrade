@@ -113,10 +113,10 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
 
       await expect(redistributeTx)
         .to.emit(this.contracts.trenBoxManager, "TrenBoxUpdated")
-        .withArgs(erc20, borrower, 0n, 0n, 0n, 4n);
+        .withArgs(erc20, borrower, 0n, 0n, 0n, 3n);
       await expect(redistributeTx)
         .to.emit(this.contracts.trenBoxManager, "TrenBoxUpdated")
-        .withArgs(erc20, borrower2, 0n, 0n, 0n, 4n);
+        .withArgs(erc20, borrower2, 0n, 0n, 0n, 3n);
 
       const reapyTrenBoxPromises = newBorrowers.map((borrower) => {
         return this.utils.repayDebt({

@@ -169,7 +169,6 @@ export type SetupCollateralForTestsArgs = {
       minNetDebt: bigint;
       mintCap: bigint;
       percentDivisor: bigint;
-      redemptionFeeFloor: bigint;
     };
   };
   overrideAdminContract?: AdminContract;
@@ -204,10 +203,6 @@ export type SetupProtocolCommands =
   | {
       action: "withdrawFromStabilityPool";
       args: WithdrawFromStabilityPoolArgs;
-    }
-  | {
-      action: "redeemCollateral";
-      args: RedeemCollateralArgs;
     }
   | {
       action: "liquidate";
@@ -328,23 +323,6 @@ export type LiquidateTrenBoxesArgs = {
 };
 export type LiquidateTrenBoxesResult = ContractTransactionResponse;
 
-export type RedeemCollateralArgs = {
-  from?: HardhatEthersSigner;
-  asset: ERC20 | AddressLike;
-  debtTokenAmount: bigint;
-  numberOfTrials: bigint;
-  randomSeed: bigint;
-
-  maxFeePercentage?: bigint;
-  price?: bigint;
-  maxIterations?: bigint;
-
-  overridePriceFeed?: PriceFeed;
-  overrideTrenBoxManagerOperations?: TrenBoxManagerOperations;
-  overrideSortedTrenBoxes?: SortedTrenBoxes;
-};
-export type RedeemCollateralResult = ContractTransactionResponse;
-
 export type CloseTrenBoxArgs = {
   from?: HardhatEthersSigner;
   asset: ERC20 | AddressLike;
@@ -381,7 +359,6 @@ export interface TestUtils {
   batchLiquidateTrenBoxes: (
     args: BatchLiquidateTrenBoxesArgs
   ) => Promise<BatchLiquidateTrenBoxesResult>;
-  redeemCollateral: (args: RedeemCollateralArgs) => Promise<RedeemCollateralResult>;
   closeTrenBox: (args: CloseTrenBoxArgs) => Promise<CloseTrenBoxResult>;
 }
 
@@ -402,7 +379,6 @@ export enum TrenBoxStatus {
   active = 1,
   closedByOwner = 2,
   closedByLiquidation = 3,
-  closedByRedemption = 4,
 }
 
 export enum BorrowerOperationType {
