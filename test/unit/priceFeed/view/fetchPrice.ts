@@ -292,8 +292,8 @@ export default function shouldHaveFetchPrice(): void {
           exponent,
           price,
           224843971,
-          now,
-          now - 1
+          now - 1,
+          now - 10
         );
 
         const updatePriceOnPythMockTx = await mockPyth.updatePriceFeed(pythPriceFeedData);
@@ -346,10 +346,10 @@ export default function shouldHaveFetchPrice(): void {
         expect(price).to.equal(expectedPrice);
       });
 
-      it("should return Pyth oracle price", async function () {
+      it("should return Pyth oracle price when exponent if negative", async function () {
         const ethAmount = ethers.WeiPerEther;
         const { mockPyth } = this.testContracts;
-        await setPrice(mockPyth, ethAmount, -18);
+        await setPrice(mockPyth, ethAmount, -12);
 
         await this.redeployedContracts.priceFeed
           .connect(this.timelockImpostor)
@@ -367,7 +367,33 @@ export default function shouldHaveFetchPrice(): void {
 
         const price = await this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address);
         const priceAnswer = ethUsdRoundData[1];
-        const expectedPrice = priceAnswer * 10n ** 10n;
+        const expectedPrice = priceAnswer * 10n ** 16n;
+
+        expect(price).to.be.equal(expectedPrice);
+      });
+
+      it("should return Pyth oracle price when exponent if positive", async function () {
+        const ethAmount = ethers.WeiPerEther;
+        const { mockPyth } = this.testContracts;
+        await setPrice(mockPyth, ethAmount, 2);
+
+        await this.redeployedContracts.priceFeed
+          .connect(this.timelockImpostor)
+          .setOracle(
+            this.erc20Address,
+            await mockPyth.getAddress(),
+            PYTH_ORACLE_OPTIONS.providerType,
+            PYTH_ORACLE_OPTIONS.timeoutSeconds,
+            true,
+            false,
+            PYTH_ORACLE_OPTIONS.additionalData
+          );
+
+        const ethUsdRoundData = await this.mockAggregator.latestRoundData();
+
+        const price = await this.redeployedContracts.priceFeed.fetchPrice(this.erc20Address);
+        const priceAnswer = ethUsdRoundData[1];
+        const expectedPrice = priceAnswer * 10n ** 30n;
 
         expect(price).to.be.equal(expectedPrice);
       });

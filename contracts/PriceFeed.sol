@@ -128,10 +128,10 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
             return ChainlinkAggregatorV3Interface(_oracle).decimals();
         } else if (ProviderType.API3 == _type) {
             return 18;
-        } else if (ProviderType.Pyth == _type) {
+        } else {
+            // (ProviderType.Pyth == _type)
             return 18;
         }
-        return 0;
     }
 
     /**
@@ -150,7 +150,8 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
             (oraclePrice, priceTimestamp) = _fetchChainlinkOracleResponse(oracle.oracleAddress);
         } else if (ProviderType.API3 == oracle.providerType) {
             (oraclePrice, priceTimestamp) = _fetchAPI3OracleResponse(oracle.oracleAddress);
-        } else if (ProviderType.Pyth == oracle.providerType) {
+        } else {
+            // (ProviderType.Pyth == oracle.providerType)
             (oraclePrice, priceTimestamp) =
                 _fetchPythOracleResponse(oracle.oracleAddress, oracle.additionalData);
         }
@@ -173,9 +174,12 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
     )
         internal
         view
-        returns (bool)
+        returns (bool isStalePrice)
     {
-        return block.timestamp - _priceTimestamp > _oracleTimeoutSeconds;
+        bool isPriceTimeouted = block.timestamp - _priceTimestamp > _oracleTimeoutSeconds;
+        bool isPriceInFuture = _priceTimestamp > block.timestamp;
+
+        isStalePrice = isPriceTimeouted || isPriceInFuture;
     }
 
     /**
@@ -217,12 +221,23 @@ contract PriceFeed is IPriceFeed, OwnableUpgradeable, UUPSUpgradeable, Configura
         view
         returns (uint256 price, uint256 timestamp)
     {
-        IPyth pythOracle = IPyth(_oracleAddress);
-        PythStructs.Price memory pythResponse = pythOracle.getPriceUnsafe(_priceFeedId);
+        try IPyth(_oracleAddress).getPrice(_priceFeedId) returns (
+            PythStructs.Price memory pythResponse
+        ) {
+            timestamp = pythResponse.publishTime;
 
-        timestamp = pythResponse.publishTime;
-        price = (uint256(uint64(pythResponse.price)) * (10 ** 18))
-            / (10 ** uint8(uint32(-1 * pythResponse.expo)));
+            if (pythResponse.expo >= 0) {
+                price = (uint256(uint64(pythResponse.price)) * (10 ** 18))
+                    * (10 ** uint8(uint32(pythResponse.expo)));
+            } else {
+                price = (uint256(uint64(pythResponse.price)) * (10 ** 18))
+                    / (10 ** uint8(uint32(-1 * pythResponse.expo)));
+            }
+        } catch {
+            // If call to Pyth aggregator reverts, return a zero response
+            price = 0;
+            timestamp = 0;
+        }
     }
 
     /**
