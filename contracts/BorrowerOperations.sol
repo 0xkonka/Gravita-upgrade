@@ -207,12 +207,26 @@ contract BorrowerOperations is
                     _asset, ITrenBoxManager(trenBoxManager).getTrenBoxDebt(_asset, msg.sender)
                 )
         ) {
-            _closeTrenBox(_asset);
+            _closeTrenBox(_asset, msg.sender);
         } else {
             _adjustTrenBox(
                 _asset, 0, msg.sender, 0, _debtTokenAmount, false, _upperHint, _lowerHint
             );
         }
+    }
+
+    function repayDebtTokensWithFlashloan(
+        address _asset,
+        address _borrower
+    )
+        external
+        override
+        nonReentrant
+    {
+        if (msg.sender != flashLoanAddress) {
+            revert BorrowerOperations__OnlyFlashLoanAddress();
+        }
+        _closeTrenBox(_asset, _borrower);
     }
 
     /// @inheritdoc IBorrowerOperations
@@ -400,42 +414,46 @@ contract BorrowerOperations is
      * and close their trenBoxes.
      * @param _asset The address of collateral asset.
      */
-    function _closeTrenBox(address _asset) internal {
-        _requireTrenBoxIsActive(_asset, msg.sender);
+    function _closeTrenBox(address _asset, address _borrower) internal {
+        _requireTrenBoxIsActive(_asset, _borrower);
         uint256 price = IPriceFeed(priceFeed).fetchPrice(_asset);
         _requireNotInRecoveryMode(_asset, price);
 
-        ITrenBoxManager(trenBoxManager).applyPendingRewards(_asset, msg.sender);
+        ITrenBoxManager(trenBoxManager).applyPendingRewards(_asset, _borrower);
 
-        uint256 coll = ITrenBoxManager(trenBoxManager).getTrenBoxColl(_asset, msg.sender);
-        uint256 debt = ITrenBoxManager(trenBoxManager).getTrenBoxDebt(_asset, msg.sender);
+        uint256 coll = ITrenBoxManager(trenBoxManager).getTrenBoxColl(_asset, _borrower);
+        uint256 debt = ITrenBoxManager(trenBoxManager).getTrenBoxDebt(_asset, _borrower);
 
         uint256 gasCompensation = IAdminContract(adminContract).getDebtTokenGasCompensation(_asset);
-        uint256 refund = IFeeCollector(feeCollector).simulateRefund(msg.sender, _asset, 1 ether);
+        uint256 refund = IFeeCollector(feeCollector).simulateRefund(_borrower, _asset, 1 ether);
         uint256 netDebt = debt - gasCompensation - refund;
 
-        _requireSufficientDebtTokenBalance(msg.sender, netDebt);
+        _requireSufficientDebtTokenBalance(_borrower, netDebt);
 
         uint256 newTCR = _getNewTCRFromTrenBoxChange(_asset, coll, false, debt, false, price);
         _requireNewTCRisAboveCCR(_asset, newTCR);
 
-        ITrenBoxManager(trenBoxManager).removeStake(_asset, msg.sender);
-        ITrenBoxManager(trenBoxManager).closeTrenBox(_asset, msg.sender);
+        ITrenBoxManager(trenBoxManager).removeStake(_asset, _borrower);
+        ITrenBoxManager(trenBoxManager).closeTrenBox(_asset, _borrower);
 
-        emit TrenBoxUpdated(_asset, msg.sender, 0, 0, 0, BorrowerOperation.closeTrenBox);
+        emit TrenBoxUpdated(_asset, _borrower, 0, 0, 0, BorrowerOperation.closeTrenBox);
 
         // Burn the repaid debt tokens from the user's balance and the gas compensation from
         // TrenBoxStorage
-        _repayDebtTokens(_asset, msg.sender, netDebt, refund);
+        _repayDebtTokens(_asset, _borrower, netDebt, refund);
         if (gasCompensation != 0) {
             _repayDebtTokens(_asset, trenBoxStorage, gasCompensation, 0);
         }
 
         // Signal to the fee collector that debt has been paid in full
-        IFeeCollector(feeCollector).closeDebt(msg.sender, _asset);
+        IFeeCollector(feeCollector).closeDebt(_borrower, _asset);
 
-        // Send the collateral back to the user
-        ITrenBoxStorage(trenBoxStorage).sendCollateral(_asset, msg.sender, coll);
+        // Send the collateral back to the user or FlashLoan contract
+        if (msg.sender == flashLoanAddress) {
+            ITrenBoxStorage(trenBoxStorage).sendCollateral(_asset, flashLoanAddress, coll);
+        } else {
+            ITrenBoxStorage(trenBoxStorage).sendCollateral(_asset, _borrower, coll);
+        }
     }
 
     /**
