@@ -31,28 +31,28 @@ contract AdminContract is
     string public constant NAME = "AdminContract";
 
     /// @notice The scaled number which means 100 percent, 1e18 == 100%.
-    uint256 public constant _100pct = 1 ether;
+    uint256 public constant _100pct = 1e18;
 
     /// @notice The default borrowing fee, 0.5%.
-    uint256 public constant BORROWING_FEE_DEFAULT = 0.005 ether;
+    uint256 public constant BORROWING_FEE_DEFAULT = 0.005 * 1e18;
 
     /// @notice The default critical collateral ratio, 150%.
-    uint256 public constant CCR_DEFAULT = 1.5 ether;
+    uint256 public constant CCR_DEFAULT = 1.5 * 1e18;
 
     /// @notice The default minimum collateral ratio, 110%.
-    uint256 public constant MCR_DEFAULT = 1.1 ether;
+    uint256 public constant MCR_DEFAULT = 1.1 * 1e18;
 
     /// @notice The default minimum amount of debt token to mint.
-    uint256 public constant MIN_NET_DEBT_DEFAULT = 2000 ether;
+    uint256 public constant MIN_NET_DEBT_DEFAULT = 2000 * 1e18;
 
     /// @notice The default mint cap, 1 million trenUSD.
-    uint256 public constant MINT_CAP_DEFAULT = 1_000_000 ether;
+    uint256 public constant MINT_CAP_DEFAULT = 1_000_000 * 1e18;
 
     /// @notice The default liquidation fee, dividing by 200 yields 0.5%.
     uint256 public constant PERCENT_DIVISOR_DEFAULT = 200;
 
     /// @notice The default floor of redemption fee, 0.5%.
-    uint256 public constant REDEMPTION_FEE_FLOOR_DEFAULT = 0.005 ether;
+    uint256 public constant REDEMPTION_FEE_FLOOR_DEFAULT = 0.005 * 1e18;
 
     /// @notice The default block timestamp for redemption.
     uint256 public constant REDEMPTION_BLOCK_TIMESTAMP_DEFAULT = type(uint256).max;
@@ -77,7 +77,7 @@ contract AdminContract is
     bool public isSetupInitialized;
 
     /// @notice If true, collected fees go to stakers; if false, to the treasury.
-    bool public routeToTRENStaking = false;
+    bool public routeToTRENStaking;
 
     // Modifiers
     // --------------------------------------------------------------------------------------------------------
@@ -142,6 +142,10 @@ contract AdminContract is
      * all subsequent config/setters will need to go through the timelocks.
      */
     function setSetupIsInitialized() external onlyTimelock {
+        if (isSetupInitialized) {
+            revert AdminContract__AlreadyInitialized();
+        }
+
         isSetupInitialized = true;
     }
 
@@ -198,13 +202,14 @@ contract AdminContract is
         onlyTimelock
     {
         collateralParams[_collateral].active = true;
-        setBorrowingFee(_collateral, _borrowingFee);
-        setCCR(_collateral, _ccr);
-        setMCR(_collateral, _mcr);
-        setMinNetDebt(_collateral, _minNetDebt);
-        setMintCap(_collateral, _mintCap);
-        setPercentDivisor(_collateral, _percentDivisor);
-        setRedemptionFeeFloor(_collateral, _redemptionFeeFloor);
+
+        _setBorrowingFee(_collateral, _borrowingFee);
+        _setCCR(_collateral, _ccr);
+        _setMCR(_collateral, _mcr);
+        _setMinNetDebt(_collateral, _minNetDebt);
+        _setMintCap(_collateral, _mintCap);
+        _setPercentDivisor(_collateral, _percentDivisor);
+        _setRedemptionFeeFloor(_collateral, _redemptionFeeFloor);
     }
 
     /// @inheritdoc IAdminContract
@@ -221,68 +226,28 @@ contract AdminContract is
         public
         override
         onlyTimelock
-        safeCheck("Borrowing Fee", _collateral, _borrowingFee, 0, 0.1 ether) // 0% - 10%
     {
-        CollateralParams storage collParams = collateralParams[_collateral];
-        uint256 oldBorrowing = collParams.borrowingFee;
-        collParams.borrowingFee = _borrowingFee;
-        emit BorrowingFeeChanged(oldBorrowing, _borrowingFee);
+        _setBorrowingFee(_collateral, _borrowingFee);
     }
 
     /// @inheritdoc IAdminContract
-    function setCCR(
-        address _collateral,
-        uint256 _newCCR
-    )
-        public
-        override
-        onlyTimelock
-        safeCheck("CCR", _collateral, _newCCR, 1 ether, 10 ether) // 100% - 1,000%
-    {
-        CollateralParams storage collParams = collateralParams[_collateral];
-        uint256 oldCCR = collParams.ccr;
-        collParams.ccr = _newCCR;
-        emit CCRChanged(oldCCR, _newCCR);
+    function setCCR(address _collateral, uint256 _newCCR) public override onlyTimelock {
+        _setCCR(_collateral, _newCCR);
     }
 
     /// @inheritdoc IAdminContract
-    function setMCR(
-        address _collateral,
-        uint256 _newMCR
-    )
-        public
-        override
-        onlyTimelock
-        safeCheck("MCR", _collateral, _newMCR, 1.01 ether, 10 ether) // 101% - 1,000%
-    {
-        CollateralParams storage collParams = collateralParams[_collateral];
-        uint256 oldMCR = collParams.mcr;
-        collParams.mcr = _newMCR;
-        emit MCRChanged(oldMCR, _newMCR);
+    function setMCR(address _collateral, uint256 _newMCR) public override onlyTimelock {
+        _setMCR(_collateral, _newMCR);
     }
 
     /// @inheritdoc IAdminContract
-    function setMinNetDebt(
-        address _collateral,
-        uint256 _minNetDebt
-    )
-        public
-        override
-        onlyTimelock
-        safeCheck("Min Net Debt", _collateral, _minNetDebt, 0, 2000 ether)
-    {
-        CollateralParams storage collParams = collateralParams[_collateral];
-        uint256 oldMinNet = collParams.minNetDebt;
-        collParams.minNetDebt = _minNetDebt;
-        emit MinNetDebtChanged(oldMinNet, _minNetDebt);
+    function setMinNetDebt(address _collateral, uint256 _minNetDebt) public override onlyTimelock {
+        _setMinNetDebt(_collateral, _minNetDebt);
     }
 
     /// @inheritdoc IAdminContract
     function setMintCap(address _collateral, uint256 _mintCap) public override onlyTimelock {
-        CollateralParams storage collParams = collateralParams[_collateral];
-        uint256 oldMintCap = collParams.mintCap;
-        collParams.mintCap = _mintCap;
-        emit MintCapChanged(oldMintCap, _mintCap);
+        _setMintCap(_collateral, _mintCap);
     }
 
     /// @inheritdoc IAdminContract
@@ -293,12 +258,8 @@ contract AdminContract is
         public
         override
         onlyTimelock
-        safeCheck("Percent Divisor", _collateral, _percentDivisor, 2, 200)
     {
-        CollateralParams storage collParams = collateralParams[_collateral];
-        uint256 oldPercent = collParams.percentDivisor;
-        collParams.percentDivisor = _percentDivisor;
-        emit PercentDivisorChanged(oldPercent, _percentDivisor);
+        _setPercentDivisor(_collateral, _percentDivisor);
     }
 
     /// @inheritdoc IAdminContract
@@ -309,12 +270,8 @@ contract AdminContract is
         public
         override
         onlyTimelock
-        safeCheck("Redemption Fee Floor", _collateral, _redemptionFeeFloor, 0.001 ether, 0.1 ether)
     {
-        CollateralParams storage collParams = collateralParams[_collateral];
-        uint256 oldRedemptionFeeFloor = collParams.redemptionFeeFloor;
-        collParams.redemptionFeeFloor = _redemptionFeeFloor;
-        emit RedemptionFeeFloorChanged(oldRedemptionFeeFloor, _redemptionFeeFloor);
+        _setRedemptionFeeFloor(_collateral, _redemptionFeeFloor);
     }
 
     /// @inheritdoc IAdminContract
@@ -395,7 +352,7 @@ contract AdminContract is
         exists(_collateral)
         returns (uint256)
     {
-        return (collateralParams[_collateral].index);
+        return collateralParams[_collateral].index;
     }
 
     /// @inheritdoc IAdminContract
@@ -510,4 +467,89 @@ contract AdminContract is
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner { }
+
+    function _setBorrowingFee(
+        address _collateral,
+        uint256 _borrowingFee
+    )
+        internal
+        safeCheck("Borrowing Fee", _collateral, _borrowingFee, 0, 0.1 ether) // 0% - 10%
+    {
+        CollateralParams storage collParams = collateralParams[_collateral];
+        uint256 oldBorrowing = collParams.borrowingFee;
+        collParams.borrowingFee = _borrowingFee;
+        emit BorrowingFeeChanged(oldBorrowing, _borrowingFee);
+    }
+
+    function _setCCR(
+        address _collateral,
+        uint256 _ccr
+    )
+        internal
+        safeCheck("CCR", _collateral, _ccr, 1 ether, 10 ether) // 100% - 1,000%
+    {
+        CollateralParams storage collParams = collateralParams[_collateral];
+        uint256 oldCCR = collParams.ccr;
+        collParams.ccr = _ccr;
+        emit CCRChanged(oldCCR, _ccr);
+    }
+
+    function _setMCR(
+        address _collateral,
+        uint256 _mcr
+    )
+        internal
+        safeCheck("MCR", _collateral, _mcr, 1.01 ether, 10 ether) // 101% - 1,000%
+    {
+        CollateralParams storage collParams = collateralParams[_collateral];
+        uint256 oldMCR = collParams.mcr;
+        collParams.mcr = _mcr;
+        emit MCRChanged(oldMCR, _mcr);
+    }
+
+    function _setMinNetDebt(
+        address _collateral,
+        uint256 _minNetDebt
+    )
+        internal
+        safeCheck("Min Net Debt", _collateral, _minNetDebt, 0, 2000 ether)
+    {
+        CollateralParams storage collParams = collateralParams[_collateral];
+        uint256 oldMinNet = collParams.minNetDebt;
+        collParams.minNetDebt = _minNetDebt;
+        emit MinNetDebtChanged(oldMinNet, _minNetDebt);
+    }
+
+    function _setMintCap(address _collateral, uint256 _mintCap) internal {
+        CollateralParams storage collParams = collateralParams[_collateral];
+        uint256 oldMintCap = collParams.mintCap;
+        collParams.mintCap = _mintCap;
+        emit MintCapChanged(oldMintCap, _mintCap);
+    }
+
+    function _setPercentDivisor(
+        address _collateral,
+        uint256 _percentDivisor
+    )
+        internal
+        safeCheck("Percent Divisor", _collateral, _percentDivisor, 2, 200)
+    {
+        CollateralParams storage collParams = collateralParams[_collateral];
+        uint256 oldPercent = collParams.percentDivisor;
+        collParams.percentDivisor = _percentDivisor;
+        emit PercentDivisorChanged(oldPercent, _percentDivisor);
+    }
+
+    function _setRedemptionFeeFloor(
+        address _collateral,
+        uint256 _redemptionFeeFloor
+    )
+        internal
+        safeCheck("Redemption Fee Floor", _collateral, _redemptionFeeFloor, 0.001 ether, 0.1 ether)
+    {
+        CollateralParams storage collParams = collateralParams[_collateral];
+        uint256 oldRedemptionFeeFloor = collParams.redemptionFeeFloor;
+        collParams.redemptionFeeFloor = _redemptionFeeFloor;
+        emit RedemptionFeeFloorChanged(oldRedemptionFeeFloor, _redemptionFeeFloor);
+    }
 }
