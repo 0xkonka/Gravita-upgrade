@@ -202,6 +202,11 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     mapping(address depositor => Snapshots snapshot) public depositSnapshots;
 
     /**
+     * @notice The mapping maintains the timestamp of the latest deposit for each depositor.
+     */
+    mapping(address depositor => uint256 timestamp) public depositTimestamp;
+
+    /**
      * @notice Product 'P': Running product by which to multiply an initial deposit, in order to
      * find the current compounded deposit,
      * after a series of liquidations have occurred, each of which cancel some debt tokens debt with
@@ -214,6 +219,9 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
 
     /// @notice The unit factor to be used in scale increment.
     uint256 public constant SCALE_FACTOR = 1e9;
+
+    /// @notice The time locked period for withdrawal from the stability pool.
+    uint256 public constant TIME_LOCKED_PERIOD = 7 days;
 
     /// @notice Each time the scale of P shifts by SCALE_FACTOR, the scale is incremented by 1.
     uint128 public currentScale;
@@ -419,6 +427,8 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
 
         // send any collateral gains accrued to the depositor
         _sendGainsToDepositor(msg.sender, gainAssets, gainAmounts);
+
+        depositTimestamp[msg.sender] = block.timestamp;
     }
 
     /// @inheritdoc IStabilityPool
@@ -468,6 +478,8 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
     {
         uint256 initialDeposit = deposits[msg.sender];
         _requireUserHasDeposit(initialDeposit);
+
+        openForWithdrawal(msg.sender);
 
         _triggerTRENIssuance();
 
@@ -521,10 +533,9 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         uint256 TRENPerUnitStaked =
             _computeTRENPerUnitStaked(_TRENIssuance, cachedTotalDebtTokenDeposits);
         uint256 marginalTRENGain = TRENPerUnitStaked * P;
-        uint256 newEpochToScaleToG = epochToScaleToG[currentEpoch][currentScale];
-        newEpochToScaleToG += marginalTRENGain;
-        epochToScaleToG[currentEpoch][currentScale] = newEpochToScaleToG;
-        emit GainsUpdated(newEpochToScaleToG, currentEpoch, currentScale);
+        mapping(uint128 => uint256) storage newEpochToScaleToG = epochToScaleToG[currentEpoch];
+        newEpochToScaleToG[currentScale] += marginalTRENGain;
+        emit GainsUpdated(newEpochToScaleToG[currentScale], currentEpoch, currentScale);
     }
 
     /**
@@ -637,8 +648,8 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         uint256 newProductFactor = DECIMAL_PRECISION - _debtLossPerUnitStaked;
         uint128 currentScaleCached = currentScale;
         uint128 currentEpochCached = currentEpoch;
-        uint256 currentS = epochToScaleToSum[_asset][currentEpochCached][currentScaleCached];
-
+        mapping(uint128 => mapping(uint128 => uint256)) storage scaleToSum =
+            epochToScaleToSum[_asset];
         /*
          * Calculate the new S first, before we update P.
         * The asset gain for any given depositor from a liquidation depends on the value of their
@@ -649,9 +660,13 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
          * Since S corresponds to asset gain, and P to deposit loss, we update S first.
          */
         uint256 marginalAssetGain = _collGainPerUnitStaked * currentP;
-        uint256 newS = currentS + marginalAssetGain;
-        epochToScaleToSum[_asset][currentEpochCached][currentScaleCached] = newS;
-        emit SumUpdated(_asset, newS, currentEpochCached, currentScaleCached);
+        scaleToSum[currentEpochCached][currentScaleCached] += marginalAssetGain;
+        emit SumUpdated(
+            _asset,
+            scaleToSum[currentEpochCached][currentScaleCached],
+            currentEpochCached,
+            currentScaleCached
+        );
 
         // If the Stability Pool was emptied, increment the epoch, and reset the scale and product P
         if (newProductFactor == 0) {
@@ -816,8 +831,9 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         uint256 G_Snapshot = _snapshots.G;
         uint256 P_Snapshot = _snapshots.P;
 
-        uint256 firstPortion = epochToScaleToG[epochSnapshot][scaleSnapshot] - G_Snapshot;
-        uint256 secondPortion = epochToScaleToG[epochSnapshot][scaleSnapshot + 1] / SCALE_FACTOR;
+        mapping(uint128 => uint256) storage newEpochToScaleToG = epochToScaleToG[epochSnapshot];
+        uint256 firstPortion = newEpochToScaleToG[scaleSnapshot] - G_Snapshot;
+        uint256 secondPortion = newEpochToScaleToG[scaleSnapshot + 1] / SCALE_FACTOR;
 
         uint256 TRENGain =
             (_initialStake * (firstPortion + secondPortion)) / P_Snapshot / DECIMAL_PRECISION;
@@ -967,9 +983,11 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         uint256 collsLen = colls.length;
 
         Snapshots storage depositorSnapshots = depositSnapshots[_depositor];
+        mapping(address => uint256) storage snapshotsSums = depositorSnapshots.S;
+
         if (_newValue == 0) {
             for (uint256 i = 0; i < collsLen;) {
-                depositSnapshots[_depositor].S[colls[i]] = 0;
+                snapshotsSums[colls[i]] = 0;
                 unchecked {
                     i++;
                 }
@@ -981,14 +999,17 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
             emit DepositSnapshotUpdated(_depositor, 0, 0);
             return;
         }
+
         uint128 currentScaleCached = currentScale;
         uint128 currentEpochCached = currentEpoch;
         uint256 currentP = P;
+        address asset;
 
         for (uint256 i = 0; i < collsLen;) {
-            address asset = colls[i];
-            uint256 currentS = epochToScaleToSum[asset][currentEpochCached][currentScaleCached];
-            depositSnapshots[_depositor].S[asset] = currentS;
+            asset = colls[i];
+            mapping(uint128 => mapping(uint128 => uint256)) storage scaleToSum =
+                epochToScaleToSum[asset];
+            snapshotsSums[asset] = scaleToSum[currentEpochCached][currentScaleCached];
             unchecked {
                 ++i;
             }
@@ -1082,6 +1103,13 @@ contract StabilityPool is ReentrancyGuardUpgradeable, UUPSUpgradeable, TrenBase,
         uint256 newAssetBalance = totalColl.amounts[collateralIndex] + _amount;
         totalColl.amounts[collateralIndex] = newAssetBalance;
         emit StabilityPoolAssetBalanceUpdated(_asset, newAssetBalance);
+    }
+
+    function openForWithdrawal(address _depositor) public view {
+        uint256 timeDiff = block.timestamp - depositTimestamp[_depositor];
+        if (timeDiff <= TIME_LOCKED_PERIOD) {
+            revert StabilityPool__ShouldWaitFor7DaysAfterDeposit();
+        }
     }
 
     function authorizeUpgrade(address newImplementation) public {
