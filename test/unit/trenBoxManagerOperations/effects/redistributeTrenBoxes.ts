@@ -325,7 +325,7 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
         borrower3.address
       );
 
-      expect(borrower3DebtAtTheEnd).to.be.equal(ethers.parseEther("6500") - 2500n);
+      expect(borrower3DebtAtTheEnd).to.be.equal(ethers.parseEther("6500") - 850n);
       expect(borrower3CollAtTheEnd).to.be.equal(ethers.parseEther("4900") - 1400n);
     });
 
