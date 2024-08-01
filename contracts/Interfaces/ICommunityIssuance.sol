@@ -15,6 +15,7 @@ interface ICommunityIssuance {
 
     // --- Events ---
 
+    event AdminContractAddressSet(address _adminContract);
     event TotalTRENIssuedUpdated(uint256 _totalTRENIssued);
 
     // --- Functions ---
