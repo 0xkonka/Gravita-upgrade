@@ -44,11 +44,6 @@ export default function shouldBehaveLikeCanFlashLoanForRepay(): void {
       const debtToken = await DebtTokenFactory.deploy(owner);
       await debtToken.waitForDeployment();
 
-      await debtToken.setAddresses(
-        borrowerOperations,
-        this.contracts.stabilityPool,
-        this.contracts.trenBoxManager
-      );
       await debtToken.addWhitelist(feeCollector);
 
       this.redeployedContracts.flashLoan = flashLoan;
