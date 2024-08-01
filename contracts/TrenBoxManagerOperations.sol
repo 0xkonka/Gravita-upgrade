@@ -242,10 +242,7 @@ contract TrenBoxManagerOperations is
         ITrenBoxManager(trenBoxManager).updateSystemSnapshots_excludeCollRemainder(_asset, 0);
 
         emit Redistribution(
-            _asset,
-            totals.totalDebtInSequence,
-            totals.totalCollInSequence - totals.totalCollToClaim,
-            totals.totalDebtTokenGasCompensation
+            _asset, totals.totalDebtInSequence, totals.totalCollInSequence - totals.totalCollToClaim
         );
     }
 
