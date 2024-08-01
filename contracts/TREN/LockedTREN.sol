@@ -28,7 +28,7 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
         _;
     }
 
-    function initialize() public initializer {
+    function initialize() public {
         address initialOwner = _msgSender();
 
         __Ownable_init(initialOwner);
@@ -38,7 +38,7 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
         trenToken = IERC20(_trenAddress);
     }
 
-    function addEntityVesting(address _entity, uint256 _totalSupply) public onlyOwner {
+    function addEntityVesting(address _entity, uint256 _vestedTokenAmount) public onlyOwner {
         if (_entity == address(0)) {
             revert LockedTREN__InvalidAddress();
         }
@@ -47,23 +47,20 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
             revert LockedTREN__AlreadyHaveVestingRule();
         }
 
-        assignedTRENTokens += _totalSupply;
+        assignedTRENTokens += _vestedTokenAmount;
 
-        entitiesVesting[_entity] = Rule(
-            block.timestamp,
-            _totalSupply,
-            block.timestamp + SIX_MONTHS,
-            block.timestamp + TWO_YEARS,
-            0
-        );
+        entitiesVesting[_entity] = Rule({
+            createdDate: block.timestamp,
+            totalSupply: _vestedTokenAmount,
+            startVestingDate: block.timestamp + SIX_MONTHS,
+            endVestingDate: block.timestamp + TWO_YEARS,
+            claimed: 0
+        });
 
-        trenToken.safeTransferFrom(msg.sender, address(this), _totalSupply);
+        trenToken.safeTransferFrom(msg.sender, address(this), _vestedTokenAmount);
 
         emit AddEntityVesting(
-            _entity,
-            _totalSupply,
-            entitiesVesting[_entity].startVestingDate,
-            entitiesVesting[_entity].endVestingDate
+            _entity, _vestedTokenAmount, block.timestamp + SIX_MONTHS, block.timestamp + TWO_YEARS
         );
     }
 
@@ -75,19 +72,24 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
         onlyOwner
         entityRuleExists(_entity)
     {
-        sendTRENTokenToEntity(_entity);
         Rule storage vestingRule = entitiesVesting[_entity];
-
+        if (newTotalSupply >= vestingRule.totalSupply) {
+            revert LockedTREN__NewValueMustBeLower();
+        }
         if (newTotalSupply <= vestingRule.claimed) {
             revert LockedTREN__TotalSupplyLessThanClaimed();
         }
+
+        assignedTRENTokens = assignedTRENTokens - (vestingRule.totalSupply - newTotalSupply);
+
+        sendTRENTokenToEntity(_entity);
 
         vestingRule.totalSupply = newTotalSupply;
     }
 
     function removeEntityVesting(address _entity) public onlyOwner entityRuleExists(_entity) {
         sendTRENTokenToEntity(_entity);
-        Rule memory vestingRule = entitiesVesting[_entity];
+        Rule storage vestingRule = entitiesVesting[_entity];
 
         assignedTRENTokens = assignedTRENTokens - (vestingRule.totalSupply - vestingRule.claimed);
 
@@ -119,7 +121,7 @@ contract LockedTREN is ILockedTREN, OwnableUpgradeable {
 
     function getClaimableTREN(address _entity) public view returns (uint256 claimable) {
         Rule memory entityRule = entitiesVesting[_entity];
-        claimable = 0;
+        claimable;
 
         if (entityRule.startVestingDate > block.timestamp) return claimable;
 
