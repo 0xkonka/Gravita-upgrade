@@ -4,7 +4,6 @@ import { Context } from "mocha";
 import { TestUtils } from "../shared/types";
 import { addCollateral } from "./addCollateral";
 import { batchLiquidateTrenBoxes } from "./batchLiquidateTrenBoxes";
-import { closeTrenBox } from "./closeTrenBox";
 import { connectRedeployedContracts } from "./connectRedeployedContracts";
 import { getActualDebtFromCompositeDebt } from "./getActualDebtFromCompositeDebt";
 import { getAddressesForSetAddresses } from "./getAddressesForSetAddresses";
@@ -51,6 +50,5 @@ export function setupUtils(context: Context): TestUtils {
     batchLiquidateTrenBoxes: batchLiquidateTrenBoxes(context),
     liquidateTrenBoxes: liquidateTrenBoxes(context),
     redeemCollateral: redeemCollateral(context),
-    closeTrenBox: closeTrenBox(context),
   };
 }

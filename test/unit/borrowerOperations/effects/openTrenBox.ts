@@ -1,3 +1,4 @@
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
@@ -8,7 +9,7 @@ const DEFAULT_UPPER_HINT = ethers.ZeroAddress;
 
 export default function shouldBehaveLikeCanOpenTrenBox() {
   beforeEach(async function () {
-    const users = [this.signers.accounts[0], this.signers.accounts[1]];
+    const users = [this.signers.accounts[0], this.signers.accounts[1], this.signers.accounts[2]];
 
     this.upperHint = DEFAULT_UPPER_HINT;
     this.lowerHint = DEFAULT_LOWER_HINT;
@@ -19,7 +20,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
       collateral: erc20,
       collateralOptions: {
         setAsActive: true,
-        price: 3473742283810000000000n,
+        price: ethers.parseEther("2500"),
         mints: [
           {
             to: users[0].address,
@@ -27,6 +28,10 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           },
           {
             to: users[1].address,
+            amount: ethers.parseUnits("100", 30),
+          },
+          {
+            to: users[2].address,
             amount: ethers.parseUnits("100", 30),
           },
         ],
@@ -37,7 +42,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
       collateral: erc20_with_6_decimals,
       collateralOptions: {
         setAsActive: true,
-        price: 1000283810000000000n,
+        price: ethers.parseEther("1"),
         mints: [
           {
             to: users[0].address,
@@ -72,7 +77,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             await this.contracts.adminContract.setMintCap(asset, mintCap);
           });
 
-          it("should revert", async function () {
+          it("should revert with custom error BorrowerOperations__TrenBoxNetDebtLessThanMin", async function () {
             const { adminContract, borrowerOperations } = this.contracts;
             const [user] = this.users;
             const { erc20 } = this.testContracts;
@@ -114,7 +119,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
             await adminContract.setMinNetDebt(asset, 0n);
           });
 
-          it("should revert", async function () {
+          it("should revert with custom error BorrowerOperations__CompositeDebtZero", async function () {
             const { borrowerOperations } = this.contracts;
             const [user] = this.users;
             const { erc20 } = this.testContracts;
@@ -141,23 +146,79 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         });
 
         context("when asset is in Recovery Mode", function () {
+          beforeEach(async function () {
+            const { erc20 } = this.testContracts;
+
+            const assetAmount = ethers.parseEther("2");
+            const users = [this.signers.accounts[0], this.signers.accounts[1]];
+            const newPrice = ethers.parseEther("1400");
+
+            await this.utils.setupProtocolForTests({
+              commands: users.map((user: HardhatEthersSigner) => {
+                return {
+                  action: "openTrenBox",
+                  args: {
+                    asset: erc20,
+                    assetAmount,
+                    from: user,
+                  },
+                };
+              }),
+            });
+
+            await this.testContracts.priceFeedTestnet.setPrice(erc20, newPrice);
+          });
+
           context("when ICR is below CCR", function () {
-            it.skip("should revert", async function () {});
+            it("should revert with custom error 'BorrowerOperations__TrenBoxICRBelowCCR", async function () {
+              const { erc20 } = this.testContracts;
+
+              const openTrenBoxTx = this.contracts.borrowerOperations
+                .connect(this.signers.accounts[3])
+                .openTrenBox(
+                  erc20,
+                  ethers.parseEther("2"),
+                  ethers.parseEther("2000"),
+                  DEFAULT_UPPER_HINT,
+                  DEFAULT_LOWER_HINT
+                );
+
+              await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+                this.contracts.borrowerOperations,
+                "BorrowerOperations__TrenBoxICRBelowCCR"
+              );
+            });
           });
 
           context("when ICR is above CCR", function () {
-            it.skip("should open tren box", async function () {});
+            it("should open tren box", async function () {
+              const { erc20 } = this.testContracts;
+              const user = this.signers.accounts[2];
+
+              await this.contracts.borrowerOperations
+                .connect(user)
+                .openTrenBox(
+                  erc20,
+                  ethers.parseEther("3"),
+                  ethers.parseEther("2000"),
+                  DEFAULT_UPPER_HINT,
+                  DEFAULT_LOWER_HINT
+                );
+
+              const status = await this.contracts.trenBoxManager.getTrenBoxStatus(erc20, user);
+              expect(status).to.be.equal(1n);
+            });
           });
         });
 
         context("when asset is not in Recovery Mode", function () {
           context("when ICR is below MCR", function () {
-            it("should revert", async function () {
+            it("should revert with custom error BorrowerOperations__TrenBoxICRBelowMCR", async function () {
               const [user] = this.users;
               const { erc20 } = this.testContracts;
               const { borrowerOperations } = this.contracts;
               const asset = await erc20.getAddress();
-              const assetAmount = ethers.parseUnits("2", 18);
+              const assetAmount = ethers.parseEther("2");
 
               await this.testContracts.priceFeedTestnet.setPrice(asset, 200);
 
@@ -182,7 +243,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
 
           const { erc20 } = this.testContracts;
           const asset = await erc20.getAddress();
-          const assetAmount = ethers.parseUnits("2", 18);
+          const assetAmount = ethers.parseEther("2");
 
           const mintCap = ethers.parseUnits("100", 35);
           await this.contracts.adminContract.setMintCap(asset, mintCap);
@@ -226,7 +287,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
 
           const { erc20 } = this.testContracts;
           const assetAddress = await erc20.getAddress();
-          const assetAmount = ethers.parseUnits("2", 18);
+          const assetAmount = ethers.parseEther("2");
 
           const { openTrenBoxTx } = await this.utils.openTrenBox({
             asset: assetAddress,
@@ -246,11 +307,11 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           await this.contracts.adminContract.setMintCap(asset, mintCap);
         });
 
-        it("should revert", async function () {
+        it("should revert with custrom error BorrowerOperations__TrenBoxICRBelowMCR", async function () {
           const [user] = this.users;
           const { erc20 } = this.testContracts;
           const assetAddress = await erc20.getAddress();
-          const assetAmount = ethers.parseUnits("2", 18);
+          const assetAmount = ethers.parseEther("2");
           const { borrowerOperations } = this.contracts;
 
           await this.testContracts.priceFeedTestnet.setPrice(assetAddress, 0);
@@ -269,66 +330,44 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
       });
 
       context("when new TCR is below CCR", function () {
-        beforeEach(async function () {
-          const { adminContract } = this.contracts;
-          const { erc20 } = this.testContracts;
-          const asset = await erc20.getAddress();
-          const mintCap = ethers.parseUnits("100", 35);
-          await adminContract.setMintCap(asset, mintCap);
-        });
-
-        it.skip("should revert", async function () {
+        it("should revert with custom error BorrowerOperations__TrenBoxNewTCRBelowCCR", async function () {
           const [user] = this.users;
           const { erc20 } = this.testContracts;
-          const asset = await erc20.getAddress();
-          const assetAmount = ethers.parseUnits("2", 18);
+          const assetAmount = ethers.parseEther("1");
 
           const { openTrenBoxTx } = await this.utils.openTrenBox({
-            asset,
+            asset: erc20,
             assetAmount,
             from: user,
           });
 
-          await expect(openTrenBoxTx).to.be.revertedWith(
-            "BorrowerOps: An operation that would result in TCR < CCR is not permitted"
+          await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+            this.contracts.borrowerOperations,
+            "BorrowerOperations__TrenBoxNewTCRBelowCCR"
           );
         });
       });
 
       context("when taken debt is greater than MintCap", function () {
-        beforeEach(async function () {
-          const { adminContract } = this.contracts;
-          const { erc20 } = this.testContracts;
-          const asset = await erc20.getAddress();
-          const mintCap = ethers.parseUnits("100", 35);
-          await adminContract.setMintCap(asset, mintCap);
-        });
-
-        it.skip("should revert", async function () {
+        it("should revert with custom error BorrowerOperations__ExceedMintCap", async function () {
           const [user] = this.users;
           const { erc20 } = this.testContracts;
-          const asset = await erc20.getAddress();
-          const assetAmount = ethers.parseUnits("2", 18);
-
           const { adminContract, borrowerOperations } = this.contracts;
-          const mintCap = await adminContract.getMintCap(asset);
+          const assetAmount = ethers.parseEther("10");
+          const mintCap = ethers.parseEther("5000");
 
-          const debtTokenAmount = mintCap + 1n;
+          await adminContract.setMintCap(erc20, mintCap);
 
-          const openTrenBoxTx = borrowerOperations
-            .connect(user)
-            .openTrenBox(
-              asset,
-              assetAmount,
-              debtTokenAmount,
-              DEFAULT_UPPER_HINT,
-              DEFAULT_LOWER_HINT
-            );
+          const { openTrenBoxTx } = await this.utils.openTrenBox({
+            asset: erc20,
+            assetAmount,
+            from: user,
+            extraDebtTokenAmount: mintCap,
+          });
 
-          await expect(openTrenBoxTx).to.be.revertedWith("Exceeds mint cap");
           await expect(openTrenBoxTx).to.be.revertedWithCustomError(
             borrowerOperations,
-            "BorrowerOperations__CompositeDebtZero"
+            "BorrowerOperations__ExceedMintCap"
           );
         });
       });
@@ -337,7 +376,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         const [user] = this.users;
         const { erc20 } = this.testContracts;
         const asset = await erc20.getAddress();
-        const assetAmount = ethers.parseUnits("2", 18);
+        const assetAmount = ethers.parseEther("2");
 
         const { openTrenBoxTx } = await this.utils.openTrenBox({
           asset,
@@ -357,7 +396,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         const [user] = this.users;
         const { erc20 } = this.testContracts;
         const asset = await erc20.getAddress();
-        const assetAmount = ethers.parseUnits("2", 18);
+        const assetAmount = ethers.parseEther("2");
 
         const { trenBoxManager } = this.contracts;
         const trenBoxCollBefore = await trenBoxManager.getTrenBoxColl(asset, user.address);
@@ -380,7 +419,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         const [user] = this.users;
         const { erc20 } = this.testContracts;
         const asset = await erc20.getAddress();
-        const assetAmount = ethers.parseUnits("2", 18);
+        const assetAmount = ethers.parseEther("2");
 
         const { trenBoxManager } = this.contracts;
         const trenBoxDebtBefore = await trenBoxManager.getTrenBoxDebt(asset, user.address);
@@ -403,7 +442,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         const [user] = this.users;
         const { erc20 } = this.testContracts;
         const asset = await erc20.getAddress();
-        const assetAmount = ethers.parseUnits("2", 18);
+        const assetAmount = ethers.parseEther("2");
 
         const { sortedTrenBoxes } = this.contracts;
 
@@ -427,7 +466,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         const [user] = this.users;
         const { erc20 } = this.testContracts;
         const asset = await erc20.getAddress();
-        const assetAmount = ethers.parseUnits("2", 18);
+        const assetAmount = ethers.parseEther("2");
 
         const { openTrenBoxTx } = await this.utils.openTrenBox({
           asset,
@@ -447,7 +486,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         const [user] = this.users;
         const { erc20 } = this.testContracts;
         const asset = await erc20.getAddress();
-        const assetAmount = ethers.parseUnits("2", 18);
+        const assetAmount = ethers.parseEther("2");
 
         const { openTrenBoxTx, netDebt } = await this.utils.openTrenBox({
           asset,
@@ -457,7 +496,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
 
         const { borrowerOperations } = this.contracts;
 
-        const expectedStake = 2000000000000000000n; // TODO: calculate expected stake
+        const expectedStake = 2000000000000000000n;
 
         await expect(openTrenBoxTx)
           .to.emit(borrowerOperations, "TrenBoxUpdated")
@@ -701,16 +740,6 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
           });
         });
 
-        context("when asset is in Recovery Mode", function () {
-          context("when ICR is below CCR", function () {
-            it.skip("should revert", async function () {});
-          });
-
-          context("when ICR is above CCR", function () {
-            it.skip("should open tren box", async function () {});
-          });
-        });
-
         context("when asset is not in Recovery Mode", function () {
           context("when ICR is below MCR", function () {
             it("should revert", async function () {
@@ -830,63 +859,45 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
       });
 
       context("when new TCR is below CCR", function () {
-        beforeEach(async function () {
-          const { adminContract } = this.contracts;
-          const { erc20_with_6_decimals } = this.testContracts;
-          const asset = await erc20_with_6_decimals.getAddress();
-          const mintCap = ethers.parseUnits("100", 35);
-          await adminContract.setMintCap(asset, mintCap);
-        });
-
-        it.skip("should revert", async function () {
+        it("should revert with custom error BorrowerOperations__TrenBoxNewTCRBelowCCR", async function () {
           const [user] = this.users;
           const { erc20_with_6_decimals } = this.testContracts;
-          const asset = await erc20_with_6_decimals.getAddress();
-          const assetAmount = ethers.parseUnits("5432.1098", 18);
+          const assetAmount = ethers.parseEther("2500");
 
           const { openTrenBoxTx } = await this.utils.openTrenBox({
-            asset,
+            asset: erc20_with_6_decimals,
             assetAmount,
             from: user,
           });
 
-          await expect(openTrenBoxTx).to.be.revertedWith(
-            "BorrowerOps: An operation that would result in TCR < CCR is not permitted"
+          await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+            this.contracts.borrowerOperations,
+            "BorrowerOperations__TrenBoxNewTCRBelowCCR"
           );
         });
       });
 
       context("when taken debt is greater than MintCap", function () {
-        beforeEach(async function () {
-          const { adminContract } = this.contracts;
-          const { erc20_with_6_decimals } = this.testContracts;
-          const asset = await erc20_with_6_decimals.getAddress();
-          const mintCap = ethers.parseUnits("100", 35);
-          await adminContract.setMintCap(asset, mintCap);
-        });
-
-        it.skip("should revert", async function () {
+        it("should revert with custom error BorrowerOperations__ExceedMintCap", async function () {
           const [user] = this.users;
           const { erc20_with_6_decimals } = this.testContracts;
-          const asset = await erc20_with_6_decimals.getAddress();
-          const assetAmount = ethers.parseUnits("5432.1098", 18);
-
           const { adminContract, borrowerOperations } = this.contracts;
-          const mintCap = await adminContract.getMintCap(asset);
+          const assetAmount = ethers.parseEther("15000");
+          const mintCap = ethers.parseEther("5000");
 
-          const debtTokenAmount = mintCap + 1n;
+          await adminContract.setMintCap(erc20_with_6_decimals, mintCap);
 
-          const openTrenBoxTx = borrowerOperations
-            .connect(user)
-            .openTrenBox(
-              asset,
-              assetAmount,
-              debtTokenAmount,
-              DEFAULT_UPPER_HINT,
-              DEFAULT_LOWER_HINT
-            );
+          const { openTrenBoxTx } = await this.utils.openTrenBox({
+            asset: erc20_with_6_decimals,
+            assetAmount,
+            from: user,
+            extraDebtTokenAmount: mintCap,
+          });
 
-          await expect(openTrenBoxTx).to.be.revertedWith("Exceeds mint cap");
+          await expect(openTrenBoxTx).to.be.revertedWithCustomError(
+            borrowerOperations,
+            "BorrowerOperations__ExceedMintCap"
+          );
         });
       });
 
@@ -935,7 +946,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         await this.contracts.adminContract.setMintCap(asset, mintCap);
       });
 
-      it("should revert", async function () {
+      it("should revert with custom error BorrowerOperations__TrenBoxICRBelowMCR", async function () {
         const [user] = this.users;
         const { erc20 } = this.testContracts;
         const assetAddress = await erc20.getAddress();
@@ -963,30 +974,6 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
         const asset = await erc20.getAddress();
         const mintCap = ethers.parseUnits("100", 35);
         await adminContract.setMintCap(asset, mintCap);
-      });
-
-      it.skip("should revert", async function () {
-        const [user] = this.users;
-        const { erc20 } = this.testContracts;
-        const asset = await erc20.getAddress();
-        const assetAmount = ethers.parseUnits("100", 30);
-
-        const { openTrenBoxTx } = await this.utils.openTrenBox({
-          asset,
-          assetAmount,
-          from: user,
-        });
-
-        await (await openTrenBoxTx).wait();
-        await expect(openTrenBoxTx).to.be.revertedWithCustomError(
-          this.contracts.borrowerOperations,
-          "BorrowerOperations__TrenBoxNewTCRBelowCCR"
-        );
-
-        const { trenBoxManager } = this.contracts;
-
-        const trenBoxStatus = await trenBoxManager.getTrenBoxStatus(asset, user.address);
-        expect(trenBoxStatus).to.equal(TrenBoxStatus.active);
       });
 
       it("should increase TrenBox Collateral amount", async function () {
@@ -1093,7 +1080,7 @@ export default function shouldBehaveLikeCanOpenTrenBox() {
 
         const { borrowerOperations } = this.contracts;
 
-        const expectedStake = 5432109800000000000000n; // TODO: calculate expected stake
+        const expectedStake = 5432109800000000000000n;
 
         await expect(openTrenBoxTx)
           .to.emit(borrowerOperations, "TrenBoxUpdated")

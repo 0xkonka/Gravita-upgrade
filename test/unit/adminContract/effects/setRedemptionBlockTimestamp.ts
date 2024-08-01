@@ -46,21 +46,4 @@ export default function shouldBehaveLikeCanSetRedemptionBlockTimestamp(): void {
       ).to.be.revertedWithCustomError(this.contracts.adminContract, "AdminContract__OnlyOwner");
     });
   });
-
-  context("when modifying redemption fee floor on inactive collateral", function () {
-    it.skip("set redemption fee floor should revert", async function () {
-      const collateralAddress = ethers.ZeroAddress;
-      const redemptionBlockTimestamp = (await time.latestBlock()) + 1000;
-
-      await expect(
-        this.contracts.adminContract.setRedemptionBlockTimestamp(
-          collateralAddress,
-          redemptionBlockTimestamp
-        )
-      ).to.be.revertedWithCustomError(
-        this.contracts.adminContract,
-        "AdminContract__CollateralNotConfigured"
-      );
-    });
-  });
 }
