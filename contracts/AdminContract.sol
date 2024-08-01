@@ -57,6 +57,9 @@ contract AdminContract is
     /// @notice The default block timestamp for redemption.
     uint256 public constant REDEMPTION_BLOCK_TIMESTAMP_DEFAULT = type(uint256).max;
 
+    uint256 public constant MCR_GRACE_PERIOD = 1 weeks;
+    uint256 public constant CCR_GRACE_PERIOD = 1 weeks;
+
     // State
     // ------------------------------------------------------------------------------------------------------------
 
@@ -165,14 +168,17 @@ contract AdminContract is
             revert AdminContract__CollateralExists();
         }
 
-        // require(_decimals == DEFAULT_DECIMALS, "collaterals must have the default decimals");
         validCollateral.push(_collateral);
         collateralParams[_collateral] = CollateralParams({
             index: validCollateral.length - 1,
             active: false,
             borrowingFee: BORROWING_FEE_DEFAULT,
             ccr: CCR_DEFAULT,
+            previousCcr: 0,
+            ccrUpdateDeadline: 0,
             mcr: MCR_DEFAULT,
+            previousMcr: 0,
+            mcrUpdateDeadline: 0,
             debtTokenGasCompensation: _debtTokenGasCompensation,
             minNetDebt: MIN_NET_DEBT_DEFAULT,
             mintCap: MINT_CAP_DEFAULT,
@@ -370,13 +376,42 @@ contract AdminContract is
     }
 
     /// @inheritdoc IAdminContract
-    function getMcr(address _collateral) external view override returns (uint256) {
-        return collateralParams[_collateral].mcr;
+    function getMcr(address _collateral) external view override returns (uint256 currentMcr) {
+        CollateralParams storage params = collateralParams[_collateral];
+        if (params.mcrUpdateDeadline > block.timestamp) {
+            uint256 impactPercentage =
+                _100pct * (params.mcrUpdateDeadline - block.timestamp) / MCR_GRACE_PERIOD;
+
+            if (params.mcr >= params.previousMcr) {
+                currentMcr =
+                    params.mcr - (impactPercentage * (params.mcr - params.previousMcr)) / _100pct;
+            } else {
+                currentMcr =
+                    params.mcr + (impactPercentage * (params.previousMcr - params.mcr)) / _100pct;
+            }
+        } else {
+            currentMcr = params.mcr;
+        }
     }
 
     /// @inheritdoc IAdminContract
-    function getCcr(address _collateral) external view override returns (uint256) {
-        return collateralParams[_collateral].ccr;
+    function getCcr(address _collateral) external view override returns (uint256 currentCcr) {
+        CollateralParams storage params = collateralParams[_collateral];
+
+        if (params.ccrUpdateDeadline > block.timestamp) {
+            uint256 impactPercentage =
+                _100pct * (params.ccrUpdateDeadline - block.timestamp) / CCR_GRACE_PERIOD;
+
+            if (params.ccr >= params.previousCcr) {
+                currentCcr =
+                    params.ccr - (impactPercentage * (params.ccr - params.previousCcr)) / _100pct;
+            } else {
+                currentCcr =
+                    params.ccr + (impactPercentage * (params.previousCcr - params.ccr)) / _100pct;
+            }
+        } else {
+            currentCcr = params.ccr;
+        }
     }
 
     /// @inheritdoc IAdminContract
@@ -489,9 +524,13 @@ contract AdminContract is
         safeCheck("CCR", _collateral, _ccr, 1 ether, 10 ether) // 100% - 1,000%
     {
         CollateralParams storage collParams = collateralParams[_collateral];
-        uint256 oldCCR = collParams.ccr;
+
+        uint256 previousCcr = collParams.ccr;
         collParams.ccr = _ccr;
-        emit CCRChanged(oldCCR, _ccr);
+        collParams.previousCcr = previousCcr;
+        collParams.ccrUpdateDeadline = block.timestamp + CCR_GRACE_PERIOD;
+
+        emit CCRChanged(previousCcr, _ccr);
     }
 
     function _setMCR(
@@ -502,9 +541,13 @@ contract AdminContract is
         safeCheck("MCR", _collateral, _mcr, 1.01 ether, 10 ether) // 101% - 1,000%
     {
         CollateralParams storage collParams = collateralParams[_collateral];
-        uint256 oldMCR = collParams.mcr;
+        uint256 previousMcr = collParams.mcr;
+
         collParams.mcr = _mcr;
-        emit MCRChanged(oldMCR, _mcr);
+        collParams.previousMcr = previousMcr;
+        collParams.mcrUpdateDeadline = block.timestamp + MCR_GRACE_PERIOD;
+
+        emit MCRChanged(previousMcr, _mcr);
     }
 
     function _setMinNetDebt(

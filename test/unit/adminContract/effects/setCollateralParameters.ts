@@ -1,3 +1,4 @@
+import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 
 export default function shouldBehaveLikeCanSetCollateralParameters(): void {
@@ -276,6 +277,8 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         defaultPercentDivisor,
         defaultRedemptionFeeFloor
       );
+
+      await time.increase(time.duration.weeks(1));
 
       const MCR = await this.contracts.adminContract.getMcr(dai.address);
 

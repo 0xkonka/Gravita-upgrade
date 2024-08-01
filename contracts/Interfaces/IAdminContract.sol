@@ -12,7 +12,9 @@ interface IAdminContract {
      * @param active The status of collateral asset.
      * @param borrowingFee The one-time fee charged on the loan amount.
      * @param ccr Critical collateral ratio to trigger recovery mode.
+     * @param previousCcr TODO
      * @param mcr Minimum collateral ratio.
+     * @param previousMcr TODO
      * @param debtTokenGasCompensation The amount of debt token to be locked
      * on opening TrenBoxes as liquidation reserve.
      * @param minNetDebt Minimum amount of debtToken a TrenBox must have.
@@ -26,7 +28,11 @@ interface IAdminContract {
         bool active;
         uint256 borrowingFee;
         uint256 ccr;
+        uint256 previousCcr;
+        uint256 ccrUpdateDeadline;
         uint256 mcr;
+        uint256 previousMcr;
+        uint256 mcrUpdateDeadline;
         uint256 debtTokenGasCompensation;
         uint256 minNetDebt;
         uint256 mintCap;
