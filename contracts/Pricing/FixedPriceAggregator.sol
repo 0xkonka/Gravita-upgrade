@@ -5,7 +5,7 @@ import { AggregatorV3Interface } from
     "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 /**
- * @dev This contract was created to serve as a price feed for the bLUSD-USD pair, fixed at a 1:1
+ * @dev This contract was created to serve as a price feed for pairs that are fixed at a 1:1
  * rate.
  * Responses' roundId and updateTime will always be 2 minutes ago, while the previousRound will
  * be 5 min ago.
@@ -39,7 +39,7 @@ contract FixedPriceAggregator is AggregatorV3Interface {
         )
     {
         uint256 timestamp = block.timestamp - 5 minutes;
-        return (_roundId, PRICE, 0, timestamp, uint80(timestamp));
+        return (_roundId, PRICE, timestamp, timestamp, uint80(timestamp));
     }
 
     function latestRoundData()
@@ -55,7 +55,7 @@ contract FixedPriceAggregator is AggregatorV3Interface {
         )
     {
         uint256 timestamp = block.timestamp - 2 minutes;
-        return (uint80(timestamp), PRICE, 0, timestamp, uint80(timestamp));
+        return (uint80(timestamp), PRICE, timestamp, timestamp, uint80(timestamp));
     }
 
     function version() external pure override returns (uint256) {
