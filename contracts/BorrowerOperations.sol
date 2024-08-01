@@ -202,7 +202,7 @@ contract BorrowerOperations is
     {
         if (
             _debtTokenAmount
-                == _getNetDebt(
+                >= _getNetDebt(
                     _asset, ITrenBoxManager(trenBoxManager).getTrenBoxDebt(_asset, msg.sender)
                 )
         ) {

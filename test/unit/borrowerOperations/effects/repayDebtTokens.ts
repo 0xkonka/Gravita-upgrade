@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 
 import { BorrowerOperationType } from "../../../shared/types";
 
@@ -360,23 +360,25 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
           .withArgs(erc20, user.address, 0n, 0n, 0n, 1n);
       });
 
-      it("should increase user collateral balance", async function () {
+      it("should increase user token balance", async function () {
         const [user] = this.users;
         const { erc20_with_6_decimals } = this.testContracts;
+        const { trenBoxManager } = this.contracts;
         const decimal = await erc20_with_6_decimals.decimals();
-        const assetAmount = ethers.parseUnits("5000", 18);
 
         const assetBalanceBefore = await erc20_with_6_decimals.balanceOf(user.address);
+        const compositDebt = await trenBoxManager.getTrenBoxDebt(
+          erc20_with_6_decimals,
+          user.address
+        );
+        const amountToRepay = await trenBoxManager.getNetDebt(erc20_with_6_decimals, compositDebt);
+        const assetAmount = ethers.parseUnits("5000", 18);
 
-        const amountToRepay = ethers.parseUnits("2000", 18);
-
-        const closeTrenBoxTx = this.utils.repayDebt({
+        await this.utils.repayDebt({
           debtAmount: amountToRepay,
           collateral: erc20_with_6_decimals,
           from: user,
         });
-
-        await (await closeTrenBoxTx).wait();
 
         const assetBalanceAfter = await erc20_with_6_decimals.balanceOf(user.address);
         const expectedAssetBalance =
@@ -385,56 +387,105 @@ export default function shouldBehaveLikeCanRepayDebtTokens() {
         expect(assetBalanceAfter).to.equal(expectedAssetBalance);
       });
 
-      it("should decrease TrenBox collateral amount", async function () {
+      it("should decrease TrenBox debt and collateral amount", async function () {
         const [user] = this.users;
         const { erc20_with_6_decimals } = this.testContracts;
-        const asset = await erc20_with_6_decimals.getAddress();
-
-        const assetAmount = ethers.parseUnits("5000", 18);
-
         const { trenBoxManager } = this.contracts;
-        const trenBoxCollBefore = await trenBoxManager.getTrenBoxColl(asset, user.address);
-
-        const amountToRepay = ethers.parseUnits("2000", 18);
-
-        const closeTrenBoxTx = this.utils.repayDebt({
-          debtAmount: amountToRepay,
-          collateral: erc20_with_6_decimals,
-          from: user,
-        });
-
-        await (await closeTrenBoxTx).wait();
-
-        const trenBoxCollAfter = await trenBoxManager.getTrenBoxColl(asset, user.address);
-        const expectedDebtBalance = trenBoxCollBefore - assetAmount;
-
-        expect(trenBoxCollAfter).to.equal(expectedDebtBalance);
-      });
-
-      it("should decrease TrenBox debt amount", async function () {
-        const [user] = this.users;
-        const { erc20_with_6_decimals } = this.testContracts;
-        const asset = await erc20_with_6_decimals.getAddress();
 
         const minDebt = await this.contracts.adminContract.getMinNetDebt(erc20_with_6_decimals);
 
-        const { trenBoxManager } = this.contracts;
-        const debtBalanceBefore = await trenBoxManager.getTrenBoxDebt(asset, user.address);
+        const debtBalanceBefore = await trenBoxManager.getTrenBoxDebt(
+          erc20_with_6_decimals,
+          user.address
+        );
+        const trenBoxCollBefore = await trenBoxManager.getTrenBoxColl(
+          erc20_with_6_decimals,
+          user.address
+        );
 
+        const assetAmount = ethers.parseUnits("5000", 18);
         const amountToRepay = ethers.parseUnits("2000", 18);
 
-        const closeTrenBoxTx = this.utils.repayDebt({
+        await this.utils.repayDebt({
           debtAmount: amountToRepay,
           collateral: erc20_with_6_decimals,
           from: user,
         });
 
-        await (await closeTrenBoxTx).wait();
-
-        const debtBalanceAfter = await trenBoxManager.getTrenBoxDebt(asset, user.address);
+        const debtBalanceAfter = await trenBoxManager.getTrenBoxDebt(
+          erc20_with_6_decimals,
+          user.address
+        );
         const expectedDebtBalance = debtBalanceBefore - minDebt;
 
         expect(debtBalanceAfter).to.equal(expectedDebtBalance);
+
+        const trenBoxCollAfter = await trenBoxManager.getTrenBoxColl(
+          erc20_with_6_decimals,
+          user.address
+        );
+        const expectedCollBalance = trenBoxCollBefore - assetAmount;
+
+        expect(trenBoxCollAfter).to.equal(expectedCollBalance);
+      });
+
+      it("should close TrenBox after repay full net debt", async function () {
+        const [user] = this.users;
+        const { erc20 } = this.testContracts;
+        const { trenBoxManager } = this.contracts;
+
+        const compositDebt = await trenBoxManager.getTrenBoxDebt(erc20, user.address);
+        const netDebt = await trenBoxManager.getNetDebt(erc20, compositDebt);
+
+        await this.utils.repayDebt({
+          debtAmount: netDebt - ethers.parseEther("1"),
+          collateral: erc20,
+          from: user,
+        });
+
+        const debtBalanceAfter = await trenBoxManager.getTrenBoxDebt(erc20, user.address);
+        expect(debtBalanceAfter).to.equal(ethers.parseUnits("201", 18));
+
+        const trenBoxStatusAfterRepay = await trenBoxManager.getTrenBoxStatus(erc20, user.address);
+        expect(trenBoxStatusAfterRepay).to.equal(1n);
+
+        await this.utils.repayDebt({
+          debtAmount: ethers.parseEther("1"),
+          collateral: erc20,
+          from: user,
+        });
+
+        const debtBalanceAfterSecondRepay = await trenBoxManager.getTrenBoxDebt(
+          erc20,
+          user.address
+        );
+        expect(debtBalanceAfterSecondRepay).to.equal(0n);
+
+        const trenBoxStatusAfterSecondRepay = await trenBoxManager.getTrenBoxStatus(
+          erc20,
+          user.address
+        );
+        expect(trenBoxStatusAfterSecondRepay).to.equal(2n);
+      });
+
+      it("should not allow repay more debt amount than needed", async function () {
+        const [user] = this.users;
+        const { erc20 } = this.testContracts;
+        const { trenBoxManager, debtToken } = this.contracts;
+
+        const compositDebt = await trenBoxManager.getTrenBoxDebt(erc20, user.address);
+        const netDebt = await trenBoxManager.getNetDebt(erc20, compositDebt);
+
+        const tx = this.utils.repayDebt({
+          debtAmount: netDebt + ethers.parseEther("500"),
+          collateral: erc20,
+          from: user,
+        });
+
+        const oneYearInSec = 31536000;
+        await network.provider.send("evm_increaseTime", [oneYearInSec]);
+
+        await expect(tx).changeTokenBalance(debtToken, user, -netDebt);
       });
     });
   });
