@@ -33,8 +33,6 @@ export default function shouldBehaveLikeCanExecutePartialRedemption(): void {
     const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
     const debtToken = await DebtTokenFactory.deploy(owner);
     await debtToken.waitForDeployment();
-
-    await debtToken.setAddresses(borrowerOperations, this.contracts.stabilityPool, trenBoxManager);
     await debtToken.addWhitelist(feeCollector);
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;

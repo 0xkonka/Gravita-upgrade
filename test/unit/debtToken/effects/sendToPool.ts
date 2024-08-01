@@ -1,35 +1,37 @@
 import { expect } from "chai";
+import { ethers } from "hardhat";
 
 export default function shouldBehaveLikeCanSendToPool(): void {
   context("when caller is StabilityPool", function () {
     beforeEach(async function () {
+      const owner = this.signers.deployer;
+
+      const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
+      const debtToken = await DebtTokenFactory.deploy(owner);
+      await debtToken.waitForDeployment();
+
+      this.redeployedContracts.debtToken = debtToken;
+
       this.collateral = this.collaterals.active.wETH;
 
       const amountTokensToMint = 500;
       this.tokenHolder = this.signers.accounts[0].address;
 
-      const borrowerOperationsAddress = await this.contracts.borrowerOperations.getAddress();
-      const stabilityPoolAddress = await this.contracts.stabilityPool.getAddress();
       const trenBoxManagerAddress = await this.contracts.trenBoxManager.getAddress();
 
       const borrowerOperationsImpostor = this.signers.accounts[1];
-      await this.contracts.debtToken.setAddresses(
-        borrowerOperationsImpostor.address,
-        stabilityPoolAddress,
-        trenBoxManagerAddress
-      );
-
-      await this.contracts.debtToken
-        .connect(borrowerOperationsImpostor)
-        .mint(this.collateral.address, this.tokenHolder, amountTokensToMint);
 
       this.stabilityPool = this.signers.accounts[1];
 
-      await this.contracts.debtToken.setAddresses(
-        borrowerOperationsAddress,
+      await this.redeployedContracts.debtToken.setAddresses(
+        borrowerOperationsImpostor.address,
         this.stabilityPool.address,
         trenBoxManagerAddress
       );
+
+      await this.redeployedContracts.debtToken
+        .connect(borrowerOperationsImpostor)
+        .mint(this.collateral.address, this.tokenHolder, amountTokensToMint);
 
       this.poolAddress = this.signers.accounts[2].address;
     });
@@ -38,15 +40,19 @@ export default function shouldBehaveLikeCanSendToPool(): void {
       it("transfers tokens to specified pool address", async function () {
         const amountToSend = 100n;
 
-        const initialPoolBalance = await this.contracts.debtToken.balanceOf(this.poolAddress);
-        const initialHolderBalance = await this.contracts.debtToken.balanceOf(this.tokenHolder);
+        const initialPoolBalance = await this.redeployedContracts.debtToken.balanceOf(
+          this.poolAddress
+        );
+        const initialHolderBalance = await this.redeployedContracts.debtToken.balanceOf(
+          this.tokenHolder
+        );
 
-        await this.contracts.debtToken
+        await this.redeployedContracts.debtToken
           .connect(this.stabilityPool)
           .sendToPool(this.tokenHolder, this.poolAddress, amountToSend);
 
-        const poolBalance = await this.contracts.debtToken.balanceOf(this.poolAddress);
-        const holderBalance = await this.contracts.debtToken.balanceOf(this.tokenHolder);
+        const poolBalance = await this.redeployedContracts.debtToken.balanceOf(this.poolAddress);
+        const holderBalance = await this.redeployedContracts.debtToken.balanceOf(this.tokenHolder);
 
         expect(poolBalance).to.be.equal(initialPoolBalance + amountToSend);
         expect(holderBalance).to.be.equal(initialHolderBalance - amountToSend);
@@ -56,11 +62,11 @@ export default function shouldBehaveLikeCanSendToPool(): void {
         const amountToSend = 100n;
 
         await expect(
-          this.contracts.debtToken
+          this.redeployedContracts.debtToken
             .connect(this.stabilityPool)
             .sendToPool(this.tokenHolder, this.poolAddress, amountToSend)
         )
-          .to.emit(this.contracts.debtToken, "Transfer")
+          .to.emit(this.redeployedContracts.debtToken, "Transfer")
           .withArgs(this.tokenHolder, this.poolAddress, amountToSend);
       });
     });

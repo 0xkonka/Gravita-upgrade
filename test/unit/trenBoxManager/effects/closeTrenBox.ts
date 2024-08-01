@@ -36,7 +36,6 @@ export default function shouldBehaveLikeCanCloseTrenBox(): void {
     const debtToken = await DebtTokenFactory.deploy(owner);
     await debtToken.waitForDeployment();
 
-    await debtToken.setAddresses(borrowerOperations, this.contracts.stabilityPool, trenBoxManager);
     await debtToken.addWhitelist(feeCollector);
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;

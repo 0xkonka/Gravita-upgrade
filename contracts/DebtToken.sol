@@ -99,6 +99,13 @@ contract DebtToken is IDebtToken, ERC20Permit, Ownable {
             revert DebtToken__InvalidAddressToConnect();
         }
 
+        if (
+            borrowerOperationsAddress != address(0) && stabilityPoolAddress != address(0)
+                && trenBoxManagerAddress != address(0)
+        ) {
+            revert DebtToken__AddressesAlreadyConnected();
+        }
+
         borrowerOperationsAddress = _borrowerOperationsAddress;
         stabilityPoolAddress = _stabilityPoolAddress;
         trenBoxManagerAddress = _trenBoxManagerAddress;

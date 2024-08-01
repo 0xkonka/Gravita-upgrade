@@ -3,37 +3,39 @@ import { ethers } from "hardhat";
 
 export default function shouldBehaveLikeCanReturnFromPool(): void {
   beforeEach(async function () {
+    const owner = this.signers.deployer;
+
+    const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
+    const debtToken = await DebtTokenFactory.deploy(owner);
+    await debtToken.waitForDeployment();
+
+    this.redeployedContracts.debtToken = debtToken;
+
     this.collateral = this.collaterals.active.wETH;
 
-    const amountTokensToMint = 500;
     this.tokenHolder = this.signers.accounts[0].address;
     this.pool = this.signers.accounts[1].address;
 
     this.borrowerOperationsAddress = await this.contracts.borrowerOperations.getAddress();
     this.stabilityPoolAddress = await this.contracts.stabilityPool.getAddress();
     this.trenBoxManagerAddress = await this.contracts.trenBoxManager.getAddress();
-
-    const borrowerOperationsImpostor = this.signers.accounts[1];
-    await this.contracts.debtToken.setAddresses(
-      borrowerOperationsImpostor.address,
-      this.stabilityPoolAddress,
-      this.trenBoxManagerAddress
-    );
-
-    await this.contracts.debtToken
-      .connect(borrowerOperationsImpostor)
-      .mint(this.collateral.address, this.pool, amountTokensToMint);
   });
 
   context("when caller is trenBoxManager", function () {
     beforeEach(async function () {
       this.caller = this.signers.accounts[2];
 
-      await this.contracts.debtToken.setAddresses(
-        this.borrowerOperationsAddress,
+      const borrowerOperationsImpostor = this.signers.accounts[1];
+      await this.redeployedContracts.debtToken.setAddresses(
+        borrowerOperationsImpostor.address,
         this.stabilityPoolAddress,
         this.caller.address
       );
+
+      const amountTokensToMint = 500;
+      await this.redeployedContracts.debtToken
+        .connect(borrowerOperationsImpostor)
+        .mint(this.collateral.address, this.pool, amountTokensToMint);
     });
 
     shouldBeAbleToReturnFromPool();
@@ -43,11 +45,17 @@ export default function shouldBehaveLikeCanReturnFromPool(): void {
     beforeEach(async function () {
       this.caller = this.signers.accounts[2];
 
-      await this.contracts.debtToken.setAddresses(
-        this.borrowerOperationsAddress,
+      const borrowerOperationsImpostor = this.signers.accounts[1];
+      await this.redeployedContracts.debtToken.setAddresses(
+        borrowerOperationsImpostor.address,
         this.caller.address,
         this.trenBoxManagerAddress
       );
+
+      const amountTokensToMint = 500;
+      await this.redeployedContracts.debtToken
+        .connect(borrowerOperationsImpostor)
+        .mint(this.collateral.address, this.pool, amountTokensToMint);
     });
 
     shouldBeAbleToReturnFromPool();
@@ -71,15 +79,19 @@ export default function shouldBehaveLikeCanReturnFromPool(): void {
         it("transfers tokens to specified pool address", async function () {
           const amountToReturn = 100n;
 
-          const initialPoolBalance = await this.contracts.debtToken.balanceOf(this.pool);
-          const initialHolderBalance = await this.contracts.debtToken.balanceOf(this.tokenHolder);
+          const initialPoolBalance = await this.redeployedContracts.debtToken.balanceOf(this.pool);
+          const initialHolderBalance = await this.redeployedContracts.debtToken.balanceOf(
+            this.tokenHolder
+          );
 
-          await this.contracts.debtToken
+          await this.redeployedContracts.debtToken
             .connect(this.caller)
             .returnFromPool(this.pool, this.tokenHolder, amountToReturn);
 
-          const poolBalance = await this.contracts.debtToken.balanceOf(this.pool);
-          const holderBalance = await this.contracts.debtToken.balanceOf(this.tokenHolder);
+          const poolBalance = await this.redeployedContracts.debtToken.balanceOf(this.pool);
+          const holderBalance = await this.redeployedContracts.debtToken.balanceOf(
+            this.tokenHolder
+          );
 
           expect(poolBalance).to.be.equal(initialPoolBalance - amountToReturn);
           expect(holderBalance).to.be.equal(initialHolderBalance + amountToReturn);
@@ -89,11 +101,11 @@ export default function shouldBehaveLikeCanReturnFromPool(): void {
           const amountToReturn = 100n;
 
           await expect(
-            this.contracts.debtToken
+            this.redeployedContracts.debtToken
               .connect(this.caller)
               .returnFromPool(this.pool, this.tokenHolder, amountToReturn)
           )
-            .to.emit(this.contracts.debtToken, "Transfer")
+            .to.emit(this.redeployedContracts.debtToken, "Transfer")
             .withArgs(this.pool, this.tokenHolder, amountToReturn);
         });
       });
@@ -101,14 +113,17 @@ export default function shouldBehaveLikeCanReturnFromPool(): void {
 
     context("when pool has insufficient balance", function () {
       it("reverts", async function () {
-        const poolBalance = await this.contracts.debtToken.balanceOf(this.pool);
+        const poolBalance = await this.redeployedContracts.debtToken.balanceOf(this.pool);
         const amountToReturn = poolBalance + 1n;
 
         await expect(
-          this.contracts.debtToken
+          this.redeployedContracts.debtToken
             .connect(this.caller)
             .returnFromPool(this.pool, this.tokenHolder, amountToReturn)
-        ).to.be.revertedWithCustomError(this.contracts.debtToken, "ERC20InsufficientBalance");
+        ).to.be.revertedWithCustomError(
+          this.redeployedContracts.debtToken,
+          "ERC20InsufficientBalance"
+        );
       });
     });
   }

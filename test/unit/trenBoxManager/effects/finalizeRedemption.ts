@@ -18,9 +18,15 @@ export default function shouldBehaveLikeCanFinalizeRedemption(): void {
     await feeCollector.waitForDeployment();
     await feeCollector.initialize(this.signers.deployer);
 
+    const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
+    const debtToken = await DebtTokenFactory.deploy(this.signers.deployer);
+    await debtToken.waitForDeployment();
+    await debtToken.addWhitelist(feeCollector);
+
     this.redeployedContracts.trenBoxManager = trenBoxManager;
     this.redeployedContracts.trenBoxStorage = trenBoxStorage;
     this.redeployedContracts.feeCollector = feeCollector;
+    this.redeployedContracts.debtToken = debtToken;
 
     this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
     this.borrowerOperationsImpostor = this.signers.accounts[4];
@@ -39,12 +45,12 @@ export default function shouldBehaveLikeCanFinalizeRedemption(): void {
         feeCollector: this.redeployedContracts.feeCollector,
         borrowerOperations: this.borrowerOperationsImpostor,
         trenBoxManager: this.redeployedContracts.trenBoxManager,
-        debtToken: this.contracts.debtToken,
+        debtToken: this.redeployedContracts.debtToken,
       });
 
       const receiver = this.signers.accounts[2];
 
-      await this.contracts.debtToken
+      await this.redeployedContracts.debtToken
         .connect(this.borrowerOperationsImpostor)
         .mint(this.testContracts.erc20, receiver, 50n);
     });

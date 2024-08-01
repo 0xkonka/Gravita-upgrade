@@ -1,7 +1,16 @@
 import { expect } from "chai";
+import { ethers } from "hardhat";
 
 export default function shouldBehaveLikeCanApprove(): void {
   beforeEach(async function () {
+    const owner = this.signers.deployer;
+
+    const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
+    const debtToken = await DebtTokenFactory.deploy(owner);
+    await debtToken.waitForDeployment();
+
+    this.redeployedContracts.debtToken = debtToken;
+
     this.collateral = this.collaterals.active.wETH;
 
     const amountTokensToMint = 5000;
@@ -13,17 +22,17 @@ export default function shouldBehaveLikeCanApprove(): void {
     this.trenBoxManagerAddress = await this.contracts.trenBoxManager.getAddress();
 
     const borrowerOperationsImpostor = this.signers.accounts[1];
-    await this.contracts.debtToken.setAddresses(
+    await this.redeployedContracts.debtToken.setAddresses(
       borrowerOperationsImpostor.address,
       this.stabilityPoolAddress,
       this.trenBoxManagerAddress
     );
 
-    await this.contracts.debtToken
+    await this.redeployedContracts.debtToken
       .connect(borrowerOperationsImpostor)
       .mint(this.collateral.address, this.aliceTokenHolder.address, amountTokensToMint);
 
-    await this.contracts.debtToken
+    await this.redeployedContracts.debtToken
       .connect(borrowerOperationsImpostor)
       .mint(this.collateral.address, this.bobTokenHolder.address, amountTokensToMint);
   });
@@ -31,16 +40,16 @@ export default function shouldBehaveLikeCanApprove(): void {
   it("approves tokens to specified address", async function () {
     const amountToApprove = 100n;
 
-    const initialAliceAllowance = await this.contracts.debtToken.allowance(
+    const initialAliceAllowance = await this.redeployedContracts.debtToken.allowance(
       this.aliceTokenHolder.address,
       this.bobTokenHolder.address
     );
 
-    await this.contracts.debtToken
+    await this.redeployedContracts.debtToken
       .connect(this.aliceTokenHolder)
       .approve(this.bobTokenHolder.address, amountToApprove);
 
-    const aliceAllowance = await this.contracts.debtToken.allowance(
+    const aliceAllowance = await this.redeployedContracts.debtToken.allowance(
       this.aliceTokenHolder.address,
       this.bobTokenHolder.address
     );
@@ -52,11 +61,11 @@ export default function shouldBehaveLikeCanApprove(): void {
     const amountToApprove = 100n;
 
     await expect(
-      this.contracts.debtToken
+      this.redeployedContracts.debtToken
         .connect(this.aliceTokenHolder)
         .approve(this.bobTokenHolder.address, amountToApprove)
     )
-      .to.emit(this.contracts.debtToken, "Approval")
+      .to.emit(this.redeployedContracts.debtToken, "Approval")
       .withArgs(this.aliceTokenHolder.address, this.bobTokenHolder.address, amountToApprove);
   });
 }

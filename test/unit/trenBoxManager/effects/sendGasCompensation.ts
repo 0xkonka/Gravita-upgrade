@@ -13,8 +13,13 @@ export default function shouldBehaveLikeCanSendGasCompensation(): void {
     await trenBoxStorage.waitForDeployment();
     await trenBoxStorage.initialize(this.signers.deployer);
 
+    const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
+    const debtToken = await DebtTokenFactory.deploy(this.signers.deployer);
+    await debtToken.waitForDeployment();
+
     this.redeployedContracts.trenBoxManager = trenBoxManager;
     this.redeployedContracts.trenBoxStorage = trenBoxStorage;
+    this.redeployedContracts.debtToken = debtToken;
 
     this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
     this.borrowerOperationsImpostor = this.signers.accounts[2];
@@ -30,11 +35,11 @@ export default function shouldBehaveLikeCanSendGasCompensation(): void {
         trenBoxStorage: this.redeployedContracts.trenBoxStorage,
         trenBoxManager: this.redeployedContracts.trenBoxManager,
         borrowerOperations: this.borrowerOperationsImpostor,
-        debtToken: this.contracts.debtToken,
+        debtToken: this.redeployedContracts.debtToken,
       });
 
       const trenBoxStorageAddress = this.redeployedContracts.trenBoxStorage.getAddress();
-      await this.contracts.debtToken
+      await this.redeployedContracts.debtToken
         .connect(this.borrowerOperationsImpostor)
         .mint(this.testContracts.erc20, trenBoxStorageAddress, 50n);
     });
@@ -49,19 +54,20 @@ export default function shouldBehaveLikeCanSendGasCompensation(): void {
         .connect(this.borrowerOperationsImpostor)
         .increaseActiveCollateral(erc20, assetAmount);
 
-      const trenBoxStorageBalanceBefore = await this.contracts.debtToken.balanceOf(
+      const trenBoxStorageBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
         this.redeployedContracts.trenBoxStorage.getAddress()
       );
-      const liquidatorBalanceBefore = await this.contracts.debtToken.balanceOf(liquidator);
+      const liquidatorBalanceBefore =
+        await this.redeployedContracts.debtToken.balanceOf(liquidator);
 
       await this.redeployedContracts.trenBoxManager
         .connect(this.trenBoxManagerOperationsImpostor)
         .sendGasCompensation(erc20, liquidator, debtTokenAmount, assetAmount);
 
-      const trenBoxStorageBalanceAfter = await this.contracts.debtToken.balanceOf(
+      const trenBoxStorageBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
         this.redeployedContracts.trenBoxStorage.getAddress()
       );
-      const liquidatorBalanceAfter = await this.contracts.debtToken.balanceOf(liquidator);
+      const liquidatorBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(liquidator);
       const liquidatorAssetBalanceAfter = await erc20.balanceOf(liquidator);
 
       expect(trenBoxStorageBalanceAfter).to.be.equal(trenBoxStorageBalanceBefore - debtTokenAmount);
@@ -73,19 +79,20 @@ export default function shouldBehaveLikeCanSendGasCompensation(): void {
       const { erc20 } = this.testContracts;
       const liquidator = this.signers.accounts[4];
 
-      const trenBoxStorageBalanceBefore = await this.contracts.debtToken.balanceOf(
+      const trenBoxStorageBalanceBefore = await this.redeployedContracts.debtToken.balanceOf(
         this.redeployedContracts.trenBoxStorage.getAddress()
       );
-      const liquidatorBalanceBefore = await this.contracts.debtToken.balanceOf(liquidator);
+      const liquidatorBalanceBefore =
+        await this.redeployedContracts.debtToken.balanceOf(liquidator);
 
       await this.redeployedContracts.trenBoxManager
         .connect(this.trenBoxManagerOperationsImpostor)
         .sendGasCompensation(erc20, liquidator, 0, 0);
 
-      const trenBoxStorageBalanceAfter = await this.contracts.debtToken.balanceOf(
+      const trenBoxStorageBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(
         this.redeployedContracts.trenBoxStorage.getAddress()
       );
-      const liquidatorBalanceAfter = await this.contracts.debtToken.balanceOf(liquidator);
+      const liquidatorBalanceAfter = await this.redeployedContracts.debtToken.balanceOf(liquidator);
       const liquidatorAssetBalanceAfter = await erc20.balanceOf(liquidator);
 
       expect(trenBoxStorageBalanceAfter).to.be.equal(trenBoxStorageBalanceBefore);
