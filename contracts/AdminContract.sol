@@ -51,15 +51,6 @@ contract AdminContract is
     /// @notice The default liquidation fee, dividing by 200 yields 0.5%.
     uint256 public constant PERCENT_DIVISOR_DEFAULT = 200;
 
-<<<<<<< HEAD
-=======
-    /// @notice The default floor of redemption fee, 0.5%.
-    uint256 public constant REDEMPTION_FEE_FLOOR_DEFAULT = 0.005 * 1e18;
-
-    /// @notice The default block timestamp for redemption.
-    uint256 public constant REDEMPTION_BLOCK_TIMESTAMP_DEFAULT = type(uint256).max;
-
->>>>>>> main
     // State
     // ------------------------------------------------------------------------------------------------------------
 
@@ -202,14 +193,6 @@ contract AdminContract is
         exists(_collateral)
     {
         collateralParams[_collateral].active = true;
-<<<<<<< HEAD
-        setBorrowingFee(_collateral, _borrowingFee);
-        setCCR(_collateral, _ccr);
-        setMCR(_collateral, _mcr);
-        setMinNetDebt(_collateral, _minNetDebt);
-        setMintCap(_collateral, _mintCap);
-        setPercentDivisor(_collateral, _percentDivisor);
-=======
 
         _setBorrowingFee(_collateral, _borrowingFee);
         _setCCR(_collateral, _ccr);
@@ -217,8 +200,6 @@ contract AdminContract is
         _setMinNetDebt(_collateral, _minNetDebt);
         _setMintCap(_collateral, _mintCap);
         _setPercentDivisor(_collateral, _percentDivisor);
-        _setRedemptionFeeFloor(_collateral, _redemptionFeeFloor);
->>>>>>> main
     }
 
     /// @inheritdoc IAdminContract
@@ -279,34 +260,6 @@ contract AdminContract is
     }
 
     /// @inheritdoc IAdminContract
-<<<<<<< HEAD
-=======
-    function setRedemptionFeeFloor(
-        address _collateral,
-        uint256 _redemptionFeeFloor
-    )
-        public
-        override
-        onlyTimelock
-    {
-        _setRedemptionFeeFloor(_collateral, _redemptionFeeFloor);
-    }
-
-    /// @inheritdoc IAdminContract
-    function setRedemptionBlockTimestamp(
-        address _collateral,
-        uint256 _blockTimestamp
-    )
-        external
-        override
-        onlyTimelock
-    {
-        collateralParams[_collateral].redemptionBlockTimestamp = _blockTimestamp;
-        emit RedemptionBlockTimestampChanged(_collateral, _blockTimestamp);
-    }
-
-    /// @inheritdoc IAdminContract
->>>>>>> main
     function setFeeForFlashLoan(uint256 _flashLoanFee) external onlyTimelock {
         uint256 oldFlashLoanFee = flashLoanParams.flashLoanFee;
         flashLoanParams.flashLoanFee = _flashLoanFee;
@@ -542,18 +495,5 @@ contract AdminContract is
         uint256 oldPercent = collParams.percentDivisor;
         collParams.percentDivisor = _percentDivisor;
         emit PercentDivisorChanged(oldPercent, _percentDivisor);
-    }
-
-    function _setRedemptionFeeFloor(
-        address _collateral,
-        uint256 _redemptionFeeFloor
-    )
-        internal
-        safeCheck("Redemption Fee Floor", _collateral, _redemptionFeeFloor, 0.001 ether, 0.1 ether)
-    {
-        CollateralParams storage collParams = collateralParams[_collateral];
-        uint256 oldRedemptionFeeFloor = collParams.redemptionFeeFloor;
-        collParams.redemptionFeeFloor = _redemptionFeeFloor;
-        emit RedemptionFeeFloorChanged(oldRedemptionFeeFloor, _redemptionFeeFloor);
     }
 }

@@ -8,12 +8,7 @@ import shouldBehaveLikeCanSetMinNetDebt from "./effects/setMinNetDebt";
 import shouldBehaveLikeCanSetMinimumCollateralRatio from "./effects/setMinimumCollateralRatio";
 import shouldBehaveLikeCanSetMintCap from "./effects/setMintCap";
 import shouldBehaveLikeCanSetPercentDivisor from "./effects/setPercentDivisor";
-<<<<<<< HEAD
-=======
-import shouldBehaveLikeCanSetRedemptionBlockTimestamp from "./effects/setRedemptionBlockTimestamp";
-import shouldBehaveLikeCanSetRedemptionFeeFloor from "./effects/setRedemptionFeeFloor";
 import shouldBehaveLikeCanSetTRENStaking from "./effects/setTRENStaking";
->>>>>>> main
 import shouldHavePublicConstant from "./view/constants";
 import shouldHaveGetBorrowingFee from "./view/getBorrowingFee";
 import shouldHaveGetCCR from "./view/getCriticalCollateralRate";

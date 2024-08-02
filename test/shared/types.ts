@@ -331,33 +331,6 @@ export type LiquidateTrenBoxesArgs = {
 };
 export type LiquidateTrenBoxesResult = ContractTransactionResponse;
 
-<<<<<<< HEAD
-export type CloseTrenBoxArgs = {
-  from?: HardhatEthersSigner;
-  asset: ERC20 | AddressLike;
-  overrideBorrowerOperations?: BorrowerOperations;
-};
-
-export type CloseTrenBoxResult = ContractTransactionResponse;
-=======
-export type RedeemCollateralArgs = {
-  from?: HardhatEthersSigner;
-  asset: ERC20 | AddressLike;
-  debtTokenAmount: bigint;
-  numberOfTrials: bigint;
-  randomSeed: bigint;
-
-  maxFeePercentage?: bigint;
-  price?: bigint;
-  maxIterations?: bigint;
-
-  overridePriceFeed?: PriceFeed;
-  overrideTrenBoxManagerOperations?: TrenBoxManagerOperations;
-  overrideSortedTrenBoxes?: SortedTrenBoxes;
-};
-export type RedeemCollateralResult = ContractTransactionResponse;
->>>>>>> main
-
 export interface TestUtils {
   revertToInitialSnapshot: () => Promise<void>;
   getAddressesForSetAddresses: (
@@ -388,11 +361,6 @@ export interface TestUtils {
   batchLiquidateTrenBoxes: (
     args: BatchLiquidateTrenBoxesArgs
   ) => Promise<BatchLiquidateTrenBoxesResult>;
-<<<<<<< HEAD
-  closeTrenBox: (args: CloseTrenBoxArgs) => Promise<CloseTrenBoxResult>;
-=======
-  redeemCollateral: (args: RedeemCollateralArgs) => Promise<RedeemCollateralResult>;
->>>>>>> main
 }
 
 export interface TestContracts {

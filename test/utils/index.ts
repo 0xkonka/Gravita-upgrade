@@ -52,10 +52,5 @@ export function setupUtils(context: Context): TestUtils {
     liquidate: liquidate(context),
     batchLiquidateTrenBoxes: batchLiquidateTrenBoxes(context),
     liquidateTrenBoxes: liquidateTrenBoxes(context),
-<<<<<<< HEAD
-    closeTrenBox: closeTrenBox(context),
-=======
-    redeemCollateral: redeemCollateral(context),
->>>>>>> main
   };
 }
