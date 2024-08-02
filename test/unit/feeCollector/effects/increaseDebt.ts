@@ -17,12 +17,6 @@ export default function shouldBehaveLikeCanIncreaseDebt(): void {
     const debtToken = await DebtTokenFactory.deploy(this.owner);
     await debtToken.waitForDeployment();
 
-    await debtToken.setAddresses(
-      this.borrowerOperationsImpostor,
-      this.signers.accounts[3],
-      this.signers.accounts[4]
-    );
-
     this.redeployedContracts.feeCollector = feeCollector;
     this.redeployedContracts.debtToken = debtToken;
     this.debtAsset = this.collaterals.active.wETH;

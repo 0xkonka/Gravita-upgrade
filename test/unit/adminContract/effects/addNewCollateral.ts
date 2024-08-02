@@ -188,16 +188,6 @@ export default function shouldBehaveLikeCanAddNewCollateral(): void {
     });
   });
 
-  context("when adding a collateral with zero address", function () {
-    it.skip("should revert", async function () {
-      const zeroAddress = ethers.ZeroAddress;
-
-      await expect(
-        this.contracts.adminContract.addNewCollateral(zeroAddress, 0)
-      ).to.be.revertedWith("invalid address");
-    });
-  });
-
   context("when not owner calls addNewCollateral", function () {
     it("should revert", async function () {
       const { testCollateral } = this.collaterals.notAdded;

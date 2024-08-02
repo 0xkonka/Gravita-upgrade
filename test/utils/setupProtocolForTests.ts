@@ -86,12 +86,6 @@ export function setupProtocolForTests(context: Context) {
             .connect(command.args.from)
             .approve(command.args.spender, command.args.amount);
           break;
-        case "closeTrenBox":
-          await context.utils.closeTrenBox({
-            ...command.args,
-            overrideBorrowerOperations: overrides?.borrowerOperations,
-          });
-          break;
         default:
           throw new Error(`Unknown command: ${action}`);
       }

@@ -1,11 +1,12 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-export default function shouldBehaveLikeCanCloseTrenBox(): void {
+export default function shouldBehaveLikeCanExecuteFullRedemption(): void {
   beforeEach(async function () {
     const owner = this.signers.deployer;
     this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
-    this.user = [this.signers.accounts[2], this.signers.accounts[3]];
+
+    await this.utils.setUsers([this.signers.accounts[2], this.signers.accounts[3]]);
 
     const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
     const trenBoxStorage = await TrenBoxStorageFactory.connect(owner).deploy();
@@ -54,11 +55,11 @@ export default function shouldBehaveLikeCanCloseTrenBox(): void {
         price: ethers.parseUnits("200", "ether"),
         mints: [
           {
-            to: this.user[0].address,
+            to: this.users[0].address,
             amount: ethers.parseUnits("100", 30),
           },
           {
-            to: this.user[1].address,
+            to: this.users[1].address,
             amount: ethers.parseUnits("100", 30),
           },
         ],
@@ -87,7 +88,7 @@ export default function shouldBehaveLikeCanCloseTrenBox(): void {
       const { openTrenBoxTx } = await this.utils.openTrenBox({
         asset: erc20,
         assetAmount,
-        from: this.user[0],
+        from: this.users[0],
         overrideTrenBoxManager: this.redeployedContracts.trenBoxManager,
         overrideBorrowerOperations: this.redeployedContracts.borrowerOperations,
       });
@@ -97,7 +98,8 @@ export default function shouldBehaveLikeCanCloseTrenBox(): void {
 
     it("should revert with custom error", async function () {
       const { erc20 } = this.testContracts;
-      const borrower = this.user[0].address;
+      const borrower = this.users[0].address;
+      const coll = 10n;
 
       expect(
         await this.redeployedContracts.trenBoxManager.getTrenBoxStatus(erc20, borrower)
@@ -106,22 +108,23 @@ export default function shouldBehaveLikeCanCloseTrenBox(): void {
       await expect(
         this.redeployedContracts.trenBoxManager
           .connect(this.trenBoxManagerOperationsImpostor)
-          .closeTrenBox(erc20, borrower)
+          .executeFullRedemption(erc20, borrower, coll)
       ).to.be.revertedWithCustomError(
         this.redeployedContracts.trenBoxManager,
         "TrenBoxManager__OnlyOneTrenBox"
       );
     });
 
-    it("should close trenBox and emit TrenBoxIndexUpdated", async function () {
+    it("should execute full redemption and emit TrenBoxUpdated", async function () {
       const { erc20 } = this.testContracts;
-      const borrower = this.user[0].address;
+      const borrower = this.users[0].address;
+      const coll = 10n;
       const assetAmount = ethers.parseUnits("100", 30);
 
       const { openTrenBoxTx } = await this.utils.openTrenBox({
         asset: erc20,
         assetAmount,
-        from: this.user[1],
+        from: this.users[1],
         overrideTrenBoxManager: this.redeployedContracts.trenBoxManager,
         overrideBorrowerOperations: this.redeployedContracts.borrowerOperations,
       });
@@ -134,28 +137,32 @@ export default function shouldBehaveLikeCanCloseTrenBox(): void {
 
       const increaseDebtTx = await this.redeployedContracts.trenBoxManager
         .connect(this.trenBoxManagerOperationsImpostor)
-        .closeTrenBox(erc20, borrower);
+        .executeFullRedemption(erc20, borrower, coll);
 
       await expect(increaseDebtTx)
-        .to.emit(this.redeployedContracts.trenBoxManager, "TrenBoxIndexUpdated")
-        .withArgs(erc20, this.user[1].address, 0n);
+        .to.emit(this.redeployedContracts.trenBoxManager, "TrenBoxUpdated")
+        .withArgs(erc20, borrower, 0n, 0n, 0n, 3n);
 
       expect(
         await this.redeployedContracts.trenBoxManager.getTrenBoxStatus(erc20, borrower)
-      ).to.be.equal(2n);
+      ).to.be.equal(4n);
     });
   });
 
-  context("when caller is not trenBoxManagerOperations or borrowerOperations", function () {
+  context("when caller is not trenBoxManagerOperations", function () {
     it("reverts custom error", async function () {
+      const impostor = this.signers.accounts[4];
       const { wETH } = this.collaterals.active;
-      const borrower = this.signers.accounts[4];
+      const borrower = this.signers.accounts[2];
+      const coll = 10n;
 
       await expect(
-        this.redeployedContracts.trenBoxManager.closeTrenBox(wETH.address, borrower)
+        this.contracts.trenBoxManager
+          .connect(impostor)
+          .executeFullRedemption(wETH.address, borrower, coll)
       ).to.be.revertedWithCustomError(
         this.contracts.trenBoxManager,
-        "TrenBoxManager__OnlyTrenBoxManagerOperationsOrBorrowerOperations"
+        "TrenBoxManager__OnlyTrenBoxManagerOperations"
       );
     });
   });

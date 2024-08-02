@@ -1,14 +1,22 @@
 import { expect } from "chai";
-import { ethers } from "ethers";
+import { ethers } from "hardhat";
 
 export default function shouldBehaveLikeCanMint(): void {
   context("when caller is borrower operations", function () {
     beforeEach(async function () {
+      const owner = this.signers.deployer;
+
+      const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
+      const debtToken = await DebtTokenFactory.deploy(owner);
+      await debtToken.waitForDeployment();
+
+      this.redeployedContracts.debtToken = debtToken;
+
       const borrowerOperationsImpostor = this.signers.accounts[1];
       const stabilityPoolAddress = await this.contracts.stabilityPool.getAddress();
       const trenBoxManagerAddress = await this.contracts.trenBoxManager.getAddress();
 
-      await this.contracts.debtToken.setAddresses(
+      await this.redeployedContracts.debtToken.setAddresses(
         borrowerOperationsImpostor.address,
         stabilityPoolAddress,
         trenBoxManagerAddress
@@ -23,11 +31,11 @@ export default function shouldBehaveLikeCanMint(): void {
       it("mints tokens", async function () {
         const amountToMint = 100;
 
-        await this.contracts.debtToken
+        await this.redeployedContracts.debtToken
           .connect(this.borrowerOperationsImpostor)
           .mint(this.collateral.address, this.tokenRecipient.address, amountToMint);
 
-        const debtTokenBalance = await this.contracts.debtToken.balanceOf(
+        const debtTokenBalance = await this.redeployedContracts.debtToken.balanceOf(
           this.tokenRecipient.address
         );
 
@@ -38,23 +46,23 @@ export default function shouldBehaveLikeCanMint(): void {
         const amountToMint = 100;
 
         await expect(
-          this.contracts.debtToken
+          this.redeployedContracts.debtToken
             .connect(this.borrowerOperationsImpostor)
             .mint(this.collateral.address, this.tokenRecipient.address, amountToMint)
         )
-          .to.emit(this.contracts.debtToken, "Transfer")
+          .to.emit(this.redeployedContracts.debtToken, "Transfer")
           .withArgs(ethers.ZeroAddress, this.tokenRecipient.address, amountToMint);
       });
 
       it("updates total supply", async function () {
         const amountToMint = 100n;
-        const initialTotalSupply = await this.contracts.debtToken.totalSupply();
+        const initialTotalSupply = await this.redeployedContracts.debtToken.totalSupply();
 
-        await this.contracts.debtToken
+        await this.redeployedContracts.debtToken
           .connect(this.borrowerOperationsImpostor)
           .mint(this.collateral.address, this.tokenRecipient.address, amountToMint);
 
-        const totalSupply = await this.contracts.debtToken.totalSupply();
+        const totalSupply = await this.redeployedContracts.debtToken.totalSupply();
 
         expect(totalSupply).to.be.equal(initialTotalSupply + amountToMint);
       });
@@ -64,14 +72,17 @@ export default function shouldBehaveLikeCanMint(): void {
       it("reverts", async function () {
         const amountToMint = 100;
 
-        await this.contracts.debtToken.emergencyStopMinting(this.collateral.address, true);
+        await this.redeployedContracts.debtToken.emergencyStopMinting(
+          this.collateral.address,
+          true
+        );
 
         await expect(
-          this.contracts.debtToken
+          this.redeployedContracts.debtToken
             .connect(this.borrowerOperationsImpostor)
             .mint(this.collateral.address, this.tokenRecipient.address, amountToMint)
         ).to.be.revertedWithCustomError(
-          this.contracts.debtToken,
+          this.redeployedContracts.debtToken,
           "DebtToken__MintBlockedForCollateral"
         );
       });

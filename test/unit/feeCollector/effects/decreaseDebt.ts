@@ -17,13 +17,6 @@ export default function shouldBehaveLikeCanDecreaseDebt(): void {
     const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
     const debtToken = await DebtTokenFactory.deploy(this.owner);
     await debtToken.waitForDeployment();
-
-    await debtToken.setAddresses(
-      this.borrowerOperationsImpostor,
-      this.signers.accounts[3],
-      this.signers.accounts[4]
-    );
-
     await debtToken.addWhitelist(await feeCollector.getAddress());
 
     this.redeployedContracts.feeCollector = feeCollector;

@@ -126,6 +126,18 @@ export type GetCompositeDebtArgs = {
   overrideBorrowerOperations?: BorrowerOperations;
 };
 
+export type GetTrenBoxCollArgs = {
+  asset: AddressLike;
+  borrowers: AddressLike[];
+  overrideTrenBoxManager?: TrenBoxManager;
+};
+
+export type GetTrenBoxDebtArgs = {
+  asset: AddressLike;
+  borrowers: AddressLike[];
+  overrideTrenBoxManager?: TrenBoxManager;
+};
+
 export type GetTrenBoxStatusArgs = {
   asset: AddressLike;
   borrowers: AddressLike[];
@@ -215,10 +227,6 @@ export type SetupProtocolCommands =
   | {
       action: "batchLiquidateTrenBoxes";
       args: BatchLiquidateTrenBoxesArgs;
-    }
-  | {
-      action: "closeTrenBox";
-      args: CloseTrenBoxArgs;
     }
   | {
       action: "approve";
@@ -323,6 +331,7 @@ export type LiquidateTrenBoxesArgs = {
 };
 export type LiquidateTrenBoxesResult = ContractTransactionResponse;
 
+<<<<<<< HEAD
 export type CloseTrenBoxArgs = {
   from?: HardhatEthersSigner;
   asset: ERC20 | AddressLike;
@@ -330,6 +339,24 @@ export type CloseTrenBoxArgs = {
 };
 
 export type CloseTrenBoxResult = ContractTransactionResponse;
+=======
+export type RedeemCollateralArgs = {
+  from?: HardhatEthersSigner;
+  asset: ERC20 | AddressLike;
+  debtTokenAmount: bigint;
+  numberOfTrials: bigint;
+  randomSeed: bigint;
+
+  maxFeePercentage?: bigint;
+  price?: bigint;
+  maxIterations?: bigint;
+
+  overridePriceFeed?: PriceFeed;
+  overrideTrenBoxManagerOperations?: TrenBoxManagerOperations;
+  overrideSortedTrenBoxes?: SortedTrenBoxes;
+};
+export type RedeemCollateralResult = ContractTransactionResponse;
+>>>>>>> main
 
 export interface TestUtils {
   revertToInitialSnapshot: () => Promise<void>;
@@ -340,6 +367,8 @@ export interface TestUtils {
   getNetBorrowingAmount(args: GetNetBorrowingAmountArgs): Promise<bigint>;
   getOpenTrenBoxTotalDebt(args: GetOpenTrenBoxTotalDebtArgs): Promise<bigint>;
   getCompositeDebt: (args: GetCompositeDebtArgs) => Promise<bigint>;
+  getTrenBoxColls: (args: GetTrenBoxCollArgs) => Promise<bigint[]>;
+  getTrenBoxDebts: (args: GetTrenBoxDebtArgs) => Promise<bigint[]>;
   getTrenBoxStatuses: (args: GetTrenBoxStatusArgs) => Promise<bigint[]>;
   getActualDebtFromCompositeDebt: (args: GetActualDebtFromCompositeDebtArgs) => Promise<bigint>;
   setupCollateralForTests: (args: SetupCollateralForTestsArgs) => Promise<void>;
@@ -359,7 +388,11 @@ export interface TestUtils {
   batchLiquidateTrenBoxes: (
     args: BatchLiquidateTrenBoxesArgs
   ) => Promise<BatchLiquidateTrenBoxesResult>;
+<<<<<<< HEAD
   closeTrenBox: (args: CloseTrenBoxArgs) => Promise<CloseTrenBoxResult>;
+=======
+  redeemCollateral: (args: RedeemCollateralArgs) => Promise<RedeemCollateralResult>;
+>>>>>>> main
 }
 
 export interface TestContracts {

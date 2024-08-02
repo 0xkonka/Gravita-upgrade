@@ -2,6 +2,7 @@
 pragma solidity ^0.8.23;
 
 import { IERC20 } from "@openzeppelin/contracts/interfaces/IERC20.sol";
+
 import { IUniswapRouterV3 } from "../Interfaces/IUniswapRouterV3.sol";
 
 contract MockUniswapRouterV3 is IUniswapRouterV3 {
@@ -12,7 +13,7 @@ contract MockUniswapRouterV3 is IUniswapRouterV3 {
     uint256 private constant FEE_SIZE = 3;
     uint256 private constant NEXT_OFFSET = ADDR_SIZE + FEE_SIZE;
 
-    uint256 public ratioAssetToStable = 3000;
+    uint256 public ratioAssetToStable = 2000;
     uint256 public ratioStableToDebt = 1;
 
     struct SwapCallbackData {
@@ -37,6 +38,22 @@ contract MockUniswapRouterV3 is IUniswapRouterV3 {
 
         IERC20(assetToken).transferFrom(params.recipient, address(this), assetTokensNeededPlusFee);
         IERC20(debtToken).transfer(params.recipient, params.amountOut);
+
+        return assetTokensNeededPlusFee;
+    }
+
+    function exactOutputSingle(ExactOutputSingleParams memory params)
+        external
+        returns (uint256 amountIn)
+    {
+        uint256 fee = (params.amountOut * params.fee) / FEE_DENOMINATOR;
+        uint256 assetTokensNeededPlusFee = params.amountOut + fee;
+
+        uint256 divisor = 10 ** (18 - 6);
+        uint256 assetAmount = assetTokensNeededPlusFee / divisor;
+
+        IERC20(params.tokenIn).transferFrom(params.recipient, address(this), assetAmount);
+        IERC20(params.tokenOut).transfer(params.recipient, params.amountOut);
 
         return assetTokensNeededPlusFee;
     }

@@ -76,6 +76,8 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable {
             revert CommunityIssuance__InvalidAdminContract();
         }
         adminContract = _adminContract;
+
+        emit AdminContractAddressSet(_adminContract);
     }
 
     function addFundToStabilityPool(uint256 _assignedSupply) external override isController {
@@ -122,7 +124,9 @@ contract CommunityIssuance is ICommunityIssuance, OwnableUpgradeable {
         uint256 totalIssuance = issuance + totalTRENIssued;
 
         if (totalIssuance > maxPoolSupply) {
-            issuance = maxPoolSupply - totalTRENIssued;
+            unchecked {
+                issuance = maxPoolSupply - totalTRENIssued;
+            }
             totalIssuance = maxPoolSupply;
         }
 

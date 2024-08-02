@@ -168,10 +168,11 @@ export default function shouldBehaveLikeCanSetOracle(): void {
         -8,
         0,
         224843971,
-        now,
+        now - 1,
         0
       );
-      await mockPyth.updatePriceFeeds([initialPythPriceFeedData]);
+      const updatePriceOnPythMockTx = await mockPyth.updatePriceFeed(initialPythPriceFeedData);
+      await updatePriceOnPythMockTx.wait();
       const pythOracleAddress = await this.testContracts.mockPyth.getAddress();
 
       await expect(

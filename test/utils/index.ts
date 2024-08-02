@@ -4,13 +4,14 @@ import { Context } from "mocha";
 import { TestUtils } from "../shared/types";
 import { addCollateral } from "./addCollateral";
 import { batchLiquidateTrenBoxes } from "./batchLiquidateTrenBoxes";
-import { closeTrenBox } from "./closeTrenBox";
 import { connectRedeployedContracts } from "./connectRedeployedContracts";
 import { getActualDebtFromCompositeDebt } from "./getActualDebtFromCompositeDebt";
 import { getAddressesForSetAddresses } from "./getAddressesForSetAddresses";
 import { getCompositeDebt } from "./getCompositeDebt";
 import { getNetBorrowingAmount } from "./getNetBorrowingAmount";
 import { getOpenTrenBoxTotalDebt } from "./getOpenTrenBoxTotalDebt";
+import { getTrenBoxColls } from "./getTrenBoxColls";
+import { getTrenBoxDebts } from "./getTrenBoxDebts";
 import { getTrenBoxStatuses } from "./getTrenBoxStatuses";
 import { liquidate } from "./liquidate";
 import { liquidateTrenBoxes } from "./liquidateTrenBoxes";
@@ -33,6 +34,8 @@ export function setupUtils(context: Context): TestUtils {
     getNetBorrowingAmount: getNetBorrowingAmount(context),
     getCompositeDebt: getCompositeDebt(context),
     getTrenBoxStatuses: getTrenBoxStatuses(context),
+    getTrenBoxColls: getTrenBoxColls(context),
+    getTrenBoxDebts: getTrenBoxDebts(context),
     getOpenTrenBoxTotalDebt: getOpenTrenBoxTotalDebt(context),
     getActualDebtFromCompositeDebt: getActualDebtFromCompositeDebt(context),
     openTrenBox: openTrenBox(context),
@@ -49,6 +52,10 @@ export function setupUtils(context: Context): TestUtils {
     liquidate: liquidate(context),
     batchLiquidateTrenBoxes: batchLiquidateTrenBoxes(context),
     liquidateTrenBoxes: liquidateTrenBoxes(context),
+<<<<<<< HEAD
     closeTrenBox: closeTrenBox(context),
+=======
+    redeemCollateral: redeemCollateral(context),
+>>>>>>> main
   };
 }

@@ -55,6 +55,11 @@ interface IAdminContract {
     );
 
     /**
+     * @dev Error emitted when the AdminContract is already initialized.
+     */
+    error AdminContract__AlreadyInitialized();
+
+    /**
      * @dev Error emitted when the caller is not owner.
      */
     error AdminContract__OnlyOwner();
@@ -78,6 +83,11 @@ interface IAdminContract {
      * @dev Error emitted when the collateral asset is not active.
      */
     error AdminContract__CollateralNotConfigured();
+
+    /**
+     * @dev Error emitted when the collateral is zero address.
+     */
+    error AdminContract__ZeroAddress();
 
     /**
      * @dev Emitted when the collateral asset is added.
@@ -147,6 +157,12 @@ interface IAdminContract {
      * @param _newMaxDebt The new minimum amount of debt token.
      */
     event FlashLoanMaxDebtChanged(uint256 _oldMaxDebt, uint256 _newMaxDebt);
+
+    /**
+     * @dev Emmited after deployment to indicate that the setup is initialized with all initial
+     * collaterals
+     */
+    event SetupInitialized();
 
     /// @notice Returns decimal precision, 1 ether.
     function DECIMAL_PRECISION() external pure returns (uint256);

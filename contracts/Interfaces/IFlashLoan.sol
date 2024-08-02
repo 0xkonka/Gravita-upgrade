@@ -26,6 +26,9 @@ interface IFlashLoan {
     /// @dev Thrown when the collateral required for the loan is not active.
     error FlashLoan__CollateralIsNotActive();
 
+    /// @dev Thrown when the flash loan transaction fails.
+    error FlashLoan__TransferFailed();
+
     // ------------------------------------------ Events ------------------------------------------
 
     /**

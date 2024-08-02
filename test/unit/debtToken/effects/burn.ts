@@ -11,33 +11,29 @@ export default function shouldBehaveLikeCanBurn(): void {
 
     this.collateral = this.collaterals.active.wETH;
     this.tokenRecipient = this.signers.accounts[2];
-
-    await this.contracts.debtToken.setAddresses(
-      this.borrowerOperationsImpostor.address,
-      await this.contracts.stabilityPool.getAddress(),
-      await this.contracts.trenBoxManager.getAddress()
-    );
-
-    await this.contracts.debtToken
-      .connect(this.borrowerOperationsImpostor)
-      .mint(this.collateral.address, this.tokenRecipient.address, 100);
-
-    await this.contracts.debtToken.setAddresses(
-      await this.contracts.borrowerOperations.getAddress(),
-      await this.contracts.stabilityPool.getAddress(),
-      await this.contracts.trenBoxManager.getAddress()
-    );
   });
 
   context("when caller is borrower operations", function () {
     beforeEach(async function () {
-      await this.contracts.debtToken.setAddresses(
+      const owner = this.signers.deployer;
+
+      const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
+      const debtToken = await DebtTokenFactory.deploy(owner);
+      await debtToken.waitForDeployment();
+
+      this.redeployedContracts.debtToken = debtToken;
+
+      await this.redeployedContracts.debtToken.setAddresses(
         this.borrowerOperationsImpostor.address,
         await this.contracts.stabilityPool.getAddress(),
         await this.contracts.trenBoxManager.getAddress()
       );
 
       this.impostor = this.borrowerOperationsImpostor;
+
+      await this.redeployedContracts.debtToken
+        .connect(this.impostor)
+        .mint(this.collateral.address, this.tokenRecipient.address, 100);
     });
 
     shouldBehaveLikeCanBurnCorrectly();
@@ -45,11 +41,23 @@ export default function shouldBehaveLikeCanBurn(): void {
 
   context("when caller is tren box manager", function () {
     beforeEach(async function () {
-      await this.contracts.debtToken.setAddresses(
-        await this.contracts.borrowerOperations.getAddress(),
+      const owner = this.signers.deployer;
+
+      const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
+      const debtToken = await DebtTokenFactory.deploy(owner);
+      await debtToken.waitForDeployment();
+
+      this.redeployedContracts.debtToken = debtToken;
+
+      await this.redeployedContracts.debtToken.setAddresses(
+        this.borrowerOperationsImpostor.address,
         await this.contracts.stabilityPool.getAddress(),
         this.trenBoxManagerImpostor.address
       );
+
+      await this.redeployedContracts.debtToken
+        .connect(this.borrowerOperationsImpostor)
+        .mint(this.collateral.address, this.tokenRecipient.address, 100);
 
       this.impostor = this.trenBoxManagerImpostor;
     });
@@ -59,11 +67,23 @@ export default function shouldBehaveLikeCanBurn(): void {
 
   context("when caller is stability pool", function () {
     beforeEach(async function () {
-      await this.contracts.debtToken.setAddresses(
-        await this.contracts.borrowerOperations.getAddress(),
+      const owner = this.signers.deployer;
+
+      const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
+      const debtToken = await DebtTokenFactory.deploy(owner);
+      await debtToken.waitForDeployment();
+
+      this.redeployedContracts.debtToken = debtToken;
+
+      await this.redeployedContracts.debtToken.setAddresses(
+        this.borrowerOperationsImpostor.address,
         this.stabilityPoolImpostor.address,
         await this.contracts.trenBoxManager.getAddress()
       );
+
+      await this.redeployedContracts.debtToken
+        .connect(this.borrowerOperationsImpostor)
+        .mint(this.collateral.address, this.tokenRecipient.address, 100);
 
       this.impostor = this.stabilityPoolImpostor;
     });
@@ -91,13 +111,17 @@ function shouldBehaveLikeCanBurnCorrectly() {
   it("burns tokens from account", async function () {
     const amountToBurn = 50n;
 
-    const initialBalance = await this.contracts.debtToken.balanceOf(this.tokenRecipient.address);
+    const initialBalance = await this.redeployedContracts.debtToken.balanceOf(
+      this.tokenRecipient.address
+    );
 
-    await this.contracts.debtToken
+    await this.redeployedContracts.debtToken
       .connect(this.impostor)
       .burn(this.tokenRecipient.address, amountToBurn);
 
-    const debtTokenBalance = await this.contracts.debtToken.balanceOf(this.tokenRecipient.address);
+    const debtTokenBalance = await this.redeployedContracts.debtToken.balanceOf(
+      this.tokenRecipient.address
+    );
 
     expect(debtTokenBalance).to.be.equal(initialBalance - amountToBurn);
   });
@@ -106,23 +130,23 @@ function shouldBehaveLikeCanBurnCorrectly() {
     const amountToBurn = 50n;
 
     await expect(
-      this.contracts.debtToken
+      this.redeployedContracts.debtToken
         .connect(this.impostor)
         .burn(this.tokenRecipient.address, amountToBurn)
     )
-      .to.emit(this.contracts.debtToken, "Transfer")
+      .to.emit(this.redeployedContracts.debtToken, "Transfer")
       .withArgs(this.tokenRecipient.address, ethers.ZeroAddress, amountToBurn);
   });
 
   it("reduce total supply", async function () {
     const amountToBurn = 50n;
-    const initialTotalSupply = await this.contracts.debtToken.totalSupply();
+    const initialTotalSupply = await this.redeployedContracts.debtToken.totalSupply();
 
-    await this.contracts.debtToken
+    await this.redeployedContracts.debtToken
       .connect(this.impostor)
       .burn(this.tokenRecipient.address, amountToBurn);
 
-    const totalSupply = await this.contracts.debtToken.totalSupply();
+    const totalSupply = await this.redeployedContracts.debtToken.totalSupply();
 
     expect(totalSupply).to.be.equal(initialTotalSupply - amountToBurn);
   });

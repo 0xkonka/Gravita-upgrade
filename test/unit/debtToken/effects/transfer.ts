@@ -3,6 +3,14 @@ import { ethers } from "hardhat";
 
 export default function shouldBehaveLikeCanTransfer(): void {
   beforeEach(async function () {
+    const owner = this.signers.deployer;
+
+    const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
+    const debtToken = await DebtTokenFactory.deploy(owner);
+    await debtToken.waitForDeployment();
+
+    this.redeployedContracts.debtToken = debtToken;
+
     this.collateral = this.collaterals.active.wETH;
 
     const amountTokensToMint = 5000;
@@ -14,17 +22,17 @@ export default function shouldBehaveLikeCanTransfer(): void {
     this.trenBoxManagerAddress = await this.contracts.trenBoxManager.getAddress();
 
     const borrowerOperationsImpostor = this.signers.accounts[1];
-    await this.contracts.debtToken.setAddresses(
+    await this.redeployedContracts.debtToken.setAddresses(
       borrowerOperationsImpostor.address,
       this.stabilityPoolAddress,
       this.trenBoxManagerAddress
     );
 
-    await this.contracts.debtToken
+    await this.redeployedContracts.debtToken
       .connect(borrowerOperationsImpostor)
       .mint(this.collateral.address, this.aliceTokenHolder.address, amountTokensToMint);
 
-    await this.contracts.debtToken
+    await this.redeployedContracts.debtToken
       .connect(borrowerOperationsImpostor)
       .mint(this.collateral.address, this.bobTokenHolder.address, amountTokensToMint);
   });
@@ -34,21 +42,23 @@ export default function shouldBehaveLikeCanTransfer(): void {
       it("transfers tokens to specified address", async function () {
         const amountToSend = 100n;
 
-        const initialAliceBalance = await this.contracts.debtToken.balanceOf(
+        const initialAliceBalance = await this.redeployedContracts.debtToken.balanceOf(
           this.aliceTokenHolder.address
         );
-        const initialBobBalance = await this.contracts.debtToken.balanceOf(
+        const initialBobBalance = await this.redeployedContracts.debtToken.balanceOf(
           this.bobTokenHolder.address
         );
 
-        await this.contracts.debtToken
+        await this.redeployedContracts.debtToken
           .connect(this.aliceTokenHolder)
           .transfer(this.bobTokenHolder, amountToSend);
 
-        const aliceBalance = await this.contracts.debtToken.balanceOf(
+        const aliceBalance = await this.redeployedContracts.debtToken.balanceOf(
           this.aliceTokenHolder.address
         );
-        const bobBalance = await this.contracts.debtToken.balanceOf(this.bobTokenHolder.address);
+        const bobBalance = await this.redeployedContracts.debtToken.balanceOf(
+          this.bobTokenHolder.address
+        );
 
         expect(aliceBalance).to.be.equal(initialAliceBalance - amountToSend);
         expect(bobBalance).to.be.equal(initialBobBalance + amountToSend);
@@ -58,23 +68,23 @@ export default function shouldBehaveLikeCanTransfer(): void {
         const amountToSend = 100n;
 
         await expect(
-          this.contracts.debtToken
+          this.redeployedContracts.debtToken
             .connect(this.aliceTokenHolder)
             .transfer(this.bobTokenHolder, amountToSend)
         )
-          .to.emit(this.contracts.debtToken, "Transfer")
+          .to.emit(this.redeployedContracts.debtToken, "Transfer")
           .withArgs(this.aliceTokenHolder, this.bobTokenHolder, amountToSend);
       });
 
       it("does not update total supply", async function () {
         const amountToSend = 100n;
-        const initialTotalSupply = await this.contracts.debtToken.totalSupply();
+        const initialTotalSupply = await this.redeployedContracts.debtToken.totalSupply();
 
-        await this.contracts.debtToken
+        await this.redeployedContracts.debtToken
           .connect(this.aliceTokenHolder)
           .transfer(this.bobTokenHolder, amountToSend);
 
-        const totalSupply = await this.contracts.debtToken.totalSupply();
+        const totalSupply = await this.redeployedContracts.debtToken.totalSupply();
 
         expect(totalSupply).to.be.equal(initialTotalSupply);
       });
@@ -85,11 +95,11 @@ export default function shouldBehaveLikeCanTransfer(): void {
         const amountToSend = 100n;
 
         await expect(
-          this.contracts.debtToken
+          this.redeployedContracts.debtToken
             .connect(this.aliceTokenHolder)
             .transfer(ethers.ZeroAddress, amountToSend)
         ).to.be.revertedWithCustomError(
-          this.contracts.debtToken,
+          this.redeployedContracts.debtToken,
           "DebtToken__CannotTransferTokensToZeroAddress"
         );
       });
@@ -99,14 +109,14 @@ export default function shouldBehaveLikeCanTransfer(): void {
       it("reverts", async function () {
         const amountToSend = 100n;
 
-        const debtTokenAddress = await this.contracts.debtToken.getAddress();
+        const debtTokenAddress = await this.redeployedContracts.debtToken.getAddress();
 
         await expect(
-          this.contracts.debtToken
+          this.redeployedContracts.debtToken
             .connect(this.aliceTokenHolder)
             .transfer(debtTokenAddress, amountToSend)
         ).to.be.revertedWithCustomError(
-          this.contracts.debtToken,
+          this.redeployedContracts.debtToken,
           "DebtToken__CannotTransferTokensToTokenContract"
         );
       });

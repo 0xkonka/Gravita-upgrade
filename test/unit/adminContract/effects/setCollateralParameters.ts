@@ -286,7 +286,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
   });
 
   context("when setting collateral parameters on non-existent collateral", function () {
-    it.skip("should revert", async function () {
+    it("should revert with custom error AdminContract__CollateralDoesNotExist", async function () {
       const nonExistentCollateral = this.collaterals.notAdded.testCollateral;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();

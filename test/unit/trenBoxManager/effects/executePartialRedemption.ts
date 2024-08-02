@@ -1,11 +1,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-export default function shouldBehaveLikeCanCloseTrenBox(): void {
+export default function shouldBehaveLikeCanExecutePartialRedemption(): void {
   beforeEach(async function () {
     const owner = this.signers.deployer;
-    this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
-    this.user = [this.signers.accounts[2], this.signers.accounts[3]];
 
     const TrenBoxStorageFactory = await ethers.getContractFactory("TrenBoxStorage");
     const trenBoxStorage = await TrenBoxStorageFactory.connect(owner).deploy();
@@ -35,7 +33,6 @@ export default function shouldBehaveLikeCanCloseTrenBox(): void {
     const DebtTokenFactory = await ethers.getContractFactory("DebtToken");
     const debtToken = await DebtTokenFactory.deploy(owner);
     await debtToken.waitForDeployment();
-
     await debtToken.addWhitelist(feeCollector);
 
     this.redeployedContracts.trenBoxManager = trenBoxManager;
@@ -44,6 +41,9 @@ export default function shouldBehaveLikeCanCloseTrenBox(): void {
     this.redeployedContracts.feeCollector = feeCollector;
     this.redeployedContracts.sortedTrenBoxes = sortedTrenBoxes;
     this.redeployedContracts.trenBoxStorage = trenBoxStorage;
+
+    this.trenBoxManagerOperationsImpostor = this.signers.accounts[1];
+    this.user = this.signers.accounts[2];
 
     const { erc20 } = this.testContracts;
 
@@ -54,11 +54,7 @@ export default function shouldBehaveLikeCanCloseTrenBox(): void {
         price: ethers.parseUnits("200", "ether"),
         mints: [
           {
-            to: this.user[0].address,
-            amount: ethers.parseUnits("100", 30),
-          },
-          {
-            to: this.user[1].address,
+            to: this.user.address,
             amount: ethers.parseUnits("100", 30),
           },
         ],
@@ -87,7 +83,7 @@ export default function shouldBehaveLikeCanCloseTrenBox(): void {
       const { openTrenBoxTx } = await this.utils.openTrenBox({
         asset: erc20,
         assetAmount,
-        from: this.user[0],
+        from: this.user,
         overrideTrenBoxManager: this.redeployedContracts.trenBoxManager,
         overrideBorrowerOperations: this.redeployedContracts.borrowerOperations,
       });
@@ -95,67 +91,67 @@ export default function shouldBehaveLikeCanCloseTrenBox(): void {
       await (await openTrenBoxTx).wait();
     });
 
-    it("should revert with custom error", async function () {
+    it("should execute partial redemption, emit TrenBoxUpdated and TotalStakesUpdated", async function () {
       const { erc20 } = this.testContracts;
-      const borrower = this.user[0].address;
-
-      expect(
-        await this.redeployedContracts.trenBoxManager.getTrenBoxStatus(erc20, borrower)
-      ).to.be.equal(1n);
-
-      await expect(
-        this.redeployedContracts.trenBoxManager
-          .connect(this.trenBoxManagerOperationsImpostor)
-          .closeTrenBox(erc20, borrower)
-      ).to.be.revertedWithCustomError(
-        this.redeployedContracts.trenBoxManager,
-        "TrenBoxManager__OnlyOneTrenBox"
-      );
-    });
-
-    it("should close trenBox and emit TrenBoxIndexUpdated", async function () {
-      const { erc20 } = this.testContracts;
-      const borrower = this.user[0].address;
-      const assetAmount = ethers.parseUnits("100", 30);
-
-      const { openTrenBoxTx } = await this.utils.openTrenBox({
-        asset: erc20,
-        assetAmount,
-        from: this.user[1],
-        overrideTrenBoxManager: this.redeployedContracts.trenBoxManager,
-        overrideBorrowerOperations: this.redeployedContracts.borrowerOperations,
-      });
-
-      await (await openTrenBoxTx).wait();
-
-      expect(
-        await this.redeployedContracts.trenBoxManager.getTrenBoxStatus(erc20, borrower)
-      ).to.be.equal(1n);
+      const borrower = this.user;
+      const newDebt = 5n;
+      const newColl = 10n;
+      const newNICR = 2n;
+      const upperHint = ethers.ZeroAddress;
+      const lowerHint = ethers.ZeroAddress;
 
       const increaseDebtTx = await this.redeployedContracts.trenBoxManager
         .connect(this.trenBoxManagerOperationsImpostor)
-        .closeTrenBox(erc20, borrower);
+        .executePartialRedemption(erc20, borrower, newDebt, newColl, newNICR, upperHint, lowerHint);
 
       await expect(increaseDebtTx)
-        .to.emit(this.redeployedContracts.trenBoxManager, "TrenBoxIndexUpdated")
-        .withArgs(erc20, this.user[1].address, 0n);
+        .to.emit(this.redeployedContracts.trenBoxManager, "TrenBoxUpdated")
+        .withArgs(erc20, borrower, newDebt, newColl, newColl, 3n);
 
-      expect(
-        await this.redeployedContracts.trenBoxManager.getTrenBoxStatus(erc20, borrower)
-      ).to.be.equal(2n);
+      await expect(increaseDebtTx)
+        .to.emit(this.redeployedContracts.trenBoxManager, "TotalStakesUpdated")
+        .withArgs(erc20, newColl);
+
+      const debtAfter = await this.redeployedContracts.trenBoxManager.getTrenBoxDebt(
+        erc20,
+        borrower
+      );
+      const collAfter = await this.redeployedContracts.trenBoxManager.getTrenBoxColl(
+        erc20,
+        borrower
+      );
+
+      expect(debtAfter).to.be.equal(newDebt);
+      expect(collAfter).to.be.equal(newColl);
     });
   });
 
-  context("when caller is not trenBoxManagerOperations or borrowerOperations", function () {
+  context("when caller is not trenBoxManagerOperations", function () {
     it("reverts custom error", async function () {
+      const impostor = this.signers.accounts[1];
       const { wETH } = this.collaterals.active;
-      const borrower = this.signers.accounts[4];
+      const borrower = this.signers.accounts[3];
+      const newDebt = 5n;
+      const newColl = 10n;
+      const newNICR = 2n;
+      const upperHint = ethers.ZeroAddress;
+      const lowerHint = ethers.ZeroAddress;
 
       await expect(
-        this.redeployedContracts.trenBoxManager.closeTrenBox(wETH.address, borrower)
+        this.contracts.trenBoxManager
+          .connect(impostor)
+          .executePartialRedemption(
+            wETH.address,
+            borrower,
+            newDebt,
+            newColl,
+            newNICR,
+            upperHint,
+            lowerHint
+          )
       ).to.be.revertedWithCustomError(
         this.contracts.trenBoxManager,
-        "TrenBoxManager__OnlyTrenBoxManagerOperationsOrBorrowerOperations"
+        "TrenBoxManager__OnlyTrenBoxManagerOperations"
       );
     });
   });

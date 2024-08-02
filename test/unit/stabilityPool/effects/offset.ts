@@ -47,7 +47,6 @@ export default function shouldBehaveLikeOffset(): void {
     const debtToken = await DebtTokenFactory.deploy(owner);
     await debtToken.waitForDeployment();
 
-    await debtToken.setAddresses(borrowerOperations, stabilityPool, trenBoxManager);
     await debtToken.addWhitelist(feeCollector);
 
     this.redeployedContracts.adminContract = adminContract;

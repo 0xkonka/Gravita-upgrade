@@ -1,12 +1,19 @@
 import shouldBehaveLikeCanAddNewCollateral from "./effects/addNewCollateral";
 import shouldBehaveLikeCanSetBorrowingFee from "./effects/setBorrowingFee";
 import shouldBehaveLikeCanSetCollateralParameters from "./effects/setCollateralParameters";
+import shouldBehaveLikeCanSetCommunityIssuance from "./effects/setCommunityIssuance";
 import shouldBehaveLikeCanSetCriticalCollateralRatio from "./effects/setCriticalCollateralRatio";
 import shouldBehaveLikeCanSetIsActive from "./effects/setIsActive";
 import shouldBehaveLikeCanSetMinNetDebt from "./effects/setMinNetDebt";
 import shouldBehaveLikeCanSetMinimumCollateralRatio from "./effects/setMinimumCollateralRatio";
 import shouldBehaveLikeCanSetMintCap from "./effects/setMintCap";
 import shouldBehaveLikeCanSetPercentDivisor from "./effects/setPercentDivisor";
+<<<<<<< HEAD
+=======
+import shouldBehaveLikeCanSetRedemptionBlockTimestamp from "./effects/setRedemptionBlockTimestamp";
+import shouldBehaveLikeCanSetRedemptionFeeFloor from "./effects/setRedemptionFeeFloor";
+import shouldBehaveLikeCanSetTRENStaking from "./effects/setTRENStaking";
+>>>>>>> main
 import shouldHavePublicConstant from "./view/constants";
 import shouldHaveGetBorrowingFee from "./view/getBorrowingFee";
 import shouldHaveGetCCR from "./view/getCriticalCollateralRate";
@@ -119,6 +126,14 @@ export function shouldBehaveLikeAdminContractContract(): void {
 
     describe("#setIsActive", function () {
       shouldBehaveLikeCanSetIsActive();
+    });
+
+    describe("#setCommunityIssuance", function () {
+      shouldBehaveLikeCanSetCommunityIssuance();
+    });
+
+    describe("#setTRENStaking", function () {
+      shouldBehaveLikeCanSetTRENStaking();
     });
   });
 }

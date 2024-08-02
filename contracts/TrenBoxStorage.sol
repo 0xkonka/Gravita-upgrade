@@ -129,7 +129,8 @@ contract TrenBoxStorage is
 
     /// @inheritdoc ITrenBoxStorage
     function getTotalDebtBalance(address _collateral) external view override returns (uint256) {
-        return debtBalances[_collateral].active + debtBalances[_collateral].liquidated;
+        DebtBalances storage balances = debtBalances[_collateral];
+        return balances.active + balances.liquidated;
     }
 
     /// @inheritdoc ITrenBoxStorage
@@ -139,7 +140,8 @@ contract TrenBoxStorage is
         override
         returns (uint256)
     {
-        return collateralBalances[_collateral].active + collateralBalances[_collateral].liquidated;
+        CollBalances storage balances = collateralBalances[_collateral];
+        return balances.active + balances.liquidated;
     }
 
     /// @inheritdoc ITrenBoxStorage
@@ -231,24 +233,29 @@ contract TrenBoxStorage is
         override
         onlyTrenBoxManager
     {
+        DebtBalances storage _debtBalances = debtBalances[_collateral];
+        CollBalances storage _collateralBalances = collateralBalances[_collateral];
         uint256 newLiquidatedDebt;
         uint256 newLiquidatedColl;
+
         if (_isActiveIncrease) {
             _updateActiveDebt(_collateral, _debtAmount, true);
-            newLiquidatedDebt = debtBalances[_collateral].liquidated - _debtAmount;
+            newLiquidatedDebt = _debtBalances.liquidated - _debtAmount;
             _updateActiveCollateral(_collateral, _collAmount, true);
-            newLiquidatedColl = collateralBalances[_collateral].liquidated - _collAmount;
+            newLiquidatedColl = _collateralBalances.liquidated - _collAmount;
         } else {
             _updateActiveDebt(_collateral, _debtAmount, false);
-            newLiquidatedDebt = debtBalances[_collateral].liquidated + _debtAmount;
+            newLiquidatedDebt = _debtBalances.liquidated + _debtAmount;
             _updateActiveCollateral(_collateral, _collAmount, false);
-            newLiquidatedColl = collateralBalances[_collateral].liquidated + _collAmount;
+            newLiquidatedColl = _collateralBalances.liquidated + _collAmount;
         }
 
-        debtBalances[_collateral].liquidated = newLiquidatedDebt;
+        _debtBalances.liquidated = newLiquidatedDebt;
+
         emit LiquidatedDebtBalanceUpdated(_collateral, newLiquidatedDebt);
 
-        collateralBalances[_collateral].liquidated = newLiquidatedColl;
+        _collateralBalances.liquidated = newLiquidatedColl;
+
         emit LiquidatedCollateralBalanceUpdated(_collateral, newLiquidatedColl);
     }
 
@@ -337,8 +344,8 @@ contract TrenBoxStorage is
         if (safetyTransferAmount == 0) {
             revert TrenBoxStorage__NoClaimableCollateral();
         }
-
         userBalance[_collateral] = 0;
+
         emit UserClaimableCollateralBalanceUpdated(_account, _collateral, 0);
 
         _updateClaimableCollateral(_collateral, claimableColl, false);
@@ -359,11 +366,13 @@ contract TrenBoxStorage is
      * @param _isIncrease The indicator that shows increasing or decreasing of active debt balance.
      */
     function _updateActiveDebt(address _collateral, uint256 _amount, bool _isIncrease) private {
+        DebtBalances storage _debtBalances = debtBalances[_collateral];
         uint256 newDebt;
-        if (_isIncrease) newDebt = debtBalances[_collateral].active + _amount;
-        else newDebt = debtBalances[_collateral].active - _amount;
 
-        debtBalances[_collateral].active = newDebt;
+        if (_isIncrease) newDebt = _debtBalances.active + _amount;
+        else newDebt = _debtBalances.active - _amount;
+        _debtBalances.active = newDebt;
+
         emit ActiveDebtBalanceUpdated(_collateral, newDebt);
     }
 
@@ -380,11 +389,13 @@ contract TrenBoxStorage is
     )
         private
     {
+        CollBalances storage _collateralBalances = collateralBalances[_collateral];
         uint256 newColl;
-        if (_isIncrease) newColl = collateralBalances[_collateral].active + _amount;
-        else newColl = collateralBalances[_collateral].active - _amount;
 
-        collateralBalances[_collateral].active = newColl;
+        if (_isIncrease) newColl = _collateralBalances.active + _amount;
+        else newColl = _collateralBalances.active - _amount;
+        _collateralBalances.active = newColl;
+
         emit ActiveCollateralBalanceUpdated(_collateral, newColl);
     }
 
@@ -402,11 +413,13 @@ contract TrenBoxStorage is
     )
         private
     {
+        CollBalances storage _collateralBalances = collateralBalances[_collateral];
         uint256 newBalance;
-        if (_isIncrease) newBalance = collateralBalances[_collateral].claimable + _amount;
-        else newBalance = collateralBalances[_collateral].claimable - _amount;
 
-        collateralBalances[_collateral].claimable = newBalance;
+        if (_isIncrease) newBalance = _collateralBalances.claimable + _amount;
+        else newBalance = _collateralBalances.claimable - _amount;
+        _collateralBalances.claimable = newBalance;
+
         emit ClaimableCollateralBalanceUpdated(_collateral, newBalance);
     }
 
@@ -436,7 +449,7 @@ contract TrenBoxStorage is
      * @return The boolean value indicating whether the operation succeeded.
      */
     function isStabilityPool(address _account) private view returns (bool) {
-        return (_account == stabilityPool);
+        return _account == stabilityPool;
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner { }
