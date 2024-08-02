@@ -33,7 +33,10 @@ export default function shouldHaveGetProtocolRevenueDestination(): void {
   });
 
   context("when fees go to TREN staking", function () {
-    it.skip("should return TREN staking as revenue destination", async function () {
+    it("should return TREN staking as revenue destination", async function () {
+      await this.redeployedContracts.feeCollector.setTRENStaking(this.trenStakingImposter);
+      await this.contracts.adminContract.switchRouteToTRENStaking();
+
       const revenueDestination =
         await this.redeployedContracts.feeCollector.getProtocolRevenueDestination();
 

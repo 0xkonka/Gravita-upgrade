@@ -126,6 +126,18 @@ export type GetCompositeDebtArgs = {
   overrideBorrowerOperations?: BorrowerOperations;
 };
 
+export type GetTrenBoxCollArgs = {
+  asset: AddressLike;
+  borrowers: AddressLike[];
+  overrideTrenBoxManager?: TrenBoxManager;
+};
+
+export type GetTrenBoxDebtArgs = {
+  asset: AddressLike;
+  borrowers: AddressLike[];
+  overrideTrenBoxManager?: TrenBoxManager;
+};
+
 export type GetTrenBoxStatusArgs = {
   asset: AddressLike;
   borrowers: AddressLike[];
@@ -220,10 +232,6 @@ export type SetupProtocolCommands =
   | {
       action: "batchLiquidateTrenBoxes";
       args: BatchLiquidateTrenBoxesArgs;
-    }
-  | {
-      action: "closeTrenBox";
-      args: CloseTrenBoxArgs;
     }
   | {
       action: "approve";
@@ -345,14 +353,6 @@ export type RedeemCollateralArgs = {
 };
 export type RedeemCollateralResult = ContractTransactionResponse;
 
-export type CloseTrenBoxArgs = {
-  from?: HardhatEthersSigner;
-  asset: ERC20 | AddressLike;
-  overrideBorrowerOperations?: BorrowerOperations;
-};
-
-export type CloseTrenBoxResult = ContractTransactionResponse;
-
 export interface TestUtils {
   revertToInitialSnapshot: () => Promise<void>;
   getAddressesForSetAddresses: (
@@ -362,6 +362,8 @@ export interface TestUtils {
   getNetBorrowingAmount(args: GetNetBorrowingAmountArgs): Promise<bigint>;
   getOpenTrenBoxTotalDebt(args: GetOpenTrenBoxTotalDebtArgs): Promise<bigint>;
   getCompositeDebt: (args: GetCompositeDebtArgs) => Promise<bigint>;
+  getTrenBoxColls: (args: GetTrenBoxCollArgs) => Promise<bigint[]>;
+  getTrenBoxDebts: (args: GetTrenBoxDebtArgs) => Promise<bigint[]>;
   getTrenBoxStatuses: (args: GetTrenBoxStatusArgs) => Promise<bigint[]>;
   getActualDebtFromCompositeDebt: (args: GetActualDebtFromCompositeDebtArgs) => Promise<bigint>;
   setupCollateralForTests: (args: SetupCollateralForTestsArgs) => Promise<void>;
@@ -382,7 +384,6 @@ export interface TestUtils {
     args: BatchLiquidateTrenBoxesArgs
   ) => Promise<BatchLiquidateTrenBoxesResult>;
   redeemCollateral: (args: RedeemCollateralArgs) => Promise<RedeemCollateralResult>;
-  closeTrenBox: (args: CloseTrenBoxArgs) => Promise<CloseTrenBoxResult>;
 }
 
 export interface TestContracts {

@@ -8,7 +8,7 @@ const DEFAULT_UPPER_HINT = ethers.ZeroAddress;
 
 export default function shouldBehaveLikeCanWithdrawColl() {
   beforeEach(async function () {
-    const users = [this.signers.accounts[0], this.signers.accounts[1]];
+    const users = [this.signers.accounts[0], this.signers.accounts[1], this.signers.accounts[2]];
 
     this.upperHint = DEFAULT_UPPER_HINT;
     this.lowerHint = DEFAULT_LOWER_HINT;
@@ -41,6 +41,15 @@ export default function shouldBehaveLikeCanWithdrawColl() {
           action: "openTrenBox",
           args: {
             from: users[0],
+            asset: asset,
+            assetAmount: ethers.parseUnits("100", 30),
+            extraDebtTokenAmount: ethers.parseUnits("10", 18),
+          },
+        },
+        {
+          action: "openTrenBox",
+          args: {
+            from: users[1],
             asset: asset,
             assetAmount: ethers.parseUnits("100", 30),
             extraDebtTokenAmount: ethers.parseUnits("10", 18),
@@ -82,7 +91,34 @@ export default function shouldBehaveLikeCanWithdrawColl() {
     });
 
     context("when TrenBox is closed", function () {
-      it.skip("they cannot withdraw collateral", async function () {});
+      it("they cannot withdraw collateral", async function () {
+        const [user] = this.users;
+        const { erc20 } = this.testContracts;
+        const debt = await this.contracts.trenBoxManager.getTrenBoxDebt(erc20, user);
+        const netDebt = await this.contracts.trenBoxManager.getNetDebt(erc20, debt);
+
+        await this.contracts.debtToken
+          .connect(this.signers.accounts[1])
+          .transfer(user, ethers.parseEther("500"));
+
+        await this.utils.repayDebt({
+          from: user,
+          collateral: erc20,
+          debtAmount: netDebt,
+        });
+
+        const amountToWithdraw = 435435n;
+        const withdrawCollateralTx = this.utils.withdrawCollateral({
+          from: user,
+          collateral: erc20,
+          amount: amountToWithdraw,
+        });
+
+        await expect(withdrawCollateralTx).to.be.revertedWithCustomError(
+          this.contracts.borrowerOperations,
+          "BorrowerOperations__TrenBoxNotExistOrClosed"
+        );
+      });
     });
 
     context("when user tries to withdraw more collateral than they have", async function () {
@@ -189,7 +225,7 @@ export default function shouldBehaveLikeCanWithdrawColl() {
 
   context("when user does not have TrenBox", function () {
     it("they cannot withdraw collateral", async function () {
-      const [, userWithoutTrenBox] = this.users;
+      const [, , userWithoutTrenBox] = this.users;
       const { erc20 } = this.testContracts;
 
       const amountToWithdraw = ethers.parseUnits("100", 30);

@@ -27,7 +27,7 @@ export default function shouldBehaveLikeCanSetIsActive(): void {
     });
 
     context("when collateral does not exist", function () {
-      it.skip("should revert", async function () {
+      it("should revert with custom error AdminContract__CollateralDoesNotExist", async function () {
         const { testCollateral } = this.collaterals.notAdded;
 
         await expect(
@@ -41,7 +41,7 @@ export default function shouldBehaveLikeCanSetIsActive(): void {
   });
 
   context("when the caller is not the owner", function () {
-    it("should revert", async function () {
+    it("should revert with custom error AdminContract__OnlyOwner", async function () {
       const { dai } = this.collaterals.inactive;
 
       const nonOwner = this.signers.accounts[1];

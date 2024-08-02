@@ -99,6 +99,11 @@ interface IAdminContract {
     error AdminContract__CollateralNotConfigured();
 
     /**
+     * @dev Error emitted when the collateral is zero address.
+     */
+    error AdminContract__ZeroAddress();
+
+    /**
      * @dev Emitted when the collateral asset is added.
      * @param _collateral The address of collateral asset.
      */

@@ -23,18 +23,23 @@ abstract contract ConfigurableAddresses is OwnableUpgradeable {
 
     bool public isAddressSetupInitialized;
 
+    uint256 public constant MAX_LENGTH = 13;
+
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[33] private __gap; // Goerli uses 47; Arbitrum uses 33
+    uint256[35] private __gap;
 
     error ConfigurableAddresses__SetupIsInitialized();
     error ConfigurableAddresses__ZeroAddresses(uint256 position, address address_);
     error ConfigurableAddresses__CommunityIssuanceZeroAddress();
     error ConfigurableAddresses__TRENStakingZeroAddress();
     error ConfigurableAddresses__LengthMismatch();
+
+    event CommunityIssuanceAddressSet(address _communityIssuance);
+    event TRENStakingAddressSet(address _trenStaking);
 
     // Dependency setters
     // -----------------------------------------------------------------------------------------------
@@ -43,11 +48,11 @@ abstract contract ConfigurableAddresses is OwnableUpgradeable {
         if (isAddressSetupInitialized) {
             revert ConfigurableAddresses__SetupIsInitialized();
         }
-        if (_addresses.length != 13) {
+        if (_addresses.length != MAX_LENGTH) {
             revert ConfigurableAddresses__LengthMismatch();
         }
 
-        for (uint256 i = 0; i < 13;) {
+        for (uint256 i = 0; i < MAX_LENGTH;) {
             if (_addresses[i] == address(0)) {
                 revert ConfigurableAddresses__ZeroAddresses(i, _addresses[i]);
             }
@@ -79,6 +84,8 @@ abstract contract ConfigurableAddresses is OwnableUpgradeable {
             revert ConfigurableAddresses__CommunityIssuanceZeroAddress();
         }
         communityIssuance = _communityIssuance;
+
+        emit CommunityIssuanceAddressSet(communityIssuance);
     }
 
     function setTRENStaking(address _trenStaking) public onlyOwner {
@@ -86,5 +93,7 @@ abstract contract ConfigurableAddresses is OwnableUpgradeable {
             revert ConfigurableAddresses__TRENStakingZeroAddress();
         }
         trenStaking = _trenStaking;
+
+        emit TRENStakingAddressSet(trenStaking);
     }
 }

@@ -178,6 +178,9 @@ interface IBorrowerOperations {
     /// @dev Error emitted when the total debt amount exceeds mint cap.
     error BorrowerOperations__ExceedMintCap();
 
+    /// @dev Error emitted when the caller is not FlashLoan contract address.
+    error BorrowerOperations__OnlyFlashLoanAddress();
+
     /**
      * @notice Creates a trenBox for the specific collateral asset with requested debt amount.
      * @dev In addition to the requested debt, extra debt is issued to pay the borrowing fee,
@@ -258,6 +261,13 @@ interface IBorrowerOperations {
         address _lowerHint
     )
         external;
+
+    /**
+     * @notice Repays debt tokens and close trenBox of borrower by FlashLoan contract.
+     * @param _asset The address of collateral asset.
+     * @param _borrower The address of borrower which FlashLoan contract will repay the debt.
+     */
+    function repayDebtTokensWithFlashloan(address _asset, address _borrower) external;
 
     /**
      * @notice Enables a caller to simultaneously change both their collateral and debt balances.

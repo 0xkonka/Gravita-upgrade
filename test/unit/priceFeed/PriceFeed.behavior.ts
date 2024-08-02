@@ -2,7 +2,6 @@ import shouldBehaveLikeCanAuthorizeUpgrade from "./effects/authorizeUpgrade";
 import shouldBehaveLikeCanSetOracle from "./effects/setOracle";
 import shouldHavePublicConstant from "./view/constants";
 import shouldHaveFetchPrice from "./view/fetchPrice";
-import shouldHaveIsAddressSetupInitialized from "./view/isAddressSetupInitialized";
 import shouldBehaveLikeOwner from "./view/owner";
 
 export function shouldBehaveLikePriceFeedContract(): void {
@@ -15,10 +14,6 @@ export function shouldBehaveLikePriceFeedContract(): void {
 
     describe("#fetchPrice", function () {
       shouldHaveFetchPrice();
-    });
-
-    describe("#isAddressSetupInitialized", function () {
-      shouldHaveIsAddressSetupInitialized();
     });
   });
 

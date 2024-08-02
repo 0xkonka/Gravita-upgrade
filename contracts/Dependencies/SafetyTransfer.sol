@@ -23,13 +23,19 @@ library SafetyTransfer {
         }
         uint8 decimals = IERC20Decimals(_token).decimals();
         if (decimals < 18) {
-            uint256 divisor = 10 ** (18 - decimals);
+            uint256 divisor;
+            unchecked {
+                divisor = 10 ** (18 - decimals);
+            }
             if (_amount % divisor != 0) {
                 revert InvalidAmountError();
             }
             return _amount / divisor;
         } else if (decimals > 18) {
-            uint256 multiplier = 10 ** (decimals - 18);
+            uint256 multiplier;
+            unchecked {
+                multiplier = 10 ** (decimals - 18);
+            }
             return _amount * multiplier;
         }
         return _amount;

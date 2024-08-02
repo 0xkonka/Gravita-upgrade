@@ -210,6 +210,7 @@ contract AdminContract is
         external
         override
         onlyTimelock
+        exists(_collateral)
     {
         collateralParams[_collateral].active = true;
 
@@ -223,7 +224,14 @@ contract AdminContract is
     }
 
     /// @inheritdoc IAdminContract
-    function setIsActive(address _collateral, bool _active) external onlyTimelock {
+    function setIsActive(
+        address _collateral,
+        bool _active
+    )
+        external
+        onlyTimelock
+        exists(_collateral)
+    {
         CollateralParams storage collParams = collateralParams[_collateral];
         collParams.active = _active;
     }
