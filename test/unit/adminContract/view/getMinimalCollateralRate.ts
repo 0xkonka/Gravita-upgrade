@@ -1,3 +1,4 @@
+import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "ethers";
 
@@ -6,6 +7,7 @@ export default function shouldHaveGetMCR(): void {
     it("should return correct minimal collateral rate", async function () {
       const { wETH } = this.collaterals.active;
 
+      await time.increase(time.duration.weeks(1));
       const collateralMcr = await this.contracts.adminContract.getMcr(wETH.address);
 
       expect(collateralMcr).to.be.equal(wETH.MCR);

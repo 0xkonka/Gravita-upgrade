@@ -53,25 +53,12 @@ async function addCollateral(collateral: Collateral, hre: HardhatRuntimeEnvironm
   if (collateralExist) {
     console.log(`Collateral ${collateral.name} already exists`);
   } else {
-    const addNewCollateralTx = await adminContract.addNewCollateral(
-      collateral.address,
-      collateral.gasCompensation
-    );
-
-    await addNewCollateralTx.wait();
-
-    console.log(`Collateral ${chalk.cyan(collateral.name)} added`);
-  }
-
-  const isActive = await adminContract.getIsActive(collateral.address);
-  if (isActive) {
-    console.log(`Collateral ${collateral.name} is already active`);
-  } else {
     const defaultPercentDivisor = await adminContract.PERCENT_DIVISOR_DEFAULT();
     const defaultRedemptionFeeFloor = await adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
-    const setCollateralParametersTx = await adminContract.setCollateralParameters(
+    const addAndInitializeNewCollateralTx = await adminContract.addAndInitializeNewCollateral(
       collateral.address,
+      collateral.gasCompensation,
       collateral.borrowingFee,
       collateral.CCR,
       collateral.MCR,
@@ -81,8 +68,9 @@ async function addCollateral(collateral: Collateral, hre: HardhatRuntimeEnvironm
       defaultRedemptionFeeFloor
     );
 
-    await setCollateralParametersTx.wait();
-    console.log(`Collateral ${chalk.cyan(collateral.name)} parameters set`);
+    await addAndInitializeNewCollateralTx.wait();
+
+    console.log(`Collateral ${chalk.cyan(collateral.name)} added and initialized`);
   }
 }
 

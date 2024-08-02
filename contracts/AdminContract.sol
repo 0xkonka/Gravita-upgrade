@@ -164,32 +164,36 @@ contract AdminContract is
         override
         onlyTimelock
     {
-        if (collateralParams[_collateral].mcr != 0) {
-            revert AdminContract__CollateralExists();
-        }
+        _addNewCollateral(_collateral, _debtTokenGasCompensation);
+    }
 
-        validCollateral.push(_collateral);
-        collateralParams[_collateral] = CollateralParams({
-            index: validCollateral.length - 1,
-            active: false,
-            borrowingFee: BORROWING_FEE_DEFAULT,
-            ccr: CCR_DEFAULT,
-            previousCcr: 0,
-            ccrUpdateDeadline: 0,
-            mcr: MCR_DEFAULT,
-            previousMcr: 0,
-            mcrUpdateDeadline: 0,
-            debtTokenGasCompensation: _debtTokenGasCompensation,
-            minNetDebt: MIN_NET_DEBT_DEFAULT,
-            mintCap: MINT_CAP_DEFAULT,
-            percentDivisor: PERCENT_DIVISOR_DEFAULT,
-            redemptionFeeFloor: REDEMPTION_FEE_FLOOR_DEFAULT,
-            redemptionBlockTimestamp: REDEMPTION_BLOCK_TIMESTAMP_DEFAULT
-        });
+    /// @inheritdoc IAdminContract
+    function addAndInitializeNewCollateral(
+        address _collateral,
+        uint256 _debtTokenGasCompensation,
+        uint256 _borrowingFee,
+        uint256 _ccr,
+        uint256 _mcr,
+        uint256 _minNetDebt,
+        uint256 _mintCap,
+        uint256 _percentDivisor,
+        uint256 _redemptionFeeFloor
+    )
+        external
+        override
+        onlyTimelock
+    {
+        _addNewCollateral(_collateral, _debtTokenGasCompensation);
 
-        emit CollateralAdded(_collateral);
+        collateralParams[_collateral].active = true;
 
-        IStabilityPool(stabilityPool).addCollateralType(_collateral);
+        _setBorrowingFee(_collateral, _borrowingFee);
+        _setCCR(_collateral, _ccr, false);
+        _setMCR(_collateral, _mcr, false);
+        _setMinNetDebt(_collateral, _minNetDebt);
+        _setMintCap(_collateral, _mintCap);
+        _setPercentDivisor(_collateral, _percentDivisor);
+        _setRedemptionFeeFloor(_collateral, _redemptionFeeFloor);
     }
 
     /// @inheritdoc IAdminContract
@@ -210,8 +214,8 @@ contract AdminContract is
         collateralParams[_collateral].active = true;
 
         _setBorrowingFee(_collateral, _borrowingFee);
-        _setCCR(_collateral, _ccr);
-        _setMCR(_collateral, _mcr);
+        _setCCR(_collateral, _ccr, true);
+        _setMCR(_collateral, _mcr, true);
         _setMinNetDebt(_collateral, _minNetDebt);
         _setMintCap(_collateral, _mintCap);
         _setPercentDivisor(_collateral, _percentDivisor);
@@ -238,12 +242,12 @@ contract AdminContract is
 
     /// @inheritdoc IAdminContract
     function setCCR(address _collateral, uint256 _newCCR) public override onlyTimelock {
-        _setCCR(_collateral, _newCCR);
+        _setCCR(_collateral, _newCCR, true);
     }
 
     /// @inheritdoc IAdminContract
     function setMCR(address _collateral, uint256 _newMCR) public override onlyTimelock {
-        _setMCR(_collateral, _newMCR);
+        _setMCR(_collateral, _newMCR, true);
     }
 
     /// @inheritdoc IAdminContract
@@ -376,42 +380,13 @@ contract AdminContract is
     }
 
     /// @inheritdoc IAdminContract
-    function getMcr(address _collateral) external view override returns (uint256 currentMcr) {
-        CollateralParams storage params = collateralParams[_collateral];
-        if (params.mcrUpdateDeadline > block.timestamp) {
-            uint256 impactPercentage =
-                _100pct * (params.mcrUpdateDeadline - block.timestamp) / MCR_GRACE_PERIOD;
-
-            if (params.mcr >= params.previousMcr) {
-                currentMcr =
-                    params.mcr - (impactPercentage * (params.mcr - params.previousMcr)) / _100pct;
-            } else {
-                currentMcr =
-                    params.mcr + (impactPercentage * (params.previousMcr - params.mcr)) / _100pct;
-            }
-        } else {
-            currentMcr = params.mcr;
-        }
+    function getMcr(address _collateral) external view override returns (uint256) {
+        return _getOrCalculateCurrentMCR(collateralParams[_collateral]);
     }
 
     /// @inheritdoc IAdminContract
-    function getCcr(address _collateral) external view override returns (uint256 currentCcr) {
-        CollateralParams storage params = collateralParams[_collateral];
-
-        if (params.ccrUpdateDeadline > block.timestamp) {
-            uint256 impactPercentage =
-                _100pct * (params.ccrUpdateDeadline - block.timestamp) / CCR_GRACE_PERIOD;
-
-            if (params.ccr >= params.previousCcr) {
-                currentCcr =
-                    params.ccr - (impactPercentage * (params.ccr - params.previousCcr)) / _100pct;
-            } else {
-                currentCcr =
-                    params.ccr + (impactPercentage * (params.previousCcr - params.ccr)) / _100pct;
-            }
-        } else {
-            currentCcr = params.ccr;
-        }
+    function getCcr(address _collateral) external view override returns (uint256) {
+        return _getOrCalculateCurrentCCR(collateralParams[_collateral]);
     }
 
     /// @inheritdoc IAdminContract
@@ -484,8 +459,14 @@ contract AdminContract is
         return routeToTRENStaking;
     }
 
+    function authorizeUpgrade(address newImplementation) external {
+        _authorizeUpgrade(newImplementation);
+    }
+
     // Internal Functions
     // -----------------------------------------------------------------------------------------------
+
+    function _authorizeUpgrade(address) internal override onlyOwner { }
 
     /**
      * @dev Checks if the specific collateral asset exists or not.
@@ -497,11 +478,34 @@ contract AdminContract is
         }
     }
 
-    function authorizeUpgrade(address newImplementation) external {
-        _authorizeUpgrade(newImplementation);
-    }
+    function _addNewCollateral(address _collateral, uint256 _debtTokenGasCompensation) internal {
+        if (collateralParams[_collateral].mcr != 0) {
+            revert AdminContract__CollateralExists();
+        }
 
-    function _authorizeUpgrade(address) internal override onlyOwner { }
+        validCollateral.push(_collateral);
+        collateralParams[_collateral] = CollateralParams({
+            index: validCollateral.length - 1,
+            active: false,
+            borrowingFee: BORROWING_FEE_DEFAULT,
+            ccr: CCR_DEFAULT,
+            previousCcr: 0,
+            ccrUpdateDeadline: 0,
+            mcr: MCR_DEFAULT,
+            previousMcr: 0,
+            mcrUpdateDeadline: 0,
+            debtTokenGasCompensation: _debtTokenGasCompensation,
+            minNetDebt: MIN_NET_DEBT_DEFAULT,
+            mintCap: MINT_CAP_DEFAULT,
+            percentDivisor: PERCENT_DIVISOR_DEFAULT,
+            redemptionFeeFloor: REDEMPTION_FEE_FLOOR_DEFAULT,
+            redemptionBlockTimestamp: REDEMPTION_BLOCK_TIMESTAMP_DEFAULT
+        });
+
+        emit CollateralAdded(_collateral);
+
+        IStabilityPool(stabilityPool).addCollateralType(_collateral);
+    }
 
     function _setBorrowingFee(
         address _collateral,
@@ -516,38 +520,88 @@ contract AdminContract is
         emit BorrowingFeeChanged(oldBorrowing, _borrowingFee);
     }
 
+    function _getOrCalculateCurrentCCR(CollateralParams storage collParams)
+        internal
+        view
+        returns (uint256 currentCcr)
+    {
+        if (collParams.ccrUpdateDeadline > block.timestamp) {
+            uint256 impactPercentage =
+                _100pct * (collParams.ccrUpdateDeadline - block.timestamp) / CCR_GRACE_PERIOD;
+
+            if (collParams.ccr >= collParams.previousCcr) {
+                currentCcr = collParams.ccr
+                    - (impactPercentage * (collParams.ccr - collParams.previousCcr)) / _100pct;
+            } else {
+                currentCcr = collParams.ccr
+                    + (impactPercentage * (collParams.previousCcr - collParams.ccr)) / _100pct;
+            }
+        } else {
+            currentCcr = collParams.ccr;
+        }
+    }
+
     function _setCCR(
         address _collateral,
-        uint256 _ccr
+        uint256 _ccr,
+        bool _applyGracePeriodDeadline
     )
         internal
         safeCheck("CCR", _collateral, _ccr, 1 ether, 10 ether) // 100% - 1,000%
     {
         CollateralParams storage collParams = collateralParams[_collateral];
 
-        uint256 previousCcr = collParams.ccr;
-        collParams.ccr = _ccr;
-        collParams.previousCcr = previousCcr;
-        collParams.ccrUpdateDeadline = block.timestamp + CCR_GRACE_PERIOD;
+        uint256 currentCcr = _getOrCalculateCurrentCCR(collParams);
 
-        emit CCRChanged(previousCcr, _ccr);
+        collParams.ccr = _ccr;
+        collParams.previousCcr = currentCcr;
+
+        if (_applyGracePeriodDeadline) {
+            collParams.ccrUpdateDeadline = block.timestamp + CCR_GRACE_PERIOD;
+        }
+
+        emit CCRChanged(currentCcr, _ccr);
+    }
+
+    function _getOrCalculateCurrentMCR(CollateralParams storage collParams)
+        internal
+        view
+        returns (uint256 currentMcr)
+    {
+        if (collParams.mcrUpdateDeadline > block.timestamp) {
+            uint256 impactPercentage =
+                _100pct * (collParams.mcrUpdateDeadline - block.timestamp) / MCR_GRACE_PERIOD;
+
+            if (collParams.mcr >= collParams.previousMcr) {
+                currentMcr = collParams.mcr
+                    - (impactPercentage * (collParams.mcr - collParams.previousMcr)) / _100pct;
+            } else {
+                currentMcr = collParams.mcr
+                    + (impactPercentage * (collParams.previousMcr - collParams.mcr)) / _100pct;
+            }
+        } else {
+            currentMcr = collParams.mcr;
+        }
     }
 
     function _setMCR(
         address _collateral,
-        uint256 _mcr
+        uint256 _mcr,
+        bool _applyGracePeriodDeadline
     )
         internal
         safeCheck("MCR", _collateral, _mcr, 1.01 ether, 10 ether) // 101% - 1,000%
     {
         CollateralParams storage collParams = collateralParams[_collateral];
-        uint256 previousMcr = collParams.mcr;
+        uint256 currentMcr = _getOrCalculateCurrentMCR(collParams);
 
         collParams.mcr = _mcr;
-        collParams.previousMcr = previousMcr;
-        collParams.mcrUpdateDeadline = block.timestamp + MCR_GRACE_PERIOD;
+        collParams.previousMcr = currentMcr;
+        if (_applyGracePeriodDeadline) {
+            collParams.mcrUpdateDeadline = block.timestamp + MCR_GRACE_PERIOD;
+        }
 
-        emit MCRChanged(previousMcr, _mcr);
+        emit MCRChanged(currentMcr, _mcr);
     }
 
     function _setMinNetDebt(
