@@ -41,7 +41,7 @@ contract TrenBoxManager is
     // -------------------------------------------------------------------------------------------------
 
     /// @notice The mapping from collateral asset to the timestamp of the latest fee operation
-    /// (redemption or new debt token issuance)
+    /// (new debt token issuance)
     mapping(address collateral => uint256 feeOpeartionTimestamp) public lastFeeOperationTime;
     /// @notice The mapping from borrower address to the TrenBox for a specific collateral asset.
     mapping(address borrower => mapping(address collateral => TrenBox)) public TrenBoxes;

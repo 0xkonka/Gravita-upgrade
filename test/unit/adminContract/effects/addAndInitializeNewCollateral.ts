@@ -6,8 +6,6 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
       const { testCollateral } = this.collaterals.notAdded;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       const addAndInitializeNewCollateralTx =
         await this.contracts.adminContract.addAndInitializeNewCollateral(
@@ -18,8 +16,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
           testCollateral.MCR,
           testCollateral.minNetDebt,
           testCollateral.mintCap,
-          defaultPercentDivisor,
-          defaultRedemptionFeeFloor
+          defaultPercentDivisor
         );
 
       const expectedAddress = testCollateral.address.toString();
@@ -33,8 +30,6 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
       const { testCollateral } = this.collaterals.notAdded;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.addAndInitializeNewCollateral(
         testCollateral.address,
@@ -44,8 +39,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
         testCollateral.MCR,
         testCollateral.minNetDebt,
         testCollateral.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const validCollaterals = await this.contracts.adminContract.getValidCollateral();
@@ -56,8 +50,6 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
     it("should set correct index", async function () {
       const { testCollateral } = this.collaterals.notAdded;
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       const expectedIndex = (await this.contracts.adminContract.getValidCollateral()).length;
 
@@ -69,8 +61,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
         testCollateral.MCR,
         testCollateral.minNetDebt,
         testCollateral.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const index = await this.contracts.adminContract.getIndex(testCollateral.address);
@@ -82,8 +73,6 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
       const { testCollateral } = this.collaterals.notAdded;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.addAndInitializeNewCollateral(
         testCollateral.address,
@@ -93,8 +82,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
         testCollateral.MCR,
         testCollateral.minNetDebt,
         testCollateral.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const gasCompensation = await this.contracts.adminContract.getDebtTokenGasCompensation(
@@ -108,8 +96,6 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
       const { testCollateral } = this.collaterals.notAdded;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.addAndInitializeNewCollateral(
         testCollateral.address,
@@ -119,8 +105,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
         testCollateral.MCR,
         testCollateral.minNetDebt,
         testCollateral.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const isActive = await this.contracts.adminContract.getIsActive(testCollateral.address);
@@ -132,8 +117,6 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
       const { testCollateral } = this.collaterals.notAdded;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.addAndInitializeNewCollateral(
         testCollateral.address,
@@ -143,8 +126,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
         testCollateral.MCR,
         testCollateral.minNetDebt,
         testCollateral.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const [tokensInStabilityPool] = await this.contracts.stabilityPool.getAllCollateral();
@@ -156,8 +138,6 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
       const { testCollateral } = this.collaterals.notAdded;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.addAndInitializeNewCollateral(
         testCollateral.address,
@@ -167,8 +147,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
         testCollateral.MCR,
         testCollateral.minNetDebt,
         testCollateral.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const borrowingFee = await this.contracts.adminContract.getBorrowingFee(
@@ -182,8 +161,6 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
       const { testCollateral } = this.collaterals.notAdded;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.addAndInitializeNewCollateral(
         testCollateral.address,
@@ -193,8 +170,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
         testCollateral.MCR,
         testCollateral.minNetDebt,
         testCollateral.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const CCR = await this.contracts.adminContract.getCcr(testCollateral.address);
@@ -206,8 +182,6 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
       const { testCollateral } = this.collaterals.notAdded;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.addAndInitializeNewCollateral(
         testCollateral.address,
@@ -217,8 +191,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
         testCollateral.MCR,
         testCollateral.minNetDebt,
         testCollateral.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const MCR = await this.contracts.adminContract.getMcr(testCollateral.address);
@@ -230,8 +203,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
       const { testCollateral } = this.collaterals.notAdded;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
+
 
       await this.contracts.adminContract.addAndInitializeNewCollateral(
         testCollateral.address,
@@ -241,8 +213,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
         testCollateral.MCR,
         testCollateral.minNetDebt,
         testCollateral.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const mintCap = await this.contracts.adminContract.getMintCap(testCollateral.address);
@@ -254,8 +225,6 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
       const { testCollateral } = this.collaterals.notAdded;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.addAndInitializeNewCollateral(
         testCollateral.address,
@@ -265,8 +234,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
         testCollateral.MCR,
         testCollateral.minNetDebt,
         testCollateral.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const percentDivisor = await this.contracts.adminContract.getPercentDivisor(
@@ -275,32 +243,6 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
 
       expect(percentDivisor).to.be.equal(defaultPercentDivisor);
     });
-
-    it("should set correct redemption fee floor", async function () {
-      const { testCollateral } = this.collaterals.notAdded;
-
-      const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
-
-      await this.contracts.adminContract.addAndInitializeNewCollateral(
-        testCollateral.address,
-        testCollateral.gasCompensation,
-        testCollateral.borrowingFee,
-        testCollateral.CCR,
-        testCollateral.MCR,
-        testCollateral.minNetDebt,
-        testCollateral.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
-      );
-
-      const redemptionFeeFloor = await this.contracts.adminContract.getRedemptionFeeFloor(
-        testCollateral.address
-      );
-
-      expect(redemptionFeeFloor).to.be.equal(defaultRedemptionFeeFloor);
-    });
   });
 
   context("when adding an existing collateral", function () {
@@ -308,8 +250,6 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
       const { wETH } = this.collaterals.active;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await expect(
         this.contracts.adminContract.addAndInitializeNewCollateral(
@@ -320,8 +260,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
           wETH.MCR,
           wETH.minNetDebt,
           wETH.mintCap,
-          defaultPercentDivisor,
-          defaultRedemptionFeeFloor
+          defaultPercentDivisor
         )
       ).to.be.revertedWithCustomError(
         this.contracts.adminContract,
@@ -334,8 +273,6 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
     it("should revert", async function () {
       const { testCollateral } = this.collaterals.notAdded;
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       const notOwner = this.signers.accounts[1];
 
@@ -350,9 +287,7 @@ export default function shouldBehaveLikeCanAddNewAndInitializeCollateral(): void
             testCollateral.MCR,
             testCollateral.minNetDebt,
             testCollateral.mintCap,
-            defaultPercentDivisor,
-            defaultRedemptionFeeFloor
-          )
+            defaultPercentDivisor          )
       ).to.be.revertedWithCustomError(this.contracts.adminContract, "AdminContract__OnlyOwner");
     });
   });

@@ -200,7 +200,6 @@ interface IAdminContract {
      * @param _minNetDebt The minimum amount of debtToken a TrenBox must have.
      * @param _mintCap The total amount of debt tokens to be allocated.
      * @param _percentDivisor The liquidation fee.
-     * @param _redemptionFeeFloor The floor of redemption fee.
      */
     function addAndInitializeNewCollateral(
         address _collateral,
@@ -210,8 +209,7 @@ interface IAdminContract {
         uint256 _mcr,
         uint256 _minNetDebt,
         uint256 _mintCap,
-        uint256 _percentDivisor,
-        uint256 _redemptionFeeFloor
+        uint256 _percentDivisor
     )
         external;
 

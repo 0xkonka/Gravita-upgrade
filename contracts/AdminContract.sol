@@ -183,14 +183,7 @@ contract AdminContract is
     {
         _addNewCollateral(_collateral, _debtTokenGasCompensation);
         _setCollateralParameters(
-            _collateral,
-            _borrowingFee,
-            _ccr,
-            _mcr,
-            _minNetDebt,
-            _mintCap,
-            _percentDivisor,
-            false
+            _collateral, _borrowingFee, _ccr, _mcr, _minNetDebt, _mintCap, _percentDivisor, false
         );
     }
 
@@ -210,14 +203,7 @@ contract AdminContract is
         exists(_collateral)
     {
         _setCollateralParameters(
-            _collateral,
-            _borrowingFee,
-            _ccr,
-            _mcr,
-            _minNetDebt,
-            _mintCap,
-            _percentDivisor,
-            true
+            _collateral, _borrowingFee, _ccr, _mcr, _minNetDebt, _mintCap, _percentDivisor, true
         );
     }
 
@@ -463,7 +449,7 @@ contract AdminContract is
             debtTokenGasCompensation: _debtTokenGasCompensation,
             minNetDebt: MIN_NET_DEBT_DEFAULT,
             mintCap: MINT_CAP_DEFAULT,
-            percentDivisor: PERCENT_DIVISOR_DEFAULT,
+            percentDivisor: PERCENT_DIVISOR_DEFAULT
         });
 
         emit CollateralAdded(_collateral);
