@@ -7,8 +7,6 @@ import shouldHaveMintCapDefault from "./mintCapDefault";
 import shouldHaveName from "./name";
 import shouldHaveHunderdPercent from "./oneHundredPercent";
 import shouldHavePercentDivisorDefault from "./percentDivisorDefault";
-import shouldHaveRedemptionBlockTimestampDefault from "./redemptionBlockTimestampDefault";
-import shouldHaveRedemptionFeeFloorDefault from "./redemptionFeeFloorDefault";
 import shouldHaveRouteToTrenStaking from "./routeToTrenStaking";
 
 export default function shouldHavePublicConstant(): void {
@@ -47,14 +45,6 @@ export default function shouldHavePublicConstant(): void {
 
     describe("#PERCENT_DIVISOR_DEFAULT", function () {
       shouldHavePercentDivisorDefault();
-    });
-
-    describe("#REDEMPTION_FEE_FLOOR_DEFAULT", function () {
-      shouldHaveRedemptionFeeFloorDefault();
-    });
-
-    describe("#REDEMPTION_BLOCK_TIMESTAMP_DEFAULT", function () {
-      shouldHaveRedemptionBlockTimestampDefault();
     });
 
     describe("#routeToTRENStaking", function () {

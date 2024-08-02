@@ -54,7 +54,6 @@ async function addCollateral(collateral: Collateral, hre: HardhatRuntimeEnvironm
     console.log(`Collateral ${collateral.name} already exists`);
   } else {
     const defaultPercentDivisor = await adminContract.PERCENT_DIVISOR_DEFAULT();
-    const defaultRedemptionFeeFloor = await adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
     const addAndInitializeNewCollateralTx = await adminContract.addAndInitializeNewCollateral(
       collateral.address,
@@ -64,8 +63,7 @@ async function addCollateral(collateral: Collateral, hre: HardhatRuntimeEnvironm
       collateral.MCR,
       collateral.minNetDebt,
       collateral.mintCap,
-      defaultPercentDivisor,
-      defaultRedemptionFeeFloor
+      defaultPercentDivisor
     );
 
     await addAndInitializeNewCollateralTx.wait();

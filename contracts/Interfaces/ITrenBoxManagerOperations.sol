@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity =0.8.23;
 
 import { ITrenBoxManager } from "./ITrenBoxManager.sol";
 
@@ -9,38 +9,6 @@ import { ITrenBoxManager } from "./ITrenBoxManager.sol";
  */
 interface ITrenBoxManagerOperations {
     // ------------------------------------------ Structs -----------------------------------------
-
-    /**
-     * @dev The struct for local variables storing of redemption total parameters.
-     * @param remainingDebt The remaining amount of debt.
-     * @param totalDebtToRedeem The total amount of debt to redeem.
-     * @param totalCollDrawn The total amount of collateral.
-     * @param collFee The amount of collateral fee.
-     * @param price The amount of collateral price.
-     * @param totalDebtTokenSupplyAtStart The total amount of trenUSD supply at the start of
-     * redemption.
-     */
-    struct RedemptionTotals {
-        uint256 remainingDebt;
-        uint256 totalDebtToRedeem;
-        uint256 totalCollDrawn;
-        uint256 collFee;
-        uint256 price;
-        uint256 totalDebtTokenSupplyAtStart;
-    }
-
-    /**
-     * @dev The struct for local variables storing of single redemption parameters.
-     * @param debtLot The remaining amount of debt.
-     * @param collLot The remaining amount of collateral.
-     * @param cancelledPartial The index of cancelled partial redemption.
-     */
-    struct SingleRedemptionValues {
-        uint256 debtLot;
-        uint256 collLot;
-        bool cancelledPartial;
-    }
-
     /**
      * @dev The struct for local variables storing of liquidation total parameters.
      * @param totalCollInSequence The total amount of collateral in list.
@@ -158,22 +126,6 @@ interface ITrenBoxManagerOperations {
     // ------------------------------------------ Events ------------------------------------------
 
     /**
-     * @dev Emitted when the TrenBox is redeemed.
-     * @param _asset The address of collateral asset.
-     * @param _attemptedDebtAmount The attempted amount of debt.
-     * @param _actualDebtAmount The actual amount of debt.
-     * @param _collSent The amount of collateral which will be sent to redeemer.
-     * @param _collFee The amount of collateral fee which should be paid.
-     */
-    event Redemption(
-        address indexed _asset,
-        uint256 _attemptedDebtAmount,
-        uint256 _actualDebtAmount,
-        uint256 _collSent,
-        uint256 _collFee
-    );
-
-    /**
      * @dev Emitted when the TrenBox is liquidated.
      * @param _asset The address of collateral asset.
      * @param _liquidatedDebt The liquidated amount of debt.
@@ -215,12 +167,6 @@ interface ITrenBoxManagerOperations {
         ITrenBoxManager.TrenBoxManagerOperation _operation
     );
 
-    /**
-     * @dev Emitted when the redemption softening parameter is changed.
-     * @param _redemptionSofteningParam The new redemption softening parameter.
-     */
-    event RedemptionSoftenParamChanged(uint256 _redemptionSofteningParam);
-
     // ------------------------------------------ Custom Errors -----------------------------------
 
     /// @dev Thrown when an operation involves an array with an invalid size.
@@ -246,9 +192,6 @@ interface ITrenBoxManagerOperations {
 
     /// @dev Thrown when a function is called by an entity that is not the TrenBox Manager.
     error TrenBoxManagerOperations__OnlyTrenBoxManager();
-
-    /// @dev Thrown when redemption of tokens is blocked.
-    error TrenBoxManagerOperations__RedemptionIsBlocked();
 
     /// @dev Thrown when the Total Collateral Ratio (TCR) is below the Minimum Collateral Ratio
     /// (MCR).
@@ -294,63 +237,6 @@ interface ITrenBoxManagerOperations {
      * @param _trenBoxArray The array of custom TrenBoxes.
      */
     function batchLiquidateTrenBoxes(address _asset, address[] memory _trenBoxArray) external;
-
-    /**
-     * @notice Redeem collateral from active TrenBox.
-     * @dev Closes an active TrenBox even if its ICR is higher than the minimum collateral ratio.
-     * @param _asset The address of asset.
-     * @param _debtTokenAmount The amount of debt.
-     * @param _upperPartialRedemptionHint The address of upper partial redemption hint.
-     * @param _lowerPartialRedemptionHint The address of lower partial redemption hint.
-     * @param _firstRedemptionHint The address of first redemption hint.
-     * @param _partialRedemptionHintNICR The number of partial redemption hint NICR.
-     * @param _maxIterations The maximum number of iterations.
-     * @param _maxFeePercentage The maximum number of fee.
-     */
-    function redeemCollateral(
-        address _asset,
-        uint256 _debtTokenAmount,
-        address _upperPartialRedemptionHint,
-        address _lowerPartialRedemptionHint,
-        address _firstRedemptionHint,
-        uint256 _partialRedemptionHintNICR,
-        uint256 _maxIterations,
-        uint256 _maxFeePercentage
-    )
-        external;
-
-    /**
-     * @notice Find the right hints to pass to redeemCollateral().
-     *
-     * It simulates a redemption of `_debtTokenAmount` to figure out where the redemption sequence
-     * will start and what state the final TrenBox of the sequence will end up in.
-     *
-     * Returns three hints:
-     *  - `firstRedemptionHint` is the address of the first TrenBox with ICR >= MCR (i.e. the first
-     *      TrenBox that will be redeemed).
-     *  - `partialRedemptionHintNICR` is the final nominal ICR of the last TrenBox of the sequence
-     *      after being hit by partial redemption, or zero in case of no partial redemption.
-     *  - `truncatedDebtTokenAmount` is the maximum amount that can be redeemed out of the the
-     *      provided `_debtTokenAmount`. This can be lower than `_debtTokenAmount` when redeeming
-     *      the full amount would leave the last TrenBox of the redemption sequence with less net
-     * debt
-     *      than the minimum allowed value (i.e. IAdminContract(adminContract).MIN_NET_DEBT()).
-     *
-     * The number of TrenBoxes to consider for redemption can be capped by passing a non-zero value
-     * as `_maxIterations`, while passing zero will leave it uncapped.
-     */
-    function getRedemptionHints(
-        address _asset,
-        uint256 _debtTokenAmount,
-        uint256 _price,
-        uint256 _maxIterations
-    )
-        external
-        returns (
-            address firstRedemptionHint,
-            uint256 partialRedemptionHintNICR,
-            uint256 truncatedDebtTokenAmount
-        );
 
     /**
      * @notice Return address of a TrenBox that is, on average, (length /

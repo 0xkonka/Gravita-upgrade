@@ -23,7 +23,6 @@ export function setupCollateralForTests(context: Context) {
         collateralOptions.setCollateralParams.minNetDebt,
         collateralOptions.setCollateralParams.mintCap,
         collateralOptions.setCollateralParams.percentDivisor,
-        collateralOptions.setCollateralParams.redemptionFeeFloor
       );
     } else if (args.collateralOptions.setAsActive) {
       await adminContract.setIsActive(collateralAddress, true);

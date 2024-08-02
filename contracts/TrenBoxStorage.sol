@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity =0.8.23;
 
 import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { OwnableUpgradeable } from
@@ -31,10 +31,10 @@ contract TrenBoxStorage is
     string public constant NAME = "TrenBoxStorage";
 
     /// @notice The balances of each collateral asset in the storage.
-    mapping(address collateral => CollBalances) internal collateralBalances;
+    mapping(address collateral => CollBalances balances) internal collateralBalances;
 
     /// @notice The balances of each debt in the storage.
-    mapping(address collateral => DebtBalances) internal debtBalances;
+    mapping(address collateral => DebtBalances balances) internal debtBalances;
 
     /// @notice The balances of each collateral asset that the user can claim from storage.
     mapping(address user => mapping(address collateral => uint256 balance)) internal
@@ -193,21 +193,6 @@ contract TrenBoxStorage is
         onlyAuthorizedProtocolContracts
     {
         _updateActiveDebt(_collateral, _amount, false);
-    }
-
-    /// @inheritdoc ITrenBoxStorage
-    /// @dev Can only be called by TrenBoxManager contract
-    function decreaseActiveBalancesAfterRedemption(
-        address _collateral,
-        uint256 _debtAmount,
-        uint256 _collAmount
-    )
-        external
-        override
-        onlyTrenBoxManager
-    {
-        _updateActiveDebt(_collateral, _debtAmount, false);
-        _updateActiveCollateral(_collateral, _collAmount, false);
     }
 
     /// @inheritdoc ITrenBoxStorage

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity =0.8.23;
 
 /// @notice Interface for reading dAPI data feeds from https://market.api3.org/dapis
 /// @dev The proxy contracts are generalized to support most types of numerical

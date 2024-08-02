@@ -1,4 +1,3 @@
-import shouldHaveBeta from "./beta";
 import shouldHaveMinuteDecayFactor from "./minuteDecayFactor";
 import shouldHaveName from "./name";
 import shouldHaveSecondsInOneMinute from "./secondsInOneMinute";
@@ -15,10 +14,6 @@ export default function shouldHavePublicConstant(): void {
 
     describe("MINUTE_DECAY_FACTOR", function () {
       shouldHaveMinuteDecayFactor();
-    });
-
-    describe("BETA", function () {
-      shouldHaveBeta();
     });
   });
 }

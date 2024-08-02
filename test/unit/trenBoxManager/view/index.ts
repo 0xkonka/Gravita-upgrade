@@ -8,10 +8,6 @@ import shouldBehaveLikeGetNetDebt from "./getNetDebt";
 import shouldBehaveLikeGetNominalICR from "./getNominalICR";
 import shouldBehaveLikeGetPendingAssetReward from "./getPendingAssetReward";
 import shouldBehaveLikeGetPendingDebtTokenReward from "./getPendingDebtTokenReward";
-import shouldBehaveLikeGetRedemptionFee from "./getRedemptionFee";
-import shouldBehaveLikeGetRedemptionFeeWithDecay from "./getRedemptionFeeWithDecay";
-import shouldBehaveLikeGetRedemptionRate from "./getRedemptionRate";
-import shouldBehaveLikeGetRedemptionRateWithDecay from "./getRedemptionRateWithDecay";
 import shouldBehaveLikeGetTCR from "./getTCR";
 import shouldBehaveLikeGetTrenBoxColl from "./getTrenBoxColl";
 import shouldBehaveLikeGetTrenBoxDebt from "./getTrenBoxDebt";
@@ -21,13 +17,11 @@ import shouldBehaveLikeGetTrenBoxStake from "./getTrenBoxStake";
 import shouldBehaveLikeGetTrenBoxStatus from "./getTrenBoxStatus";
 import shouldBehaveLikeHasPendingRewards from "./hasPendingRewards";
 import shouldBehaveLikeIsTrenBoxActive from "./isTrenBoxActive";
-import shouldBehaveLikeIsValidFirstRedemptionHint from "./isValidFirstRedemptionHint";
 import shouldBehaveLikeOwner from "./owner";
 
 export {
   shouldHavePublicConstant,
   shouldBehaveLikeOwner,
-  shouldBehaveLikeIsValidFirstRedemptionHint,
   shouldBehaveLikeGetNominalICR,
   shouldBehaveLikeGetCurrentICR,
   shouldBehaveLikeGetPendingAssetReward,
@@ -39,10 +33,6 @@ export {
   shouldBehaveLikeCheckRecoveryMode,
   shouldBehaveLikeGetBorrowingRate,
   shouldBehaveLikeGetBorrowingFee,
-  shouldBehaveLikeGetRedemptionFee,
-  shouldBehaveLikeGetRedemptionFeeWithDecay,
-  shouldBehaveLikeGetRedemptionRate,
-  shouldBehaveLikeGetRedemptionRateWithDecay,
   shouldBehaveLikeGetTrenBoxStatus,
   shouldBehaveLikeGetTrenBoxStake,
   shouldBehaveLikeGetTrenBoxDebt,

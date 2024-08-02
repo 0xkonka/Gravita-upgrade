@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity =0.8.23;
 
 import { UUPSUpgradeable } from
     "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -50,12 +50,6 @@ contract AdminContract is
 
     /// @notice The default liquidation fee, dividing by 200 yields 0.5%.
     uint256 public constant PERCENT_DIVISOR_DEFAULT = 200;
-
-    /// @notice The default floor of redemption fee, 0.5%.
-    uint256 public constant REDEMPTION_FEE_FLOOR_DEFAULT = 0.005 * 1e18;
-
-    /// @notice The default block timestamp for redemption.
-    uint256 public constant REDEMPTION_BLOCK_TIMESTAMP_DEFAULT = type(uint256).max;
 
     /// @notice The grace period for updating the collateral ratio during which old value is
     /// linearly changed to new value.
@@ -181,8 +175,7 @@ contract AdminContract is
         uint256 _mcr,
         uint256 _minNetDebt,
         uint256 _mintCap,
-        uint256 _percentDivisor,
-        uint256 _redemptionFeeFloor
+        uint256 _percentDivisor
     )
         external
         override
@@ -197,7 +190,6 @@ contract AdminContract is
             _minNetDebt,
             _mintCap,
             _percentDivisor,
-            _redemptionFeeFloor,
             false
         );
     }
@@ -210,8 +202,7 @@ contract AdminContract is
         uint256 _mcr,
         uint256 _minNetDebt,
         uint256 _mintCap,
-        uint256 _percentDivisor,
-        uint256 _redemptionFeeFloor
+        uint256 _percentDivisor
     )
         external
         override
@@ -226,7 +217,6 @@ contract AdminContract is
             _minNetDebt,
             _mintCap,
             _percentDivisor,
-            _redemptionFeeFloor,
             true
         );
     }
@@ -286,31 +276,6 @@ contract AdminContract is
         onlyTimelock
     {
         _setPercentDivisor(_collateral, _percentDivisor);
-    }
-
-    /// @inheritdoc IAdminContract
-    function setRedemptionFeeFloor(
-        address _collateral,
-        uint256 _redemptionFeeFloor
-    )
-        public
-        override
-        onlyTimelock
-    {
-        _setRedemptionFeeFloor(_collateral, _redemptionFeeFloor);
-    }
-
-    /// @inheritdoc IAdminContract
-    function setRedemptionBlockTimestamp(
-        address _collateral,
-        uint256 _blockTimestamp
-    )
-        external
-        override
-        onlyTimelock
-    {
-        collateralParams[_collateral].redemptionBlockTimestamp = _blockTimestamp;
-        emit RedemptionBlockTimestampChanged(_collateral, _blockTimestamp);
     }
 
     /// @inheritdoc IAdminContract
@@ -431,21 +396,6 @@ contract AdminContract is
     }
 
     /// @inheritdoc IAdminContract
-    function getRedemptionFeeFloor(address _collateral) external view override returns (uint256) {
-        return collateralParams[_collateral].redemptionFeeFloor;
-    }
-
-    /// @inheritdoc IAdminContract
-    function getRedemptionBlockTimestamp(address _collateral)
-        external
-        view
-        override
-        returns (uint256)
-    {
-        return collateralParams[_collateral].redemptionBlockTimestamp;
-    }
-
-    /// @inheritdoc IAdminContract
     function getMintCap(address _collateral) external view override returns (uint256) {
         return collateralParams[_collateral].mintCap;
     }
@@ -514,8 +464,6 @@ contract AdminContract is
             minNetDebt: MIN_NET_DEBT_DEFAULT,
             mintCap: MINT_CAP_DEFAULT,
             percentDivisor: PERCENT_DIVISOR_DEFAULT,
-            redemptionFeeFloor: REDEMPTION_FEE_FLOOR_DEFAULT,
-            redemptionBlockTimestamp: REDEMPTION_BLOCK_TIMESTAMP_DEFAULT
         });
 
         emit CollateralAdded(_collateral);
@@ -653,19 +601,6 @@ contract AdminContract is
         emit PercentDivisorChanged(oldPercent, _percentDivisor);
     }
 
-    function _setRedemptionFeeFloor(
-        address _collateral,
-        uint256 _redemptionFeeFloor
-    )
-        internal
-        safeCheck("Redemption Fee Floor", _collateral, _redemptionFeeFloor, 0.001 ether, 0.1 ether)
-    {
-        CollateralParams storage collParams = collateralParams[_collateral];
-        uint256 oldRedemptionFeeFloor = collParams.redemptionFeeFloor;
-        collParams.redemptionFeeFloor = _redemptionFeeFloor;
-        emit RedemptionFeeFloorChanged(oldRedemptionFeeFloor, _redemptionFeeFloor);
-    }
-
     function _setCollateralParameters(
         address _collateral,
         uint256 _borrowingFee,
@@ -674,7 +609,6 @@ contract AdminContract is
         uint256 _minNetDebt,
         uint256 _mintCap,
         uint256 _percentDivisor,
-        uint256 _redemptionFeeFloor,
         bool _applyGracePeriodDeadline
     )
         internal
@@ -687,6 +621,5 @@ contract AdminContract is
         _setMinNetDebt(_collateral, _minNetDebt);
         _setMintCap(_collateral, _mintCap);
         _setPercentDivisor(_collateral, _percentDivisor);
-        _setRedemptionFeeFloor(_collateral, _redemptionFeeFloor);
     }
 }

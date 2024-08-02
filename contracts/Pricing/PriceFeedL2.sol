@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity =0.8.23;
 
 import { ChainlinkAggregatorV3Interface } from "../Interfaces/IPriceFeed.sol";
 import { IPriceFeedL2 } from "../Interfaces/IPriceFeedL2.sol";
