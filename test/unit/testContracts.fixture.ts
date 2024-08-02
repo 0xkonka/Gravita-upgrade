@@ -31,7 +31,7 @@ const COLLATERALS_TO_ADD_AS_INACTIVE = [
     oracleTimeoutMinutes: 1440,
     oracleIsEthIndexed: false,
     MCR: parseEther("1.25"),
-    CCR: parseEther("1.5"),
+    CCR: parseEther("1.6"),
     minNetDebt: parseEther("1800"),
     gasCompensation: parseEther("300"),
     mintCap: parseEther("1500000"),

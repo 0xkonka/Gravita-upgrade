@@ -57,7 +57,12 @@ contract AdminContract is
     /// @notice The default block timestamp for redemption.
     uint256 public constant REDEMPTION_BLOCK_TIMESTAMP_DEFAULT = type(uint256).max;
 
+    /// @notice The grace period for updating the collateral ratio during which old value is
+    /// linearly changed to new value.
     uint256 public constant MCR_GRACE_PERIOD = 1 weeks;
+
+    /// @notice The grace period for updating the collateral ratio during which old value is
+    /// linearly changed to new value.
     uint256 public constant CCR_GRACE_PERIOD = 1 weeks;
 
     // State
@@ -184,16 +189,17 @@ contract AdminContract is
         onlyTimelock
     {
         _addNewCollateral(_collateral, _debtTokenGasCompensation);
-
-        collateralParams[_collateral].active = true;
-
-        _setBorrowingFee(_collateral, _borrowingFee);
-        _setCCR(_collateral, _ccr, false);
-        _setMCR(_collateral, _mcr, false);
-        _setMinNetDebt(_collateral, _minNetDebt);
-        _setMintCap(_collateral, _mintCap);
-        _setPercentDivisor(_collateral, _percentDivisor);
-        _setRedemptionFeeFloor(_collateral, _redemptionFeeFloor);
+        _setCollateralParameters(
+            _collateral,
+            _borrowingFee,
+            _ccr,
+            _mcr,
+            _minNetDebt,
+            _mintCap,
+            _percentDivisor,
+            _redemptionFeeFloor,
+            false
+        );
     }
 
     /// @inheritdoc IAdminContract
@@ -212,15 +218,17 @@ contract AdminContract is
         onlyTimelock
         exists(_collateral)
     {
-        collateralParams[_collateral].active = true;
-
-        _setBorrowingFee(_collateral, _borrowingFee);
-        _setCCR(_collateral, _ccr, true);
-        _setMCR(_collateral, _mcr, true);
-        _setMinNetDebt(_collateral, _minNetDebt);
-        _setMintCap(_collateral, _mintCap);
-        _setPercentDivisor(_collateral, _percentDivisor);
-        _setRedemptionFeeFloor(_collateral, _redemptionFeeFloor);
+        _setCollateralParameters(
+            _collateral,
+            _borrowingFee,
+            _ccr,
+            _mcr,
+            _minNetDebt,
+            _mintCap,
+            _percentDivisor,
+            _redemptionFeeFloor,
+            true
+        );
     }
 
     /// @inheritdoc IAdminContract
@@ -656,5 +664,29 @@ contract AdminContract is
         uint256 oldRedemptionFeeFloor = collParams.redemptionFeeFloor;
         collParams.redemptionFeeFloor = _redemptionFeeFloor;
         emit RedemptionFeeFloorChanged(oldRedemptionFeeFloor, _redemptionFeeFloor);
+    }
+
+    function _setCollateralParameters(
+        address _collateral,
+        uint256 _borrowingFee,
+        uint256 _ccr,
+        uint256 _mcr,
+        uint256 _minNetDebt,
+        uint256 _mintCap,
+        uint256 _percentDivisor,
+        uint256 _redemptionFeeFloor,
+        bool _applyGracePeriodDeadline
+    )
+        internal
+    {
+        collateralParams[_collateral].active = true;
+
+        _setBorrowingFee(_collateral, _borrowingFee);
+        _setCCR(_collateral, _ccr, _applyGracePeriodDeadline);
+        _setMCR(_collateral, _mcr, _applyGracePeriodDeadline);
+        _setMinNetDebt(_collateral, _minNetDebt);
+        _setMintCap(_collateral, _mintCap);
+        _setPercentDivisor(_collateral, _percentDivisor);
+        _setRedemptionFeeFloor(_collateral, _redemptionFeeFloor);
     }
 }
