@@ -1,3 +1,4 @@
+import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 
 export default function shouldBehaveLikeCanSetCollateralParameters(): void {
@@ -184,7 +185,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       expect(borrowingFee).to.be.equal(dai.borrowingFee);
     });
 
-    it("should set correct critical collateral rate", async function () {
+    it("should set correct critical collateral rate in full effect after grace period", async function () {
       const { dai } = this.collaterals.inactive;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
@@ -199,29 +200,89 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         defaultPercentDivisor
       );
 
-      const CCR = await this.contracts.adminContract.getCcr(dai.address);
+      await time.increase(time.duration.weeks(1));
 
-      expect(CCR).to.be.equal(dai.CCR);
+      const currentCCR = await this.contracts.adminContract.getCcr(dai.address);
+
+      expect(currentCCR).to.be.equal(dai.CCR);
     });
 
-    it("should set correct minimum collateral rate", async function () {
+    it("should set correct critical collateral rate that is in half effect after half of grace period", async function () {
       const { dai } = this.collaterals.inactive;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
+      const ccrGracePeriod = await this.contracts.adminContract.CCR_GRACE_PERIOD();
+
+      const initialCCR = await this.contracts.adminContract.getCcr(dai.address);
+      const targetCCR = BigInt(dai.CCR);
+      const diffCCR = targetCCR - initialCCR;
+      const gracePeriodDivider = 2n;
 
       await this.contracts.adminContract.setCollateralParameters(
         dai.address,
         dai.borrowingFee,
-        dai.CCR,
+        targetCCR,
         dai.MCR,
         dai.minNetDebt,
         dai.mintCap,
         defaultPercentDivisor
       );
+
+      await time.increase(ccrGracePeriod / gracePeriodDivider);
+      const CCR = await this.contracts.adminContract.getCcr(dai.address);
+
+      expect(CCR).to.be.equal(initialCCR + diffCCR / gracePeriodDivider);
+    });
+
+    it("should set correct minimum collateral rate in full effect after grace period", async function () {
+      const { dai } = this.collaterals.inactive;
+
+      const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
+
+      const targetMCR = BigInt(dai.MCR) + 10n;
+
+      await this.contracts.adminContract.setCollateralParameters(
+        dai.address,
+        dai.borrowingFee,
+        dai.CCR,
+        targetMCR,
+        dai.minNetDebt,
+        dai.mintCap,
+        defaultPercentDivisor
+      );
+
+      await time.increase(time.duration.weeks(1));
 
       const MCR = await this.contracts.adminContract.getMcr(dai.address);
 
-      expect(MCR).to.be.equal(dai.MCR);
+      expect(MCR).to.be.equal(targetMCR);
+    });
+
+    it("should set correct minimum collateral rate that is in half effect after half of grace period", async function () {
+      const { dai } = this.collaterals.inactive;
+
+      const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
+      const mcrGracePeriod = await this.contracts.adminContract.MCR_GRACE_PERIOD();
+
+      const initialMCR = await this.contracts.adminContract.getMcr(dai.address);
+      const targetMCR = BigInt(dai.MCR);
+      const diffMCR = targetMCR - initialMCR;
+      const gracePeriodDivider = 2n;
+
+      await this.contracts.adminContract.setCollateralParameters(
+        dai.address,
+        dai.borrowingFee,
+        dai.CCR,
+        targetMCR,
+        dai.minNetDebt,
+        dai.mintCap,
+        defaultPercentDivisor
+      );
+
+      await time.increase(mcrGracePeriod / gracePeriodDivider);
+      const currentMCR = await this.contracts.adminContract.getMcr(dai.address);
+
+      expect(currentMCR).to.be.equal(initialMCR + diffMCR / gracePeriodDivider);
     });
 
     it("should set correct minimum net debt", async function () {

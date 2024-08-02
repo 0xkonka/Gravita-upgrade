@@ -12,7 +12,13 @@ interface IAdminContract {
      * @param active The status of collateral asset.
      * @param borrowingFee The one-time fee charged on the loan amount.
      * @param ccr Critical collateral ratio to trigger recovery mode.
+     * @param previousCcr Critical collateral ratio before the update.
+     * @param ccrUpdateDeadline The deadline before which the CCR will slowly update to the new
+     * value.
      * @param mcr Minimum collateral ratio.
+     * @param previousMcr Minimum collateral ratio before the update.
+     * @param mcrUpdateDeadline The deadline before which the MCR will slowly update to the new
+     * value.
      * @param debtTokenGasCompensation The amount of debt token to be locked
      * on opening TrenBoxes as liquidation reserve.
      * @param minNetDebt Minimum amount of debtToken a TrenBox must have.
@@ -24,7 +30,11 @@ interface IAdminContract {
         bool active;
         uint256 borrowingFee;
         uint256 ccr;
+        uint256 previousCcr;
+        uint256 ccrUpdateDeadline;
         uint256 mcr;
+        uint256 previousMcr;
+        uint256 mcrUpdateDeadline;
         uint256 debtTokenGasCompensation;
         uint256 minNetDebt;
         uint256 mintCap;
@@ -179,7 +189,32 @@ interface IAdminContract {
     function addNewCollateral(address _collateral, uint256 _debtTokenGasCompensation) external;
 
     /**
-     * @notice Sets collateral parameters.
+     * @notice Adds and initializes new collateral asset. Does not apply grace period deadline for
+     * CCR and MCR.
+     * @param _collateral The address of collateral asset.
+     * @param _debtTokenGasCompensation The amount of debtToken to be locked on opening
+     * TrenBoxes as liquidation reserve.
+     * @param _borrowingFee The one-time fee charged on the loan amount.
+     * @param _ccr The critical collateral ratio to trigger recovery mode.
+     * @param _mcr The minimum collateral ratio to avoid liquidation under normal mode.
+     * @param _minNetDebt The minimum amount of debtToken a TrenBox must have.
+     * @param _mintCap The total amount of debt tokens to be allocated.
+     * @param _percentDivisor The liquidation fee.
+     */
+    function addAndInitializeNewCollateral(
+        address _collateral,
+        uint256 _debtTokenGasCompensation,
+        uint256 _borrowingFee,
+        uint256 _ccr,
+        uint256 _mcr,
+        uint256 _minNetDebt,
+        uint256 _mintCap,
+        uint256 _percentDivisor
+    )
+        external;
+
+    /**
+     * @notice Sets collateral parameters. Apply grace period deadline for CCR and MCR.
      * @param _collateral The address of collateral asset.
      * @param _borrowingFee The one-time fee charged on the loan amount.
      * @param _ccr The critical collateral ratio to trigger recovery mode.

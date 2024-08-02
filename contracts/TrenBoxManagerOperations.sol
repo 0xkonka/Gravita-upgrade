@@ -18,8 +18,7 @@ import { ITrenBoxManagerOperations } from "./Interfaces/ITrenBoxManagerOperation
 import { ITrenBoxStorage } from "./Interfaces/ITrenBoxStorage.sol";
 
 /// @title TrenBoxManagerOperations
-/// @notice A contract with main operation functionality such as redemption, redistribution and
-/// liquidation.
+/// @notice A contract with main operation functionality such as redistribution and liquidation.
 contract TrenBoxManagerOperations is
     ITrenBoxManagerOperations,
     UUPSUpgradeable,
@@ -33,8 +32,6 @@ contract TrenBoxManagerOperations is
     uint256 public constant PERCENTAGE_PRECISION = 10_000;
     /// @notice The array limit.
     uint256 public constant BATCH_SIZE_LIMIT = 25;
-    /// @notice The redemption softening peram.
-    uint256 public redemptionSofteningParam;
 
     // ------------------------------------- Initializer ------------------------------------------
 

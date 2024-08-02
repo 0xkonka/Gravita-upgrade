@@ -1,3 +1,4 @@
+import shouldBehaveLikeCanAddNewAndInitializeCollateral from "./effects/addAndInitializeNewCollateral";
 import shouldBehaveLikeCanAddNewCollateral from "./effects/addNewCollateral";
 import shouldBehaveLikeCanSetBorrowingFee from "./effects/setBorrowingFee";
 import shouldBehaveLikeCanSetCollateralParameters from "./effects/setCollateralParameters";
@@ -113,6 +114,10 @@ export function shouldBehaveLikeAdminContractContract(): void {
 
     describe("#addNewCollateral", function () {
       shouldBehaveLikeCanAddNewCollateral();
+    });
+
+    describe("#addAndInitializeNewCollateral", function () {
+      shouldBehaveLikeCanAddNewAndInitializeCollateral();
     });
 
     describe("#setCollateralParameters", function () {

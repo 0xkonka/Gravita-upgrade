@@ -199,10 +199,6 @@ interface ITrenBoxManagerOperations {
     /// @param mcr The Minimum Collateral Ratio that must be met or exceeded.
     error TrenBoxManagerOperations__TCRMustBeAboveMCR(uint256 tcr, uint256 mcr);
 
-    /// @dev Thrown when no amount can be redeemed due to insufficient conditions or
-    /// restrictions.
-    error TrenBoxManagerOperations__UnableToRedeemAnyAmount();
-
     /// @dev Thrown when an operation is attempted on an inactive TrenBox.
     error TrenBoxManagerOperations__TrenBoxNotActive();
 

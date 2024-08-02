@@ -1,18 +1,37 @@
+import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { ethers } from "ethers";
+import { ethers } from "hardhat";
 
 const MIN_MCR = ethers.parseEther("1.01");
 const MAX_MCR = ethers.parseEther("10");
 
 export default function shouldBehaveLikeCanSetMinimumCollateralRatio(): void {
   context("when modifying MCR on active collateral", function () {
-    it("set MCR should match value", async function () {
+    it("set MCR should match value after MCR_GRACE_PERIOD passes", async function () {
       const collateralAddress = this.collaterals.active.wETH.address;
       const mcr = "1500000000000000000";
 
+      const GRACE_PERIOD = await this.contracts.adminContract.MCR_GRACE_PERIOD();
+
       await this.contracts.adminContract.setMCR(collateralAddress, mcr);
 
+      await time.increase(GRACE_PERIOD);
+
       expect(await this.contracts.adminContract.getMcr(collateralAddress)).to.be.equal(mcr);
+    });
+
+    it("set MCR should increase only by 50% value half after MCR_GRACE_PERIOD passes", async function () {
+      const collateralAddress = this.collaterals.active.wETH.address;
+      const targetMcr = 1500000000000000000n;
+      const expectedMcr = 1375000000000000000n;
+
+      const GRACE_PERIOD = await this.contracts.adminContract.MCR_GRACE_PERIOD();
+
+      await this.contracts.adminContract.setMCR(collateralAddress, targetMcr);
+
+      await time.increase(GRACE_PERIOD / 2n);
+
+      expect(await this.contracts.adminContract.getMcr(collateralAddress)).to.be.equal(expectedMcr);
     });
 
     it("should emit MCRChanged event", async function () {
