@@ -18,8 +18,6 @@ interface IAdminContract {
      * @param minNetDebt Minimum amount of debtToken a TrenBox must have.
      * @param mintCap The total amount of debt token that can be minted.
      * @param percentDivisor The liquidation fee.
-     * @param redemptionFeeFloor The floor of redemption fee.
-     * @param redemptionBlockTimestamp The timestamp which the redemption can be started from.
      */
     struct CollateralParams {
         uint256 index;
@@ -31,8 +29,6 @@ interface IAdminContract {
         uint256 minNetDebt;
         uint256 mintCap;
         uint256 percentDivisor;
-        uint256 redemptionFeeFloor;
-        uint256 redemptionBlockTimestamp;
     }
 
     /**
@@ -135,25 +131,11 @@ interface IAdminContract {
     event BorrowingFeeChanged(uint256 _oldBorrowingFee, uint256 _newBorrowingFee);
 
     /**
-     * @dev Emitted when the floor of redemption fee is updated.
-     * @param _oldRedemptionFeeFloor The old floor of redemption fee.
-     * @param _newRedemptionFeeFloor The new floor of redemption fee.
-     */
-    event RedemptionFeeFloorChanged(uint256 _oldRedemptionFeeFloor, uint256 _newRedemptionFeeFloor);
-
-    /**
      * @dev Emitted when the mint cap is updated.
      * @param _oldMintCap The old mint cap.
      * @param _newMintCap The new mint cap.
      */
     event MintCapChanged(uint256 _oldMintCap, uint256 _newMintCap);
-
-    /**
-     * @dev Emitted when the redemption timestamp of specific collateral is updated.
-     * @param _collateral The address of collateral asset.
-     * @param _blockTimestamp The new redemption timestamp.
-     */
-    event RedemptionBlockTimestampChanged(address _collateral, uint256 _blockTimestamp);
 
     /**
      * @dev Emitted when the flash loan fee is updated.
@@ -205,7 +187,6 @@ interface IAdminContract {
      * @param _minNetDebt The minimum amount of debtToken a TrenBox must have.
      * @param _mintCap The total amount of debt tokens to be allocated.
      * @param _percentDivisor The liquidation fee.
-     * @param _redemptionFeeFloor The floor of redemption fee.
      */
     function setCollateralParameters(
         address _collateral,
@@ -214,8 +195,7 @@ interface IAdminContract {
         uint256 _mcr,
         uint256 _minNetDebt,
         uint256 _mintCap,
-        uint256 _percentDivisor,
-        uint256 _redemptionFeeFloor
+        uint256 _percentDivisor
     )
         external;
 
@@ -262,26 +242,11 @@ interface IAdminContract {
     function setBorrowingFee(address _collateral, uint256 _borrowingFee) external;
 
     /**
-     * @notice Sets the floor of redemption fee.
-     * @param _collateral The address of collateral asset.
-     * @param _redemptionFeeFloor The floor of redemption fee charged on the redeemed
-     * amount(scaled by 1e18); min 0.001(0.1%), max 0.1(10%).
-     */
-    function setRedemptionFeeFloor(address _collateral, uint256 _redemptionFeeFloor) external;
-
-    /**
      * @notice Sets the total amount of debt tokens that can be allocated.
      * @param _collateral The address of collateral asset.
      * @param _mintCap The mint cap.
      */
     function setMintCap(address _collateral, uint256 _mintCap) external;
-
-    /**
-     * @notice Sets the redemption timestamp.
-     * @param _collateral The address of collateral asset.
-     * @param _blockTimestamp The timestamp which redemption can be started from.
-     */
-    function setRedemptionBlockTimestamp(address _collateral, uint256 _blockTimestamp) external;
 
     /**
      * @notice Sets the flash loan fee.
@@ -362,18 +327,6 @@ interface IAdminContract {
      * @param _collateral The address of collateral asset.
      */
     function getBorrowingFee(address _collateral) external view returns (uint256);
-
-    /**
-     * @notice Returns the floor of redemption fee for the specific collateral.
-     * @param _collateral The address of collateral asset.
-     */
-    function getRedemptionFeeFloor(address _collateral) external view returns (uint256);
-
-    /**
-     * @notice Returns the redemption timestamp for the specific collateral.
-     * @param _collateral The address of collateral asset.
-     */
-    function getRedemptionBlockTimestamp(address _collateral) external view returns (uint256);
 
     /**
      * @notice Returns the total allocated amount of debt token for the specific collateral.

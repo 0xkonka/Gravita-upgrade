@@ -17,7 +17,6 @@ import { liquidate } from "./liquidate";
 import { liquidateTrenBoxes } from "./liquidateTrenBoxes";
 import { openTrenBox } from "./openTrenBox";
 import { provideToStabilityPool } from "./provideToStabilityPool";
-import { redeemCollateral } from "./redeemCollateral";
 import { repayDebt } from "./repayDebt";
 import { setUsers } from "./setUsers";
 import { setupCollateralForTests } from "./setupCollateralForTests";
@@ -53,6 +52,5 @@ export function setupUtils(context: Context): TestUtils {
     liquidate: liquidate(context),
     batchLiquidateTrenBoxes: batchLiquidateTrenBoxes(context),
     liquidateTrenBoxes: liquidateTrenBoxes(context),
-    redeemCollateral: redeemCollateral(context),
   };
 }

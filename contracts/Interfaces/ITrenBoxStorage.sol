@@ -186,20 +186,6 @@ interface ITrenBoxStorage {
     function decreaseActiveDebt(address _collateral, uint256 _amount) external;
 
     /**
-     * @notice Decreases the active balances of debt and collateral for a specific collateral after
-     * redemption exists.
-     * @param _collateral The address of the collateral asset.
-     * @param _debtAmount The amount to decrease the debt balance.
-     * @param _collAmount The amount to decrease the collateral balance.
-     */
-    function decreaseActiveBalancesAfterRedemption(
-        address _collateral,
-        uint256 _debtAmount,
-        uint256 _collAmount
-    )
-        external;
-
-    /**
      * @notice Increases the active balance for a specific collateral asset.
      * @param _collateral The address of the collateral asset.
      * @param _amount The amount to increase the debt balance.

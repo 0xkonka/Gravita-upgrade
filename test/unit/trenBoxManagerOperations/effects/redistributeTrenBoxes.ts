@@ -114,10 +114,10 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
 
       await expect(redistributeTx)
         .to.emit(this.contracts.trenBoxManager, "TrenBoxUpdated")
-        .withArgs(erc20, borrower, 0n, 0n, 0n, 4n);
+        .withArgs(erc20, borrower, 0n, 0n, 0n, 3n);
       await expect(redistributeTx)
         .to.emit(this.contracts.trenBoxManager, "TrenBoxUpdated")
-        .withArgs(erc20, borrower2, 0n, 0n, 0n, 4n);
+        .withArgs(erc20, borrower2, 0n, 0n, 0n, 3n);
 
       const reapyTrenBoxPromises = newBorrowers.map((borrower) => {
         return this.utils.repayDebt({
@@ -246,7 +246,7 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
         borrowers: [borrower1, borrower2],
       });
 
-      expect(trenBoxStatuses).to.have.members([5n, 5n]);
+      expect(trenBoxStatuses).to.have.members([4n, 4n]);
       expect(trenBoxDebts).to.have.members([0n, 0n]);
 
       // Borrower3 decided to add some collaterals to avoid redistribution
@@ -308,7 +308,7 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
         borrower4.address
       );
 
-      expect(trenBoxStatuses2).to.have.members([1n, 5n]);
+      expect(trenBoxStatuses2).to.have.members([1n, 4n]);
       expect(borrower4Debt).to.be.equal(0n);
 
       // Borrower3 decided to add more collaterals to avoid another redistribution
@@ -408,7 +408,7 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
         borrowers: [borrower1, borrower2, borrower3, borrower4],
       });
 
-      expect(trenBoxStatuses).to.have.members([1n, 1n, 5n, 5n]);
+      expect(trenBoxStatuses).to.have.members([1n, 1n, 4n, 4n]);
 
       // Borrower1 and borrower2 repayed some part of the debts and updated TrenBoxes
       await this.utils.repayDebt({
@@ -517,7 +517,7 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
         borrowers: [borrower1, borrower2, borrower3, borrower4],
       });
 
-      expect(trenBoxStatuses).to.have.members([1n, 5n, 1n, 5n]);
+      expect(trenBoxStatuses).to.have.members([1n, 4n, 1n, 4n]);
       expect(trenBoxDebts).to.have.members([
         ethers.parseEther("3900"),
         0n,
@@ -607,7 +607,7 @@ export default function shouldBehaveLikeRedistributeTrenBoxes(): void {
         borrowers: [borrower1, borrower2, borrower3, borrower4],
       });
 
-      expect(trenBoxStatuses2).to.have.members([5n, 1n, 5n, 5n]);
+      expect(trenBoxStatuses2).to.have.members([4n, 1n, 4n, 4n]);
       expect(trenBoxDebts2).to.have.members([0n, ethers.parseEther("3250"), 0n, 0n]);
       expect(trenBoxColls2).to.have.members([0n, ethers.parseEther("6450"), 0n, 0n]);
     });

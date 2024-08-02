@@ -9,10 +9,6 @@ export function shouldBehaveLikeTrenBoxManagerContract(): void {
       view.shouldBehaveLikeOwner();
     });
 
-    describe("#isValidFirstRedemptionHint", function () {
-      view.shouldBehaveLikeIsValidFirstRedemptionHint();
-    });
-
     describe("#getNominalICR", function () {
       view.shouldBehaveLikeGetNominalICR();
     });
@@ -57,22 +53,6 @@ export function shouldBehaveLikeTrenBoxManagerContract(): void {
       view.shouldBehaveLikeGetBorrowingFee();
     });
 
-    describe("#getRedemptionFee", function () {
-      view.shouldBehaveLikeGetRedemptionFee();
-    });
-
-    describe("#getRedemptionFeeWithDecay", function () {
-      view.shouldBehaveLikeGetRedemptionFeeWithDecay();
-    });
-
-    describe("#getRedemptionRate", function () {
-      view.shouldBehaveLikeGetRedemptionRate();
-    });
-
-    describe("#getRedemptionRateWithDecay", function () {
-      view.shouldBehaveLikeGetRedemptionRateWithDecay();
-    });
-
     describe("#getTrenBoxStatus", function () {
       view.shouldBehaveLikeGetTrenBoxStatus();
     });
@@ -101,22 +81,6 @@ export function shouldBehaveLikeTrenBoxManagerContract(): void {
   describe("Effects Functions", function () {
     describe("#addTrenBoxOwnerToArray", function () {
       effects.shouldBehaveLikeCanAddTrenBoxOwnerToArray();
-    });
-
-    describe("#executeFullRedemption", function () {
-      effects.shouldBehaveLikeCanExecuteFullRedemption();
-    });
-
-    describe("#executePartialRedemption", function () {
-      effects.shouldBehaveLikeCanExecutePartialRedemption();
-    });
-
-    describe("#finalizeRedemption", function () {
-      effects.shouldBehaveLikeCanFinalizeRedemption();
-    });
-
-    describe("#updateBaseRateFromRedemption", function () {
-      effects.shouldBehaveLikeCanUpdateBaseRateFromRedemption();
     });
 
     describe("#applyPendingRewards", function () {

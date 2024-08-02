@@ -6,8 +6,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { wETH } = this.collaterals.active;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         wETH.address,
@@ -16,8 +14,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         wETH.MCR,
         wETH.minNetDebt,
         wETH.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const active = await this.contracts.adminContract.getIsActive(wETH.address);
@@ -29,8 +26,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { wETH } = this.collaterals.active;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         wETH.address,
@@ -39,8 +34,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         wETH.MCR,
         wETH.minNetDebt,
         wETH.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const borrowingFee = await this.contracts.adminContract.getBorrowingFee(wETH.address);
@@ -52,8 +46,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { wETH } = this.collaterals.active;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         wETH.address,
@@ -62,8 +54,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         wETH.MCR,
         wETH.minNetDebt,
         wETH.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const CCR = await this.contracts.adminContract.getCcr(wETH.address);
@@ -75,8 +66,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { wETH } = this.collaterals.active;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         wETH.address,
@@ -85,8 +74,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         wETH.MCR,
         wETH.minNetDebt,
         wETH.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const MCR = await this.contracts.adminContract.getMcr(wETH.address);
@@ -98,8 +86,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { wETH } = this.collaterals.active;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         wETH.address,
@@ -108,8 +94,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         wETH.MCR,
         wETH.minNetDebt,
         wETH.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const minNetDebt = await this.contracts.adminContract.getMinNetDebt(wETH.address);
@@ -121,8 +106,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { wETH } = this.collaterals.active;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         wETH.address,
@@ -131,8 +114,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         wETH.MCR,
         wETH.minNetDebt,
         wETH.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const mintCap = await this.contracts.adminContract.getMintCap(wETH.address);
@@ -144,8 +126,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { wETH } = this.collaterals.active;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         wETH.address,
@@ -154,38 +134,12 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         wETH.MCR,
         wETH.minNetDebt,
         wETH.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const percentDivisor = await this.contracts.adminContract.getPercentDivisor(wETH.address);
 
       expect(percentDivisor).to.be.equal(defaultPercentDivisor);
-    });
-
-    it("should set correct redemption fee floor", async function () {
-      const { wETH } = this.collaterals.active;
-
-      const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
-
-      await this.contracts.adminContract.setCollateralParameters(
-        wETH.address,
-        wETH.borrowingFee,
-        wETH.CCR,
-        wETH.MCR,
-        wETH.minNetDebt,
-        wETH.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
-      );
-
-      const redemptionFeeFloor = await this.contracts.adminContract.getRedemptionFeeFloor(
-        wETH.address
-      );
-
-      expect(redemptionFeeFloor).to.be.equal(defaultRedemptionFeeFloor);
     });
   });
 
@@ -194,8 +148,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { dai } = this.collaterals.inactive;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         dai.address,
@@ -204,8 +156,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         dai.MCR,
         dai.minNetDebt,
         dai.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const active = await this.contracts.adminContract.getIsActive(dai.address);
@@ -217,8 +168,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { dai } = this.collaterals.inactive;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         dai.address,
@@ -227,8 +176,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         dai.MCR,
         dai.minNetDebt,
         dai.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const borrowingFee = await this.contracts.adminContract.getBorrowingFee(dai.address);
@@ -240,8 +188,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { dai } = this.collaterals.inactive;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         dai.address,
@@ -250,8 +196,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         dai.MCR,
         dai.minNetDebt,
         dai.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const CCR = await this.contracts.adminContract.getCcr(dai.address);
@@ -263,8 +208,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { dai } = this.collaterals.inactive;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         dai.address,
@@ -273,8 +216,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         dai.MCR,
         dai.minNetDebt,
         dai.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const MCR = await this.contracts.adminContract.getMcr(dai.address);
@@ -286,8 +228,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { dai } = this.collaterals.inactive;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         dai.address,
@@ -296,8 +236,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         dai.MCR,
         dai.minNetDebt,
         dai.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const minNetDebt = await this.contracts.adminContract.getMinNetDebt(dai.address);
@@ -309,8 +248,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { dai } = this.collaterals.inactive;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         dai.address,
@@ -319,8 +256,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         dai.MCR,
         dai.minNetDebt,
         dai.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const mintCap = await this.contracts.adminContract.getMintCap(dai.address);
@@ -332,8 +268,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const { dai } = this.collaterals.inactive;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await this.contracts.adminContract.setCollateralParameters(
         dai.address,
@@ -342,38 +276,12 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
         dai.MCR,
         dai.minNetDebt,
         dai.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
+        defaultPercentDivisor
       );
 
       const percentDivisor = await this.contracts.adminContract.getPercentDivisor(dai.address);
 
       expect(percentDivisor).to.be.equal(defaultPercentDivisor);
-    });
-
-    it("should set correct redemption fee floor", async function () {
-      const { dai } = this.collaterals.inactive;
-
-      const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
-
-      await this.contracts.adminContract.setCollateralParameters(
-        dai.address,
-        dai.borrowingFee,
-        dai.CCR,
-        dai.MCR,
-        dai.minNetDebt,
-        dai.mintCap,
-        defaultPercentDivisor,
-        defaultRedemptionFeeFloor
-      );
-
-      const redemptionFeeFloor = await this.contracts.adminContract.getRedemptionFeeFloor(
-        dai.address
-      );
-
-      expect(redemptionFeeFloor).to.be.equal(defaultRedemptionFeeFloor);
     });
   });
 
@@ -382,8 +290,6 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
       const nonExistentCollateral = this.collaterals.notAdded.testCollateral;
 
       const defaultPercentDivisor = await this.contracts.adminContract.PERCENT_DIVISOR_DEFAULT();
-      const defaultRedemptionFeeFloor =
-        await this.contracts.adminContract.REDEMPTION_FEE_FLOOR_DEFAULT();
 
       await expect(
         this.contracts.adminContract.setCollateralParameters(
@@ -393,8 +299,7 @@ export default function shouldBehaveLikeCanSetCollateralParameters(): void {
           nonExistentCollateral.MCR,
           nonExistentCollateral.minNetDebt,
           nonExistentCollateral.mintCap,
-          defaultPercentDivisor,
-          defaultRedemptionFeeFloor
+          defaultPercentDivisor
         )
       ).to.be.revertedWithCustomError(
         this.contracts.adminContract,
