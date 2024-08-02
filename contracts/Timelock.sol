@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity =0.8.23;
 
 error Timelock__DelayMustExceedMininumDelay();
 error Timelock__DelayMustNotExceedMaximumDelay();

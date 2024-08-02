@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.23;
+pragma solidity =0.8.23;
 
 uint256 constant DECIMAL_PRECISION = 1 ether;
 
